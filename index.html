@@ -10,6 +10,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <title>JJConnect | 专业连接服务</title>
 <meta name="description" content="JJConnect 提供面向个人与企业的专业连接服务，帮助你在多元文化与多语言环境中高效沟通、拓展人脉，并找到适合自己的支持网络。">
+<link rel="stylesheet" href="navbar.css">
 <style id='kadence-blocks-advancedheading-inline-css'>
 .wp-block-kadence-advancedheading mark{background:transparent;border-style:solid;border-width:0}.wp-block-kadence-advancedheading mark.kt-highlight{color:#f76a0c;}.kb-adv-heading-icon{display: inline-flex;justify-content: center;align-items: center;} .is-layout-constrained > .kb-advanced-heading-link {display: block;}.single-content .kadence-advanced-heading-wrapper h1, .single-content .kadence-advanced-heading-wrapper h2, .single-content .kadence-advanced-heading-wrapper h3, .single-content .kadence-advanced-heading-wrapper h4, .single-content .kadence-advanced-heading-wrapper h5, .single-content .kadence-advanced-heading-wrapper h6 {margin: 1.5em 0 .5em;}.single-content .kadence-advanced-heading-wrapper+* { margin-top:0;}.kb-screen-reader-text{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);}
 /*# sourceURL=kadence-blocks-advancedheading-inline-css */
@@ -148,7 +149,101 @@ var giveApiSettings = {"root":"https://jjconnect.jp/index.php?rest_route=/give-a
 </style>
 <link rel="preload" href="wp-content/fonts/saira/memWYa2wxmKQyPMrZX79wwYZQMhsyuShhKMjjbU9uXuA71rCks8xlg.woff2" as="font" type="font/woff2" crossorigin><link rel='stylesheet' id='kadence-fonts-gfonts-css' href='wp-content/fonts/e0285bb97d809e3336e35242857b0eb0.css%3Fver=1.3.2.css' media='all'/>
 <style id="wp-custom-css">
-			/* Always show the USP submit button */
+/* Button Styles - Consolidated */
+.login-btn-overlay,
+.explore-btn-overlay,
+.drop-message-btn-overlay {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 2rem;
+    min-width: 180px; /* Increased min-width for all buttons */
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    color: var(--global-palette1, #2B6CB0);
+    font-weight: 600;
+    font-size: 16px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.login-btn-overlay:hover,
+.explore-btn-overlay:hover,
+.drop-message-btn-overlay:hover {
+    background: var(--global-palette1, #2B6CB0);
+    color: white;
+    border-color: var(--global-palette1, #2B6CB0);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(43, 108, 176, 0.3);
+}
+
+.login-btn-overlay:active,
+.explore-btn-overlay:active,
+.drop-message-btn-overlay:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Icons */
+.login-btn-overlay .login-icon,
+.explore-btn-overlay .explore-icon,
+.drop-message-btn-overlay .drop-message-icon {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2;
+}
+
+/* Text */
+.login-btn-overlay .login-text,
+.explore-btn-overlay .explore-text,
+.drop-message-btn-overlay .drop-message-text {
+    font-size: 16px;
+}
+
+/* Button Container for Explore and Login */
+.wp-block-kadence-advancedbtn.kb-buttons-wrap.kb-btns6_c33008-e7 {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start; /* Restore left alignment for Explore and Login */
+    margin-top: 2rem;
+}
+
+/* Button Container for Drop a Message */
+.wp-block-kadence-advancedbtn.kb-buttons-wrap.kb-btns6_bca1ae-d3 {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center; /* Keep centered for Drop a Message */
+    margin-top: 2rem;
+}
+
+/* Mobile responsiveness for overlay buttons */
+@media (max-width: 767px) {
+    .login-btn-overlay,
+    .explore-btn-overlay,
+    .drop-message-btn-overlay {
+        padding: 0.6rem 1.5rem;
+        font-size: 14px;
+        min-width: 150px; /* Adjusted min-width for mobile */
+    }
+    .login-btn-overlay .login-text,
+    .explore-btn-overlay .explore-text,
+    .drop-message-btn-overlay .drop-message-text {
+        font-size: 14px;
+    }
+    .login-btn-overlay .login-icon,
+    .explore-btn-overlay .explore-icon,
+    .drop-message-btn-overlay .drop-message-icon {
+        width: 18px;
+        height: 18px;
+    }
+}
+
+/* Always show the USP submit button */
 #usp-submit,
 #usp-form input[type="submit"],
 .usp-submit input[type="submit"] {
@@ -156,7 +251,7 @@ var giveApiSettings = {"root":"https://jjconnect.jp/index.php?rest_route=/give-a
   visibility: visible !important;
   opacity: 1 !important;
 }
-		</style>
+</style></style>
 <style id='core-block-supports-inline-css'>
 .wp-container-core-group-is-layout-7206f975 > :where(:not(.alignleft):not(.alignright):not(.alignfull)){max-width:75%;margin-left:0 !important;margin-right:auto !important;}.wp-container-core-group-is-layout-7206f975 > .alignwide{max-width:75%;}.wp-container-core-group-is-layout-7206f975 .alignfull{max-width:none;}
 /*# sourceURL=core-block-supports-inline-css */
@@ -167,23 +262,32 @@ var giveApiSettings = {"root":"https://jjconnect.jp/index.php?rest_route=/give-a
 </style>
 </head>
 <body class="home wp-singular page-template-default page page-id-6 page-parent wp-custom-logo wp-embed-responsive wp-theme-kadence theme-kadence woocommerce-no-js tribe-no-js give-test-mode give-page footer-on-bottom hide-focus-outline link-style-standard no-header no-footer content-title-style-hide content-width-fullwidth content-style-boxed content-vertical-padding-show non-transparent-header mobile-non-transparent-header">
+<script src="navbar.js"></script>
 <div id="wrapper" class="site wp-site-blocks">
 <a class="skip-link screen-reader-text scroll-ignore" href="index.html#main">Skip to content</a>
-<main id="inner-wrap" class="wrap kt-clear" role="main">
-<div id="primary" class="content-area">
+<main id="inner-wrap" class="wrap kt-clear" role="main"><div id="primary" class="content-area">
 <div class="content-container site-container">
 <div id="main" class="site-main">
 <div class="woocommerce kadence-woo-messages-none-woo-pages woocommerce-notices-wrapper"></div>	<div class="content-wrap">
 <article id="post-6" class="entry content-bg single-entry post-6 page type-page status-publish hentry">
 <div class="entry-content-wrap">
 <div class="entry-content single-content">
-<div class="wp-block-cover alignfull wp-duotone-unset-1" style="margin-top:0;padding-top:48px;padding-right:48px;padding-bottom:48px;padding-left:48px;min-height:66vh;aspect-ratio:unset;"><img fetchpriority="high" decoding="async" width="1024" height="576" class="wp-block-cover__image-background wp-image-248 size-large" alt="" src="wp-content/uploads/2025/09/三浦海岸-2025-2-1024x576.jpg" data-object-fit="cover" srcset="wp-content/uploads/2025/09/三浦海岸-2025-2-1024x576.jpg 1024w, wp-content/uploads/2025/09/三浦海岸-2025-2-300x169.jpg 300w, wp-content/uploads/2025/09/三浦海岸-2025-2-768x432.jpg 768w, wp-content/uploads/2025/09/三浦海岸-2025-2-1536x864.jpg 1536w, wp-content/uploads/2025/09/三浦海岸-2025-2-2048x1152.jpg 2048w, wp-content/uploads/2025/09/三浦海岸-2025-2-600x338.jpg 600w" sizes="(max-width: 1024px) 100vw, 1024px"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-30 has-background-dim" style="background-color:#747f8f"></span><div class="wp-block-cover__inner-container is-layout-flow wp-block-cover-is-layout-flow">
+<div class="wp-block-cover alignfull wp-duotone-unset-1" style="margin-top:0;padding-top:48px;padding-right:48px;padding-bottom:48px;padding-left:48px;min-height:66vh;aspect-ratio:unset; position: relative;"><img fetchpriority="high" decoding="async" width="1024" height="576" class="wp-block-cover__image-background wp-image-248 size-large" alt="" src="wp-content/uploads/2025/09/三浦海岸-2025-2-1024x576.jpg" data-object-fit="cover" srcset="wp-content/uploads/2025/09/三浦海岸-2025-2-1024x576.jpg 1024w, wp-content/uploads/2025/09/三浦海岸-2025-2-300x169.jpg 300w, wp-content/uploads/2025/09/三浦海岸-2025-2-768x432.jpg 768w, wp-content/uploads/2025/09/三浦海岸-2025-2-1536x864.jpg 1536w, wp-content/uploads/2025/09/三浦海岸-2025-2-2048x1152.jpg 2048w, wp-content/uploads/2025/09/三浦海岸-2025-2-600x338.jpg 600w" sizes="(max-width: 1024px) 100vw, 1024px"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-30 has-background-dim" style="background-color:#747f8f"></span><div class="wp-block-cover__inner-container">
 <div class="wp-block-group is-content-justification-left"><div class="wp-block-group__inner-container is-layout-constrained wp-container-core-group-is-layout-7206f975 wp-block-group-is-layout-constrained">
 <p class="kt-adv-heading6_03d4ce-8f_0 wp-block-kadence-advancedheading" data-kb-block="kb-adv-heading6_03d4ce-8f_0">GET CONNECTED,</p>
 <p class="kt-adv-heading6_03d4ce-8f_1 wp-block-kadence-advancedheading" data-kb-block="kb-adv-heading6_03d4ce-8f_1">SURVIVE AND THRIVE.</p>
 </div></div>
 <div style="height:72px" aria-hidden="true" class="wp-block-spacer"></div>
-<div class="wp-block-kadence-advancedbtn kb-buttons-wrap kb-btns6_c33008-e7"><a class="kb-button kt-button button kb-btn6_a38a6f-fb kt-btn-size-small kt-btn-width-type-auto kb-btn-global-fill kt-btn-has-text-true kt-btn-has-svg-false  wp-block-kadence-singlebtn" href="about.html"><span class="kt-btn-inner-text">EXPLORE</span></a></div>
+<div class="wp-block-kadence-advancedbtn kb-buttons-wrap kb-btns6_c33008-e7">
+<a class="explore-btn-overlay" href="about.html"><svg class="explore-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg><span class="explore-text">Explore</span></a>
+<a href="login.html" class="login-btn-overlay" id="loginButtonOverlay" onclick="event.preventDefault(); window.location.href = 'login.html';">
+    <svg class="login-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+        <circle cx="12" cy="7" r="4"></circle>
+    </svg>
+    <span class="login-text">Login</span>
+</a>
+</div>
 </div></div>
 <p class="kt-adv-heading6_f0f79d-54 wp-block-kadence-advancedheading has-theme-palette-2-color has-text-color" data-kb-block="kb-adv-heading6_f0f79d-54">Present by</p>
 <div class="wp-block-kadence-column kadence-column6_ea36d7-a7"><div class="kt-inside-inner-col">
@@ -191,7 +295,7 @@ var giveApiSettings = {"root":"https://jjconnect.jp/index.php?rest_route=/give-a
 </div></div>
 <div class="wp-block-kadence-image kb-image6_0bca28-d1"><figure class="aligncenter size-large"><img decoding="async" width="1024" height="207" src="wp-content/uploads/2025/11/company-front-door-board_0001_カブシキガイシャ・ジェイジェイコネクト-1-1024x207.jpg" alt="" class="kb-img wp-image-472" srcset="wp-content/uploads/2025/11/company-front-door-board_0001_カブシキガイシャ・ジェイジェイコネクト-1-1024x207.jpg 1024w, wp-content/uploads/2025/11/company-front-door-board_0001_カブシキガイシャ・ジェイジェイコネクト-1-300x61.jpg 300w, wp-content/uploads/2025/11/company-front-door-board_0001_カブシキガイシャ・ジェイジェイコネクト-1-768x155.jpg 768w, wp-content/uploads/2025/11/company-front-door-board_0001_カブシキガイシャ・ジェイジェイコネクト-1-1536x310.jpg 1536w, wp-content/uploads/2025/11/company-front-door-board_0001_カブシキガイシャ・ジェイジェイコネクト-1-2048x414.jpg 2048w, wp-content/uploads/2025/11/company-front-door-board_0001_カブシキガイシャ・ジェイジェイコネクト-1-600x121.jpg 600w" sizes="(max-width: 1024px) 100vw, 1024px"/></figure></div>
 <p class="kt-adv-heading6_bdde43-c7 wp-block-kadence-advancedheading" data-kb-block="kb-adv-heading6_bdde43-c7">つながれていい感じ！💕 もっと聞いてみたいことあったら、気軽にドロップしてね。😉✨<br><br>We&#8217;re connected, how nice! Hope you will be interested. Just drop a message for anything you may want to know more.</p>
-<div class="wp-block-kadence-advancedbtn kb-buttons-wrap kb-btns6_bca1ae-d3"><a class="kb-button kt-button button kb-btn6_53bb78-5d kt-btn-size-small kt-btn-width-type-auto kb-btn-global-outline kt-btn-has-text-true kt-btn-has-svg-false  wp-block-kadence-singlebtn" id="feedback" href="feedback.html" target="_blank" rel="noreferrer noopener" role="button"><span class="kt-btn-inner-text">Drop a Message</span></a></div>
+<div class="wp-block-kadence-advancedbtn kb-buttons-wrap kb-btns6_bca1ae-d3"><a class="drop-message-btn-overlay" id="feedback" href="feedback.html" target="_blank" rel="noreferrer noopener" role="button"><svg class="drop-message-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg><span class="drop-message-text">Drop a Message</span></a></div>
 </div><!-- .entry-content -->
 </div>
 </article><!-- #post-6 -->

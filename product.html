@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>关于我们 - 产品服务 | JJConnect</title>
+    <link rel="icon" href="wp-content/uploads/2025/08/cropped-cropped-logo-icon-1.png">
+    <link rel="stylesheet" href="navbar.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1A202C;
+            background: #F7FAFC;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #2B6CB0 0%, #215387 100%);
+            color: white;
+            padding: 5rem 2rem 3rem;
+            text-align: center;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        
+        .hero p {
+            font-size: 1.25rem;
+            opacity: 0.95;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+        
+        .intro-text {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 4rem;
+        }
+        
+        .intro-text h2 {
+            font-size: 2rem;
+            color: #1A202C;
+            margin-bottom: 1rem;
+        }
+        
+        .intro-text p {
+            font-size: 1.125rem;
+            color: #4A5568;
+            line-height: 1.8;
+        }
+        
+        /* Product Cards */
+        .product-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s;
+            text-align: center;
+            border: 2px solid transparent;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+        
+        .product-card.blue {
+            border-color: #2563EB;
+        }
+        
+        .product-card.blue:hover {
+            background: linear-gradient(135deg, #DBEAFE 0%, white 100%);
+        }
+        
+        .product-card.cyan {
+            border-color: #06B6D4;
+        }
+        
+        .product-card.cyan:hover {
+            background: linear-gradient(135deg, #CFFAFE 0%, white 100%);
+        }
+        
+        .product-card.orange {
+            border-color: #F59E0B;
+        }
+        
+        .product-card.orange:hover {
+            background: linear-gradient(135deg, #FEF3C7 0%, white 100%);
+        }
+        
+        .product-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .product-card h3 {
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            color: #1A202C;
+        }
+        
+        .product-card p {
+            font-size: 1.125rem;
+            color: #4A5568;
+            margin-bottom: 2rem;
+            line-height: 1.7;
+        }
+        
+        .product-button {
+            display: inline-block;
+            padding: 0.875rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.3s;
+            color: white;
+        }
+        
+        .product-button.blue {
+            background: #2563EB;
+        }
+        
+        .product-button.blue:hover {
+            background: #1E40AF;
+            transform: scale(1.05);
+        }
+        
+        .product-button.cyan {
+            background: #06B6D4;
+        }
+        
+        .product-button.cyan:hover {
+            background: #0891B2;
+            transform: scale(1.05);
+        }
+        
+        .product-button.orange {
+            background: #F59E0B;
+        }
+        
+        .product-button.orange:hover {
+            background: #D97706;
+            transform: scale(1.05);
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .product-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-card {
+                padding: 2rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar will be injected here -->
+    <script src="navbar.js"></script>
+    
+    <!-- Hero Section -->
+    <div class="hero">
+        <h1>JJConnect 产品服务</h1>
+        <p>为您的业务提供专业的数字化解决方案</p>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="container">
+        <div class="intro-text">
+            <h2>我们的产品</h2>
+            <p>
+                JJConnect 致力于为企业提供高效、智能的数字化管理工具。
+                我们的产品涵盖财务分析、物业管理、房地产市场分析等多个领域，
+                帮助您的业务实现数字化转型，提升运营效率。
+            </p>
+        </div>
+        
+        <!-- Product Cards -->
+        <div class="product-cards">
+            <!-- RAFT2.03 Card -->
+            <div class="product-card blue">
+                <div class="product-icon">🚢</div>
+                <h3>RAFT2.03</h3>
+                <p>智能财务分析与预测系统，助您驾驭商业海洋</p>
+                <a href="raft_info.html" class="product-button blue">查看详情 →</a>
+            </div>
+            
+            <!-- Mansion管理主任 Card -->
+            <div class="product-card cyan">
+                <div class="product-icon">🏢</div>
+                <h3>Mansion管理主任</h3>
+                <p>专业公寓管理系统，让物业管理更轻松</p>
+                <a href="mansion_info.html" class="product-button cyan">查看详情 →</a>
+            </div>
+            
+            <!-- 地产报告 Card -->
+            <div class="product-card orange">
+                <div class="product-icon">📊</div>
+                <h3>地产报告</h3>
+                <p>专业的房地产市场分析与报告生成平台</p>
+                <a href="property_report_info.html" class="product-button orange">查看详情 →</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,463 @@
+/**
+ * JJConnect 导航栏样式
+ * 完全隔离的样式系统，使用 !important 确保优先级
+ */
+
+/* ========================================
+   导航栏容器
+   ======================================== */
+.jjc-navbar {
+    position: sticky !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    z-index: 9999 !important;
+    background: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+/* 重置所有内部元素 */
+.jjc-navbar *,
+.jjc-navbar *::before,
+.jjc-navbar *::after {
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    font-family: inherit !important;
+}
+
+.jjc-navbar-container {
+    max-width: 1290px !important;
+    margin: 0 auto !important;
+    padding: 1rem 1.5rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 2rem !important;
+}
+
+/* ========================================
+   Logo 区域
+   ======================================== */
+.jjc-navbar-logo {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    text-decoration: none !important;
+    color: #1A202C !important;
+    font-weight: 700 !important;
+    font-size: 1.25rem !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+}
+
+.jjc-navbar-logo:hover {
+    color: #2B6CB0 !important;
+}
+
+.jjc-navbar-logo img {
+    height: 40px !important;
+    width: auto !important;
+    display: block !important;
+    object-fit: contain !important;
+}
+
+/* ========================================
+   导航链接区域
+   ======================================== */
+.jjc-navbar-nav {
+    display: none !important;
+    flex: 1 !important;
+    align-items: center !important;
+    gap: 2rem !important;
+}
+
+@media (min-width: 1024px) {
+    .jjc-navbar-nav {
+        display: flex !important;
+    }
+}
+
+.jjc-nav-link {
+    color: #4A5568 !important;
+    text-decoration: none !important;
+    font-weight: 500 !important;
+    font-size: 1rem !important;
+    transition: color 0.2s !important;
+    white-space: nowrap !important;
+    background: none !important;
+    border: none !important;
+    cursor: pointer !important;
+    padding: 0.5rem 0 !important;
+}
+
+.jjc-nav-link:hover {
+    color: #2B6CB0 !important;
+}
+
+/* 产品下拉菜单 */
+.jjc-nav-dropdown {
+    position: relative !important;
+}
+
+.jjc-nav-dropdown-toggle {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.25rem !important;
+}
+
+.jjc-nav-dropdown-toggle::after {
+    content: "▼" !important;
+    font-size: 0.625rem !important;
+    margin-left: 0.25rem !important;
+}
+
+.jjc-nav-dropdown-menu {
+    display: none !important;
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    background: white !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    min-width: 220px !important;
+    margin-top: 0.5rem !important;
+    padding: 0.5rem 0 !important;
+    z-index: 10000 !important;
+}
+
+.jjc-nav-dropdown.active .jjc-nav-dropdown-menu {
+    display: block !important;
+}
+
+.jjc-nav-dropdown-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    padding: 0.75rem 1rem !important;
+    color: #1A202C !important;
+    text-decoration: none !important;
+    transition: background 0.2s !important;
+    white-space: nowrap !important;
+}
+
+.jjc-nav-dropdown-item:hover {
+    background: #EDF2F7 !important;
+}
+
+.jjc-nav-dropdown-icon {
+    font-size: 1.25rem !important;
+    flex-shrink: 0 !important;
+}
+
+/* ========================================
+   用户区域
+   ======================================== */
+.jjc-navbar-user {
+    display: none !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    flex-shrink: 0 !important;
+}
+
+@media (min-width: 1024px) {
+    .jjc-navbar-user {
+        display: flex !important;
+    }
+}
+
+/* 登录按钮 */
+.jjc-btn {
+    padding: 0.5rem 1.25rem !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+    text-decoration: none !important;
+    transition: all 0.2s !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    border: none !important;
+}
+
+.jjc-btn-outline {
+    background: transparent !important;
+    color: #2B6CB0 !important;
+    border: 1px solid #2B6CB0 !important;
+}
+
+.jjc-btn-outline:hover {
+    background: #EDF2F7 !important;
+}
+
+.jjc-btn-primary {
+    background: #2B6CB0 !important;
+    color: white !important;
+    border: 1px solid #2B6CB0 !important;
+}
+
+.jjc-btn-primary:hover {
+    background: #215387 !important;
+    border-color: #215387 !important;
+}
+
+/* 用户菜单 */
+.jjc-user-menu {
+    position: relative !important;
+}
+
+.jjc-user-button {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    padding: 0.5rem 1rem !important;
+    background: #EDF2F7 !important;
+    border: none !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+    color: #1A202C !important;
+    transition: all 0.2s !important;
+    white-space: nowrap !important;
+}
+
+.jjc-user-button:hover {
+    background: #718096 !important;
+    color: white !important;
+}
+
+.jjc-user-icon {
+    width: 18px !important;
+    height: 18px !important;
+    flex-shrink: 0 !important;
+}
+
+.jjc-user-dropdown {
+    display: none !important;
+    position: absolute !important;
+    top: calc(100% + 0.5rem) !important;
+    right: 0 !important;
+    background: white !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    min-width: 180px !important;
+    overflow: hidden !important;
+    z-index: 10001 !important;
+}
+
+.jjc-user-dropdown.active {
+    display: block !important;
+}
+
+.jjc-user-dropdown-item {
+    display: block !important;
+    padding: 0.75rem 1rem !important;
+    color: #1A202C !important;
+    text-decoration: none !important;
+    transition: background 0.2s !important;
+    font-size: 0.875rem !important;
+    background: none !important;
+    border: none !important;
+    width: 100% !important;
+    text-align: left !important;
+    cursor: pointer !important;
+}
+
+.jjc-user-dropdown-item:hover {
+    background: #EDF2F7 !important;
+}
+
+/* ========================================
+   移动端菜单
+   ======================================== */
+.jjc-mobile-toggle {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    background: none !important;
+    border: none !important;
+    cursor: pointer !important;
+    padding: 0.5rem !important;
+    width: 40px !important;
+    height: 40px !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+@media (min-width: 1024px) {
+    .jjc-mobile-toggle {
+        display: none !important;
+    }
+}
+
+.jjc-mobile-toggle span {
+    width: 24px !important;
+    height: 2px !important;
+    background: #1A202C !important;
+    border-radius: 2px !important;
+    transition: all 0.3s !important;
+    display: block !important;
+}
+
+.jjc-mobile-menu {
+    display: none !important;
+    flex-direction: column !important;
+    padding: 1rem 1.5rem !important;
+    background: #F7FAFC !important;
+    border-top: 1px solid #EDF2F7 !important;
+}
+
+.jjc-mobile-menu.active {
+    display: flex !important;
+}
+
+.jjc-mobile-link {
+    padding: 0.75rem 0 !important;
+    color: #1A202C !important;
+    text-decoration: none !important;
+    font-weight: 500 !important;
+    font-size: 1rem !important;
+    transition: color 0.2s !important;
+    background: none !important;
+    border: none !important;
+    text-align: left !important;
+    cursor: pointer !important;
+}
+
+.jjc-mobile-link:hover {
+    color: #2B6CB0 !important;
+}
+
+.jjc-mobile-divider {
+    height: 1px !important;
+    background: #EDF2F7 !important;
+    margin: 0.5rem 0 !important;
+}
+
+.jjc-mobile-user {
+    padding: 0.75rem 0 !important;
+    font-weight: 600 !important;
+    color: #1A202C !important;
+    font-size: 1rem !important;
+}
+
+/* 移动端产品子菜单 */
+.jjc-mobile-products {
+    padding-left: 1rem !important;
+}
+
+.jjc-mobile-product-link {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    padding: 0.5rem 0 !important;
+    color: #4A5568 !important;
+    text-decoration: none !important;
+    font-size: 0.875rem !important;
+}
+
+.jjc-mobile-product-link:hover {
+    color: #2B6CB0 !important;
+}
+
+/* ========================================
+   Footer 样式
+   ======================================== */
+.jjc-footer {
+    background: #ffffff !important;
+    border-top: 1px solid #EDF2F7 !important;
+    padding: 2rem 0 !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+.jjc-footer * {
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.jjc-footer-container {
+    max-width: 1290px !important;
+    margin: 0 auto !important;
+    padding: 0 1.5rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 2rem !important;
+}
+
+.jjc-footer-logo {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    color: #4A5568 !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+}
+
+.jjc-footer-logo img {
+    height: 30px !important;
+    width: auto !important;
+}
+
+.jjc-footer-social {
+    display: flex !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    flex: 1 !important;
+    justify-content: center !important;
+}
+
+.jjc-social-link {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+    background: #EDF2F7 !important;
+    color: #4A5568 !important;
+    text-decoration: none !important;
+    transition: all 0.2s !important;
+}
+
+.jjc-social-link:hover {
+    background: #2B6CB0 !important;
+    color: white !important;
+    transform: translateY(-2px) !important;
+}
+
+.jjc-social-link svg {
+    width: 20px !important;
+    height: 20px !important;
+}
+
+.jjc-footer-copy {
+    color: #718096 !important;
+    font-size: 0.875rem !important;
+    text-align: right !important;
+}
+
+/* 隐藏原有 footer */
+#colophon {
+    display: none !important;
+}
+
+@media (max-width: 768px) {
+    .jjc-footer-container {
+        flex-direction: column !important;
+        text-align: center !important;
+        gap: 1.5rem !important;
+    }
+    
+    .jjc-footer-copy {
+        text-align: center !important;
+    }
+}
