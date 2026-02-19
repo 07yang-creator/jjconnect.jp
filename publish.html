@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>发布文章 - JJConnect</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Supabase Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Quill Rich Text Editor -->
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+  <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+  
+  <style>
+    .ql-editor {
+      min-height: 400px;
+      font-size: 16px;
+    }
+    
+    .ql-container {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    }
+    
+    /* Custom switch styles */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+    
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #cbd5e0;
+      transition: .4s;
+      border-radius: 24px;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+      background-color: #2563eb;
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+  <div class="min-h-screen py-8 px-4">
+    <div class="max-w-4xl mx-auto">
+      
+      <!-- Header -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">发布文章</h1>
+        <p class="text-gray-600">分享你的想法和经验</p>
+      </div>
+
+      <form id="publish-form" class="space-y-6">
+        
+        <!-- Title Input -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <input
+            type="text"
+            id="title"
+            placeholder="输入文章标题..."
+            class="w-full text-4xl font-bold border-none focus:outline-none focus:ring-0 placeholder-gray-300"
+            required
+          />
+        </div>
+
+        <!-- Cover Image -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <label class="block text-sm font-medium text-gray-700 mb-3">
+            封面图片（可选）
+          </label>
+          
+          <div id="cover-preview-container" class="hidden">
+            <div class="relative">
+              <img id="cover-preview" alt="Cover preview" class="w-full h-64 object-cover rounded-lg" />
+              <button
+                type="button"
+                onclick="removeCover()"
+                class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-red-600"
+              >
+                移除
+              </button>
+            </div>
+          </div>
+
+          <label id="cover-upload-area" class="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
+            <svg class="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <p class="text-sm text-gray-600">点击上传封面图片</p>
+            <p class="text-xs text-gray-500 mt-1">支持 JPG, PNG, GIF (最大 5MB)</p>
+            <input
+              type="file"
+              id="cover-input"
+              accept="image/*"
+              onchange="handleCoverChange(event)"
+              class="hidden"
+            />
+          </label>
+        </div>
+
+        <!-- Summary -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <label class="block text-sm font-medium text-gray-700 mb-3">
+            摘要（可选）
+          </label>
+          <textarea
+            id="summary"
+            placeholder="简要描述文章内容..."
+            rows="3"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+          ></textarea>
+        </div>
+
+        <!-- Category Selection -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <label class="block text-sm font-medium text-gray-700 mb-3">
+            分类
+          </label>
+          
+          <!-- Category Type Toggle -->
+          <div class="flex gap-4 mb-4" id="category-type-container">
+            <button
+              type="button"
+              id="official-category-btn"
+              onclick="setCategoryType('official')"
+              class="flex-1 py-2 px-4 rounded-lg font-medium transition-colors bg-blue-600 text-white"
+            >
+              网站官方板块
+            </button>
+            
+            <button
+              type="button"
+              id="personal-category-btn"
+              onclick="setCategoryType('personal')"
+              class="hidden flex-1 py-2 px-4 rounded-lg font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200"
+            >
+              我的个人分类
+            </button>
+          </div>
+
+          <!-- Category Select -->
+          <select
+            id="category-select"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">请选择分类...</option>
+          </select>
+        </div>
+
+        <!-- Rich Text Editor -->
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+          <div id="editor"></div>
+        </div>
+
+        <!-- Paid Content Settings -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-sm font-medium text-gray-900">付费内容</h3>
+              <p class="text-xs text-gray-500 mt-1">开启后此文章需要付费阅读</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="is-paid-toggle" onchange="togglePaidSettings()">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div id="price-input-container" class="hidden mt-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              价格（人民币）
+            </label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">¥</span>
+              <input
+                type="number"
+                id="price-input"
+                min="0"
+                step="0.01"
+                value="0"
+                class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <p class="text-xs text-gray-500 mt-2">
+              建议定价：9.9 - 99.9 元
+            </p>
+          </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="flex items-center justify-between bg-white rounded-lg shadow-sm p-6">
+          <button
+            type="button"
+            onclick="history.back()"
+            class="px-6 py-2 text-gray-700 hover:text-gray-900 font-medium"
+          >
+            取消
+          </button>
+
+          <div class="flex gap-3">
+            <button
+              type="button"
+              onclick="handleSubmit('draft')"
+              id="save-draft-btn"
+              class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium"
+            >
+              保存草稿
+            </button>
+
+            <button
+              type="button"
+              onclick="handleSubmit('published')"
+              id="publish-btn"
+              class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+            >
+              立即发布
+            </button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ========================================================================
+    // CONFIGURATION
+    // ========================================================================
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ========================================================================
+    // STATE
+    // ========================================================================
+    let coverFile = null;
+    let currentCategoryType = 'official';
+    let categories = [];
+    let userCategories = [];
+    let isAuthorized = false;
+    let currentUser = null;
+
+    // Initialize Quill Editor
+    const quill = new Quill('#editor', {
+      theme: 'snow',
+      placeholder: '开始写作...',
+      modules: {
+        toolbar: [
+          [{ 'header': [2, 3, false] }],
+          ['bold', 'italic', 'underline', 'strike'],
+          ['blockquote', 'code-block'],
+          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+          [{ 'indent': '-1'}, { 'indent': '+1' }],
+          ['link', 'image'],
+          ['clean']
+        ]
+      }
+    });
+
+    // ========================================================================
+    // INITIALIZATION
+    // ========================================================================
+    async function init() {
+      try {
+        // Check authentication
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        
+        if (authError || !user) {
+          alert('请先登录');
+          window.location.href = '/login.html';
+          return;
+        }
+
+        currentUser = user;
+
+        // Load categories
+        const { data: categoriesData } = await supabase
+          .from('categories')
+          .select('*')
+          .order('name');
+        
+        categories = categoriesData || [];
+
+        // Check authorization
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_authorized')
+          .eq('id', user.id)
+          .single();
+        
+        isAuthorized = profile?.is_authorized || false;
+
+        // Show personal category button if authorized
+        if (isAuthorized) {
+          document.getElementById('personal-category-btn').classList.remove('hidden');
+          
+          // Load user categories
+          const { data: userCategoriesData } = await supabase
+            .from('user_categories')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('name');
+          
+          userCategories = userCategoriesData || [];
+        }
+
+        // Populate category select
+        updateCategorySelect();
+
+      } catch (error) {
+        console.error('Initialization error:', error);
+        alert('初始化失败: ' + error.message);
+      }
+    }
+
+    // ========================================================================
+    // CATEGORY MANAGEMENT
+    // ========================================================================
+    function setCategoryType(type) {
+      currentCategoryType = type;
+      
+      // Update button styles
+      const officialBtn = document.getElementById('official-category-btn');
+      const personalBtn = document.getElementById('personal-category-btn');
+      
+      if (type === 'official') {
+        officialBtn.className = 'flex-1 py-2 px-4 rounded-lg font-medium transition-colors bg-blue-600 text-white';
+        personalBtn.className = 'flex-1 py-2 px-4 rounded-lg font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200';
+      } else {
+        officialBtn.className = 'flex-1 py-2 px-4 rounded-lg font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200';
+        personalBtn.className = 'flex-1 py-2 px-4 rounded-lg font-medium transition-colors bg-blue-600 text-white';
+      }
+      
+      updateCategorySelect();
+    }
+
+    function updateCategorySelect() {
+      const select = document.getElementById('category-select');
+      const items = currentCategoryType === 'official' ? categories : userCategories;
+      
+      select.innerHTML = '<option value="">请选择分类...</option>';
+      items.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.id;
+        option.textContent = item.name;
+        select.appendChild(option);
+      });
+    }
+
+    // ========================================================================
+    // COVER IMAGE HANDLING
+    // ========================================================================
+    function handleCoverChange(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      // Check file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('文件大小不能超过 5MB');
+        return;
+      }
+
+      coverFile = file;
+      
+      // Preview image
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('cover-preview').src = e.target.result;
+        document.getElementById('cover-preview-container').classList.remove('hidden');
+        document.getElementById('cover-upload-area').classList.add('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeCover() {
+      coverFile = null;
+      document.getElementById('cover-input').value = '';
+      document.getElementById('cover-preview-container').classList.add('hidden');
+      document.getElementById('cover-upload-area').classList.remove('hidden');
+    }
+
+    // ========================================================================
+    // PAID SETTINGS
+    // ========================================================================
+    function togglePaidSettings() {
+      const isChecked = document.getElementById('is-paid-toggle').checked;
+      const container = document.getElementById('price-input-container');
+      
+      if (isChecked) {
+        container.classList.remove('hidden');
+      } else {
+        container.classList.add('hidden');
+      }
+    }
+
+    // ========================================================================
+    // FORM SUBMISSION
+    // ========================================================================
+    async function handleSubmit(status) {
+      try {
+        // Disable buttons
+        const saveDraftBtn = document.getElementById('save-draft-btn');
+        const publishBtn = document.getElementById('publish-btn');
+        saveDraftBtn.disabled = true;
+        publishBtn.disabled = true;
+        
+        if (status === 'draft') {
+          saveDraftBtn.textContent = '保存中...';
+        } else {
+          publishBtn.textContent = '发布中...';
+        }
+
+        // Get form data
+        const title = document.getElementById('title').value.trim();
+        const summary = document.getElementById('summary').value.trim();
+        const categoryId = document.getElementById('category-select').value;
+        const isPaid = document.getElementById('is-paid-toggle').checked;
+        const price = isPaid ? parseFloat(document.getElementById('price-input').value) : 0;
+
+        // Validate
+        if (!title) {
+          throw new Error('请输入标题');
+        }
+
+        if (quill.getLength() <= 1) {
+          throw new Error('请输入文章内容');
+        }
+
+        // Get content
+        const content = {
+          html: quill.root.innerHTML,
+          text: quill.getText(),
+          delta: quill.getContents()
+        };
+
+        // Upload cover if exists
+        let coverUrl = null;
+        if (coverFile) {
+          const timestamp = Date.now();
+          const fileExt = coverFile.name.split('.').pop();
+          const fileName = `${currentUser.id}/${timestamp}.${fileExt}`;
+          
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('covers')
+            .upload(fileName, coverFile, {
+              contentType: coverFile.type,
+              upsert: false
+            });
+          
+          if (uploadError) throw uploadError;
+          
+          const { data: { publicUrl } } = supabase.storage
+            .from('covers')
+            .getPublicUrl(uploadData.path);
+          
+          coverUrl = publicUrl;
+        }
+
+        // Prepare post data
+        const postData = {
+          title,
+          content,
+          summary: summary || null,
+          cover_image: coverUrl,
+          author_id: currentUser.id,
+          category_id: currentCategoryType === 'official' ? categoryId : null,
+          is_paid: isPaid,
+          price,
+          status
+        };
+
+        // Insert post
+        const { data: post, error: insertError } = await supabase
+          .from('posts')
+          .insert(postData)
+          .select()
+          .single();
+        
+        if (insertError) throw insertError;
+
+        // Success!
+        alert(status === 'published' ? '发布成功！' : '草稿已保存！');
+        
+        // Redirect
+        if (status === 'published') {
+          window.location.href = `/posts/${post.id}`;
+        } else {
+          window.location.href = '/profile/drafts';
+        }
+
+      } catch (error) {
+        console.error('Submit error:', error);
+        alert('操作失败: ' + error.message);
+        
+        // Re-enable buttons
+        const saveDraftBtn = document.getElementById('save-draft-btn');
+        const publishBtn = document.getElementById('publish-btn');
+        saveDraftBtn.disabled = false;
+        publishBtn.disabled = false;
+        saveDraftBtn.textContent = '保存草稿';
+        publishBtn.textContent = '立即发布';
+      }
+    }
+
+    // ========================================================================
+    // RUN ON PAGE LOAD
+    // ========================================================================
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+
+</body>
+</html>

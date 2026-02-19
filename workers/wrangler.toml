@@ -1,0 +1,52 @@
+# Cloudflare Workers Configuration for JJConnect Auth Worker
+
+name = "jjconnect-auth-worker"
+main = "auth-worker.js"
+compatibility_date = "2024-01-01"
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "jjconnect-db"
+database_id = "your-database-id"  # Replace with actual D1 database ID
+
+# R2 Storage binding for media files
+[[r2_buckets]]
+binding = "MY_BUCKET"
+bucket_name = "jjconnect"
+preview_bucket_name = "jjconnect-preview"  # Optional: for local development
+
+# Environment variables
+[vars]
+ENVIRONMENT = "production"
+
+# Secrets (set via: wrangler secret put SECRET_NAME)
+# JWT_SECRET - Used for JWT token signing
+# Run: npx wrangler secret put JWT_SECRET
+
+# Routes (optional - configure if using custom domain)
+# routes = [
+#   { pattern = "jjconnect.jp/api/*", zone_name = "jjconnect.jp" }
+# ]
+
+# Build configuration
+[build]
+command = ""
+
+# Development configuration
+[env.development]
+name = "jjconnect-auth-worker-dev"
+
+[env.development.d1_databases]
+binding = "DB"
+database_name = "jjconnect-db"
+database_id = "your-database-id"
+
+[env.development.r2_buckets]
+binding = "MY_BUCKET"
+bucket_name = "jjconnect-dev"
+
+# Observability
+[observability]
+enabled = true
+head_sampling_rate = 1

@@ -1,0 +1,31 @@
+{
+  "name": "jjconnect-auth",
+  "version": "1.0.0",
+  "description": "JJConnect Authentication System with Cloudflare Workers",
+  "main": "workers/auth-worker.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "echo 'Build step - copying worker files' && mkdir -p .wrangler/dist && cp workers/auth-worker.js .wrangler/dist/index.js",
+    "deploy": "wrangler deploy",
+    "deploy:production": "wrangler deploy --env production",
+    "deploy:development": "wrangler deploy --env development",
+    "tail": "wrangler tail",
+    "login": "wrangler login",
+    "logout": "wrangler logout",
+    "whoami": "wrangler whoami"
+  },
+  "keywords": [
+    "cloudflare",
+    "workers",
+    "authentication",
+    "jwt"
+  ],
+  "author": "JJConnect",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.95.3"
+  }
+}

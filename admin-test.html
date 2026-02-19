@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin 权限系统测试 | JJConnect</title>
+<style>
+:root {
+    --primary: #2B6CB0;
+    --secondary: #215387;
+    --success: #48BB78;
+    --danger: #E53E3E;
+    --warning: #FFC107;
+    --dark: #1A202C;
+    --light: #F7FAFC;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header {
+    text-align: center;
+    color: white;
+    margin-bottom: 3rem;
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.test-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.test-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.test-card h2 {
+    color: var(--dark);
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.test-card p {
+    color: #666;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.role-selector {
+    margin-bottom: 1.5rem;
+}
+
+.role-selector label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--dark);
+}
+
+.role-selector select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--secondary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(43, 108, 176, 0.3);
+}
+
+.btn-success {
+    background: var(--success);
+    color: white;
+}
+
+.btn-block {
+    display: block;
+    width: 100%;
+    text-align: center;
+}
+
+.permission-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.permission-table th,
+.permission-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.permission-table th {
+    background: var(--light);
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.permission-table td {
+    color: #666;
+}
+
+.check {
+    color: var(--success);
+    font-weight: bold;
+}
+
+.cross {
+    color: var(--danger);
+    font-weight: bold;
+}
+
+.info-box {
+    background: #EBF8FF;
+    border-left: 4px solid var(--primary);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1.5rem;
+}
+
+.info-box h3 {
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+}
+
+.info-box p {
+    color: #2C5282;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.feature-list {
+    list-style: none;
+    margin-top: 1rem;
+}
+
+.feature-list li {
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+    color: #666;
+}
+
+.feature-list li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--success);
+    font-weight: bold;
+}
+
+.code-block {
+    background: #2D3748;
+    color: #E2E8F0;
+    padding: 1rem;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    overflow-x: auto;
+    margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+    .header h1 {
+        font-size: 2rem;
+    }
+    
+    .test-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🔐 Admin 权限系统测试</h1>
+        <p>测试不同用户角色的权限控制效果</p>
+    </div>
+    
+    <div class="test-grid">
+        <!-- Quick Test Card -->
+        <div class="test-card">
+            <h2>🚀 快速测试</h2>
+            <p>选择一个角色，然后打开 Admin Dashboard 查看效果</p>
+            
+            <div class="role-selector">
+                <label for="test-role">选择测试角色:</label>
+                <select id="test-role">
+                    <option value="2">管理员 (Admin) - 完全权限</option>
+                    <option value="1">编辑者 (Editor) - 部分权限</option>
+                    <option value="0">访客 (Viewer) - 只读权限</option>
+                </select>
+            </div>
+            
+            <a href="admin.html" class="btn btn-primary btn-block" target="_blank">
+                打开 Admin Dashboard
+            </a>
+            
+            <div class="info-box">
+                <h3>💡 提示</h3>
+                <p>打开 Admin Dashboard 后，使用右下角的调试面板可以动态切换角色</p>
+            </div>
+        </div>
+        
+        <!-- Permission Matrix Card -->
+        <div class="test-card">
+            <h2>📋 权限矩阵</h2>
+            <p>各角色的详细权限对照表</p>
+            
+            <table class="permission-table">
+                <thead>
+                    <tr>
+                        <th>功能</th>
+                        <th>Viewer</th>
+                        <th>Editor</th>
+                        <th>Admin</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>查看内容</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>编辑内容</td>
+                        <td class="cross">✗</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>删除内容</td>
+                        <td class="cross">✗</td>
+                        <td class="cross">✗</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>编辑用户</td>
+                        <td class="cross">✗</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>删除用户</td>
+                        <td class="cross">✗</td>
+                        <td class="cross">✗</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>系统设置</td>
+                        <td class="cross">✗</td>
+                        <td class="cross">✗</td>
+                        <td class="check">✓</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Features Card -->
+        <div class="test-card">
+            <h2>✨ 系统特性</h2>
+            <p>权限控制系统的主要功能</p>
+            
+            <ul class="feature-list">
+                <li>基于角色的访问控制 (RBAC)</li>
+                <li>动态 UI 显示/隐藏</li>
+                <li>实时权限检查</li>
+                <li>Cloudflare Workers 集成接口</li>
+                <li>开发者调试面板</li>
+                <li>详细的权限提示信息</li>
+            </ul>
+            
+            <div class="info-box">
+                <h3>🔧 开发模式</h3>
+                <p>在 admin.html 中修改 userRole 变量 (0-2) 来测试不同权限</p>
+            </div>
+        </div>
+        
+        <!-- Integration Card -->
+        <div class="test-card">
+            <h2>🔌 Cloudflare Workers 集成</h2>
+            <p>后端认证 API 示例</p>
+            
+            <div class="code-block">
+// Cloudflare Workers 响应格式
+{
+  "authenticated": true,
+  "role": 2,
+  "username": "admin_user",
+  "email": "admin@jjconnect.jp"
+}
+            </div>
+            
+            <p style="margin-top: 1rem; font-size: 0.9rem;">
+                在 admin.html 的 <code>checkAuth()</code> 函数中取消注释 fetch 代码即可集成
+            </p>
+        </div>
+        
+        <!-- Documentation Card -->
+        <div class="test-card">
+            <h2>📚 文档</h2>
+            <p>查看完整的权限系统文档</p>
+            
+            <a href="ADMIN_PERMISSIONS_README.md" class="btn btn-success btn-block" target="_blank">
+                查看完整文档
+            </a>
+            
+            <div class="info-box" style="margin-top: 1.5rem;">
+                <h3>📖 文档内容</h3>
+                <p>包含权限矩阵、API 文档、集成指南、安全建议等</p>
+            </div>
+        </div>
+        
+        <!-- Test Scenarios Card -->
+        <div class="test-card">
+            <h2>🧪 测试场景</h2>
+            <p>推荐的测试流程</p>
+            
+            <ol style="padding-left: 1.5rem; color: #666; line-height: 1.8;">
+                <li>以 <strong>Admin</strong> 角色登录，测试所有功能</li>
+                <li>切换到 <strong>Editor</strong>，验证删除按钮被隐藏</li>
+                <li>切换到 <strong>Viewer</strong>，确认只能查看</li>
+                <li>尝试点击被禁用的按钮，查看权限提示</li>
+                <li>检查系统设置页面的访问控制</li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<script>
+// Store selected role in localStorage
+document.getElementById('test-role').addEventListener('change', function() {
+    localStorage.setItem('testUserRole', this.value);
+});
+
+// Load saved role on page load
+window.addEventListener('load', function() {
+    const savedRole = localStorage.getItem('testUserRole');
+    if (savedRole) {
+        document.getElementById('test-role').value = savedRole;
+    }
+});
+
+// Update admin.html link with role parameter
+document.querySelector('a[href="admin.html"]').addEventListener('click', function(e) {
+    const role = document.getElementById('test-role').value;
+    localStorage.setItem('testUserRole', role);
+});
+</script>
+</body>
+</html>

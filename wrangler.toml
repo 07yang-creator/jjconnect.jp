@@ -1,0 +1,119 @@
+# Cloudflare Workers Configuration for JJConnect
+# Documentation: https://developers.cloudflare.com/workers/wrangler/configuration/
+
+# Worker 名称
+name = "jjconnect-auth-worker"
+
+# Worker 入口文件（构建后的输出）
+main = ".wrangler/dist/index.js"
+
+# 兼容性日期 (使用最新的 Workers 运行时)
+compatibility_date = "2026-02-05"
+
+# 账户 ID (从 Cloudflare Dashboard 获取)
+# 登录 https://dash.cloudflare.com/ -> Workers & Pages -> 右侧查看 Account ID
+# account_id = "your-account-id-here"
+
+# ============================================
+# 路由配置
+# ============================================
+
+# 如果部署为独立 Worker，可以使用自定义域名
+# routes = [
+#   { pattern = "api.jjconnect.jp/*", zone_name = "jjconnect.jp" }
+# ]
+
+# 如果与 Cloudflare Pages 集成，使用 workers_dev
+workers_dev = true
+
+# ============================================
+# 环境变量 (生产环境)
+# ============================================
+
+# 生产环境的环境变量
+[env.production]
+name = "jjconnect-auth-worker-production"
+
+# 生产环境变量 (敏感信息不要写在这里，使用 wrangler secret 命令)
+# [env.production.vars]
+# ENVIRONMENT = "production"
+
+# ============================================
+# 环境变量 (开发环境)
+# ============================================
+
+# 开发环境的环境变量
+[env.development]
+name = "jjconnect-auth-worker-dev"
+
+# 开发环境变量
+# [env.development.vars]
+# ENVIRONMENT = "development"
+
+# ============================================
+# KV 命名空间 (可选 - 用于存储 session)
+# ============================================
+
+# 如果需要使用 KV 存储，取消注释以下配置
+# [[kv_namespaces]]
+# binding = "AUTH_SESSIONS"
+# id = "your-kv-namespace-id"
+# preview_id = "your-preview-kv-namespace-id"
+
+# ============================================
+# Supabase 配置
+# ============================================
+
+# Supabase 配置现在通过 .dev.vars 文件管理
+# 生产环境请使用: wrangler secret put SUPABASE_URL
+# 生产环境请使用: wrangler secret put SUPABASE_ANON_KEY
+
+# ============================================
+# Secrets (敏感信息)
+# ============================================
+
+# 不要在这里写敏感信息！
+# 使用命令行设置 secrets:
+# wrangler secret put JWT_SECRET
+# wrangler secret put NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+# ============================================
+# 构建配置
+# ============================================
+
+[build]
+command = "npm run build"
+
+# ============================================
+# 开发服务器配置
+# ============================================
+
+# 本地开发服务器端口
+[dev]
+port = 8787
+local_protocol = "http"
+
+# ============================================
+# 限制和配额
+# ============================================
+
+# CPU 限制 (毫秒)
+# limits = { cpu_ms = 50 }
+
+# ============================================
+# 观察性配置
+# ============================================
+
+# 启用日志
+# [observability]
+# enabled = true
+
+# ============================================
+# 注意事项
+# ============================================
+
+# 1. 首次使用需要运行: wrangler login
+# 2. 部署命令: wrangler deploy
+# 3. 查看日志: wrangler tail
+# 4. 本地测试: wrangler dev
+# 5. 设置 secret: wrangler secret put SECRET_NAME
