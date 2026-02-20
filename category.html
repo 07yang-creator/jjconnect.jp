@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>分类 - JJConnect</title>
+  <link rel="stylesheet" href="navbar.css">
+  <link rel="icon" href="wp-content/uploads/2025/08/cropped-cropped-logo-icon-1.png">
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -12,32 +14,49 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <style>
+    :root {
+      --jjc-primary: #2B6CB0;
+      --jjc-primary-hover: #215387;
+      --jjc-bg: #F7FAFC;
+    }
     .line-clamp-2 {
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+    .jjc-article-card {
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+    .jjc-article-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+    .jjc-article-card:hover h3 {
+      color: var(--jjc-primary) !important;
+    }
   </style>
 </head>
-<body class="bg-gray-50">
+<body class="min-h-screen" style="background: var(--jjc-bg);">
+  <script src="navbar.js"></script>
 
   <div class="min-h-screen">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       
       <!-- Breadcrumb -->
-      <nav class="flex items-center gap-2 text-sm text-gray-600 mb-6">
-        <a href="/home.html" class="hover:text-blue-600">首页</a>
+      <nav class="flex items-center gap-2 text-sm mb-6" style="color: #4A5568;">
+        <a href="home.html" class="hover:opacity-80" style="color: var(--jjc-primary);">首页</a>
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
-        <span id="breadcrumb-category" class="text-gray-900 font-medium">...</span>
+        <span id="breadcrumb-category" class="font-medium" style="color: #1A202C;">...</span>
       </nav>
 
       <!-- Category Header -->
       <header class="mb-8">
-        <h1 id="category-title" class="text-4xl font-bold text-gray-900 mb-3">...</h1>
-        <p id="category-description" class="text-lg text-gray-600 max-w-3xl"></p>
+        <h1 id="category-title" class="text-4xl font-bold mb-3" style="color: #1A202C;">...</h1>
+        <p id="category-description" class="text-lg max-w-3xl" style="color: #4A5568;"></p>
         
         <!-- Stats -->
         <div class="flex items-center gap-6 mt-4 text-sm text-gray-500">
@@ -57,7 +76,7 @@
           <div id="posts-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             <!-- Loading -->
             <div class="text-center py-12 col-span-full">
-              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <div class="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style="border-color: var(--jjc-primary);"></div>
               <p class="text-gray-500 mt-4">加载中...</p>
             </div>
           </div>
@@ -67,9 +86,9 @@
         <aside class="lg:col-span-1 space-y-6">
           
           <!-- Related Categories -->
-          <div id="related-categories" class="bg-white rounded-lg shadow-sm p-6">
-            <h3 class="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div id="related-categories" class="jjc-article-card p-6">
+            <h3 class="font-semibold mb-4 flex items-center gap-2" style="color: #1A202C;">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--jjc-primary);">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
               </svg>
               其他分类
@@ -80,10 +99,10 @@
           </div>
 
           <!-- CTA Card -->
-          <div class="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg shadow-sm p-6 text-white">
+          <div class="rounded-lg p-6 text-white" style="background: linear-gradient(135deg, var(--jjc-primary) 0%, var(--jjc-primary-hover) 100%); box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
             <h3 class="font-semibold mb-2">分享你的经验</h3>
-            <p class="text-sm text-blue-100 mb-4">在这个分类下发布你的文章</p>
-            <a href="/publish.html" class="block w-full text-center bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-blue-50 transition-colors">
+            <p class="text-sm mb-4 opacity-90">在这个分类下发布你的文章</p>
+            <a href="publish.html" class="block w-full text-center bg-white px-4 py-2 rounded-lg font-medium hover:opacity-95 transition-opacity" style="color: var(--jjc-primary);">
               发布文章
             </a>
           </div>
@@ -193,17 +212,17 @@
       ` : '';
 
       const priceTag = post.is_paid ? `
-        <span class="font-semibold text-orange-600">¥${post.price}</span>
+        <span class="font-semibold" style="color: #dd6b20;">¥${post.price}</span>
       ` : '';
 
       return `
-        <a href="/posts/${post.id}" class="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col">
-          <div class="relative aspect-video bg-gray-200 overflow-hidden">
+        <a href="/posts/${post.id}" class="group jjc-article-card overflow-hidden transition-shadow flex flex-col">
+          <div class="relative aspect-video overflow-hidden" style="background: #EDF2F7;">
             ${coverImage}
             ${paidBadge}
           </div>
           <div class="p-4 flex-1 flex flex-col">
-            <h3 class="font-semibold text-gray-900 line-clamp-2 mb-2 group-hover:text-blue-600 transition-colors">
+            <h3 class="font-semibold line-clamp-2 mb-2 transition-colors" style="color: #1A202C;">
               ${post.title}
             </h3>
             ${summary}
@@ -232,13 +251,13 @@
       
       if (posts.length === 0) {
         container.innerHTML = `
-          <div class="col-span-full text-center py-16 bg-white rounded-lg">
-            <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="col-span-full text-center py-16 jjc-article-card">
+            <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #CBD5E0;">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">暂无文章</h3>
-            <p class="text-gray-500 mb-6">该分类下还没有发布任何文章</p>
-            <a href="/publish.html" class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors">
+            <h3 class="text-lg font-medium mb-2" style="color: #1A202C;">暂无文章</h3>
+            <p class="mb-6" style="color: #4A5568;">该分类下还没有发布任何文章</p>
+            <a href="publish.html" class="inline-block text-white px-6 py-2 rounded-lg font-medium hover:opacity-95 transition-opacity" style="background: var(--jjc-primary);">
               发布第一篇文章
             </a>
           </div>
@@ -258,7 +277,7 @@
       }
 
       container.innerHTML = categories.map(cat => `
-        <a href="/category.html?slug=${cat.slug}" class="block px-3 py-2 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors">
+        <a href="category.html?slug=${cat.slug}" class="block px-3 py-2 rounded-lg hover:opacity-80 transition-opacity" style="color: #2D3748;" data-hover-color="var(--jjc-primary)">
           ${cat.name}
         </a>
       `).join('');
@@ -272,9 +291,9 @@
       // Check if slug is provided
       if (!categorySlug) {
         document.getElementById('posts-grid').innerHTML = `
-          <div class="col-span-full text-center py-16 bg-white rounded-lg">
+          <div class="col-span-full text-center py-16 jjc-article-card">
             <p class="text-red-500">未指定分类</p>
-            <a href="/home.html" class="text-blue-600 hover:underline mt-2 inline-block">返回首页</a>
+            <a href="home.html" class="hover:opacity-80 mt-2 inline-block" style="color: var(--jjc-primary);">返回首页</a>
           </div>
         `;
         return;
@@ -286,9 +305,9 @@
         
         if (!category) {
           document.getElementById('posts-grid').innerHTML = `
-            <div class="col-span-full text-center py-16 bg-white rounded-lg">
+            <div class="col-span-full text-center py-16 jjc-article-card">
               <p class="text-red-500">分类不存在</p>
-              <a href="/home.html" class="text-blue-600 hover:underline mt-2 inline-block">返回首页</a>
+              <a href="home.html" class="hover:opacity-80 mt-2 inline-block" style="color: var(--jjc-primary);">返回首页</a>
             </div>
           `;
           return;
@@ -316,7 +335,7 @@
       } catch (error) {
         console.error('Initialization error:', error);
         document.getElementById('posts-grid').innerHTML = `
-          <div class="col-span-full text-center py-16 bg-white rounded-lg">
+          <div class="col-span-full text-center py-16 jjc-article-card">
             <p class="text-red-500">加载失败，请刷新页面重试</p>
           </div>
         `;

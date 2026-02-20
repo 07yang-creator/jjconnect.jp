@@ -4,38 +4,71 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Home - JJConnect</title>
+  <link rel="stylesheet" href="navbar.css">
+  <link rel="icon" href="wp-content/uploads/2025/08/cropped-cropped-logo-icon-1.png">
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2B6CB0',
+            'primary-hover': '#215387',
+            'bg-light': '#F7FAFC',
+          }
+        }
+      }
+    }
+  </script>
   
   <!-- Supabase Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <style>
+    :root {
+      --jjc-primary: #2B6CB0;
+      --jjc-primary-hover: #215387;
+      --jjc-bg: #F7FAFC;
+    }
     .line-clamp-2 {
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+    /* Article cards: white bg, 8px radius, light shadow */
+    .jjc-article-card {
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+    .jjc-article-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+    .jjc-article-card:hover h3 {
+      color: var(--jjc-primary) !important;
+    }
   </style>
 </head>
-<body class="bg-gray-50">
+<body class="min-h-screen" style="background: var(--jjc-bg);">
+  <script src="navbar.js"></script>
 
   <div class="min-h-screen">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       
       <!-- Hero Section -->
       <section class="mb-12">
-        <h1 class="text-4xl font-bold text-gray-900 mb-2">Welcome to JJConnect</h1>
-        <p class="text-lg text-gray-600">Community - Share Knowledge, Exchange Experience</p>
+        <h1 class="text-4xl font-bold mb-2" style="color: #1A202C;">Welcome to JJConnect</h1>
+        <p class="text-lg" style="color: #4A5568;">Community - Share Knowledge, Exchange Experience</p>
       </section>
 
       <!-- Latest Posts Section -->
       <section class="mb-16">
         <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-bold text-gray-900">Latest Posts</h2>
-          <a href="/posts.html" class="text-blue-600 hover:text-blue-700 font-medium text-sm">
+          <h2 class="text-2xl font-bold" style="color: #1A202C;">Latest Posts</h2>
+          <a href="posts.html" class="font-medium text-sm hover:opacity-80" style="color: var(--jjc-primary);">
             View All →
           </a>
         </div>
@@ -43,7 +76,7 @@
         <div id="latest-posts" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <!-- Loading skeleton -->
           <div class="text-center py-12 col-span-full">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style="border-color: var(--jjc-primary);"></div>
             <p class="text-gray-500 mt-4">Loading...</p>
           </div>
         </div>
@@ -55,10 +88,10 @@
       </div>
 
       <!-- CTA Section -->
-      <section class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 md:p-12 text-center text-white">
+      <section class="rounded-2xl p-8 md:p-12 text-center text-white" style="background: linear-gradient(135deg, var(--jjc-primary) 0%, var(--jjc-primary-hover) 100%);">
         <h2 class="text-3xl font-bold mb-4">Start Sharing Your Story</h2>
-        <p class="text-lg mb-6 text-blue-100">Join our community and connect with like-minded friends</p>
-        <a href="/publish.html" class="inline-block bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors">
+        <p class="text-lg mb-6 opacity-90">Join our community and connect with like-minded friends</p>
+        <a href="publish.html" class="inline-block bg-white px-8 py-3 rounded-lg font-semibold hover:opacity-95 transition-opacity" style="color: var(--jjc-primary);">
           Publish Article
         </a>
       </section>
@@ -167,17 +200,17 @@
       ` : '';
 
       const priceTag = post.is_paid ? `
-        <span class="font-semibold text-orange-600">¥${post.price}</span>
+        <span class="font-semibold" style="color: #dd6b20;">¥${post.price}</span>
       ` : '';
 
       return `
-        <a href="/posts/${post.id}" class="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-          <div class="relative aspect-video bg-gray-200 overflow-hidden">
+        <a href="/posts/${post.id}" class="group jjc-article-card overflow-hidden transition-shadow block">
+          <div class="relative aspect-video overflow-hidden" style="background: #EDF2F7;">
             ${coverImage}
             ${paidBadge}
           </div>
           <div class="p-4">
-            <h3 class="font-semibold text-gray-900 line-clamp-2 mb-2 group-hover:text-blue-600 transition-colors">
+            <h3 class="font-semibold line-clamp-2 mb-2 transition-colors" style="color: #1A202C;">
               ${post.title}
             </h3>
             ${summary}
@@ -204,7 +237,7 @@
       
       if (posts.length === 0) {
         container.innerHTML = `
-          <div class="text-center py-12 bg-white rounded-lg col-span-full">
+          <div class="text-center py-12 jjc-article-card col-span-full">
             <p class="text-gray-500">No articles yet</p>
           </div>
         `;
@@ -221,10 +254,10 @@
         <section class="mb-16">
           <div class="flex items-center justify-between mb-6">
             <div>
-              <h2 class="text-2xl font-bold text-gray-900">${category.name}</h2>
-              ${category.description ? `<p class="text-sm text-gray-600 mt-1">${category.description}</p>` : ''}
+              <h2 class="text-2xl font-bold" style="color: #1A202C;">${category.name}</h2>
+              ${category.description ? `<p class="text-sm mt-1" style="color: #4A5568;">${category.description}</p>` : ''}
             </div>
-            <a href="/category.html?slug=${category.slug}" class="text-blue-600 hover:text-blue-700 font-medium text-sm">
+            <a href="category.html?slug=${category.slug}" class="font-medium text-sm hover:opacity-80" style="color: var(--jjc-primary);">
               View All →
             </a>
           </div>
@@ -254,7 +287,7 @@
       } catch (error) {
         console.error('Initialization error:', error);
         document.getElementById('latest-posts').innerHTML = `
-          <div class="text-center py-12 bg-white rounded-lg col-span-full">
+          <div class="text-center py-12 jjc-article-card col-span-full">
             <p class="text-red-500">Loading failed, please refresh the page</p>
           </div>
         `;
