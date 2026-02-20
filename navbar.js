@@ -23,11 +23,11 @@
                 
                 <!-- 导航链接（桌面端） -->
                 <div class="jjc-navbar-nav">
-                    <a href="about.html" class="jjc-nav-link">关于我们</a>
+                    <a href="about.html" class="jjc-nav-link">About Us</a>
                     
                     <!-- 产品下拉菜单 -->
                     <div class="jjc-nav-dropdown" id="jjc-products-dropdown">
-                        <a href="product.html" class="jjc-nav-link jjc-nav-dropdown-toggle">产品服务</a>
+                        <a href="product.html" class="jjc-nav-link jjc-nav-dropdown-toggle">Products & Services</a>
                         <div class="jjc-nav-dropdown-menu">
                             <a href="raft_info.html" class="jjc-nav-dropdown-item">
                                 <span class="jjc-nav-dropdown-icon">🚢</span>
@@ -54,16 +54,16 @@
                                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                     <circle cx="12" cy="7" r="4"></circle>
                                 </svg>
-                                <span>${userData?.username || '用户'}</span>
+                                <span>${userData?.username || 'User'}</span>
                             </button>
                             <div class="jjc-user-dropdown" id="jjc-user-dropdown">
-                                ${userData?.role >= 2 ? '<a href="admin.html" class="jjc-user-dropdown-item">管理后台</a>' : ''}
-                                <button id="jjc-logout-btn" class="jjc-user-dropdown-item">退出登录</button>
+                                ${userData?.role >= 2 ? '<a href="admin.html" class="jjc-user-dropdown-item">Admin Dashboard</a>' : ''}
+                                <button id="jjc-logout-btn" class="jjc-user-dropdown-item">Logout</button>
                             </div>
                         </div>
                     ` : `
-                        <a href="login.html" class="jjc-btn jjc-btn-outline">登录</a>
-                        <a href="login.html?tab=register" class="jjc-btn jjc-btn-primary">注册</a>
+                        <a href="login.html" class="jjc-btn jjc-btn-outline">Login</a>
+                        <a href="login.html?tab=register" class="jjc-btn jjc-btn-primary">Register</a>
                     `}
                 </div>
                 
@@ -77,10 +77,10 @@
             
             <!-- 移动端菜单 -->
             <div class="jjc-mobile-menu" id="jjc-mobile-menu">
-                <a href="about.html" class="jjc-mobile-link">关于我们</a>
+                <a href="about.html" class="jjc-mobile-link">About Us</a>
                 
                 <div class="jjc-mobile-divider"></div>
-                <a href="product.html" class="jjc-mobile-link" style="font-weight: 600;">产品服务</a>
+                <a href="product.html" class="jjc-mobile-link" style="font-weight: 600;">Products & Services</a>
                 <div class="jjc-mobile-products">
                     <a href="raft_info.html" class="jjc-mobile-product-link">
                         <span>🚢</span>
@@ -98,12 +98,12 @@
                 
                 <div class="jjc-mobile-divider"></div>
                 ${isLoggedIn ? `
-                    <div class="jjc-mobile-user">👤 ${userData?.username || '用户'}</div>
-                    ${userData?.role >= 2 ? '<a href="admin.html" class="jjc-mobile-link">管理后台</a>' : ''}
-                    <button id="jjc-mobile-logout" class="jjc-mobile-link">退出登录</button>
+                    <div class="jjc-mobile-user">👤 ${userData?.username || 'User'}</div>
+                    ${userData?.role >= 2 ? '<a href="admin.html" class="jjc-mobile-link">Admin Dashboard</a>' : ''}
+                    <button id="jjc-mobile-logout" class="jjc-mobile-link">Logout</button>
                 ` : `
-                    <a href="login.html" class="jjc-mobile-link">登录</a>
-                    <a href="login.html?tab=register" class="jjc-mobile-link">注册</a>
+                    <a href="login.html" class="jjc-mobile-link">Login</a>
+                    <a href="login.html?tab=register" class="jjc-mobile-link">Register</a>
                 `}
             </div>
         </nav>
