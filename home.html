@@ -64,27 +64,13 @@
         <p class="text-lg" style="color: #4A5568;">Community - Share Knowledge, Exchange Experience</p>
       </section>
 
-      <!-- Latest Posts Section -->
-      <section class="mb-16">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-bold" style="color: #1A202C;">Latest Posts</h2>
-          <a href="posts.html" class="font-medium text-sm hover:opacity-80" style="color: var(--jjc-primary);">
-            View All →
-          </a>
+      <!-- Four Category Type Sections: #@A, #@B, #@C, #@D -->
+      <div id="type-sections">
+        <!-- Loading skeleton for all 4 sections -->
+        <div class="text-center py-12">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style="border-color: var(--jjc-primary);"></div>
+          <p class="text-gray-500 mt-4">Loading...</p>
         </div>
-        
-        <div id="latest-posts" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <!-- Loading skeleton -->
-          <div class="text-center py-12 col-span-full">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style="border-color: var(--jjc-primary);"></div>
-            <p class="text-gray-500 mt-4">Loading...</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- Category Sections -->
-      <div id="category-sections">
-        <!-- Will be populated by JavaScript -->
       </div>
 
       <!-- CTA Section -->
@@ -107,67 +93,59 @@
     const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    // 四种类型分类：请根据数据库中 categories 表的 slug 修改以下配置
+    const CATEGORY_TYPES = [
+      { slug: 'type-a', label: '类型 A' },   // #@A - 替换为实际 slug
+      { slug: 'type-b', label: '类型 B' },   // #@B
+      { slug: 'type-c', label: '类型 C' },   // #@C
+      { slug: 'type-d', label: '类型 D' },   // #@D
+    ];
+
     // ========================================================================
     // DATA FETCHING
     // ========================================================================
     
-    async function loadLatestPosts() {
+    async function loadPostsByCategorySlug(slug, limit = 3) {
       try {
-        const { data, error } = await supabase
+        const { data: category, error: catError } = await supabase
+          .from('categories')
+          .select('id, name, slug, description')
+          .eq('slug', slug)
+          .single();
+        
+        if (catError || !category) return { category: null, posts: [] };
+        
+        const { data: posts, error: postsError } = await supabase
           .from('posts')
           .select(`
             *,
             author:profiles(display_name, avatar_url)
           `)
           .eq('status', 'published')
+          .eq('category_id', category.id)
           .order('created_at', { ascending: false })
-          .limit(8);
+          .limit(limit);
         
-        if (error) throw error;
-        return data || [];
+        if (postsError) throw postsError;
+        return { category, posts: posts || [] };
       } catch (error) {
-        console.error('Failed to load latest posts:', error);
-        return [];
+        console.error('Failed to load posts for slug:', slug, error);
+        return { category: null, posts: [] };
       }
     }
 
-    async function loadCategoriesWithPosts() {
-      try {
-        // Get all categories
-        const { data: categories, error: categoriesError } = await supabase
-          .from('categories')
-          .select('*')
-          .order('name');
-        
-        if (categoriesError) throw categoriesError;
-        
-        // Get posts for each category
-        const categoriesWithPosts = await Promise.all(
-          (categories || []).map(async (category) => {
-            const { data: posts } = await supabase
-              .from('posts')
-              .select(`
-                *,
-                author:profiles(display_name, avatar_url)
-              `)
-              .eq('status', 'published')
-              .eq('category_id', category.id)
-              .order('created_at', { ascending: false })
-              .limit(4);
-            
-            return {
-              ...category,
-              posts: posts || []
-            };
-          })
-        );
-        
-        // Filter out categories with no posts
-        return categoriesWithPosts.filter(cat => cat.posts.length > 0);
-      } catch (error) {
-        console.error('Failed to load categories:', error);
-        return [];
-      }
+    async function loadTypeSections() {
+      return Promise.all(
+        CATEGORY_TYPES.map(async (type) => {
+          const result = await loadPostsByCategorySlug(type.slug, 3);
+          return {
+            slug: type.slug,
+            label: type.label,
+            category: result.category,
+            posts: result.posts,
+          };
+        })
+      );
     }
 
     // ========================================================================
@@ -232,40 +210,39 @@
       `;
     }
 
-    function renderLatestPosts(posts) {
-      const container = document.getElementById('latest-posts');
+    function renderTypeSections(sections) {
+      const container = document.getElementById('type-sections');
       
-      if (posts.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-12 jjc-article-card col-span-full">
-            <p class="text-gray-500">No articles yet</p>
-          </div>
-        `;
-        return;
-      }
-
-      container.innerHTML = posts.map(post => renderPostCard(post)).join('');
-    }
-
-    function renderCategorySections(categories) {
-      const container = document.getElementById('category-sections');
-      
-      container.innerHTML = categories.map(category => `
+      container.innerHTML = sections.map((section) => {
+        const displayName = section.category?.name || section.label;
+        const categorySlug = section.category?.slug || section.slug;
+        const hasLink = section.category && section.posts.length > 0;
+        
+        return `
         <section class="mb-16">
           <div class="flex items-center justify-between mb-6">
             <div>
-              <h2 class="text-2xl font-bold" style="color: #1A202C;">${category.name}</h2>
-              ${category.description ? `<p class="text-sm mt-1" style="color: #4A5568;">${category.description}</p>` : ''}
+              <h2 class="text-2xl font-bold" style="color: #1A202C;">${displayName}</h2>
+              ${section.category?.description ? `<p class="text-sm mt-1" style="color: #4A5568;">${section.category.description}</p>` : ''}
             </div>
-            <a href="category.html?slug=${category.slug}" class="font-medium text-sm hover:opacity-80" style="color: var(--jjc-primary);">
+            ${hasLink ? `
+            <a href="category.html?slug=${categorySlug}" class="font-medium text-sm hover:opacity-80" style="color: var(--jjc-primary);">
               View All →
             </a>
+            ` : ''}
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            ${category.posts.map(post => renderPostCard(post)).join('')}
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            ${section.posts.length > 0 
+              ? section.posts.map(post => renderPostCard(post)).join('')
+              : `
+            <div class="col-span-full text-center py-12 jjc-article-card">
+              <p class="text-gray-500">暂无文章</p>
+            </div>
+            `}
           </div>
         </section>
-      `).join('');
+        `;
+      }).join('');
     }
 
     // ========================================================================
@@ -274,21 +251,13 @@
     
     async function init() {
       try {
-        // Load data in parallel
-        const [latestPosts, categoriesWithPosts] = await Promise.all([
-          loadLatestPosts(),
-          loadCategoriesWithPosts()
-        ]);
-
-        // Render content
-        renderLatestPosts(latestPosts);
-        renderCategorySections(categoriesWithPosts);
-
+        const sections = await loadTypeSections();
+        renderTypeSections(sections);
       } catch (error) {
         console.error('Initialization error:', error);
-        document.getElementById('latest-posts').innerHTML = `
-          <div class="text-center py-12 jjc-article-card col-span-full">
-            <p class="text-red-500">Loading failed, please refresh the page</p>
+        document.getElementById('type-sections').innerHTML = `
+          <div class="text-center py-12 jjc-article-card">
+            <p class="text-red-500">加载失败，请刷新页面</p>
           </div>
         `;
       }

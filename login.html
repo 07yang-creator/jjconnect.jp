@@ -187,6 +187,34 @@
 
 .auth-links a:hover { text-decoration: underline; }
 
+.create-account-prompt {
+    margin-top: 1.5rem;
+    font-size: 14px;
+    color: var(--global-palette5);
+    text-align: center;
+}
+
+.create-account-prompt a {
+    color: var(--global-palette1);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.create-account-prompt a:hover { text-decoration: underline; }
+
+.sign-in-instead {
+    margin-top: 0.5rem;
+    font-size: 14px;
+    color: var(--global-palette5);
+}
+
+.sign-in-instead a {
+    color: var(--global-palette1);
+    text-decoration: none;
+}
+
+.sign-in-instead a:hover { text-decoration: underline; }
+
 .back-home {
     text-align: center;
     margin-top: 2rem;
@@ -252,6 +280,9 @@
                 <div class="auth-actions">
                     <button type="submit" class="auth-button auth-button-primary" id="next-btn">Next</button>
                 </div>
+                <p class="create-account-prompt">
+                    Don't have an account? <a href="#" id="go-create-account">Create one</a>
+                </p>
             </form>
         </div>
 
@@ -280,7 +311,8 @@
         <div id="step-register" class="auth-step">
             <div class="login-header">
                 <h1>Create your JJConnect account</h1>
-                <p class="account-identifier"><span id="identifier-display-register"></span> <a href="#" id="change-account-register">Use different email</a></p>
+                <p class="account-identifier" id="register-identifier-bar"><span id="identifier-display-register"></span> <a href="#" id="change-account-register">Use different email</a></p>
+                <p class="sign-in-instead" id="register-sign-in-instead" style="display:none;"><a href="#" id="back-to-signin">Already have an account? Sign in</a></p>
             </div>
             <form id="register-form">
                 <div class="form-row">
@@ -378,6 +410,8 @@ document.getElementById('identifier-form').addEventListener('submit', async func
             document.getElementById('identifier-display').innerHTML = `<strong>${identifier}</strong>`;
             showStep('step-login');
         } else {
+            document.getElementById('register-identifier-bar').style.display = '';
+            document.getElementById('register-sign-in-instead').style.display = 'none';
             document.getElementById('identifier-display-register').innerHTML = `<strong>${identifier}</strong>`;
             const regEmail = document.getElementById('reg-email');
             const regUsername = document.getElementById('reg-username');
@@ -404,7 +438,33 @@ document.getElementById('identifier-form').addEventListener('submit', async func
     btn.textContent = 'Next';
 });
 
-// Back to step 1
+// "Create one" - go directly to registration form
+document.getElementById('go-create-account').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('register-identifier-bar').style.display = 'none';
+    document.getElementById('register-sign-in-instead').style.display = 'block';
+    document.getElementById('reg-firstname').value = '';
+    document.getElementById('reg-lastname').value = '';
+    document.getElementById('reg-username').value = '';
+    document.getElementById('reg-username').removeAttribute('readonly');
+    document.getElementById('reg-username').placeholder = 'Choose a username';
+    document.getElementById('reg-email').value = '';
+    document.getElementById('reg-email').removeAttribute('readonly');
+    document.getElementById('reg-email').placeholder = 'your.email@example.com';
+    document.getElementById('reg-password').value = '';
+    document.getElementById('reg-confirm-password').value = '';
+    showStep('step-register');
+});
+
+// "Already have an account? Sign in" - back to step 1
+document.getElementById('back-to-signin').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('register-identifier-bar').style.display = '';
+    document.getElementById('register-sign-in-instead').style.display = 'none';
+    showStep('step-identifier');
+});
+
+// Back to step 1 (from "Use different account/email")
 ['change-account-login', 'change-account-register'].forEach(id => {
     document.getElementById(id).addEventListener('click', function(e) {
         e.preventDefault();
