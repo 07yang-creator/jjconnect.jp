@@ -543,19 +543,19 @@ tr:hover {
 <!-- Developer Debug Panel (Remove in production) -->
 <div id="debug-panel" style="position: fixed; bottom: 20px; right: 20px; background: var(--global-palette3); color: var(--global-palette9); padding: 1rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; font-size: 13px; min-width: 250px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-        <strong>🔧 开发者调试面板</strong>
+        <strong>🔧 Developer Debug Panel</strong>
         <button onclick="document.getElementById('debug-panel').style.display='none'" style="background: transparent; border: none; color: var(--global-palette9); cursor: pointer; font-size: 18px; padding: 0; line-height: 1;">×</button>
     </div>
     <div style="margin-bottom: 0.75rem;">
-        <label style="display: block; margin-bottom: 0.25rem; font-size: 12px;">切换用户角色:</label>
+        <label style="display: block; margin-bottom: 0.25rem; font-size: 12px;">Switch User Role:</label>
         <select id="role-switcher" onchange="switchRole(this.value)" style="width: 100%; padding: 0.5rem; border-radius: 6px; border: none; font-size: 13px;">
-            <option value="2">管理员 (Admin)</option>
-            <option value="1">编辑者 (Editor)</option>
-            <option value="0">访客 (Viewer)</option>
+            <option value="2">Admin</option>
+            <option value="1">Editor</option>
+            <option value="0">Viewer</option>
         </select>
     </div>
     <div style="font-size: 11px; color: rgba(255,255,255,0.7); border-top: 1px solid rgba(255,255,255,0.2); padding-top: 0.5rem;">
-        当前权限: <span id="current-role-display" style="font-weight: 600;">Admin</span>
+        Current Permission: <span id="current-role-display" style="font-weight: 600;">Admin</span>
     </div>
 </div>
 
@@ -565,25 +565,25 @@ tr:hover {
         <li class="sidebar-menu-item">
             <a class="sidebar-menu-link active" data-section="users">
                 <span class="sidebar-icon">👥</span>
-                <span>用户管理</span>
+                <span>User Management</span>
             </a>
         </li>
         <li class="sidebar-menu-item">
             <a class="sidebar-menu-link" data-section="content">
                 <span class="sidebar-icon">📝</span>
-                <span>内容发布</span>
+                <span>Content Publishing</span>
             </a>
         </li>
         <li class="sidebar-menu-item">
             <a class="sidebar-menu-link" data-section="settings">
                 <span class="sidebar-icon">⚙️</span>
-                <span>系统设置</span>
+                <span>System Settings</span>
             </a>
         </li>
         <li class="sidebar-menu-item">
             <a class="sidebar-menu-link" data-section="submissions">
                 <span class="sidebar-icon">📮</span>
-                <span>提交管理</span>
+                <span>Submission Management</span>
             </a>
         </li>
     </ul>

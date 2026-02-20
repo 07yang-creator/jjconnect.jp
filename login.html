@@ -438,10 +438,10 @@
 // ============================================
 
 // Cloudflare Worker API endpoint
-// 开发环境: 使用 wrangler dev 的本地地址
-// 生产环境: 替换为您的 Worker URL
-const API_ENDPOINT = 'http://localhost:8787'; // 本地开发
-// const API_ENDPOINT = 'https://jjconnect-auth-worker.your-subdomain.workers.dev'; // 生产环境
+// Development: Use wrangler dev local address
+// Production: Replace with your Worker URL
+const API_ENDPOINT = 'http://localhost:8787'; // Local development
+// const API_ENDPOINT = 'https://jjconnect-auth-worker.your-subdomain.workers.dev'; // Production
 
 // ============================================
 // Tab Switching
@@ -480,7 +480,7 @@ document.getElementById('login-form').addEventListener('submit', async function(
     
     // Validate input
     if (!username || !password) {
-        showMessage('请填写用户名和密码', 'error');
+        showMessage('Please fill in username and password', 'error');
         return;
     }
     
@@ -517,7 +517,7 @@ document.getElementById('login-form').addEventListener('submit', async function(
             localStorage.setItem('user_info', JSON.stringify(data.user));
             
             // Show success message
-            showMessage('登录成功！正在跳转...', 'success');
+            showMessage('Login successful! Redirecting...', 'success');
             
             console.log('Login successful:', data.user);
             
@@ -528,14 +528,14 @@ document.getElementById('login-form').addEventListener('submit', async function(
             
         } else {
             // Show error message
-            showMessage(data.error || '登录失败，请重试', 'error');
+            showMessage(data.error || 'Login failed, please try again', 'error');
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
         }
         
     } catch (error) {
         console.error('Login error:', error);
-        showMessage('网络错误，请检查 Worker 是否正在运行', 'error');
+        showMessage('Network error, please check if Worker is running', 'error');
         submitBtn.disabled = false;
         submitBtn.textContent = originalText;
     }
@@ -559,22 +559,22 @@ document.getElementById('register-form').addEventListener('submit', async functi
     
     // Validate input
     if (!firstname || !lastname || !username || !email || !password) {
-        showMessage('请填写所有必填字段', 'error');
+        showMessage('Please fill in all required fields', 'error');
         return;
     }
     
     if (password !== confirmPassword) {
-        showMessage('两次输入的密码不一致', 'error');
+        showMessage('Password confirmation does not match', 'error');
         return;
     }
     
     if (password.length < 8) {
-        showMessage('密码长度至少需要 8 个字符', 'error');
+        showMessage('Password must be at least 8 characters', 'error');
         return;
     }
     
     if (!termsAccepted) {
-        showMessage('请同意服务条款', 'error');
+        showMessage('Please accept the terms of service', 'error');
         return;
     }
     
