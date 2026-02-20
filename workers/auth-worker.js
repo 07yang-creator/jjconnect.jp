@@ -9,6 +9,7 @@
  * 
  * API Endpoints:
  * - POST /api/login - User login
+ * - GET /api/account/check - Check if account exists (?identifier=email|username)
  * - GET /api/auth/check - Check authentication status
  * - POST /api/auth/logout - User logout
  * - POST /api/register - User registration
@@ -1090,6 +1091,27 @@ async function handleLogout() {
 }
 
 /**
+ * Handle GET /api/account/check
+ * Check if account exists (for Google-style sign-in flow)
+ * Query: ?identifier=email_or_username
+ * Response: { exists: boolean }
+ */
+async function handleAccountCheck(request, env) {
+  try {
+    const url = new URL(request.url);
+    const identifier = url.searchParams.get('identifier');
+    if (!identifier || identifier.trim() === '') {
+      return errorResponse('identifier is required', 400);
+    }
+    const user = await findUserByUsernameOrEmail(identifier.trim(), env);
+    return jsonResponse({ exists: !!user });
+  } catch (dbError) {
+    console.error('Account check error:', dbError);
+    return errorResponse(`Account check failed: ${dbError.message}`, 500);
+  }
+}
+
+/**
  * Handle POST /api/register
  * Register new user
  * Request body: { firstname, lastname, username, email, password, role }
@@ -1952,6 +1974,11 @@ export default {
         } catch (error) {
           return jsonResponse({ success: false, error: error.message }, 500);
         }
+      }
+      
+      // GET /api/account/check - Check if account exists (Google-style flow)
+      if (path === '/api/account/check' && method === 'GET') {
+        return await handleAccountCheck(request, env);
       }
       
       // POST /api/login

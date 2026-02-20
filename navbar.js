@@ -63,8 +63,7 @@
                             </div>
                         </div>
                     ` : `
-                        <a href="login.html" class="jjc-btn jjc-btn-outline">Login</a>
-                        <a href="login.html?tab=register" class="jjc-btn jjc-btn-primary">Register</a>
+                        <a href="login.html" class="jjc-btn jjc-btn-primary">Sign in</a>
                     `}
                 </div>
                 
@@ -104,8 +103,7 @@
                     ${userData?.role >= 2 ? '<a href="admin.html" class="jjc-mobile-link">Admin Dashboard</a>' : ''}
                     <button id="jjc-mobile-logout" class="jjc-mobile-link">Logout</button>
                 ` : `
-                    <a href="login.html" class="jjc-mobile-link">Login</a>
-                    <a href="login.html?tab=register" class="jjc-mobile-link">Register</a>
+                    <a href="login.html" class="jjc-mobile-link">Sign in</a>
                 `}
             </div>
         </nav>
