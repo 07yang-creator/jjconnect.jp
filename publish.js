@@ -22,9 +22,37 @@ let currentUser = null;
 let editor = null;
 
 // ========================================================================
-// EDITOR.JS 初始化
+// EDITOR.JS 初始化 - 含 Image 工具（Supabase Storage 上传）
 // ========================================================================
+function createImageUploader() {
+  const BUCKET = 'covers'; // 使用已配置的 covers bucket，正文图片存于 content/ 子目录
+  return {
+    async uploadByFile(file) {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) return { success: 0, file: { url: '' } };
+      const timestamp = Date.now();
+      const ext = file.name.split('.').pop() || 'jpg';
+      const path = `${user.id}/content/${timestamp}.${ext}`;
+      const { data: uploadData, error } = await supabase.storage.from(BUCKET).upload(path, file, { contentType: file.type, upsert: false });
+      if (error) {
+        console.error('Image upload error:', error);
+        return { success: 0, file: { url: '' } };
+      }
+      const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(uploadData.path);
+      return { success: 1, file: { url: publicUrl } };
+    },
+    async uploadByUrl(url) {
+      const res = await fetch(url, { mode: 'cors' }).catch(() => null);
+      if (!res || !res.ok) return { success: 0, file: { url: '' } };
+      const blob = await res.blob();
+      const file = new File([blob], 'image.jpg', { type: blob.type });
+      return this.uploadByFile(file);
+    }
+  };
+}
+
 function initEditor() {
+  const imageUploader = createImageUploader();
   editor = new EditorJS({
     holder: 'editor',
     placeholder: '开始写作...',
@@ -32,7 +60,13 @@ function initEditor() {
       header: { class: window.Header, inlineToolbar: true },
       list: { class: window.List, inlineToolbar: true },
       quote: { class: window.Quote, inlineToolbar: true },
-      code: window.Code
+      code: window.Code,
+      image: {
+        class: window.ImageTool,
+        config: {
+          uploader: imageUploader
+        }
+      }
     }
   });
   window.editor = editor;
@@ -173,15 +207,15 @@ function togglePaidSettings() {
 }
 
 // ========================================================================
-// FORM SUBMISSION - Editor.js 保存 + Supabase 插入
+// FORM SUBMISSION - Editor.js 保存 + Supabase 精准写入
 // ========================================================================
 async function handleSubmit(status) {
+  const saveDraftBtn = document.getElementById('save-draft-btn');
+  const publishBtn = document.getElementById('publish-btn');
+
   try {
-    const saveDraftBtn = document.getElementById('save-draft-btn');
-    const publishBtn = document.getElementById('publish-btn');
     saveDraftBtn.disabled = true;
     publishBtn.disabled = true;
-
     if (status === 'draft') {
       saveDraftBtn.textContent = '保存中...';
     } else {
@@ -190,68 +224,55 @@ async function handleSubmit(status) {
 
     const title = document.getElementById('title').value.trim();
     const summary = document.getElementById('summary').value.trim();
-    const categoryId = document.getElementById('category-select').value;
+    const categoryId = document.getElementById('category-select').value.trim();
     const isPaid = document.getElementById('is-paid-toggle').checked;
-    const price = isPaid ? parseFloat(document.getElementById('price-input').value) : 0;
+    const price = isPaid ? parseFloat(document.getElementById('price-input').value) || 0 : 0;
 
-    if (!title) {
-      throw new Error('请输入标题');
-    }
+    if (!title) throw new Error('请输入标题');
 
-    // Editor.js 保存逻辑：等待就绪后 save() 获取最新数据
+    // 1. 定位编辑器实例，调用 save() 获取 JSON 结构
     const editorInstance = window.editor;
     if (!editorInstance) throw new Error('编辑器尚未加载完成，请稍候再试');
     await editorInstance.isReady;
-    const outputData = await editorInstance.save();
-    const blocks = outputData?.blocks || [];
+    const data = await window.editor.save();
 
+    const blocks = data?.blocks || [];
     const hasContent = blocks.some(block => {
       const d = block.data || {};
       if (d.text !== undefined) return !!String(d.text).trim();
       if (Array.isArray(d.items)) return d.items.some(i => !!String(i).trim());
+      if (d.file?.url) return true;
       return false;
     });
     if (!hasContent) throw new Error('请输入文章内容');
 
-    const content = {
-      blocks: outputData.blocks,
-      time: outputData.time,
-      version: outputData.version
-    };
+    // 2. JSON.stringify 转为字符串
+    const contentJsonString = JSON.stringify(data);
 
-    // 封面上传
+    // 3. 封面上传（covers bucket）
     let coverUrl = null;
     if (coverFile) {
       const timestamp = Date.now();
       const fileExt = coverFile.name.split('.').pop();
       const fileName = `${currentUser.id}/${timestamp}.${fileExt}`;
-
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('covers')
-        .upload(fileName, coverFile, {
-          contentType: coverFile.type,
-          upsert: false
-        });
-
+        .upload(fileName, coverFile, { contentType: coverFile.type, upsert: false });
       if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('covers')
-        .getPublicUrl(uploadData.path);
-
+      const { data: { publicUrl } } = supabase.storage.from('covers').getPublicUrl(uploadData.path);
       coverUrl = publicUrl;
     }
 
-    // Supabase 数据插入
+    // 4. 精准写入 Supabase posts 表
     const postData = {
       title,
-      content,
+      content: contentJsonString,
       summary: summary || null,
       cover_image: coverUrl,
       author_id: currentUser.id,
       category_id: currentCategoryType === 'official' && categoryId ? categoryId : null,
       user_category_id: currentCategoryType === 'personal' && categoryId ? categoryId : null,
-      is_paid: isPaid,
+      is_paid: Boolean(isPaid),
       price,
       status
     };
@@ -271,8 +292,6 @@ async function handleSubmit(status) {
     console.error('Submit error:', error);
     alert('操作失败: ' + error.message);
 
-    const saveDraftBtn = document.getElementById('save-draft-btn');
-    const publishBtn = document.getElementById('publish-btn');
     saveDraftBtn.disabled = false;
     publishBtn.disabled = false;
     saveDraftBtn.textContent = '保存草稿';
