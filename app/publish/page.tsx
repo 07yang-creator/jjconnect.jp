@@ -36,6 +36,12 @@ export default function PublishPage() {
   const [price, setPrice] = useState<string>('0');
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
 
+  // Local draft autosave / restore
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
+  const [hasLocalDraft, setHasLocalDraft] = useState(false);
+
+  const DRAFT_STORAGE_KEY = 'jjconnect-publish-draft';
+
   // TipTap Editor
   const editor = useEditor({
     extensions: [
@@ -55,6 +61,22 @@ export default function PublishPage() {
       },
     },
   });
+
+  // Detect existing draft on mount
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = window.localStorage.getItem(DRAFT_STORAGE_KEY);
+      if (!raw) return;
+      const draft = JSON.parse(raw) as { updatedAt?: number | null };
+      if (draft.updatedAt) {
+        setLastSavedAt(draft.updatedAt);
+      }
+      setHasLocalDraft(true);
+    } catch (err) {
+      console.error('Failed to read draft from localStorage', err);
+    }
+  }, []);
 
   // Load categories and check authorization
   useEffect(() => {
@@ -103,6 +125,87 @@ export default function PublishPage() {
       }
     } catch (error) {
       console.error('Failed to load data:', error);
+    }
+  }
+
+  // Auto-save draft locally every 30s
+  useEffect(() => {
+    if (!editor) return;
+    const interval = setInterval(() => {
+      try {
+        const json = editor.getJSON();
+        const payload = {
+          title,
+          summary,
+          selectedCategory,
+          categoryType,
+          isPaid,
+          price,
+          content: json,
+          updatedAt: Date.now(),
+        };
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(payload));
+        }
+        setLastSavedAt(payload.updatedAt);
+        setHasLocalDraft(true);
+      } catch (err) {
+        console.error('Auto-save draft failed', err);
+      }
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [editor, title, summary, selectedCategory, categoryType, isPaid, price]);
+
+  function formatLastSaved() {
+    if (!lastSavedAt) return '';
+    try {
+      const d = new Date(lastSavedAt);
+      return d.toLocaleString('zh-CN', { hour12: false });
+    } catch {
+      return '';
+    }
+  }
+
+  function handleRestoreDraft() {
+    if (!editor || typeof window === 'undefined') return;
+    try {
+      const raw = window.localStorage.getItem(DRAFT_STORAGE_KEY);
+      if (!raw) {
+        alert('当前没有可恢复的草稿。');
+        return;
+      }
+      const draft = JSON.parse(raw) as {
+        title?: string;
+        summary?: string;
+        selectedCategory?: string;
+        categoryType?: 'official' | 'personal';
+        isPaid?: boolean;
+        price?: string | number;
+        content?: any;
+        updatedAt?: number;
+      };
+      if (draft.title) setTitle(draft.title);
+      if (typeof draft.summary === 'string') setSummary(draft.summary);
+      if (draft.categoryType === 'official' || draft.categoryType === 'personal') {
+        setCategoryType(draft.categoryType);
+      }
+      if (typeof draft.selectedCategory === 'string') {
+        setSelectedCategory(draft.selectedCategory);
+      }
+      if (typeof draft.isPaid === 'boolean') setIsPaid(draft.isPaid);
+      if (typeof draft.price === 'string' || typeof draft.price === 'number') {
+        setPrice(String(draft.price));
+      }
+      if (draft.content) {
+        editor.commands.setContent(draft.content, false);
+      }
+      if (draft.updatedAt) {
+        setLastSavedAt(draft.updatedAt);
+      }
+      alert('本地草稿已恢复。');
+    } catch (err) {
+      console.error('Failed to restore draft', err);
+      alert('恢复草稿失败，请稍后重试。');
     }
   }
 
@@ -170,25 +273,87 @@ export default function PublishPage() {
     }
   }
 
+  // 提交审核：状态保持为 draft，但在内容中标记 review_state = 'pending'
+  async function handleSubmitForReview(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      if (!editor) {
+        throw new Error('Editor not initialized');
+      }
+
+      const json = editor.getJSON();
+
+      const content = {
+        type: 'doc',
+        content: json.content,
+        html: editor.getHTML(),
+        review_state: 'pending' as const,
+      };
+
+      const input = {
+        title: title.trim(),
+        content,
+        summary: summary.trim() || undefined,
+        category_id: categoryType === 'official' ? selectedCategory : undefined,
+        user_category_id: categoryType === 'personal' ? selectedCategory : undefined,
+        is_paid: isPaid,
+        price: isPaid ? parseFloat(price) : 0,
+        cover_image: coverFile || undefined,
+        status: 'draft' as const,
+      };
+
+      const result = await createPost(input);
+
+      if (result.success) {
+        alert('已提交审核，管理员通过后将自动公开。');
+        router.push('/profile/drafts');
+      } else {
+        alert(result.error?.message || '提交审核失败');
+      }
+    } catch (error) {
+      console.error('Submit for review error:', error);
+      alert(error instanceof Error ? error.message : '发生错误');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gray-50 py-6 sm:py-8 px-3 sm:px-4 overflow-x-hidden">
+      <div className="max-w-4xl mx-auto w-full min-w-0">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">发布文章</h1>
-          <p className="text-gray-600">分享你的想法和经验</p>
+        <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">发布文章</h1>
+            <p className="text-sm sm:text-base text-gray-600">分享你的想法和经验</p>
+          </div>
+          <div className="flex flex-col items-start sm:items-end gap-1 text-xs sm:text-sm text-gray-500">
+            {lastSavedAt && (
+              <span>最近自动保存：{formatLastSaved()}</span>
+            )}
+            <button
+              type="button"
+              onClick={handleRestoreDraft}
+              disabled={!hasLocalDraft || !editor}
+              className="inline-flex items-center px-2.5 py-1 rounded-md border border-gray-300 bg-white text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40"
+            >
+              从草稿恢复
+            </button>
+          </div>
         </div>
 
         <form onSubmit={(e) => handleSubmit(e, status)} className="space-y-6">
           
           {/* Title Input */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="输入文章标题..."
-              className="w-full text-4xl font-bold border-none focus:outline-none focus:ring-0 placeholder-gray-300"
+              className="w-full text-2xl sm:text-4xl font-bold border-none focus:outline-none focus:ring-0 placeholder-gray-300 min-w-0"
               required
             />
           </div>
@@ -249,13 +414,13 @@ export default function PublishPage() {
           </div>
 
           {/* Category Selection */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
             <label className="block text-sm font-medium text-gray-700 mb-3">
               分类
             </label>
             
             {/* Category Type Toggle */}
-            <div className="flex gap-4 mb-4">
+            <div className="flex flex-wrap gap-2 sm:gap-4 mb-4">
               <button
                 type="button"
                 onClick={() => {
@@ -311,11 +476,13 @@ export default function PublishPage() {
           </div>
 
           {/* Rich Text Editor */}
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-            <div className="border-b border-gray-200 p-4">
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden min-w-0">
+            <div className="border-b border-gray-200 p-2 sm:p-4 overflow-x-auto">
               <EditorToolbar editor={editor} />
             </div>
-            <EditorContent editor={editor} />
+            <div className="min-h-[280px] sm:min-h-[400px] [&_.ProseMirror]:min-h-[260px] sm:[&_.ProseMirror]:min-h-[380px] [&_.ProseMirror]:p-3 sm:[&_.ProseMirror]:p-4 [&_.ProseMirror]:overflow-x-auto">
+              <EditorContent editor={editor} />
+            </div>
           </div>
 
           {/* Paid Content Settings */}
@@ -365,24 +532,36 @@ export default function PublishPage() {
           </div>
 
           {/* Submit Buttons */}
-          <div className="flex items-center justify-between bg-white rounded-lg shadow-sm p-6">
+          <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 bg-white rounded-lg shadow-sm p-4 sm:p-6">
             <button
               type="button"
               onClick={() => router.back()}
-              className="px-6 py-2 text-gray-700 hover:text-gray-900 font-medium"
+              className="w-full sm:w-auto px-4 sm:px-6 py-2 text-gray-700 hover:text-gray-900 font-medium"
               disabled={loading}
             >
               取消
             </button>
 
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-2 sm:gap-3 justify-end">
+              <button
+                type="button"
+                onClick={(e) => {
+                  if (loading) return;
+                  handleSubmitForReview(e);
+                }}
+                className="px-3 sm:px-6 py-2 text-sm sm:text-base border border-amber-300 text-amber-800 bg-amber-50 rounded-lg hover:bg-amber-100 font-medium disabled:opacity-50"
+                disabled={loading}
+              >
+                {loading ? '提交中...' : '提交审核'}
+              </button>
+
               <button
                 type="button"
                 onClick={(e) => {
                   setStatus('draft');
                   handleSubmit(e, 'draft');
                 }}
-                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium disabled:opacity-50"
+                className="px-3 sm:px-6 py-2 text-sm sm:text-base border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium disabled:opacity-50"
                 disabled={loading}
               >
                 {loading && status === 'draft' ? '保存中...' : '保存草稿'}
@@ -394,7 +573,7 @@ export default function PublishPage() {
                   setStatus('published');
                   handleSubmit(e, 'published');
                 }}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50"
+                className="px-3 sm:px-6 py-2 text-sm sm:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50"
                 disabled={loading}
               >
                 {loading && status === 'published' ? '发布中...' : '立即发布'}
@@ -413,14 +592,14 @@ function EditorToolbar({ editor }: { editor: any }) {
   if (!editor) return null;
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-1.5 sm:gap-2">
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleBold().run()}
-        className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('bold') ? 'bg-gray-200' : ''}`}
+        className={`p-1.5 sm:p-2 rounded hover:bg-gray-100 touch-manipulation ${editor.isActive('bold') ? 'bg-gray-200' : ''}`}
         title="粗体"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 4h8a4 4 0 014 4 4 4 0 01-4 4H6z" />
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 12h9a4 4 0 014 4 4 4 0 01-4 4H6z" />
         </svg>
@@ -429,20 +608,20 @@ function EditorToolbar({ editor }: { editor: any }) {
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleItalic().run()}
-        className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('italic') ? 'bg-gray-200' : ''}`}
+        className={`p-1.5 sm:p-2 rounded hover:bg-gray-100 touch-manipulation ${editor.isActive('italic') ? 'bg-gray-200' : ''}`}
         title="斜体"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
         </svg>
       </button>
 
-      <div className="w-px h-8 bg-gray-300"></div>
+      <div className="w-px h-6 sm:h-8 bg-gray-300 self-stretch hidden sm:block" aria-hidden></div>
 
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-        className={`px-3 py-2 rounded hover:bg-gray-100 font-semibold ${editor.isActive('heading', { level: 2 }) ? 'bg-gray-200' : ''}`}
+        className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded hover:bg-gray-100 font-semibold text-xs sm:text-base touch-manipulation ${editor.isActive('heading', { level: 2 }) ? 'bg-gray-200' : ''}`}
         title="标题"
       >
         H2
@@ -451,21 +630,21 @@ function EditorToolbar({ editor }: { editor: any }) {
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-        className={`px-3 py-2 rounded hover:bg-gray-100 font-semibold ${editor.isActive('heading', { level: 3 }) ? 'bg-gray-200' : ''}`}
+        className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded hover:bg-gray-100 font-semibold text-xs sm:text-base touch-manipulation ${editor.isActive('heading', { level: 3 }) ? 'bg-gray-200' : ''}`}
         title="副标题"
       >
         H3
       </button>
 
-      <div className="w-px h-8 bg-gray-300"></div>
+      <div className="w-px h-6 sm:h-8 bg-gray-300 self-stretch hidden sm:block" aria-hidden></div>
 
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleBulletList().run()}
-        className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('bulletList') ? 'bg-gray-200' : ''}`}
+        className={`p-1.5 sm:p-2 rounded hover:bg-gray-100 touch-manipulation ${editor.isActive('bulletList') ? 'bg-gray-200' : ''}`}
         title="无序列表"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
@@ -473,10 +652,10 @@ function EditorToolbar({ editor }: { editor: any }) {
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('orderedList') ? 'bg-gray-200' : ''}`}
+        className={`p-1.5 sm:p-2 rounded hover:bg-gray-100 touch-manipulation ${editor.isActive('orderedList') ? 'bg-gray-200' : ''}`}
         title="有序列表"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
       </button>
@@ -484,24 +663,24 @@ function EditorToolbar({ editor }: { editor: any }) {
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
-        className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('blockquote') ? 'bg-gray-200' : ''}`}
+        className={`p-1.5 sm:p-2 rounded hover:bg-gray-100 touch-manipulation ${editor.isActive('blockquote') ? 'bg-gray-200' : ''}`}
         title="引用"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
         </svg>
       </button>
 
-      <div className="w-px h-8 bg-gray-300"></div>
+      <div className="w-px h-6 sm:h-8 bg-gray-300 self-stretch hidden sm:block" aria-hidden></div>
 
       <button
         type="button"
         onClick={() => editor.chain().focus().undo().run()}
         disabled={!editor.can().undo()}
-        className="p-2 rounded hover:bg-gray-100 disabled:opacity-30"
+        className="p-1.5 sm:p-2 rounded hover:bg-gray-100 disabled:opacity-30 touch-manipulation"
         title="撤销"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
         </svg>
       </button>
@@ -510,10 +689,10 @@ function EditorToolbar({ editor }: { editor: any }) {
         type="button"
         onClick={() => editor.chain().focus().redo().run()}
         disabled={!editor.can().redo()}
-        className="p-2 rounded hover:bg-gray-100 disabled:opacity-30"
+        className="p-1.5 sm:p-2 rounded hover:bg-gray-100 disabled:opacity-30 touch-manipulation"
         title="重做"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10h-10a8 8 0 00-8 8v2m18-10l-6 6m6-6l-6-6" />
         </svg>
       </button>

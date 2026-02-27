@@ -1,6 +1,6 @@
 /**
  * publish.js - 发布页交互逻辑
- * 包含 Editor.js 保存逻辑和 Supabase 数据插入逻辑
+ * 包含 Supabase 数据插入逻辑
  */
 
 // ========================================================================
@@ -19,58 +19,6 @@ let categories = [];
 let userCategories = [];
 let isAuthorized = false;
 let currentUser = null;
-let editor = null;
-
-// ========================================================================
-// EDITOR.JS 初始化 - 含 Image 工具（Supabase Storage 上传）
-// ========================================================================
-function createImageUploader() {
-  const BUCKET = 'covers'; // 使用已配置的 covers bucket，正文图片存于 content/ 子目录
-  return {
-    async uploadByFile(file) {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) return { success: 0, file: { url: '' } };
-      const timestamp = Date.now();
-      const ext = file.name.split('.').pop() || 'jpg';
-      const path = `${user.id}/content/${timestamp}.${ext}`;
-      const { data: uploadData, error } = await supabase.storage.from(BUCKET).upload(path, file, { contentType: file.type, upsert: false });
-      if (error) {
-        console.error('Image upload error:', error);
-        return { success: 0, file: { url: '' } };
-      }
-      const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(uploadData.path);
-      return { success: 1, file: { url: publicUrl } };
-    },
-    async uploadByUrl(url) {
-      const res = await fetch(url, { mode: 'cors' }).catch(() => null);
-      if (!res || !res.ok) return { success: 0, file: { url: '' } };
-      const blob = await res.blob();
-      const file = new File([blob], 'image.jpg', { type: blob.type });
-      return this.uploadByFile(file);
-    }
-  };
-}
-
-function initEditor() {
-  const imageUploader = createImageUploader();
-  editor = new EditorJS({
-    holder: 'editor',
-    placeholder: '开始写作...',
-    tools: {
-      header: { class: window.Header, inlineToolbar: true },
-      list: { class: window.List, inlineToolbar: true },
-      quote: { class: window.Quote, inlineToolbar: true },
-      code: window.Code,
-      image: {
-        class: window.ImageTool,
-        config: {
-          uploader: imageUploader
-        }
-      }
-    }
-  });
-  window.editor = editor;
-}
 
 // ========================================================================
 // INITIALIZATION
@@ -207,7 +155,7 @@ function togglePaidSettings() {
 }
 
 // ========================================================================
-// FORM SUBMISSION - Editor.js 保存 + Supabase 精准写入
+// FORM SUBMISSION - Supabase 精准写入
 // ========================================================================
 async function handleSubmit(status) {
   const saveDraftBtn = document.getElementById('save-draft-btn');
@@ -227,27 +175,14 @@ async function handleSubmit(status) {
     const categoryId = document.getElementById('category-select').value.trim();
     const isPaid = document.getElementById('is-paid-toggle').checked;
     const price = isPaid ? parseFloat(document.getElementById('price-input').value) || 0 : 0;
+    const contentText = (document.getElementById('content')?.value || '').trim();
 
     if (!title) throw new Error('请输入标题');
+    if (!contentText) throw new Error('请输入文章内容');
 
-    // 1. 定位编辑器实例，调用 save() 获取 JSON 结构
-    const editorInstance = window.editor;
-    if (!editorInstance) throw new Error('编辑器尚未加载完成，请稍候再试');
-    await editorInstance.isReady;
-    const data = await window.editor.save();
-
-    const blocks = data?.blocks || [];
-    const hasContent = blocks.some(block => {
-      const d = block.data || {};
-      if (d.text !== undefined) return !!String(d.text).trim();
-      if (Array.isArray(d.items)) return d.items.some(i => !!String(i).trim());
-      if (d.file?.url) return true;
-      return false;
-    });
-    if (!hasContent) throw new Error('请输入文章内容');
-
-    // 2. JSON.stringify 转为字符串
-    const contentJsonString = JSON.stringify(data);
+    // 正文以单段落块形式存储，便于与原有 blocks 结构兼容
+    const contentData = { blocks: [{ type: 'paragraph', data: { text: contentText } }] };
+    const contentJsonString = JSON.stringify(contentData);
 
     // 3. 封面上传（covers bucket）
     let coverUrl = null;
@@ -329,7 +264,6 @@ function bindEvents() {
 // RUN ON PAGE LOAD
 // ========================================================================
 function boot() {
-  initEditor();
   bindEvents();
 
   if (document.readyState === 'loading') {

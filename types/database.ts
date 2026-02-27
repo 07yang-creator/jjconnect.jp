@@ -95,12 +95,15 @@ export interface PostContent {
   // Alternative: Markdown
   markdown?: string;
   
-  // Alternative: blocks-based (like Notion, Editor.js)
+  // Alternative: blocks-based (e.g. Notion-style)
   blocks?: Array<{
     id: string;
     type: string;
     data: Record<string, any>;
   }>;
+
+  /** 审核流程：提交审核时为 'pending'，管理员通过/拒绝后为 'approved' | 'rejected' */
+  review_state?: 'pending' | 'approved' | 'rejected';
 }
 
 // ============================================================================

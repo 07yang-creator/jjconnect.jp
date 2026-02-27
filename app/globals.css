@@ -54,3 +54,109 @@ body {
     padding-right: 5rem; /* Space for narrow sidebar */
   }
 }
+
+/* ================================
+ * TipTap EditorPage Styles
+ * ================================ */
+
+/* 外层编辑器容器：仿 Notion / Medium 居中排版 */
+.tiptap-editor-wrapper {
+  padding-top: 1.5rem;
+  padding-bottom: 2rem;
+}
+
+/* 编辑区域基础样式 */
+.tiptap-editor {
+  position: relative;
+}
+
+.tiptap-content {
+  background-color: white;
+}
+
+.tiptap-content h1,
+.tiptap-content h2,
+.tiptap-content h3 {
+  font-weight: 600;
+  color: #1f2933;
+}
+
+.tiptap-content p {
+  color: #4b5563;
+}
+
+/* 编辑器与正文在移动端防止横向溢出 */
+@media (max-width: 640px) {
+  .tiptap-content {
+    overflow-x: auto;
+    word-wrap: break-word;
+  }
+  .ProseMirror {
+    min-height: 260px;
+    padding: 0.75rem 1rem;
+    overflow-x: auto;
+  }
+}
+
+/* 气泡菜单按钮样式 */
+.tiptap-bubble-menu {
+  font-size: 0.75rem;
+}
+
+.tiptap-bubble-button {
+  border-radius: 9999px;
+  padding: 0.15rem 0.55rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: #4b5563;
+}
+
+.tiptap-bubble-button:hover {
+  background-color: #edf2f7;
+}
+
+.tiptap-bubble-button.is-active {
+  background-color: #2563eb;
+  color: white;
+}
+
+/* 斜杠菜单 */
+.tiptap-slash-menu {
+  min-width: 220px;
+}
+
+/* 图片浮动与文字环绕 */
+img.float-left {
+  float: left;
+  max-width: 50%;
+  margin: 0 1.5rem 1rem 0;
+}
+
+img.float-right {
+  float: right;
+  max-width: 50%;
+  margin: 0 0 1rem 1.5rem;
+}
+
+/* 移动端：浮动图片改为块级居中，避免横向溢出 */
+@media (max-width: 640px) {
+  .tiptap-content img.float-left,
+  .tiptap-content img.float-right {
+    float: none;
+    display: block;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 1rem;
+  }
+}
+
+/* 避免父元素高度塌陷 */
+.tiptap-content::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+

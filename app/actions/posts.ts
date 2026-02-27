@@ -8,6 +8,10 @@
 import { revalidatePath } from 'next/cache';
 import { createServerSupabaseClient, getCurrentUser, isAuthorizedUser } from '@/lib/supabase/server';
 import type { PostInsert, PostContent } from '@/types/database';
+import {
+  sendPostSubmittedConfirmationToAuthor,
+  sendPostSubmittedNotificationToAdmin,
+} from '@/lib/email';
 
 // ============================================================================
 // TYPES
@@ -251,7 +255,37 @@ export async function createPost(input: CreatePostInput): Promise<CreatePostResu
         },
       };
     }
-    
+
+    // 6b. If submitted for review (review_state === 'pending'), send emails
+    const contentWithReview = input.content as Record<string, unknown> | undefined;
+    if (contentWithReview?.review_state === 'pending' && user.email) {
+      const authorEmail = user.email;
+      let authorDisplayName: string | null = null;
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('id', user.id)
+          .single();
+        authorDisplayName = profile?.display_name ?? null;
+      } catch {
+        // ignore
+      }
+      const reviewPayload = {
+        postTitle: input.title.trim(),
+        authorEmail,
+        postId: post.id,
+        authorDisplayName,
+      };
+      Promise.all([
+        sendPostSubmittedConfirmationToAuthor(authorEmail),
+        sendPostSubmittedNotificationToAdmin(reviewPayload),
+      ]).then(([userResult, adminResult]) => {
+        if (!userResult.success) console.error('Review confirmation email failed:', userResult.error);
+        if (!adminResult.success) console.error('Review notification to admin failed:', adminResult.error);
+      }).catch((err) => console.error('Review emails error:', err));
+    }
+
     // 7. Revalidate relevant paths
     revalidatePath('/posts');
     revalidatePath(`/profile/${user.id}`);

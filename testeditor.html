@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>发布文章 - JJConnect</title>
+  <title>Editor Test - JJConnect</title>
   <link rel="stylesheet" href="navbar.css">
   <link rel="icon" href="wp-content/uploads/2025/08/cropped-cropped-logo-icon-1.png">
   
@@ -14,51 +14,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <style>
-    /* Custom switch styles */
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 44px;
-      height: 24px;
-    }
-    
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-    
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #cbd5e0;
-      transition: .4s;
-      border-radius: 24px;
-    }
-    
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 16px;
-      width: 16px;
-      left: 4px;
-      bottom: 4px;
-      background-color: white;
-      transition: .4s;
-      border-radius: 50%;
-    }
-    
-    input:checked + .slider {
-      background-color: #2B6CB0;
-    }
-    
-    input:checked + .slider:before {
-      transform: translateX(20px);
-    }
     :root {
       --jjc-primary: #2B6CB0;
       --jjc-bg: #F7FAFC;
@@ -73,13 +28,13 @@
     <div class="max-w-4xl mx-auto">
       
       <!-- Header -->
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold mb-2" style="color: #1A202C;">发布文章</h1>
-        <p style="color: #4A5568;">分享你的想法和经验</p>
+      <div class="mb-8 text-center">
+        <h1 class="text-3xl font-bold mb-2" style="color: #1A202C;">Editor Test Page</h1>
+        <p style="color: #4A5568;">本页仅用于快速测试发布编辑器，不会对正式导航造成影响。</p>
       </div>
 
+      <!-- Use the same form structure as publish.html so publish.js can attach behavior -->
       <form id="publish-form" class="space-y-6">
-        
         <!-- Title Input -->
         <div class="bg-white rounded-lg p-6" style="box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
           <input
@@ -138,41 +93,7 @@
           ></textarea>
         </div>
 
-        <!-- Category Selection -->
-        <div class="bg-white rounded-lg p-6" style="box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-          <label class="block text-sm font-medium text-gray-700 mb-3">
-            分类
-          </label>
-          
-          <!-- Category Type Toggle -->
-          <div class="flex gap-4 mb-4" id="category-type-container">
-            <button
-              type="button"
-              id="official-category-btn"
-              class="flex-1 py-2 px-4 rounded-lg font-medium transition-colors jjc-btn-primary"
-            >
-              网站官方板块
-            </button>
-            
-            <button
-              type="button"
-              id="personal-category-btn"
-              class="hidden flex-1 py-2 px-4 rounded-lg font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200"
-            >
-              我的个人分类
-            </button>
-          </div>
-
-          <!-- Category Select -->
-          <select
-            id="category-select"
-            class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:border-transparent" style="border-color: #E2E8F0;"
-          >
-            <option value="">请选择分类...</option>
-          </select>
-        </div>
-
-        <!-- 正文内容 -->
+        <!-- Content -->
         <div class="bg-white rounded-lg p-6 overflow-hidden" style="box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
           <label class="block text-sm font-medium text-gray-700 mb-3">正文</label>
           <textarea
@@ -183,48 +104,14 @@
           ></textarea>
         </div>
 
-        <!-- Paid Content Settings -->
-        <div class="bg-white rounded-lg p-6" style="box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <h3 class="text-sm font-medium text-gray-900">付费内容</h3>
-              <p class="text-xs text-gray-500 mt-1">开启后此文章需要付费阅读</p>
-            </div>
-            <label class="switch">
-              <input type="checkbox" id="is-paid-toggle">
-              <span class="slider"></span>
-            </label>
-          </div>
-
-          <div id="price-input-container" class="hidden mt-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              价格（人民币）
-            </label>
-            <div class="relative">
-              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">¥</span>
-              <input
-                type="number"
-                id="price-input"
-                min="0"
-                step="0.01"
-                value="0"
-                class="w-full pl-8 pr-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent" style="border-color: #E2E8F0;"
-              />
-            </div>
-            <p class="text-xs text-gray-500 mt-2">
-              建议定价：9.9 - 99.9 元
-            </p>
-          </div>
-        </div>
-
-        <!-- Submit Buttons -->
+        <!-- Simple buttons just to trigger publish.js logic; they behave same as正式发布页 -->
         <div class="flex items-center justify-between bg-white rounded-lg p-6" style="box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
           <button
             type="button"
             onclick="history.back()"
             class="px-6 py-2 text-gray-700 hover:text-gray-900 font-medium"
           >
-            取消
+            返回
           </button>
 
           <div class="flex gap-3">
@@ -239,18 +126,18 @@
             <button
               type="button"
               id="publish-btn"
-              class="px-6 py-2 text-white rounded-lg hover:opacity-95 font-medium transition-opacity" style="background: var(--jjc-primary);"
+              class="px-6 py-2 text-white rounded-lg hover:opacity-95 font-medium transition-opacity"
+              style="background: var(--jjc-primary);"
             >
-              立即发布
+              立即发布（测试）
             </button>
           </div>
         </div>
-
       </form>
     </div>
   </div>
 
   <script type="module" src="publish.js"></script>
-
 </body>
 </html>
+
