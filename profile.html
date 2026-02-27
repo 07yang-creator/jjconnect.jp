@@ -309,22 +309,11 @@
                     <h2>Avatar</h2>
                 </div>
                 <div class="profile-card-body">
-                    <p class="avatar-hint">Choose from presets, create your own (Dicebear), or upload an image (max 500KB).</p>
+                    <p class="avatar-hint">Choose from presets, create your own (Multiavatar), or upload an image (max 500KB).</p>
                     <div class="avatar-presets" id="avatar-presets"></div>
                     <div class="avatar-custom">
-                        <label>Create custom (Dicebear)</label>
+                        <label>Create custom (Multiavatar)</label>
                         <div class="avatar-custom-row">
-                            <select id="avatar-style">
-                                <option value="lorelei">Lorelei</option>
-                                <option value="avataaars">Avataaars</option>
-                                <option value="pixel-art">Pixel Art</option>
-                                <option value="bottts">Bottts</option>
-                                <option value="adventurer">Adventurer</option>
-                                <option value="micah">Micah</option>
-                                <option value="big-ears">Big Ears</option>
-                                <option value="croodles">Croodles</option>
-                                <option value="notionists">Notionists</option>
-                            </select>
                             <input type="text" id="avatar-seed" placeholder="Enter seed (e.g. your name)" maxlength="50">
                             <button type="button" class="btn-edit" id="avatar-custom-apply">Generate & Use</button>
                         </div>
@@ -418,19 +407,8 @@
     <script>
         const API_ENDPOINT = (window.location.protocol === 'file:' || (window.location.hostname === 'localhost' && window.location.port && window.location.port !== '8787')) ? 'http://localhost:8787' : '';
         
-        const DICEBEAR_BASE = 'https://api.dicebear.com/9.x';
-        const AVATAR_PRESETS = [
-            { style: 'lorelei', seed: 'smile' },
-            { style: 'avataaars', seed: 'happy' },
-            { style: 'pixel-art', seed: 'pixel1' },
-            { style: 'bottts', seed: 'bot1' },
-            { style: 'adventurer', seed: 'adventure1' },
-            { style: 'micah', seed: 'micah1' },
-            { style: 'big-ears', seed: 'ears1' },
-            { style: 'croodles', seed: 'croodle1' },
-            { style: 'notionists', seed: 'notion1' },
-            { style: 'fun-emoji', seed: 'fun1' }
-        ];
+        const MULTIAVATAR_BASE = 'https://api.multiavatar.com';
+        const AVATAR_PRESETS = ['smile', 'happy', 'alice', 'bob', 'carlos', 'denise', 'eva', 'frank', 'grace', 'henry'];
         const MAX_AVATAR_SIZE = 500 * 1024; // 500KB
         
         const USER_CATEGORY_LABELS = {
@@ -525,7 +503,7 @@
             if (el) el.value = val || '';
         }
         
-        function dicebearUrl(style, seed) { return DICEBEAR_BASE + '/' + style + '/svg?seed=' + encodeURIComponent(seed); }
+        function multiavatarUrl(seed) { return MULTIAVATAR_BASE + '/' + encodeURIComponent(seed) + '.svg'; }
         
         async function saveAvatar(avatarUrl) {
             try {
@@ -540,7 +518,7 @@
                     renderProfile(data.profile, false);
                     updateNavbarAvatar(avatarUrl);
                     document.querySelectorAll('.avatar-preset.selected').forEach(el => el.classList.remove('selected'));
-                    const preset = AVATAR_PRESETS.findIndex(p => dicebearUrl(p.style, p.seed) === avatarUrl);
+                    const preset = AVATAR_PRESETS.findIndex(seed => multiavatarUrl(seed) === avatarUrl);
                     if (preset >= 0) document.querySelectorAll('.avatar-preset')[preset]?.classList.add('selected');
                 } else showError(data.error || 'Failed to save avatar');
             } catch (err) { showError('Network error: ' + err.message); }
@@ -561,18 +539,17 @@
         function setupAvatarPicker() {
             const presetsEl = document.getElementById('avatar-presets');
             if (!presetsEl) return;
-            presetsEl.innerHTML = AVATAR_PRESETS.map((p, i) => {
-                const url = dicebearUrl(p.style, p.seed);
-                return '<img class="avatar-preset" src="' + url + '" alt="' + p.style + '" data-url="' + encodeURIComponent(url) + '">';
+            presetsEl.innerHTML = AVATAR_PRESETS.map(seed => {
+                const url = multiavatarUrl(seed);
+                return '<img class="avatar-preset" src="' + url + '" alt="' + seed + '" data-url="' + encodeURIComponent(url) + '">';
             }).join('');
             presetsEl.querySelectorAll('.avatar-preset').forEach((el, i) => {
                 el.addEventListener('click', () => saveAvatar(decodeURIComponent(el.dataset.url)));
             });
             document.getElementById('avatar-custom-apply')?.addEventListener('click', () => {
-                const style = document.getElementById('avatar-style').value;
                 const seed = (document.getElementById('avatar-seed').value || 'custom').trim().slice(0, 50);
                 if (!seed) return showError('Enter a seed');
-                saveAvatar(dicebearUrl(style, seed));
+                saveAvatar(multiavatarUrl(seed));
             });
             document.getElementById('avatar-file')?.addEventListener('change', async (e) => {
                 const f = e.target.files?.[0];
