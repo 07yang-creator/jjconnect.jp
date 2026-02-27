@@ -6,12 +6,23 @@
 (function() {
     'use strict';
     
-    const API_ENDPOINT = 'http://localhost:8787';
+    const API_ENDPOINT = (typeof window !== 'undefined' && (window.location.protocol === 'file:' || (window.location.hostname === 'localhost' && window.location.port && window.location.port !== '8787'))) ? 'http://localhost:8787' : '';
+    
+    /**
+     * 判断是否为首页（仅首页隐藏 Sign in 按钮）
+     */
+    function isHomepage() {
+        const path = window.location.pathname || '';
+        return !path || path === '/' || path === '/index.html' || path.endsWith('/index.html');
+    }
     
     /**
      * 生成导航栏 HTML
      */
-    function createNavbarHTML(isLoggedIn, userData) {
+    function createNavbarHTML(isLoggedIn, userData, hideSignIn) {
+        const showSignIn = !hideSignIn;
+        const avatarUrl = userData?.avatar_url || (typeof localStorage !== 'undefined' ? localStorage.getItem('jjc_avatar_url') : null);
+        const avatarSrc = avatarUrl ? (avatarUrl.startsWith('http') ? avatarUrl : (API_ENDPOINT || (typeof window !== 'undefined' && window.location.origin) || '') + avatarUrl) : '';
         return `
         <nav class="jjc-navbar">
             <div class="jjc-navbar-container">
@@ -44,20 +55,20 @@
                             </a>
                         </div>
                     </div>
+                    ${showSignIn ? '<a href="ai.html" class="jjc-nav-link">✨AI empowered</a>' : ''}
                 </div>
                 
-                <!-- 用户区域（桌面端） -->
+                <!-- 用户区域（桌面端），首页未登录时不显示 -->
+                ${(isLoggedIn || showSignIn) ? `
                 <div class="jjc-navbar-user">
                     ${isLoggedIn ? `
                         <div class="jjc-user-menu">
                             <button class="jjc-user-button" id="jjc-user-menu-btn">
-                                <svg class="jjc-user-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                    <circle cx="12" cy="7" r="4"></circle>
-                                </svg>
+                                ${avatarSrc ? '<img class="jjc-user-avatar" src="' + avatarSrc + '" alt="">' : '<svg class="jjc-user-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>'}
                                 <span>${userData?.username || 'User'}</span>
                             </button>
                             <div class="jjc-user-dropdown" id="jjc-user-dropdown">
+                                <a href="profile.html?view=own" class="jjc-user-dropdown-item">My Profile</a>
                                 ${userData?.role >= 2 ? '<a href="admin.html" class="jjc-user-dropdown-item">Admin Dashboard</a>' : ''}
                                 <button id="jjc-logout-btn" class="jjc-user-dropdown-item">Logout</button>
                             </div>
@@ -66,6 +77,7 @@
                         <a href="login.html" class="jjc-btn jjc-btn-primary">Sign in</a>
                     `}
                 </div>
+                ` : ''}
                 
                 <!-- 移动端菜单按钮 -->
                 <button class="jjc-mobile-toggle" id="jjc-mobile-toggle">
@@ -96,15 +108,19 @@
                         <span>地产报告</span>
                     </a>
                 </div>
+                ${showSignIn ? '<a href="ai.html" class="jjc-mobile-link">✨AI empowered</a>' : ''}
                 
+                ${(isLoggedIn || showSignIn) ? `
                 <div class="jjc-mobile-divider"></div>
                 ${isLoggedIn ? `
-                    <div class="jjc-mobile-user">👤 ${userData?.username || 'User'}</div>
+                    <a href="profile.html?view=own" class="jjc-mobile-link">My Profile</a>
+                    <div class="jjc-mobile-user">${avatarSrc ? '<img class="jjc-mobile-avatar" src="' + avatarSrc + '" alt="">' : '👤'} ${userData?.username || 'User'}</div>
                     ${userData?.role >= 2 ? '<a href="admin.html" class="jjc-mobile-link">Admin Dashboard</a>' : ''}
                     <button id="jjc-mobile-logout" class="jjc-mobile-link">Logout</button>
                 ` : `
                     <a href="login.html" class="jjc-mobile-link">Sign in</a>
                 `}
+                ` : ''}
             </div>
         </nav>
         `;
@@ -149,6 +165,7 @@
         localStorage.removeItem('auth_token');
         sessionStorage.removeItem('auth_token');
         localStorage.removeItem('user_info');
+        localStorage.removeItem('jjc_avatar_url');
         window.location.reload();
     }
     
@@ -202,10 +219,13 @@
         // 检查登录状态
         const { isLoggedIn, userData } = await checkAuthStatus();
         
+        // 首页隐藏 Sign in 按钮
+        const hideSignIn = isHomepage();
+        
         // 创建导航栏容器
         const navContainer = document.createElement('div');
         navContainer.id = 'jjconnect-navbar';
-        navContainer.innerHTML = createNavbarHTML(isLoggedIn, userData);
+        navContainer.innerHTML = createNavbarHTML(isLoggedIn, userData, hideSignIn);
         
         // 插入到 body 开头
         document.body.insertBefore(navContainer.firstElementChild, document.body.firstChild);

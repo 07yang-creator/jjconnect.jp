@@ -86,6 +86,53 @@ async function querySupabase(config, table, params = {}) {
   return await response.json();
 }
 
+/**
+ * Supabase upsert (insert or update on conflict)
+ * @param {Object} config - Supabase configuration
+ * @param {string} table - Table name
+ * @param {Object} row - Row data to upsert
+ */
+async function supabaseUpsert(config, table, row) {
+  if (!config) throw new Error('Supabase not configured');
+  const url = `${config.url}/rest/v1/${table}`;
+  const headers = {
+    ...config.headers,
+    'Prefer': 'resolution=merge-duplicates,return=representation'
+  };
+  const response = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(row)
+  });
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Supabase upsert failed: ${response.status} - ${errText}`);
+  }
+  const data = await response.json();
+  return Array.isArray(data) ? data[0] : data;
+}
+
+/**
+ * Supabase PATCH (update by filter)
+ */
+async function supabasePatch(config, table, eq, patch) {
+  if (!config) throw new Error('Supabase not configured');
+  const url = new URL(`${config.url}/rest/v1/${table}`);
+  Object.entries(eq).forEach(([key, value]) => {
+    url.searchParams.set(key, `eq.${value}`);
+  });
+  const response = await fetch(url.toString(), {
+    method: 'PATCH',
+    headers: config.headers,
+    body: JSON.stringify(patch)
+  });
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Supabase patch failed: ${response.status} - ${errText}`);
+  }
+  return response.status === 204 ? null : await response.json();
+}
+
 // ============================================
 // Configuration
 // ============================================
@@ -378,6 +425,18 @@ function generateFileKey(filename) {
   
   return `${year}/${month}/${day}/${timestamp}-${randomId}.${ext}`;
 }
+
+/**
+ * Generate avatar file key: avatars/userId/timestamp-random.ext
+ */
+function generateAvatarKey(userId, filename) {
+  const ext = filename.split('.').pop().toLowerCase();
+  const randomId = Math.random().toString(36).substring(2, 15);
+  return `avatars/${userId}/${Date.now()}-${randomId}.${ext}`;
+}
+
+const AVATAR_MAX_SIZE = 500 * 1024; // 500KB
+const AVATAR_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
 
 /**
  * Validate file type (images and videos only)
@@ -1059,12 +1118,27 @@ async function handleAuthCheck(request, env) {
       }, 401);
     }
     
+    let avatar_url = null;
+    const supabase = getSupabaseConfig(env);
+    if (supabase) {
+      try {
+        const rows = await querySupabase(supabase, 'user_profiles', {
+          select: 'avatar_url',
+          eq: { user_id: String(payload.userId) },
+          limit: '1'
+        });
+        const p = Array.isArray(rows) ? rows[0] : rows;
+        if (p && p.avatar_url) avatar_url = p.avatar_url;
+      } catch (e) { /* ignore */ }
+    }
+    
     return jsonResponse({
       authenticated: true,
       user: {
         id: payload.userId,
         username: payload.username,
         email: payload.email,
+        avatar_url: avatar_url,
         role: payload.role,
         name: payload.name
       }
@@ -1470,6 +1544,310 @@ async function handleGetUsers(request, env) {
   } catch (error) {
     console.error('Get users error:', error);
     return errorResponse(`获取用户列表失败: ${error.message}`, 500);
+  }
+}
+
+/**
+ * Handle GET /api/profile - Own profile (full, requires auth)
+ * Handle GET /api/profile/:userId - Public profile (limited: username, avatar_url, contribution_value)
+ */
+async function handleGetProfile(request, env) {
+  const url = new URL(request.url);
+  const pathParts = url.pathname.split('/').filter(Boolean);
+  const isPublic = pathParts[2] && pathParts[2] !== 'own';
+  const targetUserId = isPublic ? pathParts[2] : null;
+
+  if (isPublic && targetUserId) {
+    // Public profile: return only username, avatar_url, contribution_value
+    const supabase = getSupabaseConfig(env);
+    if (!supabase) {
+      return jsonResponse({ success: false, error: 'Supabase not configured' }, 500);
+    }
+    try {
+      const rows = await querySupabase(supabase, 'user_profiles', {
+        select: 'username,avatar_url,contribution_value,registered_date',
+        eq: { user_id: targetUserId },
+        limit: '1'
+      });
+      const profile = Array.isArray(rows) ? rows[0] : rows;
+      if (!profile) {
+        return jsonResponse({ success: false, error: 'Profile not found' }, 404);
+      }
+      return jsonResponse({
+        success: true,
+        profile: {
+          username: profile.username,
+          avatar_url: profile.avatar_url || null,
+          contribution_value: profile.contribution_value || '0',
+          registered_date: profile.registered_date
+        },
+        public: true
+      });
+    } catch (err) {
+      console.error('Get public profile error:', err);
+      return jsonResponse({ success: false, error: err.message }, 500);
+    }
+  }
+
+  // Own profile: requires auth, returns full data
+  const token = extractToken(request);
+  if (!token) {
+    return errorResponse('需要登录', 401);
+  }
+  let payload;
+  try {
+    payload = verifyToken(token, env);
+  } catch (tokenError) {
+    return errorResponse('Token 验证失败', 401);
+  }
+  if (!payload) {
+    return errorResponse('Token 无效或已过期', 401);
+  }
+
+  const userId = String(payload.userId);
+  const supabase = getSupabaseConfig(env);
+  if (!supabase) {
+    return jsonResponse({ success: false, error: 'Supabase not configured' }, 500);
+  }
+
+  try {
+    const rows = await querySupabase(supabase, 'user_profiles', {
+      select: '*',
+      eq: { user_id: userId },
+      limit: '1'
+    });
+    let profile = Array.isArray(rows) ? rows[0] : rows;
+
+    if (!profile) {
+      // Create default profile from JWT user data
+      const d1User = await env.DB.prepare(
+        'SELECT id, username, email, firstname, lastname, role, created_at FROM users WHERE id = ?'
+      ).bind(payload.userId).first();
+
+      const now = new Date().toISOString();
+      const defaultProfile = {
+        user_id: userId,
+        username: payload.username || (d1User ? d1User.username : ''),
+        avatar_url: null,
+        registered_date: d1User?.created_at || now,
+        self_description: null,
+        email: payload.email || (d1User ? d1User.email : ''),
+        telephone: null,
+        company_name: null,
+        address: null,
+        mail_code: null,
+        user_category: payload.role ?? 1,
+        contribution_value: '0',
+        personal_remarks: null,
+        created_at: now,
+        updated_at: now
+      };
+      try {
+        profile = await supabaseUpsert(supabase, 'user_profiles', defaultProfile);
+      } catch (upsertErr) {
+        console.error('Profile upsert error:', upsertErr);
+        return jsonResponse({ success: false, error: upsertErr.message }, 500);
+      }
+    }
+
+    return jsonResponse({
+      success: true,
+      profile: {
+        user_id: profile.user_id,
+        username: profile.username,
+        avatar_url: profile.avatar_url || null,
+        registered_date: profile.registered_date,
+        self_description: profile.self_description || '',
+        email: profile.email || '',
+        telephone: profile.telephone || '',
+        company_name: profile.company_name || '',
+        address: profile.address || '',
+        mail_code: profile.mail_code || '',
+        user_category: profile.user_category ?? 1,
+        contribution_value: profile.contribution_value || '0',
+        personal_remarks: profile.personal_remarks || ''
+      }
+    });
+  } catch (err) {
+    console.error('Get profile error:', err);
+    return jsonResponse({ success: false, error: err.message }, 500);
+  }
+}
+
+/**
+ * Handle PUT /api/profile - Update own profile (requires auth)
+ */
+async function handlePutProfile(request, env) {
+  const token = extractToken(request);
+  if (!token) {
+    return errorResponse('需要登录', 401);
+  }
+  let payload;
+  try {
+    payload = verifyToken(token, env);
+  } catch (tokenError) {
+    return errorResponse('Token 验证失败', 401);
+  }
+  if (!payload) {
+    return errorResponse('Token 无效或已过期', 401);
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return errorResponse('请求体无效', 400);
+  }
+
+  const userId = String(payload.userId);
+  const allowed = [
+    'username', 'avatar_url', 'self_description', 'email', 'telephone',
+    'company_name', 'address', 'mail_code', 'user_category',
+    'contribution_value', 'personal_remarks'
+  ];
+  const patch = {};
+  for (const key of allowed) {
+    if (body[key] !== undefined) {
+      patch[key] = body[key];
+    }
+  }
+
+  if (Object.keys(patch).length === 0) {
+    return errorResponse('没有可更新的字段', 400);
+  }
+
+  const supabase = getSupabaseConfig(env);
+  if (!supabase) {
+    return jsonResponse({ success: false, error: 'Supabase not configured' }, 500);
+  }
+
+  try {
+    const rows = await querySupabase(supabase, 'user_profiles', {
+      select: 'user_id',
+      eq: { user_id: userId },
+      limit: '1'
+    });
+    const exists = Array.isArray(rows) ? rows[0] : rows;
+
+    if (!exists) {
+      const now = new Date().toISOString();
+      const d1User = await env.DB.prepare(
+        'SELECT username, email, role, created_at FROM users WHERE id = ?'
+      ).bind(payload.userId).first();
+      const fullRow = {
+        user_id: userId,
+        username: patch.username ?? payload.username ?? (d1User?.username || ''),
+        avatar_url: patch.avatar_url ?? null,
+        registered_date: d1User?.created_at || now,
+        self_description: patch.self_description ?? null,
+        email: patch.email ?? payload.email ?? (d1User?.email || ''),
+        telephone: patch.telephone ?? null,
+        company_name: patch.company_name ?? null,
+        address: patch.address ?? null,
+        mail_code: patch.mail_code ?? null,
+        user_category: patch.user_category ?? d1User?.role ?? 1,
+        contribution_value: patch.contribution_value ?? '0',
+        personal_remarks: patch.personal_remarks ?? null,
+        created_at: now,
+        updated_at: now
+      };
+      await supabaseUpsert(supabase, 'user_profiles', fullRow);
+    } else {
+      patch.updated_at = new Date().toISOString();
+      await supabasePatch(supabase, 'user_profiles', { user_id: userId }, patch);
+    }
+
+    const updated = await querySupabase(supabase, 'user_profiles', {
+      select: '*',
+      eq: { user_id: userId },
+      limit: '1'
+    });
+    const profile = Array.isArray(updated) ? updated[0] : updated;
+
+    return jsonResponse({
+      success: true,
+      profile: {
+        user_id: profile.user_id,
+        username: profile.username,
+        avatar_url: profile.avatar_url || null,
+        registered_date: profile.registered_date,
+        self_description: profile.self_description || '',
+        email: profile.email || '',
+        telephone: profile.telephone || '',
+        company_name: profile.company_name || '',
+        address: profile.address || '',
+        mail_code: profile.mail_code || '',
+        user_category: profile.user_category ?? 1,
+        contribution_value: profile.contribution_value || '0',
+        personal_remarks: profile.personal_remarks || ''
+      }
+    });
+  } catch (err) {
+    console.error('Put profile error:', err);
+    return jsonResponse({ success: false, error: err.message }, 500);
+  }
+}
+
+/**
+ * Handle POST /api/avatar/upload
+ * Upload avatar image (auth required, max 500KB, images only)
+ * Response: { success, avatar_url }
+ */
+async function handleAvatarUpload(request, env) {
+  try {
+    const token = extractToken(request);
+    if (!token) return errorResponse('需要登录', 401);
+    let payload;
+    try {
+      payload = verifyToken(token, env);
+    } catch (e) {
+      return errorResponse('Token 验证失败', 401);
+    }
+    if (!payload) return errorResponse('Token 无效或已过期', 401);
+    
+    const formData = await request.formData();
+    const file = formData.get('avatar');
+    if (!file || !(file instanceof File))
+      return errorResponse('请选择图片文件 (avatar 字段)', 400);
+    
+    if (!AVATAR_TYPES.includes(file.type?.toLowerCase()))
+      return errorResponse('仅支持 JPEG, PNG, GIF, WebP', 400);
+    if (file.size > AVATAR_MAX_SIZE)
+      return errorResponse('图片过大，最大 500KB', 400);
+    
+    if (!env.MY_BUCKET)
+      return errorResponse('文件存储未配置', 500);
+    
+    const key = generateAvatarKey(String(payload.userId), file.name);
+    await env.MY_BUCKET.put(key, file.stream(), {
+      httpMetadata: { contentType: file.type },
+      customMetadata: { originalFilename: file.name, uploadedAt: new Date().toISOString() }
+    });
+    
+    const avatarUrl = '/api/files/' + key;
+    
+    const supabase = getSupabaseConfig(env);
+    if (supabase) {
+      const rows = await querySupabase(supabase, 'user_profiles', { select: 'user_id', eq: { user_id: String(payload.userId) }, limit: '1' });
+      const exists = Array.isArray(rows) ? rows[0] : rows;
+      if (exists) {
+        await supabasePatch(supabase, 'user_profiles', { user_id: String(payload.userId) }, { avatar_url: avatarUrl, updated_at: new Date().toISOString() });
+      } else {
+        const now = new Date().toISOString();
+        const d1User = await env.DB.prepare('SELECT username, email, role, created_at FROM users WHERE id = ?').bind(payload.userId).first();
+        await supabaseUpsert(supabase, 'user_profiles', {
+          user_id: String(payload.userId), username: payload.username ?? d1User?.username ?? '', avatar_url: avatarUrl,
+          registered_date: d1User?.created_at || now, email: payload.email ?? d1User?.email ?? '',
+          user_category: d1User?.role ?? 1, contribution_value: '0',
+          created_at: now, updated_at: now
+        });
+      }
+    }
+    
+    return jsonResponse({ success: true, avatar_url: avatarUrl });
+  } catch (err) {
+    console.error('Avatar upload error:', err);
+    return jsonResponse({ success: false, error: err.message }, 500);
   }
 }
 
@@ -2004,6 +2382,21 @@ export default {
       // GET /api/users (示例)
       if (path === '/api/users' && method === 'GET') {
         return await handleGetUsers(request, env);
+      }
+      
+      // GET /api/profile (own, full) or GET /api/profile/:userId (public, limited)
+      if (path.startsWith('/api/profile') && method === 'GET') {
+        return await handleGetProfile(request, env);
+      }
+      
+      // PUT /api/profile (update own profile)
+      if (path === '/api/profile' && method === 'PUT') {
+        return await handlePutProfile(request, env);
+      }
+      
+      // POST /api/avatar/upload (avatar image, max 500KB)
+      if (path === '/api/avatar/upload' && method === 'POST') {
+        return await handleAvatarUpload(request, env);
       }
       
       // POST /api/submit (Joint Mamori Submission)

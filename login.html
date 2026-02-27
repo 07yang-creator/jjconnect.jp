@@ -11,25 +11,28 @@
 <link rel='stylesheet' id='kadence-global-css' href='wp-content/themes/kadence/assets/css/global.min.css%3Fver=1.3.2.css' media='all'/>
 <style id='kadence-global-inline-css'>
 :root{--global-palette1:#2B6CB0;--global-palette2:#215387;--global-palette3:#1A202C;--global-palette4:#2D3748;--global-palette5:#4A5568;--global-palette6:#718096;--global-palette7:#EDF2F7;--global-palette8:#F7FAFC;--global-palette9:#ffffff;}
+:root{--jjc-primary:#2B6CB0;--jjc-primary-hover:#215387;--jjc-bg:#F7FAFC;--jjc-card:#ffffff;--jjc-text:#1A202C;--jjc-text-muted:#4A5568;--jjc-border:#EDF2F7;}
 </style>
 <link rel='stylesheet' id='kadence-content-css' href='wp-content/themes/kadence/assets/css/content.min.css%3Fver=1.3.2.css' media='all'/>
 <style id='login-custom-styles'>
-/* Google-style Sign-in Page */
+/* Google-style Sign-in Page (aligned with profile.html) */
 .login-container {
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 100vh;
     padding: 2rem;
-    background: var(--global-palette9);
+    background: var(--jjc-bg);
 }
 
 .login-box {
-    background: var(--global-palette9);
+    background: var(--jjc-card);
     border-radius: 8px;
     padding: 48px 40px;
     width: 100%;
-    max-width: 448px;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
     box-shadow: 0 1px 3px rgba(0,0,0,0.12);
 }
 
@@ -54,13 +57,13 @@
 .login-header h1 {
     font-size: 24px;
     font-weight: 400;
-    color: var(--global-palette3);
+    color: var(--jjc-text);
     margin: 0 0 0.5rem;
     letter-spacing: -0.5px;
 }
 
 .login-header p {
-    color: var(--global-palette5);
+    color: var(--jjc-text-muted);
     font-size: 14px;
     margin: 0;
 }
@@ -71,14 +74,15 @@
     gap: 12px;
     padding: 12px 16px;
     margin-bottom: 1.5rem;
-    background: var(--global-palette8);
-    border-radius: 4px;
+    background: var(--jjc-bg);
+    border: 1px solid var(--jjc-border);
+    border-radius: 6px;
     font-size: 14px;
-    color: var(--global-palette4);
+    color: var(--jjc-text-muted);
 }
 
 .account-identifier strong {
-    color: var(--global-palette3);
+    color: var(--jjc-text);
 }
 
 .form-group {
@@ -102,7 +106,7 @@
 .form-group label {
     font-weight: 500;
     font-size: 14px;
-    color: var(--global-palette4);
+    color: var(--jjc-text-muted);
 }
 
 .form-group label .required { color: #E53E3E; }
@@ -113,22 +117,119 @@
     max-width: 100%;
     box-sizing: border-box;
     padding: 12px 14px;
-    border: 1px solid var(--global-palette6);
-    border-radius: 4px;
+    border: 1px solid var(--jjc-border);
+    border-radius: 6px;
     font-size: 16px;
     font-family: inherit;
-    color: var(--global-palette3);
+    color: var(--jjc-text);
 }
 
 .form-group input:focus,
-.form-group select:focus {
+.form-group select:focus,
+.form-group textarea:focus {
     outline: none;
-    border-color: var(--global-palette1);
-    border-width: 2px;
-    padding: 11px 13px;
+    border-color: var(--jjc-primary);
+    box-shadow: 0 0 0 2px rgba(43, 108, 176, 0.2);
 }
 
-.form-group input::placeholder { color: var(--global-palette6); }
+.form-group input::placeholder,
+.form-group textarea::placeholder { color: var(--jjc-text-muted); }
+
+.form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1px solid var(--jjc-border);
+    border-radius: 6px;
+    font-size: 16px;
+    font-family: inherit;
+    color: var(--jjc-text);
+    min-height: 80px;
+    resize: vertical;
+}
+
+.form-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--jjc-border);
+}
+
+.form-section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--jjc-text);
+    margin: 0 0 1rem;
+}
+
+.avatar-register-wrap {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.avatar-register-preview {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--jjc-border);
+    background: var(--jjc-bg);
+}
+
+.avatar-register-placeholder {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--jjc-primary), var(--jjc-primary-hover));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.avatar-register-options {
+    flex: 1;
+}
+
+.avatar-register-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.avatar-register-row select,
+.avatar-register-row input[type="text"] {
+    padding: 8px 10px;
+    border: 1px solid var(--jjc-border);
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.avatar-preset-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.5rem;
+}
+
+.avatar-preset-reg {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+    border: 2px solid var(--jjc-border);
+    transition: border-color 0.2s;
+}
+
+.avatar-preset-reg:hover { border-color: var(--jjc-primary); }
+.avatar-preset-reg.selected { border-color: var(--jjc-primary); box-shadow: 0 0 0 2px rgba(43,108,176,0.3); }
+
+.avatar-reg-hint { font-size: 12px; color: var(--jjc-text-muted); margin-top: 0.5rem; }
 
 .auth-actions {
     display: flex;
@@ -149,23 +250,23 @@
 }
 
 .auth-button-primary {
-    background: var(--global-palette1);
+    background: var(--jjc-primary);
     color: white;
 }
 
 .auth-button-primary:hover:not(:disabled) {
-    background: var(--global-palette2);
+    background: var(--jjc-primary-hover);
 }
 
 .auth-button-primary:disabled {
-    background: var(--global-palette7);
-    color: var(--global-palette5);
+    background: var(--jjc-border);
+    color: var(--jjc-text-muted);
     cursor: not-allowed;
 }
 
 .auth-button-secondary {
     background: transparent;
-    color: var(--global-palette1);
+    color: var(--jjc-primary);
 }
 
 .auth-button-secondary:hover {
@@ -181,7 +282,7 @@
 
 .auth-links a {
     font-size: 14px;
-    color: var(--global-palette1);
+    color: var(--jjc-primary);
     text-decoration: none;
 }
 
@@ -190,12 +291,12 @@
 .create-account-prompt {
     margin-top: 1.5rem;
     font-size: 14px;
-    color: var(--global-palette5);
+    color: var(--jjc-text-muted);
     text-align: center;
 }
 
 .create-account-prompt a {
-    color: var(--global-palette1);
+    color: var(--jjc-primary);
     text-decoration: none;
     font-weight: 500;
 }
@@ -205,11 +306,11 @@
 .sign-in-instead {
     margin-top: 0.5rem;
     font-size: 14px;
-    color: var(--global-palette5);
+    color: var(--jjc-text-muted);
 }
 
 .sign-in-instead a {
-    color: var(--global-palette1);
+    color: var(--jjc-primary);
     text-decoration: none;
 }
 
@@ -219,16 +320,16 @@
     text-align: center;
     margin-top: 2rem;
     padding-top: 2rem;
-    border-top: 1px solid var(--global-palette7);
+    border-top: 1px solid var(--jjc-border);
 }
 
 .back-home a {
-    color: var(--global-palette5);
+    color: var(--jjc-text-muted);
     text-decoration: none;
     font-size: 14px;
 }
 
-.back-home a:hover { color: var(--global-palette1); }
+.back-home a:hover { color: var(--jjc-primary); }
 
 .remember-me {
     display: flex;
@@ -239,18 +340,25 @@
 .remember-me input[type="checkbox"] {
     width: 18px;
     height: 18px;
-    accent-color: var(--global-palette1);
+    accent-color: var(--jjc-primary);
 }
 
-.remember-me label { font-size: 14px; color: var(--global-palette4); cursor: pointer; margin: 0; }
+.remember-me label { font-size: 14px; color: var(--jjc-text-muted); cursor: pointer; margin: 0; }
+.remember-me label a { color: var(--jjc-primary); text-decoration: none; }
+.remember-me label a:hover { text-decoration: underline; }
 
 .create-account-notice {
     margin-top: 1rem;
     padding: 12px 16px;
     background: rgba(43, 108, 176, 0.08);
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 14px;
-    color: var(--global-palette4);
+    color: var(--jjc-text-muted);
+}
+
+.optional-hint {
+    font-weight: 400;
+    color: var(--jjc-text-muted);
 }
 
 @media (max-width: 767px) {
@@ -334,6 +442,10 @@
                     <label for="reg-email">Email <span class="required">*</span></label>
                     <input type="email" id="reg-email" name="email" placeholder="your.email@example.com" required autocomplete="email" readonly>
                 </div>
+                <div class="form-group full-width">
+                    <label for="reg-telephone">Phone number <span class="optional-hint">(optional, for account recovery)</span></label>
+                    <input type="tel" id="reg-telephone" name="telephone" placeholder="+81 90-1234-5678" autocomplete="tel">
+                </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="reg-password">Password <span class="required">*</span></label>
@@ -351,28 +463,90 @@
                         <option value="1">Editor (Create & Edit Content)</option>
                     </select>
                 </div>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">Avatar</h3>
+                    <div class="avatar-register-wrap">
+                        <img class="avatar-register-preview" id="reg-avatar-img" src="" alt="" style="display:none;">
+                        <div class="avatar-register-placeholder" id="reg-avatar-placeholder">?</div>
+                        <div class="avatar-register-options">
+                            <div class="avatar-preset-grid" id="reg-avatar-presets"></div>
+                            <div class="avatar-register-row" style="margin-top:0.5rem;">
+                                <select id="reg-avatar-style">
+                                    <option value="lorelei">Lorelei</option>
+                                    <option value="avataaars">Avataaars</option>
+                                    <option value="pixel-art">Pixel Art</option>
+                                    <option value="bottts">Bottts</option>
+                                    <option value="adventurer">Adventurer</option>
+                                    <option value="micah">Micah</option>
+                                </select>
+                                <input type="text" id="reg-avatar-seed" placeholder="Enter seed (e.g. name)" maxlength="50">
+                                <button type="button" class="auth-button auth-button-secondary" id="reg-avatar-generate">Generate</button>
+                            </div>
+                            <p class="avatar-reg-hint">Choose a preset or create custom with Dicebear</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">Personal &amp; Company</h3>
+                    <div class="form-group full-width">
+                        <label for="reg-selfdesc">Self description</label>
+                        <textarea id="reg-selfdesc" name="self_description" placeholder="Tell others about yourself"></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="reg-company">Company name</label>
+                        <input type="text" id="reg-company" name="company_name" placeholder="Company name">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="reg-address">Address</label>
+                        <input type="text" id="reg-address" name="address" placeholder="Full address">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="reg-mailcode">Postal code</label>
+                        <input type="text" id="reg-mailcode" name="mail_code" placeholder="Postal code / Zipcode">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="reg-remarks">Personal remarks</label>
+                        <textarea id="reg-remarks" name="personal_remarks" placeholder="Add personal notes"></textarea>
+                    </div>
+                </div>
+
                 <div class="form-group full-width">
                     <div class="remember-me">
                         <input type="checkbox" id="terms" name="terms" required>
-                        <label for="terms">I agree to the Terms & Conditions</label>
+                        <label for="terms">I agree to the <a href="terms.html" target="_blank" rel="noopener noreferrer">Terms &amp; Conditions</a></label>
                     </div>
                 </div>
                 <div class="auth-actions">
-                    <button type="submit" class="auth-button auth-button-primary">Create account</button>
+                    <button type="submit" class="auth-button auth-button-primary" id="reg-create-account-btn" disabled>Create account</button>
                 </div>
             </form>
         </div>
 
         <div class="back-home">
             <a href="index.html">← Back to Home</a>
+            <span style="margin: 0 0.5rem;">·</span>
+            <a href="profile.html?view=own">My Profile</a>
         </div>
     </div>
 </div>
 
 <script>
-const API_ENDPOINT = 'http://localhost:8787';
+const API_ENDPOINT = (window.location.protocol === 'file:' || (window.location.hostname === 'localhost' && window.location.port && window.location.port !== '8787')) ? 'http://localhost:8787' : '';
+
+const DICEBEAR_BASE = 'https://api.dicebear.com/9.x';
+const AVATAR_PRESETS = [
+    { style: 'lorelei', seed: 'smile' },
+    { style: 'avataaars', seed: 'happy' },
+    { style: 'pixel-art', seed: 'pixel1' },
+    { style: 'bottts', seed: 'bot1' },
+    { style: 'adventurer', seed: 'adventure1' },
+    { style: 'micah', seed: 'micah1' }
+];
 
 let currentIdentifier = '';
+let selectedAvatarUrl = '';
 
 function showStep(stepId) {
     document.querySelectorAll('.auth-step').forEach(s => s.classList.remove('active'));
@@ -427,6 +601,7 @@ document.getElementById('identifier-form').addEventListener('submit', async func
                 regEmail.placeholder = 'your.email@example.com';
             }
             showStep('step-register');
+            updateCreateAccountButtonState();
         }
     } catch (err) {
         showMessage('Network error. Please check if the API is running.', 'error');
@@ -437,6 +612,51 @@ document.getElementById('identifier-form').addEventListener('submit', async func
     btn.disabled = false;
     btn.textContent = 'Next';
 });
+
+function dicebearUrl(style, seed) {
+    return DICEBEAR_BASE + '/' + style + '/svg?seed=' + encodeURIComponent(seed);
+}
+
+function setupRegAvatarPicker() {
+    const presetsEl = document.getElementById('reg-avatar-presets');
+    if (!presetsEl) return;
+    presetsEl.innerHTML = AVATAR_PRESETS.map(p => {
+        const url = dicebearUrl(p.style, p.seed);
+        return '<img class="avatar-preset-reg" src="' + url + '" alt="" data-url="' + encodeURIComponent(url) + '">';
+    }).join('');
+    presetsEl.querySelectorAll('.avatar-preset-reg').forEach(el => {
+        el.addEventListener('click', function() {
+            selectedAvatarUrl = decodeURIComponent(this.dataset.url);
+            document.querySelectorAll('.avatar-preset-reg').forEach(x => x.classList.remove('selected'));
+            this.classList.add('selected');
+            const img = document.getElementById('reg-avatar-img');
+            const ph = document.getElementById('reg-avatar-placeholder');
+            img.src = selectedAvatarUrl;
+            img.style.display = 'block';
+            ph.style.display = 'none';
+        });
+    });
+    document.getElementById('reg-avatar-generate')?.addEventListener('click', function() {
+        const style = document.getElementById('reg-avatar-style').value;
+        const seed = (document.getElementById('reg-avatar-seed').value || 'custom').trim().slice(0, 50) || 'custom';
+        selectedAvatarUrl = dicebearUrl(style, seed);
+        document.querySelectorAll('.avatar-preset-reg').forEach(x => x.classList.remove('selected'));
+        const img = document.getElementById('reg-avatar-img');
+        const ph = document.getElementById('reg-avatar-placeholder');
+        img.src = selectedAvatarUrl;
+        img.style.display = 'block';
+        ph.style.display = 'none';
+    });
+}
+
+function updateCreateAccountButtonState() {
+    const cb = document.getElementById('terms');
+    const btn = document.getElementById('reg-create-account-btn');
+    if (btn) btn.disabled = !cb || !cb.checked;
+}
+
+// Terms checkbox: enable Create account button only when checked
+document.getElementById('terms')?.addEventListener('change', updateCreateAccountButtonState);
 
 // "Create one" - go directly to registration form
 document.getElementById('go-create-account').addEventListener('click', function(e) {
@@ -451,9 +671,22 @@ document.getElementById('go-create-account').addEventListener('click', function(
     document.getElementById('reg-email').value = '';
     document.getElementById('reg-email').removeAttribute('readonly');
     document.getElementById('reg-email').placeholder = 'your.email@example.com';
+    document.getElementById('reg-telephone').value = '';
     document.getElementById('reg-password').value = '';
     document.getElementById('reg-confirm-password').value = '';
+    document.getElementById('reg-selfdesc').value = '';
+    document.getElementById('reg-company').value = '';
+    document.getElementById('reg-address').value = '';
+    document.getElementById('reg-mailcode').value = '';
+    document.getElementById('reg-remarks').value = '';
+    document.getElementById('terms').checked = false;
+    selectedAvatarUrl = '';
+    document.getElementById('reg-avatar-img').style.display = 'none';
+    document.getElementById('reg-avatar-placeholder').style.display = 'flex';
+    document.getElementById('reg-avatar-placeholder').textContent = '?';
+    document.querySelectorAll('.avatar-preset-reg').forEach(x => x.classList.remove('selected'));
     showStep('step-register');
+    updateCreateAccountButtonState();
 });
 
 // "Already have an account? Sign in" - back to step 1
@@ -495,7 +728,7 @@ document.getElementById('login-form').addEventListener('submit', async function(
             localStorage.setItem('auth_token', data.token);
             localStorage.setItem('user_info', JSON.stringify(data.user));
             showMessage('Sign in successful! Redirecting...', 'success');
-            setTimeout(() => { window.location.href = 'admin.html'; }, 800);
+            setTimeout(() => { window.location.href = 'profile.html?view=own'; }, 800);
         } else {
             showMessage(data.error || 'Wrong password. Try again.', 'error');
             btn.disabled = false;
@@ -509,15 +742,23 @@ document.getElementById('login-form').addEventListener('submit', async function(
 });
 
 // Step 2b: Register
+if (document.getElementById('reg-avatar-presets')) setupRegAvatarPicker();
+
 document.getElementById('register-form').addEventListener('submit', async function(e) {
     e.preventDefault();
     const firstname = document.getElementById('reg-firstname').value.trim();
     const lastname = document.getElementById('reg-lastname').value.trim();
     const username = document.getElementById('reg-username').value.trim();
     const email = document.getElementById('reg-email').value.trim();
+    const telephone = document.getElementById('reg-telephone').value.trim();
     const password = document.getElementById('reg-password').value;
     const confirm = document.getElementById('reg-confirm-password').value;
     const role = document.getElementById('reg-role').value;
+    const termsChecked = document.getElementById('terms').checked;
+    if (!termsChecked) {
+        showMessage('You must agree to the Terms & Conditions.', 'error');
+        return;
+    }
     
     if (password !== confirm) {
         showMessage('Passwords do not match.', 'error');
@@ -536,17 +777,33 @@ document.getElementById('register-form').addEventListener('submit', async functi
         const res = await fetch(`${API_ENDPOINT}/api/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ firstname, lastname, username, email, password, role: parseInt(role) })
+            body: JSON.stringify({ firstname, lastname, username, email, telephone: telephone || undefined, password, role: parseInt(role) })
         });
         const data = await res.json();
         
         if (data.success) {
-            showMessage('Account created! Signing in...', 'success');
+            showMessage('Account created! Redirecting to profile...', 'success');
             if (data.token) {
                 localStorage.setItem('auth_token', data.token);
                 localStorage.setItem('user_info', JSON.stringify(data.user));
+                const profilePayload = {
+                    telephone: telephone || undefined,
+                    avatar_url: selectedAvatarUrl || undefined,
+                    self_description: document.getElementById('reg-selfdesc').value.trim() || undefined,
+                    company_name: document.getElementById('reg-company').value.trim() || undefined,
+                    address: document.getElementById('reg-address').value.trim() || undefined,
+                    mail_code: document.getElementById('reg-mailcode').value.trim() || undefined,
+                    personal_remarks: document.getElementById('reg-remarks').value.trim() || undefined
+                };
+                if (Object.keys(profilePayload).some(k => profilePayload[k] !== undefined)) {
+                    fetch(`${API_ENDPOINT}/api/profile`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + data.token },
+                        body: JSON.stringify(profilePayload)
+                    }).catch(() => {});
+                }
             }
-            setTimeout(() => { window.location.href = 'admin.html'; }, 1000);
+            setTimeout(() => { window.location.href = 'profile.html?view=own'; }, 1000);
         } else {
             showMessage(data.error || 'Registration failed.', 'error');
             btn.disabled = false;
@@ -565,15 +822,21 @@ document.querySelector('.forgot-password').addEventListener('click', function(e)
     showMessage('Please contact admin to reset your password.', 'info');
 });
 
-// Check if already logged in
+// On load: show register if ?create=1, or redirect if already logged in
 window.addEventListener('load', function() {
+    const params = new URLSearchParams(window.location.search);
     const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
     if (token) {
         fetch(`${API_ENDPOINT}/api/auth/check`, { headers: { 'Authorization': `Bearer ${token}` } })
             .then(r => r.json())
-            .then(d => { if (d.authenticated) window.location.href = 'admin.html'; })
+            .then(d => { if (d.authenticated) window.location.href = 'profile.html?view=own'; })
             .catch(() => {});
+    } else if (params.get('create') === '1') {
+        document.getElementById('register-identifier-bar').style.display = 'none';
+        document.getElementById('register-sign-in-instead').style.display = 'block';
+        showStep('step-register');
     }
+    updateCreateAccountButtonState();
 });
 </script>
 </body>
