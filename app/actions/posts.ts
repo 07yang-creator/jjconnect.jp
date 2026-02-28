@@ -8,6 +8,7 @@
 import { revalidatePath } from 'next/cache';
 import { createServerSupabaseClient, getCurrentUser, isAuthorizedUser } from '@/lib/supabase/server';
 import type { PostInsert, PostContent } from '@/types/database';
+import { createPostSchema, parseSafe, type CreatePostInput as SchemaCreatePostInput } from '@/lib/schemas';
 import {
   sendPostSubmittedConfirmationToAuthor,
   sendPostSubmittedNotificationToAdmin,
@@ -97,30 +98,14 @@ async function uploadCoverImage(
 }
 
 /**
- * Validate post input data
+ * Validate post input data (Zod schema - prevents injection)
  */
-function validatePostInput(input: CreatePostInput): { valid: boolean; error?: string } {
-  if (!input.title || input.title.trim().length === 0) {
-    return { valid: false, error: 'Title is required' };
-  }
-  
-  if (input.title.length > 200) {
-    return { valid: false, error: 'Title must be less than 200 characters' };
-  }
-  
-  if (!input.content) {
-    return { valid: false, error: 'Content is required' };
-  }
-  
-  if (input.is_paid && (!input.price || input.price <= 0)) {
-    return { valid: false, error: 'Price must be greater than 0 for paid posts' };
-  }
-  
-  if (input.price && input.price < 0) {
-    return { valid: false, error: 'Price cannot be negative' };
-  }
-  
-  return { valid: true };
+function validatePostInput(input: unknown): { valid: true; data: SchemaCreatePostInput } | { valid: false; error: string } {
+  const parsed = parseSafe(createPostSchema, input);
+  if (parsed.success) return { valid: true, data: parsed.data };
+  const firstIssue = parsed.error.issues[0];
+  const msg = firstIssue?.message || 'Invalid post input';
+  return { valid: false, error: msg };
 }
 
 // ============================================================================
@@ -146,17 +131,18 @@ function validatePostInput(input: CreatePostInput): { valid: boolean; error?: st
  */
 export async function createPost(input: CreatePostInput): Promise<CreatePostResult> {
   try {
-    // 1. Validate input
+    // 1. Validate input (Zod - prevents injection)
     const validation = validatePostInput(input);
     if (!validation.valid) {
       return {
         success: false,
         error: {
           code: 'VALIDATION_ERROR',
-          message: validation.error!,
+          message: validation.error,
         },
       };
     }
+    const validatedInput = validation.data;
     
     // 2. Check authentication
     const user = await getCurrentUser();
@@ -171,7 +157,7 @@ export async function createPost(input: CreatePostInput): Promise<CreatePostResu
     }
     
     // 3. Check if user_category_id is provided (indicates posting to user homepage)
-    if (input.user_category_id) {
+    if (validatedInput.user_category_id) {
       const isAuthorized = await isAuthorizedUser(user.id);
       if (!isAuthorized) {
         return {
@@ -188,7 +174,7 @@ export async function createPost(input: CreatePostInput): Promise<CreatePostResu
       const { data: userCategory } = await supabase
         .from('user_categories')
         .select('user_id')
-        .eq('id', input.user_category_id)
+        .eq('id', validatedInput.user_category_id)
         .single();
       
       if (!userCategory || userCategory.user_id !== user.id) {
@@ -204,9 +190,9 @@ export async function createPost(input: CreatePostInput): Promise<CreatePostResu
     
     // 4. Handle cover image upload
     let coverUrl: string | null = null;
-    if (input.cover_image) {
-      if (input.cover_image instanceof File) {
-        const uploadResult = await uploadCoverImage(input.cover_image, user.id);
+    if (validatedInput.cover_image) {
+      if (validatedInput.cover_image instanceof File) {
+        const uploadResult = await uploadCoverImage(validatedInput.cover_image, user.id);
         if (uploadResult.error) {
           return {
             success: false,
@@ -217,24 +203,24 @@ export async function createPost(input: CreatePostInput): Promise<CreatePostResu
           };
         }
         coverUrl = uploadResult.url;
-      } else if (typeof input.cover_image === 'string') {
+      } else if (typeof validatedInput.cover_image === 'string') {
         // URL string provided directly
-        coverUrl = input.cover_image;
+        coverUrl = validatedInput.cover_image;
       }
     }
     
     // 5. Create post data
     const supabase = await createServerSupabaseClient();
     const postData: PostInsert = {
-      title: input.title.trim(),
-      content: input.content,
-      summary: input.summary?.trim() || null,
+      title: validatedInput.title.trim(),
+      content: validatedInput.content,
+      summary: validatedInput.summary?.trim() || null,
       cover_image: coverUrl,
-      category_id: input.category_id || null,
+      category_id: validatedInput.category_id || null,
       author_id: user.id,
-      is_paid: input.is_paid || false,
-      price: input.price || 0,
-      status: input.status || 'draft',
+      is_paid: validatedInput.is_paid || false,
+      price: validatedInput.price || 0,
+      status: validatedInput.status || 'draft',
     };
     
     // 6. Insert post
@@ -257,7 +243,7 @@ export async function createPost(input: CreatePostInput): Promise<CreatePostResu
     }
 
     // 6b. If submitted for review (review_state === 'pending'), send emails
-    const contentWithReview = input.content as Record<string, unknown> | undefined;
+    const contentWithReview = validatedInput.content as Record<string, unknown> | undefined;
     if (contentWithReview?.review_state === 'pending' && user.email) {
       const authorEmail = user.email;
       let authorDisplayName: string | null = null;
@@ -272,7 +258,7 @@ export async function createPost(input: CreatePostInput): Promise<CreatePostResu
         // ignore
       }
       const reviewPayload = {
-        postTitle: input.title.trim(),
+        postTitle: validatedInput.title.trim(),
         authorEmail,
         postId: post.id,
         authorDisplayName,
@@ -289,8 +275,8 @@ export async function createPost(input: CreatePostInput): Promise<CreatePostResu
     // 7. Revalidate relevant paths
     revalidatePath('/posts');
     revalidatePath(`/profile/${user.id}`);
-    if (input.category_id) {
-      revalidatePath(`/category/${input.category_id}`);
+    if (validatedInput.category_id) {
+      revalidatePath(`/category/${validatedInput.category_id}`);
     }
     
     // 8. Return success

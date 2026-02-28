@@ -2,7 +2,7 @@
  * RightSidebar 组件相关类型定义
  */
 
-import type { Category, Profile } from '@/types/database';
+import type { Category } from '@/types/database';
 
 // ============================================================================
 // 组件 Props 类型

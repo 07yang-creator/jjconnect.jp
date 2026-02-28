@@ -46,9 +46,9 @@ open http://localhost:8000/home.html
 # 1. 安装依赖
 npm install
 
-# 2. 配置环境变量
-cp .env.example .env.local
-# 编辑 .env.local 填入 Supabase 配置
+# 2. 配置环境变量（.env 在项目根目录）
+cp .env.example .env
+# 编辑 .env 填入 Supabase 配置 (NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY)
 
 # 3. 运行开发服务器
 npm run dev

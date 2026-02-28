@@ -1,14 +1,33 @@
 /**
  * publish.js - 发布页交互逻辑
  * 包含 Supabase 数据插入逻辑
+ * 从 /api/public-config 加载配置，不再硬编码
  */
 
 // ========================================================================
-// CONFIGURATION
+// CONFIGURATION (loaded from /api/public-config)
 // ========================================================================
-const SUPABASE_URL = 'https://iagbrhyqatsccwdlxoww.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_WYITJIrPsX6ILRbgfKo6_Q_q_h9ZohC';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let supabase = null;
+
+async function loadConfig() {
+  // Fallback: window.JJCONNECT_CONFIG (inject via script tag in HTML for static deploy)
+  const fallback = typeof window !== 'undefined' && window.JJCONNECT_CONFIG;
+  try {
+    const res = await fetch('/api/public-config');
+    const cfg = await res.json();
+    if (cfg.supabaseUrl && cfg.supabaseAnonKey) {
+      supabase = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+      return supabase;
+    }
+  } catch (e) {
+    console.warn('API config fetch failed, using fallback if available:', e.message);
+  }
+  if (fallback?.supabaseUrl && fallback?.supabaseAnonKey) {
+    supabase = window.supabase.createClient(fallback.supabaseUrl, fallback.supabaseAnonKey);
+    return supabase;
+  }
+  throw new Error('Missing Supabase config. Set NEXT_PUBLIC_* in .env or inject window.JJCONNECT_CONFIG.');
+}
 
 // ========================================================================
 // STATE
@@ -25,6 +44,7 @@ let currentUser = null;
 // ========================================================================
 async function init() {
   try {
+    await loadConfig();
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 

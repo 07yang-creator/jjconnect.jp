@@ -7,7 +7,7 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
-import type { Database } from '../types/database.types'
+import type { Database } from '../types/database'
 
 /**
  * Cloudflare Workers 环境变量接口
@@ -181,6 +181,10 @@ export function isSupabaseConfigured(env: Env): boolean {
 
 /**
  * Alias for getSupabase for compatibility
- * @deprecated Use getSupabase instead
  */
 export const getSupabaseClient = getSupabase
+
+/**
+ * Alias for getSupabaseWithAuth for compatibility
+ */
+export const getSupabaseClientWithAuth = getSupabaseWithAuth

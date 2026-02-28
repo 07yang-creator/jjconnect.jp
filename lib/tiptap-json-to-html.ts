@@ -3,6 +3,8 @@
  * Handles common node types from StarterKit + Image, Link.
  */
 
+import { escapeHtml } from './escape-html';
+
 type ContentNode = {
   type: string;
   attrs?: Record<string, unknown>;
@@ -10,15 +12,6 @@ type ContentNode = {
   text?: string;
   marks?: Array< { type: string; attrs?: Record<string, unknown> }>;
 };
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
 
 function applyMarks(text: string, marks?: ContentNode['marks']): string {
   if (!marks || marks.length === 0) return escapeHtml(text);

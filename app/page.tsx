@@ -133,45 +133,6 @@ async function getCategoriesWithPosts(): Promise<CategoryWithPosts[]> {
   return categoriesWithPosts.filter(cat => cat.posts.length > 0);
 }
 
-async function getCategoriesWithPosts(): Promise<CategoryWithPosts[]> {
-  const supabase = await createServerSupabaseClient();
-  
-  // Get all categories
-  const { data: categories, error: categoriesError } = await supabase
-    .from('categories')
-    .select('*')
-    .order('name');
-  
-  if (categoriesError || !categories) {
-    console.error('Failed to fetch categories:', categoriesError);
-    return [];
-  }
-  
-  // Get posts for each category
-  const categoriesWithPosts = await Promise.all(
-    categories.map(async (category) => {
-      const { data: posts } = await supabase
-        .from('posts')
-        .select(`
-          *,
-          author:profiles(display_name, avatar_url)
-        `)
-        .eq('status', 'published')
-        .eq('category_id', category.id)
-        .order('created_at', { ascending: false })
-        .limit(4);
-      
-      return {
-        ...category,
-        posts: posts || [],
-      };
-    })
-  );
-  
-  // Filter out categories with no posts
-  return categoriesWithPosts.filter(cat => cat.posts.length > 0);
-}
-
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================

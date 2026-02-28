@@ -15,19 +15,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 /**
- * Create a Supabase client for server-side operations
- * This client uses the service role key for admin operations
- */
-export function createServerClient() {
-  return createClient<Database>(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
-}
-
-/**
  * Create a Supabase client for client-side operations
  * This client uses the anon key and respects RLS policies
  */

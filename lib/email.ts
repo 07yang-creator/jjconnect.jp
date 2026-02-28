@@ -3,9 +3,11 @@
  * Uses noreply@jjconnect.jp as sender (same as workers/auth-worker.js)
  */
 
-const FROM_EMAIL = 'noreply@jjconnect.jp';
-const FROM_NAME = 'JJConnect';
-const REVIEW_ADMIN_EMAIL = 'review@jjconnect.jp';
+import { escapeHtml } from './escape-html';
+
+const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@jjconnect.jp';
+const FROM_NAME = process.env.FROM_NAME || 'JJConnect';
+const REVIEW_ADMIN_EMAIL = process.env.REVIEW_ADMIN_EMAIL || 'review@jjconnect.jp';
 const MAILCHANNELS_API = 'https://api.mailchannels.net/tx/v1/send';
 
 export interface SendEmailParams {
@@ -199,13 +201,4 @@ export async function sendPostSubmittedNotificationToAdmin(params: {
     html,
     text,
   });
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
 }
