@@ -12,6 +12,9 @@ wrangler.toml.backup
 .env
 .env.local
 .env.production
+scripts/backup.env
+scripts/backup.log
+scripts/backup.err
 
 # Logs
 *.log

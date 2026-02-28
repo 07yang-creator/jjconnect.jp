@@ -28,7 +28,7 @@ function loadEnv() {
 
 const env = loadEnv();
 const recaptchaKey = env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || env.RECAPTCHA_SITE_KEY || '';
-const placeholder = '6LdELc4rAAAAANnRvGLrrV1achd-aP8bxgr02EJn';
+const placeholder = env.RECAPTCHA_PLACEHOLDER || '__RECAPTCHA_SITE_KEY__';
 
 if (!recaptchaKey) {
   console.warn('No NEXT_PUBLIC_RECAPTCHA_SITE_KEY in .env, skipping injection');

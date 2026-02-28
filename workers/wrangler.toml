@@ -5,10 +5,14 @@ main = "auth-worker.js"
 compatibility_date = "2024-01-01"
 
 # D1 Database binding
+# 如何获取 database_id:
+#   方法 A: 在 workers 目录执行: npx wrangler d1 list  （会列出所有 D1 库及 ID）
+#   方法 B: 若尚未创建库，先执行: npx wrangler d1 create jjconnect-db  （输出里会给出 database_id）
+#   方法 C: 打开 https://dash.cloudflare.com → Workers & Pages → D1 → 点击 jjconnect-db → 右侧 Overview 或 URL 里可见 database_id（UUID 格式）
 [[d1_databases]]
 binding = "DB"
 database_name = "jjconnect-db"
-database_id = "your-database-id"  # Replace with actual D1 database ID
+database_id = "9bd1d32d-80fa-4c4c-8db7-1b3b67a09bdc"
 
 # R2 Storage binding for media files
 [[r2_buckets]]
@@ -40,7 +44,7 @@ name = "jjconnect-auth-worker-dev"
 [env.development.d1_databases]
 binding = "DB"
 database_name = "jjconnect-db"
-database_id = "your-database-id"
+database_id = "9bd1d32d-80fa-4c4c-8db7-1b3b67a09bdc"
 
 [env.development.r2_buckets]
 binding = "MY_BUCKET"
