@@ -29,28 +29,49 @@ function loadEnv() {
 const env = loadEnv();
 const recaptchaKey = env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || env.RECAPTCHA_SITE_KEY || '';
 const placeholder = env.RECAPTCHA_PLACEHOLDER || '__RECAPTCHA_SITE_KEY__';
-
-if (!recaptchaKey) {
-  console.warn('No NEXT_PUBLIC_RECAPTCHA_SITE_KEY in .env, skipping injection');
-  process.exit(0);
-}
+const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL || env.SUPABASE_URL || '';
+const supabaseAnonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY || env.SUPABASE_ANON_KEY || '';
+const configPlaceholder = '__JJCONNECT_CONFIG__';
 
 const root = path.resolve(process.cwd());
-const htmlFiles = ['index.html', 'feedback.html', 'about.html'].filter((f) =>
-  fs.existsSync(path.join(root, f))
-);
-
 let replaced = 0;
-for (const file of htmlFiles) {
-  const fp = path.join(root, file);
-  let content = fs.readFileSync(fp, 'utf8');
-  if (content.includes(placeholder)) {
-    content = content.split(placeholder).join(recaptchaKey);
-    fs.writeFileSync(fp, content);
-    replaced++;
-    console.log(`Injected recaptcha key into ${file}`);
+
+// 1. Inject reCAPTCHA key into index, feedback, about
+if (recaptchaKey) {
+  const recaptchaFiles = ['index.html', 'feedback.html', 'about.html'].filter((f) =>
+    fs.existsSync(path.join(root, f))
+  );
+  for (const file of recaptchaFiles) {
+    const fp = path.join(root, file);
+    let content = fs.readFileSync(fp, 'utf8');
+    if (content.includes(placeholder)) {
+      content = content.split(placeholder).join(recaptchaKey);
+      fs.writeFileSync(fp, content);
+      replaced++;
+      console.log(`Injected recaptcha key into ${file}`);
+    }
   }
+} else {
+  console.warn('No NEXT_PUBLIC_RECAPTCHA_SITE_KEY in .env, skipping recaptcha injection');
 }
+
+// 2. Inject Supabase config into publish.html (for static deploy / Live Server)
+if (supabaseUrl && supabaseAnonKey) {
+  const publishPath = path.join(root, 'publish.html');
+  if (fs.existsSync(publishPath)) {
+    const configObj = JSON.stringify({ supabaseUrl, supabaseAnonKey });
+    let content = fs.readFileSync(publishPath, 'utf8');
+    if (content.includes(configPlaceholder)) {
+      content = content.split(configPlaceholder).join(configObj);
+      fs.writeFileSync(publishPath, content);
+      replaced++;
+      console.log('Injected Supabase config into publish.html');
+    }
+  }
+} else {
+  console.warn('No NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY in .env, skipping publish.html config injection');
+}
+
 if (replaced === 0) {
   console.log('No replacements needed');
 }
