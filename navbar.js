@@ -34,7 +34,7 @@
                 
                 <!-- 导航链接（桌面端） -->
                 <div class="jjc-navbar-nav">
-                    <a href="home.html" class="jjc-nav-link">Home</a>
+                    <a href="gettingready.html" class="jjc-nav-link">Home</a>
                     <a href="about.html" class="jjc-nav-link">About Us</a>
                     
                     <!-- 产品下拉菜单 -->
@@ -89,7 +89,7 @@
             
             <!-- 移动端菜单 -->
             <div class="jjc-mobile-menu" id="jjc-mobile-menu">
-                <a href="home.html" class="jjc-mobile-link">Home</a>
+                <a href="gettingready.html" class="jjc-mobile-link">Home</a>
                 <a href="about.html" class="jjc-mobile-link">About Us</a>
                 
                 <div class="jjc-mobile-divider"></div>
