@@ -63,7 +63,7 @@
       50% { opacity: 1; }
     }
     
-    /* Meteors - 50-100 per hour，置于星星之上、主内容之下 */
+    /* 火流星：无尾迹，仅明亮光点 */
     .meteors {
       position: fixed;
       inset: 0;
@@ -73,34 +73,28 @@
     }
     .meteor {
       position: absolute;
-      height: 3px;
-      width: 120px;
-      background: linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0.98) 0%,
-        rgba(200, 220, 255, 0.6) 30%,
-        transparent 100%
-      );
-      transform-origin: left center;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      transform-origin: center center;
       will-change: transform, opacity;
-      animation: meteor-fall 1.8s linear forwards;
+      animation: fireball-fall 1.5s linear forwards;
       opacity: 0;
     }
-    @keyframes meteor-fall {
+    @keyframes fireball-fall {
       0% {
         opacity: 0;
-        transform: translate(0, 0) rotate(-45deg);
+        transform: translate(0, 0);
       }
-      2% {
+      5% {
         opacity: 1;
       }
-      95% {
-        opacity: 0.35;
+      90% {
+        opacity: 0.9;
       }
       100% {
         opacity: 0;
-        transform: translate(600px, 600px) rotate(-45deg);
+        transform: translate(500px, 500px);
       }
     }
     
@@ -310,16 +304,26 @@
       document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
     }
     
-    // Meteors - 50-100 per hour (interval 36-72 seconds)
+    // 火流星 - 50-100 per hour，随机颜色
+    const meteorColors = [
+      { main: '255,255,255', glow: '255,240,220' },   // 白
+      { main: '255,240,200', glow: '255,220,150' },   // 暖白
+      { main: '255,200,100', glow: '255,180,80' },    // 金黄
+      { main: '255,150,80', glow: '255,120,50' },     // 橙
+      { main: '200,220,255', glow: '150,190,255' },   // 淡蓝
+      { main: '180,240,255', glow: '120,220,255' },   // 青
+      { main: '255,180,220', glow: '255,150,200' },   // 粉
+    ];
     function spawnMeteor() {
       const container = document.getElementById('meteors');
       if (!container) return;
       const meteor = document.createElement('div');
       meteor.className = 'meteor';
-      // 起始位置限制在视口内：左侧 0~85%，上方 0~35%，避免一开始就在屏外
+      const c = meteorColors[Math.floor(Math.random() * meteorColors.length)];
+      meteor.style.background = `radial-gradient(circle at 30% 30%, rgba(${c.main},1) 0%, rgba(${c.main},0.6) 50%, transparent 100%)`;
+      meteor.style.boxShadow = `0 0 4px 1px rgba(${c.glow},0.6)`;
       meteor.style.left = (Math.random() * 85) + '%';
       meteor.style.top = (Math.random() * 35) + '%';
-      meteor.style.width = (90 + Math.random() * 70) + 'px';
       container.appendChild(meteor);
       const onEnd = function() {
         meteor.remove();
@@ -342,7 +346,7 @@
     spawnMeteor();
     setTimeout(scheduleNextMeteor, 500);
     
-    // Generate stars
+    // Generate stars（仅在上部 70% 区域，下部 30% 无星点）
     function createStars() {
       const container = document.getElementById('stars');
       for (let i = 0; i < 80; i++) {
@@ -350,7 +354,7 @@
         star.className = 'star';
         star.style.width = star.style.height = (Math.random() * 2 + 1) + 'px';
         star.style.left = Math.random() * 100 + '%';
-        star.style.top = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 70 + '%'; // 0~70%，下部 30% 无星点
         container.appendChild(star);
       }
     }
