@@ -1,0 +1,904 @@
+<!doctype html>
+<html lang="en-US" class="no-js" itemtype="https://schema.org/WebPage" itemscope>
+<head>
+<link rel="dns-prefetch" href="https://fonts.googleapis.com/">
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<title>Sign in | JJConnect</title>
+<meta name="description" content="Sign in to your JJConnect account.">
+<link rel="stylesheet" href="navbar.css">
+<link rel='stylesheet' id='kadence-global-css' href='wp-content/themes/kadence/assets/css/global.min.css%3Fver=1.3.2.css' media='all'/>
+<style id='kadence-global-inline-css'>
+:root{--global-palette1:#2B6CB0;--global-palette2:#215387;--global-palette3:#1A202C;--global-palette4:#2D3748;--global-palette5:#4A5568;--global-palette6:#718096;--global-palette7:#EDF2F7;--global-palette8:#F7FAFC;--global-palette9:#ffffff;}
+:root{--jjc-primary:#2B6CB0;--jjc-primary-hover:#215387;--jjc-bg:#F7FAFC;--jjc-card:#ffffff;--jjc-text:#1A202C;--jjc-text-muted:#4A5568;--jjc-border:#EDF2F7;}
+</style>
+<link rel='stylesheet' id='kadence-content-css' href='wp-content/themes/kadence/assets/css/content.min.css%3Fver=1.3.2.css' media='all'/>
+<style id='login-custom-styles'>
+/* Google Create Account–style register form */
+.login-container {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px 16px 48px;
+    background: #f1f3f4;
+    font-family: 'Google Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.login-box {
+    background: #fff;
+    border-radius: 8px;
+    padding: 48px 40px 36px;
+    width: 100%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 1px 3px 1px rgba(60,64,67,.15), 0 1px 2px 0 rgba(60,64,67,.3);
+}
+
+.auth-step {
+    display: none;
+    animation: fadeIn 0.25s ease;
+}
+
+.auth-step.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; } to { opacity: 1; }
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.login-header h1 {
+    font-size: 24px;
+    font-weight: 400;
+    color: #202124;
+    margin: 0 0 8px;
+    letter-spacing: -0.5px;
+    text-align: center;
+}
+
+.login-header p {
+    color: #5f6368;
+    font-size: 16px;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.account-identifier {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 0 24px;
+    margin-bottom: 0;
+    font-size: 14px;
+    color: #5f6368;
+}
+
+.account-identifier strong {
+    color: #202124;
+}
+
+.account-identifier a {
+    color: #1a73e8;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.account-identifier a:hover { text-decoration: underline; }
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 20px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    min-width: 0;
+}
+
+.form-row .form-group { margin-bottom: 20px; }
+
+.form-group.full-width { grid-column: 1 / -1; }
+
+.form-group label {
+    font-weight: 400;
+    font-size: 14px;
+    color: #202124;
+}
+
+.form-group label .required { color: #d93025; }
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 13px 15px;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    font-size: 16px;
+    font-family: inherit;
+    color: #202124;
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:hover,
+.form-group select:hover {
+    border-color: #202124;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.25);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder { color: #5f6368; }
+
+.form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 13px 15px;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    font-size: 16px;
+    font-family: inherit;
+    color: #202124;
+    min-height: 80px;
+    resize: vertical;
+}
+
+.form-group textarea:hover { border-color: #202124; }
+
+.form-section {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #dadce0;
+}
+
+.form-section-title {
+    font-size: 16px;
+    font-weight: 400;
+    color: #202124;
+    margin: 0 0 16px;
+}
+
+.avatar-register-wrap {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.avatar-register-preview {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #dadce0;
+    background: #f1f3f4;
+}
+
+.avatar-register-placeholder {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #1a73e8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.avatar-register-options {
+    flex: 1;
+}
+
+.avatar-register-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+.avatar-register-row .avatar-upload-btn { margin-left: 0.25rem; }
+
+.avatar-register-row input[type="text"] {
+    padding: 10px 14px;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.avatar-preset-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.5rem;
+}
+
+.avatar-preset-reg {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+    border: 2px solid var(--jjc-border);
+    transition: border-color 0.2s;
+}
+
+.avatar-preset-reg:hover { border-color: #1a73e8; }
+.avatar-preset-reg.selected { border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.25); }
+
+.avatar-reg-hint { font-size: 12px; color: #5f6368; margin-top: 8px; }
+
+.auth-actions {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-top: 26px;
+}
+
+.auth-button {
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s;
+    border: none;
+    font-family: inherit;
+    min-height: 36px;
+}
+
+.auth-button-primary {
+    background: #1a73e8;
+    color: #fff;
+}
+
+.auth-button-primary:hover:not(:disabled) {
+    background: #1765cc;
+    box-shadow: 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
+}
+
+.auth-button-primary:disabled {
+    background: rgba(26, 115, 232, 0.38);
+    color: #fff;
+    cursor: not-allowed;
+}
+
+.auth-button-secondary {
+    background: transparent;
+    color: #1a73e8;
+}
+
+.auth-button-secondary:hover {
+    background: rgba(26, 115, 232, 0.08);
+}
+
+.auth-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.auth-links a {
+    font-size: 14px;
+    color: #1a73e8;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.auth-links a:hover { text-decoration: underline; }
+
+.create-account-prompt {
+    margin-top: 24px;
+    font-size: 14px;
+    color: #5f6368;
+    text-align: center;
+}
+
+.create-account-prompt a {
+    color: #1a73e8;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.create-account-prompt a:hover { text-decoration: underline; }
+
+.sign-in-instead {
+    margin-top: 16px;
+    font-size: 14px;
+    color: #5f6368;
+    text-align: center;
+}
+
+.sign-in-instead a {
+    color: #1a73e8;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.sign-in-instead a:hover { text-decoration: underline; }
+
+.back-home {
+    text-align: center;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid #dadce0;
+}
+
+.back-home a {
+    color: #5f6368;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.back-home a:hover { color: #1a73e8; }
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.remember-me input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #1a73e8;
+}
+
+.remember-me label { font-size: 14px; color: #5f6368; cursor: pointer; margin: 0; }
+
+.product-services-checkboxes { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+.checkbox-label { display: flex; align-items: center; gap: 12px; font-size: 14px; color: #202124; cursor: pointer; font-weight: 400; }
+.checkbox-label input { width: 18px; height: 18px; accent-color: #1a73e8; flex-shrink: 0; }
+
+.avatar-upload-btn { padding: 8px 16px; font-size: 14px; border-radius: 4px; background: #fff; border: 1px solid #dadce0; cursor: pointer; color: #1a73e8; }
+.avatar-upload-btn:hover { background: rgba(26, 115, 232, 0.08); border-color: #1a73e8; }
+.avatar-upload-input { display: none; }
+.remember-me label a { color: #1a73e8; text-decoration: none; }
+.remember-me label a:hover { text-decoration: underline; }
+
+.create-account-notice {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: #e8f0fe;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #5f6368;
+}
+
+.optional-hint {
+    font-weight: 400;
+    color: #5f6368;
+}
+
+.register-header .account-identifier { flex-wrap: wrap; justify-content: center; }
+
+@media (max-width: 767px) {
+    .login-box { padding: 32px 24px; }
+    .form-row { grid-template-columns: 1fr; }
+    .auth-actions { flex-direction: column; align-items: stretch; }
+    .auth-actions .auth-button-primary { width: 100%; }
+}
+</style>
+</head>
+<body class="login-page">
+<script src="navbar.js"></script>
+<style>#masthead, #mobile-header { display: none !important; }</style>
+
+<div class="login-container">
+    <div class="login-box">
+        <!-- Step 1: Enter email/username -->
+        <div id="step-identifier" class="auth-step active">
+            <div class="login-header">
+                <h1>Sign in</h1>
+                <p>Use your JJConnect account</p>
+            </div>
+            <form id="identifier-form">
+                <div class="form-group">
+                    <label for="identifier">Email or username</label>
+                    <input type="text" id="identifier" name="identifier" 
+                        placeholder="Enter your email or username" required autocomplete="username">
+                </div>
+                <div class="auth-actions">
+                    <button type="submit" class="auth-button auth-button-primary" id="next-btn">Next</button>
+                </div>
+                <p class="create-account-prompt">
+                    Don't have an account? <a href="#" id="go-create-account">Create one</a>
+                </p>
+            </form>
+        </div>
+
+        <!-- Step 2a: Login (account exists) -->
+        <div id="step-login" class="auth-step">
+            <div class="login-header">
+                <h1>Welcome</h1>
+                <p class="account-identifier"><span id="identifier-display"></span> <a href="#" id="change-account-login">Use different account</a></p>
+            </div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="password">Enter your password</label>
+                    <input type="password" id="password" name="password" 
+                        placeholder="Enter your password" required autocomplete="current-password">
+                </div>
+                <div class="auth-actions">
+                    <button type="submit" class="auth-button auth-button-primary">Sign in</button>
+                </div>
+                <div class="auth-links">
+                    <a href="#" class="forgot-password">Forgot password?</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Step 2b: Register (no account) - Google Create Account style -->
+        <div id="step-register" class="auth-step">
+            <div class="login-header register-header">
+                <h1>Create your JJConnect account</h1>
+                <p class="account-identifier" id="register-identifier-bar"><span id="identifier-display-register"></span> <a href="#" id="change-account-register">Use different account</a></p>
+                <p class="sign-in-instead" id="register-sign-in-instead" style="display:none;"><a href="#" id="back-to-signin">Sign in instead</a></p>
+            </div>
+            <form id="register-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="reg-firstname">First name <span class="required">*</span></label>
+                        <input type="text" id="reg-firstname" name="firstname" placeholder="John" required autocomplete="given-name">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-lastname">Last name <span class="required">*</span></label>
+                        <input type="text" id="reg-lastname" name="lastname" placeholder="Doe" required autocomplete="family-name">
+                    </div>
+                </div>
+                <div class="form-group full-width">
+                    <label for="reg-username">Username <span class="required">*</span></label>
+                    <input type="text" id="reg-username" name="username" placeholder="Choose a username" required 
+                        autocomplete="username" pattern="[a-zA-Z0-9_]{3,20}" title="3-20 characters, letters, numbers, underscores only">
+                </div>
+                <div class="form-group full-width">
+                    <label for="reg-email">Email <span class="required">*</span></label>
+                    <input type="email" id="reg-email" name="email" placeholder="your.email@example.com" required autocomplete="email" readonly>
+                </div>
+                <div class="form-group full-width">
+                    <label for="reg-telephone">Phone number <span class="optional-hint">(optional, for account recovery)</span></label>
+                    <input type="tel" id="reg-telephone" name="telephone" placeholder="+81 90-1234-5678" autocomplete="tel">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="reg-password">Password <span class="required">*</span></label>
+                        <input type="password" id="reg-password" name="password" placeholder="Min. 8 characters" required autocomplete="new-password" minlength="8">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-confirm-password">Confirm <span class="required">*</span></label>
+                        <input type="password" id="reg-confirm-password" name="confirm_password" placeholder="Repeat password" required autocomplete="new-password" minlength="8">
+                    </div>
+                </div>
+                <div class="form-group full-width">
+                    <label class="form-section-title">Products &amp; Services</label>
+                    <div class="product-services-checkboxes">
+                        <label class="checkbox-label"><input type="checkbox" name="product_service" value="raft"> RAFT2.03 – Financial analysis &amp; forecasting</label>
+                        <label class="checkbox-label"><input type="checkbox" name="product_service" value="mansion"> Mansion Manager – Property management</label>
+                        <label class="checkbox-label"><input type="checkbox" name="product_service" value="property_report"> Property Report – Real estate market analysis</label>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">Avatar</h3>
+                    <div class="avatar-register-wrap">
+                        <img class="avatar-register-preview" id="reg-avatar-img" src="" alt="" style="display:none;">
+                        <div class="avatar-register-placeholder" id="reg-avatar-placeholder">?</div>
+                        <div class="avatar-register-options">
+                            <div class="avatar-preset-grid" id="reg-avatar-presets"></div>
+                            <div class="avatar-register-row" style="margin-top:0.5rem;">
+                                <input type="text" id="reg-avatar-seed" placeholder="Enter seed (e.g. name)" maxlength="50">
+                                <button type="button" class="auth-button auth-button-secondary" id="reg-avatar-generate">Regenerate</button>
+                                <input type="file" id="reg-avatar-upload" class="avatar-upload-input" accept="image/*">
+                                <button type="button" class="avatar-upload-btn" id="reg-avatar-upload-btn">Upload avatar</button>
+                            </div>
+                            <p class="avatar-reg-hint">Choose preset, regenerate (Multiavatar), or upload your own image</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">Personal &amp; Company</h3>
+                    <div class="form-group full-width">
+                        <label for="reg-selfdesc">Self description</label>
+                        <textarea id="reg-selfdesc" name="self_description" placeholder="Tell others about yourself"></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="reg-company">Company name</label>
+                        <input type="text" id="reg-company" name="company_name" placeholder="Company name">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="reg-address">Address</label>
+                        <input type="text" id="reg-address" name="address" placeholder="Full address">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="reg-mailcode">Postal code</label>
+                        <input type="text" id="reg-mailcode" name="mail_code" placeholder="Postal code / Zipcode">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="reg-remarks">Personal remarks</label>
+                        <textarea id="reg-remarks" name="personal_remarks" placeholder="Add personal notes"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <div class="remember-me">
+                        <input type="checkbox" id="terms" name="terms" required>
+                        <label for="terms">I agree to the <a href="terms.html" target="_blank" rel="noopener noreferrer">Terms &amp; Conditions</a></label>
+                    </div>
+                </div>
+                <div class="auth-actions">
+                    <button type="submit" class="auth-button auth-button-primary" id="reg-create-account-btn" disabled>Create account</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="back-home">
+            <a href="index.html">← Back to Home</a>
+            <span style="margin: 0 0.5rem;">·</span>
+            <a href="profile.html?view=own">My Profile</a>
+        </div>
+    </div>
+</div>
+
+<script>
+const API_ENDPOINT = (window.location.protocol === 'file:' || (window.location.hostname === 'localhost' && window.location.port && window.location.port !== '8787')) ? 'http://localhost:8787' : '';
+
+const MULTIAVATAR_BASE = 'https://api.multiavatar.com';
+const AVATAR_PRESETS = ['smile', 'happy', 'alice', 'bob', 'carlos', 'denise'];
+
+let currentIdentifier = '';
+let selectedAvatarUrl = '';
+
+function showStep(stepId) {
+    document.querySelectorAll('.auth-step').forEach(s => s.classList.remove('active'));
+    const step = document.getElementById(stepId);
+    if (step) step.classList.add('active');
+}
+
+function showMessage(message, type = 'info') {
+    const existing = document.querySelector('.message-box');
+    if (existing) existing.remove();
+    const msg = document.createElement('div');
+    msg.className = 'message-box';
+    msg.textContent = message;
+    msg.style.cssText = `position:fixed;top:20px;right:20px;background:${type==='error'?'#E53E3E':type==='success'?'#48BB78':'#4299E1'};color:white;padding:1rem 1.5rem;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.2);z-index:10000;max-width:300px;`;
+    document.body.appendChild(msg);
+    setTimeout(() => msg.remove(), 3000);
+}
+
+// Step 1: Identifier check
+document.getElementById('identifier-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const identifier = document.getElementById('identifier').value.trim();
+    if (!identifier) return;
+    
+    const btn = document.getElementById('next-btn');
+    btn.disabled = true;
+    btn.textContent = 'Checking...';
+    
+    try {
+        const res = await fetch(`${API_ENDPOINT}/api/account/check?identifier=${encodeURIComponent(identifier)}`);
+        const data = await res.json();
+        currentIdentifier = identifier;
+        
+        if (data.exists) {
+            document.getElementById('identifier-display').innerHTML = `<strong>${identifier}</strong>`;
+            showStep('step-login');
+        } else {
+            document.getElementById('register-identifier-bar').style.display = '';
+            document.getElementById('register-sign-in-instead').style.display = 'none';
+            document.getElementById('identifier-display-register').innerHTML = `<strong>${identifier}</strong>`;
+            const regEmail = document.getElementById('reg-email');
+            const regUsername = document.getElementById('reg-username');
+            if (identifier.includes('@')) {
+                regEmail.value = identifier;
+                regEmail.setAttribute('readonly', 'readonly');
+                regUsername.placeholder = identifier.split('@')[0] || 'Choose a username';
+            } else {
+                regUsername.value = identifier;
+                regUsername.removeAttribute('readonly');
+                regEmail.value = '';
+                regEmail.removeAttribute('readonly');
+                regEmail.placeholder = 'your.email@example.com';
+            }
+            showStep('step-register');
+            updateCreateAccountButtonState();
+        }
+    } catch (err) {
+        showMessage('Network error. Please check if the API is running.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Next';
+        return;
+    }
+    btn.disabled = false;
+    btn.textContent = 'Next';
+});
+
+function multiavatarUrl(seed) {
+    return MULTIAVATAR_BASE + '/' + encodeURIComponent(seed) + '.svg';
+}
+
+function setupRegAvatarPicker() {
+    const presetsEl = document.getElementById('reg-avatar-presets');
+    if (!presetsEl) return;
+    presetsEl.innerHTML = AVATAR_PRESETS.map(seed => {
+        const url = multiavatarUrl(seed);
+        return '<img class="avatar-preset-reg" src="' + url + '" alt="" data-url="' + encodeURIComponent(url) + '">';
+    }).join('');
+    presetsEl.querySelectorAll('.avatar-preset-reg').forEach(el => {
+        el.addEventListener('click', function() {
+            selectedAvatarUrl = decodeURIComponent(this.dataset.url);
+            document.querySelectorAll('.avatar-preset-reg').forEach(x => x.classList.remove('selected'));
+            this.classList.add('selected');
+            const img = document.getElementById('reg-avatar-img');
+            const ph = document.getElementById('reg-avatar-placeholder');
+            img.src = selectedAvatarUrl;
+            img.style.display = 'block';
+            ph.style.display = 'none';
+        });
+    });
+    document.getElementById('reg-avatar-generate')?.addEventListener('click', function() {
+        const seedInput = (document.getElementById('reg-avatar-seed').value || '').trim().slice(0, 50);
+        const seed = seedInput || 'rand-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+        selectedAvatarUrl = multiavatarUrl(seed);
+        document.querySelectorAll('.avatar-preset-reg').forEach(x => x.classList.remove('selected'));
+        const img = document.getElementById('reg-avatar-img');
+        const ph = document.getElementById('reg-avatar-placeholder');
+        img.src = selectedAvatarUrl;
+        img.style.display = 'block';
+        ph.style.display = 'none';
+    });
+    document.getElementById('reg-avatar-upload-btn')?.addEventListener('click', function() {
+        document.getElementById('reg-avatar-upload')?.click();
+    });
+    document.getElementById('reg-avatar-upload')?.addEventListener('change', function(e) {
+        const f = e.target?.files?.[0];
+        if (!f || !f.type.startsWith('image/')) return;
+        const r = new FileReader();
+        r.onload = function() {
+            selectedAvatarUrl = r.result || '';
+            document.querySelectorAll('.avatar-preset-reg').forEach(x => x.classList.remove('selected'));
+            const img = document.getElementById('reg-avatar-img');
+            const ph = document.getElementById('reg-avatar-placeholder');
+            img.src = selectedAvatarUrl;
+            img.style.display = 'block';
+            ph.style.display = 'none';
+        };
+        r.readAsDataURL(f);
+        e.target.value = '';
+    });
+}
+
+function updateCreateAccountButtonState() {
+    const btn = document.getElementById('reg-create-account-btn');
+    if (!btn) return;
+    const firstname = (document.getElementById('reg-firstname')?.value || '').trim();
+    const lastname = (document.getElementById('reg-lastname')?.value || '').trim();
+    const username = (document.getElementById('reg-username')?.value || '').trim();
+    const email = (document.getElementById('reg-email')?.value || '').trim();
+    const password = document.getElementById('reg-password')?.value || '';
+    const confirm = document.getElementById('reg-confirm-password')?.value || '';
+    const termsChecked = document.getElementById('terms')?.checked || false;
+    const usernameValid = /^[a-zA-Z0-9_]{3,20}$/.test(username);
+    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const allFilled = firstname && lastname && usernameValid && emailValid && password.length >= 8 && confirm === password && termsChecked;
+    btn.disabled = !allFilled;
+}
+
+// Terms checkbox and required fields: enable Create account button only when all valid
+document.getElementById('terms')?.addEventListener('change', updateCreateAccountButtonState);
+['reg-firstname', 'reg-lastname', 'reg-username', 'reg-email', 'reg-password', 'reg-confirm-password'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', updateCreateAccountButtonState);
+});
+
+// "Create one" - go directly to registration form
+document.getElementById('go-create-account').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('register-identifier-bar').style.display = 'none';
+    document.getElementById('register-sign-in-instead').style.display = 'block';
+    document.getElementById('reg-firstname').value = '';
+    document.getElementById('reg-lastname').value = '';
+    document.getElementById('reg-username').value = '';
+    document.getElementById('reg-username').removeAttribute('readonly');
+    document.getElementById('reg-username').placeholder = 'Choose a username';
+    document.getElementById('reg-email').value = '';
+    document.getElementById('reg-email').removeAttribute('readonly');
+    document.getElementById('reg-email').placeholder = 'your.email@example.com';
+    document.getElementById('reg-telephone').value = '';
+    document.getElementById('reg-password').value = '';
+    document.getElementById('reg-confirm-password').value = '';
+    document.getElementById('reg-selfdesc').value = '';
+    document.getElementById('reg-company').value = '';
+    document.getElementById('reg-address').value = '';
+    document.getElementById('reg-mailcode').value = '';
+    document.getElementById('reg-remarks').value = '';
+    document.getElementById('terms').checked = false;
+    document.querySelectorAll('input[name="product_service"]').forEach(cb => cb.checked = false);
+    document.getElementById('reg-avatar-upload') && (document.getElementById('reg-avatar-upload').value = '');
+    selectedAvatarUrl = '';
+    document.getElementById('reg-avatar-img').style.display = 'none';
+    document.getElementById('reg-avatar-placeholder').style.display = 'flex';
+    document.getElementById('reg-avatar-placeholder').textContent = '?';
+    document.querySelectorAll('.avatar-preset-reg').forEach(x => x.classList.remove('selected'));
+    showStep('step-register');
+    updateCreateAccountButtonState();
+});
+
+// "Already have an account? Sign in" - back to step 1
+document.getElementById('back-to-signin').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('register-identifier-bar').style.display = '';
+    document.getElementById('register-sign-in-instead').style.display = 'none';
+    showStep('step-identifier');
+});
+
+// Back to step 1 (from "Use different account/email")
+['change-account-login', 'change-account-register'].forEach(id => {
+    document.getElementById(id).addEventListener('click', function(e) {
+        e.preventDefault();
+        currentIdentifier = '';
+        document.getElementById('identifier').value = '';
+        showStep('step-identifier');
+    });
+});
+
+// Step 2a: Login
+document.getElementById('login-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const password = document.getElementById('password').value;
+    
+    const btn = this.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.textContent = 'Signing in...';
+    
+    try {
+        const res = await fetch(`${API_ENDPOINT}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: currentIdentifier, password })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+            localStorage.setItem('auth_token', data.token);
+            localStorage.setItem('user_info', JSON.stringify(data.user));
+            showMessage('Sign in successful! Redirecting...', 'success');
+            setTimeout(() => { window.location.href = 'profile.html?view=own'; }, 800);
+        } else {
+            showMessage(data.error || 'Wrong password. Try again.', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Sign in';
+        }
+    } catch (err) {
+        showMessage('Network error.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Sign in';
+    }
+});
+
+// Step 2b: Register
+if (document.getElementById('reg-avatar-presets')) setupRegAvatarPicker();
+
+document.getElementById('register-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const firstname = document.getElementById('reg-firstname').value.trim();
+    const lastname = document.getElementById('reg-lastname').value.trim();
+    const username = document.getElementById('reg-username').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const telephone = document.getElementById('reg-telephone').value.trim();
+    const password = document.getElementById('reg-password').value;
+    const confirm = document.getElementById('reg-confirm-password').value;
+    const role = 0;
+    const termsChecked = document.getElementById('terms').checked;
+    if (!termsChecked) {
+        showMessage('You must agree to the Terms & Conditions.', 'error');
+        return;
+    }
+    
+    if (password !== confirm) {
+        showMessage('Passwords do not match.', 'error');
+        return;
+    }
+    if (password.length < 8) {
+        showMessage('Password must be at least 8 characters.', 'error');
+        return;
+    }
+    
+    const btn = this.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.textContent = 'Creating account...';
+    
+    try {
+        const res = await fetch(`${API_ENDPOINT}/api/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ firstname, lastname, username, email, telephone: telephone || undefined, password, role })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+            showMessage('Account created! Redirecting to profile...', 'success');
+            if (data.token) {
+                localStorage.setItem('auth_token', data.token);
+                localStorage.setItem('user_info', JSON.stringify(data.user));
+                const profilePayload = {
+                    telephone: telephone || undefined,
+                    avatar_url: selectedAvatarUrl || undefined,
+                    self_description: document.getElementById('reg-selfdesc').value.trim() || undefined,
+                    company_name: document.getElementById('reg-company').value.trim() || undefined,
+                    address: document.getElementById('reg-address').value.trim() || undefined,
+                    mail_code: document.getElementById('reg-mailcode').value.trim() || undefined,
+                    personal_remarks: document.getElementById('reg-remarks').value.trim() || undefined
+                };
+                if (Object.keys(profilePayload).some(k => profilePayload[k] !== undefined)) {
+                    fetch(`${API_ENDPOINT}/api/profile`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + data.token },
+                        body: JSON.stringify(profilePayload)
+                    }).catch(() => {});
+                }
+            }
+            setTimeout(() => { window.location.href = 'profile.html?view=own'; }, 1000);
+        } else {
+            showMessage(data.error || 'Registration failed.', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Create account';
+        }
+    } catch (err) {
+        showMessage('Network error.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Create account';
+    }
+});
+
+// Forgot password (placeholder)
+document.querySelector('.forgot-password').addEventListener('click', function(e) {
+    e.preventDefault();
+    showMessage('Please contact admin to reset your password.', 'info');
+});
+
+// On load: show register if ?create=1, or redirect if already logged in
+window.addEventListener('load', function() {
+    const params = new URLSearchParams(window.location.search);
+    const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+    if (token) {
+        fetch(`${API_ENDPOINT}/api/auth/check`, { headers: { 'Authorization': `Bearer ${token}` } })
+            .then(r => r.json())
+            .then(d => { if (d.authenticated) window.location.href = 'profile.html?view=own'; })
+            .catch(() => {});
+    } else if (params.get('create') === '1') {
+        document.getElementById('register-identifier-bar').style.display = 'none';
+        document.getElementById('register-sign-in-instead').style.display = 'block';
+        showStep('step-register');
+    }
+    updateCreateAccountButtonState();
+});
+</script>
+</body>
+</html>

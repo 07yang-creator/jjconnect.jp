@@ -99,7 +99,8 @@
     </div>
   </aside>
 
-  <!-- 4. Add JavaScript before closing </body> -->
+  <!-- 4. Add JavaScript before closing </body> (include cloudflare-image-url.js if showing cover images) -->
+  <script src="cloudflare-image-url.js"></script>
   <script>
     // ⚠️ IMPORTANT: Replace with your actual Supabase credentials
     const SUPABASE_URL = 'https://your-project.supabase.co';
@@ -144,7 +145,7 @@
         if (data?.length) {
           list.innerHTML = data.map(p => `
             <a href="/posts/${p.id}" class="block group hover:bg-gray-50 rounded-lg p-2 transition-colors hidden md:block">
-              ${p.cover_image ? `<div class="aspect-video w-full mb-2 rounded overflow-hidden bg-gray-200"><img src="${p.cover_image}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" /></div>` : ''}
+              ${p.cover_image ? `<div class="aspect-video w-full mb-2 rounded overflow-hidden bg-gray-200"><img src="${getCoverImageUrl(p.cover_image, 'card')}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async" /></div>` : ''}
               <h4 class="text-sm font-medium text-gray-900 line-clamp-2 mb-1 group-hover:text-blue-600 transition-colors">${p.title}</h4>
               <div class="flex items-center justify-between text-xs">
                 <span class="text-gray-600">${p.author?.display_name || '匿名'}</span>

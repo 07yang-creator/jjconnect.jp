@@ -6,6 +6,7 @@
 
 import { redirect } from 'next/navigation';
 import { createServerSupabaseClient, getCurrentUser, isAuthorizedUser } from '@/lib/supabase/server';
+import { getCoverImageUrl } from '@/lib/cloudflare-image-url';
 
 interface ReviewPost {
   id: string;
@@ -245,9 +246,11 @@ export default async function AdminReviewPage({
                 {post.cover_image && (
                   <div className="w-32 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
                     <img
-                      src={post.cover_image}
+                      src={getCoverImageUrl(post.cover_image, 'card')}
                       alt={post.title}
                       className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </div>
                 )}

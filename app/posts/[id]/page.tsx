@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache';
 import { createServerSupabaseClient, getCurrentUser } from '@/lib/supabase/server';
 import type { Post, PostContent } from '@/types/database';
 import { tiptapJsonToHtml } from '@/lib/tiptap-json-to-html';
+import { getCoverImageUrl } from '@/lib/cloudflare-image-url';
 
 interface Comment {
   id: string;
@@ -213,9 +214,11 @@ export default async function PostPage({ params }: PostPageProps) {
           {post.cover_image && (
             <div className="mb-6">
               <img
-                src={post.cover_image}
+                src={getCoverImageUrl(post.cover_image, 'detail')}
                 alt={post.title}
                 className="w-full rounded-lg object-cover"
+                loading="lazy"
+                decoding="async"
               />
             </div>
           )}

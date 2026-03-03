@@ -54,6 +54,7 @@
 </head>
 <body class="min-h-screen" style="background: var(--jjc-bg);">
   <script src="navbar.js"></script>
+  <script src="cloudflare-image-url.js"></script>
 
   <div class="min-h-screen">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -164,7 +165,7 @@
       ` : '';
 
       const coverImage = post.cover_image ? `
-        <img src="${post.cover_image}" alt="${post.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+        <img src="${getCoverImageUrl(post.cover_image, 'card')}" alt="${post.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async" />
       ` : `
         <div class="w-full h-full flex items-center justify-center text-gray-400">
           <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -195,7 +196,7 @@
             <div class="flex items-center justify-between text-xs text-gray-500">
               <div class="flex items-center gap-2">
                 ${post.author?.avatar_url ? 
-                  `<img src="${post.author.avatar_url}" alt="${post.author.display_name || ''}" class="w-5 h-5 rounded-full" />` :
+                  `<img src="${post.author.avatar_url}" alt="${post.author.display_name || ''}" class="w-5 h-5 rounded-full" loading="lazy" />` :
                   `<div class="w-5 h-5 rounded-full bg-gray-300"></div>`
                 }
                 <span>${post.author?.display_name || 'Anonymous'}</span>

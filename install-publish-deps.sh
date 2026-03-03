@@ -21,7 +21,7 @@ if [ ! -f "package.json" ]; then
 fi
 
 echo "🔧 Installing TipTap editor and extensions..."
-npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image @tiptap/extension-link @tiptap/extension-placeholder
+npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image @tiptap/extension-file-handler @tiptap/extension-link @tiptap/extension-placeholder
 
 echo ""
 echo "🔧 Installing Supabase client..."

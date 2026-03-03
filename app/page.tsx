@@ -6,6 +6,7 @@
 import Link from 'next/link';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import type { Post, Category } from '@/types/database';
+import { getCoverImageUrl } from '@/lib/cloudflare-image-url';
 
 // Extend Post type with relations
 interface PostWithAuthor extends Post {
@@ -310,9 +311,11 @@ function PostCard({ post }: PostCardProps) {
       <div className="relative aspect-video bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
         {post.cover_image ? (
           <img
-            src={post.cover_image}
+            src={getCoverImageUrl(post.cover_image, 'card')}
             alt={post.title}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            loading="lazy"
+            decoding="async"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400">

@@ -1,0 +1,11 @@
+{
+  "app/editor/basic/page.tsx -> @/src/components/TipTapBasicEditor": {
+    "id": 3912,
+    "files": [
+      "static/chunks/70e0d97a-7cb972dc861ad7a1.js",
+      "static/chunks/54a60aa6-be002e3c28746b90.js",
+      "static/chunks/974-4961a4e0d530453f.js",
+      "static/chunks/912.e4c38444e69bf5a4.js"
+    ]
+  }
+}

@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import type { Category, Post } from '@/types/database';
+import { getCoverImageUrl } from '@/lib/cloudflare-image-url';
 
 interface PostWithAuthor extends Post {
   author: {
@@ -229,9 +230,11 @@ function PostCard({ post }: PostCardProps) {
       <div className="relative aspect-video bg-gray-200 overflow-hidden">
         {post.cover_image ? (
           <img
-            src={post.cover_image}
+            src={getCoverImageUrl(post.cover_image, 'card')}
             alt={post.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+            decoding="async"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400">

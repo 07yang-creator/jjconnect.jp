@@ -7,6 +7,16 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 249, 250, 251;
   --background-end-rgb: 255, 255, 255;
+  /* Notion-style tokens */
+  --sidebar-width: 224px;
+  --sidebar-collapsed: 48px;
+  --radius: 8px;
+  --bg-page: #fafafa;
+  --bg-sidebar: #ffffff;
+  --border: rgba(0, 0, 0, 0.06);
+  --text-primary: #37352f;
+  --text-secondary: #6b6b6b;
+  --hover: rgba(55, 53, 47, 0.08);
 }
 
 body {

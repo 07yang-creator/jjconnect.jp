@@ -102,7 +102,7 @@ async function uploadCoverImage(
  */
 function validatePostInput(input: unknown): { valid: true; data: SchemaCreatePostInput } | { valid: false; error: string } {
   const parsed = parseSafe(createPostSchema, input);
-  if (parsed.success) return { valid: true, data: parsed.data };
+  if (parsed.success) return { valid: true, data: parsed.data as SchemaCreatePostInput };
   const firstIssue = parsed.error.issues[0];
   const msg = firstIssue?.message || 'Invalid post input';
   return { valid: false, error: msg };
@@ -177,7 +177,8 @@ export async function createPost(input: CreatePostInput): Promise<CreatePostResu
         .eq('id', validatedInput.user_category_id)
         .single();
       
-      if (!userCategory || userCategory.user_id !== user.id) {
+      const uc = userCategory as { user_id: string } | null;
+      if (!uc || uc.user_id !== user.id) {
         return {
           success: false,
           error: {
@@ -224,9 +225,10 @@ export async function createPost(input: CreatePostInput): Promise<CreatePostResu
     };
     
     // 6. Insert post
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: post, error: insertError } = await supabase
       .from('posts')
-      .insert(postData)
+      .insert(postData as any)
       .select('id')
       .single();
     
@@ -242,6 +244,8 @@ export async function createPost(input: CreatePostInput): Promise<CreatePostResu
       };
     }
 
+    const postId = (post as { id: string }).id;
+
     // 6b. If submitted for review (review_state === 'pending'), send emails
     const contentWithReview = validatedInput.content as Record<string, unknown> | undefined;
     if (contentWithReview?.review_state === 'pending' && user.email) {
@@ -253,14 +257,14 @@ export async function createPost(input: CreatePostInput): Promise<CreatePostResu
           .select('display_name')
           .eq('id', user.id)
           .single();
-        authorDisplayName = profile?.display_name ?? null;
+        authorDisplayName = (profile as { display_name?: string } | null)?.display_name ?? null;
       } catch {
         // ignore
       }
       const reviewPayload = {
         postTitle: validatedInput.title.trim(),
         authorEmail,
-        postId: post.id,
+        postId,
         authorDisplayName,
       };
       Promise.all([
@@ -283,7 +287,7 @@ export async function createPost(input: CreatePostInput): Promise<CreatePostResu
     return {
       success: true,
       data: {
-        post_id: post.id,
+        post_id: postId,
         cover_url: coverUrl || undefined,
       },
     };
