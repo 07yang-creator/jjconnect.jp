@@ -5,7 +5,7 @@
 
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient, getCurrentUser, isAuthorizedUser } from '@/lib/supabase/server';
 import type { Category, Post } from '@/types/database';
 import { getCoverImageUrl } from '@/lib/cloudflare-image-url';
 
@@ -111,6 +111,9 @@ export default async function CategoryPage({
   
   const posts = await getPostsByCategory(category.id);
   const relatedCategories = await getRelatedCategories(params.slug);
+  
+  const user = await getCurrentUser();
+  const canPublish = user ? await isAuthorizedUser(user.id) : false;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -160,7 +163,7 @@ export default async function CategoryPage({
                 ))}
               </div>
             ) : (
-              <EmptyState />
+              <EmptyState showPublishLink={canPublish} />
             )}
           </div>
 
@@ -190,17 +193,17 @@ export default async function CategoryPage({
               </div>
             )}
 
-            {/* CTA Card */}
+            {/* CTA Card - 发布入口仅授权用户可见 */}
             <div className="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg shadow-sm p-6 text-white">
               <h3 className="font-semibold mb-2">分享你的经验</h3>
               <p className="text-sm text-blue-100 mb-4">
                 在这个分类下发布你的文章
               </p>
               <Link
-                href="/publish"
+                href={canPublish ? '/publish' : '/login.html'}
                 className="block w-full text-center bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-blue-50 transition-colors"
               >
-                发布文章
+                {canPublish ? '发布文章' : '登录后发布'}
               </Link>
             </div>
 
@@ -299,7 +302,7 @@ function PostCard({ post }: PostCardProps) {
   );
 }
 
-function EmptyState() {
+function EmptyState({ showPublishLink }: { showPublishLink?: boolean }) {
   return (
     <div className="col-span-full text-center py-16 bg-white rounded-lg">
       <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -311,12 +314,21 @@ function EmptyState() {
       <p className="text-gray-500 mb-6">
         该分类下还没有发布任何文章
       </p>
-      <Link
-        href="/publish"
-        className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-      >
-        发布第一篇文章
-      </Link>
+      {showPublishLink ? (
+        <Link
+          href="/publish"
+          className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+        >
+          发布第一篇文章
+        </Link>
+      ) : (
+        <Link
+          href="/login.html"
+          className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+        >
+          登录后发布
+        </Link>
+      )}
     </div>
   );
 }

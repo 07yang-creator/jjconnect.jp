@@ -210,6 +210,35 @@
       opacity: 0.9;
     }
     
+    /* 右下角 Home 按钮：默认无文字无边框，悬停时显示 */
+    .home-btn-wrap {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 10;
+    }
+    .home-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2.5rem;
+      min-height: 2.5rem;
+      padding: 0 0.75rem;
+      background: #000;
+      color: transparent;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      transition: color 0.2s, border-color 0.2s, padding 0.2s;
+    }
+    .home-btn:hover {
+      color: #fff;
+      border-color: rgba(255,255,255,0.25);
+      padding: 0 1.25rem;
+    }
+    
     .newsletter-btn svg {
       width: 20px;
       height: 20px;
@@ -275,6 +304,10 @@
         </svg>
       </button>
     </form>
+  </div>
+
+  <div class="home-btn-wrap">
+    <a href="home.html" class="home-btn">Home</a>
   </div>
 
   <script>

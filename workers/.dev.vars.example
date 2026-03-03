@@ -4,6 +4,8 @@
 
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_ANON_KEY=your_supabase_anon_key
+# 同步 role_permissions 到 Supabase 时使用（admin 更新授权双写）
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key

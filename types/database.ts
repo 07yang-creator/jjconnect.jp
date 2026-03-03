@@ -9,6 +9,13 @@
 
 export type PostStatus = 'draft' | 'published';
 
+/** Role Matrix permission row */
+export interface RolePermission {
+  role_level: string;
+  resource: string;
+  permission: string;
+}
+
 // ============================================================================
 // BASE TABLE INTERFACES
 // ============================================================================
@@ -36,6 +43,7 @@ export interface Profile {
   avatar_url: string | null;
   bio: string | null;
   is_authorized: boolean; // Admin/authorized user flag
+  role_level?: string | null; // Role Matrix: A/B/CB/VB/T/S/W/WN/W1/W2/W3/S_writer
   created_at: string;
   updated_at: string;
 }
@@ -166,8 +174,9 @@ export type CategoryUpdate = Partial<Omit<Category, 'id' | 'created_at' | 'updat
  * Type for inserting a new profile
  * Omits auto-generated fields and defaults
  */
-export type ProfileInsert = Omit<Profile, 'created_at' | 'updated_at' | 'is_authorized'> & {
+export type ProfileInsert = Omit<Profile, 'created_at' | 'updated_at' | 'is_authorized' | 'role_level'> & {
   is_authorized?: boolean;
+  role_level?: string | null;
 };
 
 /**
@@ -316,6 +325,11 @@ export interface Database {
         Row: UserCategory;
         Insert: UserCategoryInsert;
         Update: UserCategoryUpdate;
+      };
+      role_permissions: {
+        Row: RolePermission;
+        Insert: RolePermission;
+        Update: Partial<RolePermission>;
       };
     };
     Views: {

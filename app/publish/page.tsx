@@ -1,16 +1,21 @@
 /**
  * Publish Page - Server Component wrapper
- * Redirects to /login.html if user is not authenticated
+ * Requires login + is_authorized (write permission for publish)
+ * Non-authorized users are redirected to home
  */
 
 import { redirect } from 'next/navigation';
-import { getCurrentUser } from '@/lib/supabase/server';
+import { getCurrentUser, isAuthorizedUser } from '@/lib/supabase/server';
 import PublishForm from './PublishForm';
 
 export default async function PublishPage() {
   const user = await getCurrentUser();
   if (!user) {
     redirect('/login.html');
+  }
+  const authorized = await isAuthorizedUser(user.id);
+  if (!authorized) {
+    redirect('/');
   }
   return <PublishForm />;
 }

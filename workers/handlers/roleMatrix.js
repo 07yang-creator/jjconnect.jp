@@ -1,11 +1,13 @@
 /**
- * Role Matrix sync handler - POST /api/admin/sync-role-matrix
- * Fetches Google Sheet CSV, parses, writes to D1 role_permissions
+ * Role Matrix handlers:
+ * - POST /api/admin/sync-role-matrix
+ * - GET /api/my-permissions
  */
 
 import { jsonResponse, errorResponse } from '../lib/http.js';
 import { extractToken, verifyToken } from '../lib/auth.js';
-import { parseRoleMatrixCSV } from '../lib/roleMatrix.js';
+import { parseRoleMatrixCSV, getAllPermissionsForRole, hasWritePermission } from '../lib/roleMatrix.js';
+import { getSupabaseServiceConfig, syncRolePermissionsToSupabase } from '../lib/supabase.js';
 
 export async function handleSyncRoleMatrix(request, env) {
   try {
@@ -77,6 +79,17 @@ export async function handleSyncRoleMatrix(request, env) {
       return errorResponse(`写入数据库失败: ${dbError.message}`, 500);
     }
 
+    // 双写 Supabase role_permissions（供 Next.js 查询）
+    const supabaseService = getSupabaseServiceConfig(env);
+    if (supabaseService) {
+      try {
+        await syncRolePermissionsToSupabase(supabaseService, rows);
+      } catch (supaErr) {
+        console.error('Supabase role_permissions sync error:', supaErr);
+        // 不阻断成功，D1 已写入
+      }
+    }
+
     const lastSyncAt = new Date().toISOString();
     return jsonResponse({
       success: true,
@@ -88,5 +101,60 @@ export async function handleSyncRoleMatrix(request, env) {
   } catch (error) {
     console.error('Sync role matrix error:', error);
     return errorResponse('同步失败', 500);
+  }
+}
+
+/**
+ * GET /api/my-permissions - Returns permissions for current user's role_level
+ */
+export async function handleGetMyPermissions(request, env) {
+  try {
+    const token = extractToken(request);
+    if (!token) return errorResponse('需要登录', 401);
+
+    let payload;
+    try {
+      payload = verifyToken(token, env);
+    } catch (e) {
+      return errorResponse(`Token 验证失败: ${e.message}`, 401);
+    }
+    if (!payload) return errorResponse('Token 无效或已过期', 401);
+
+    const roleLevel = payload.role_level || 'T';
+    const permissions = await getAllPermissionsForRole(roleLevel, env);
+
+    // Derive admin UI flags from matrix (fallback to role for backward compat)
+    const canPublishContent =
+      hasWritePermission(permissions.blog_full_1) ||
+      hasWritePermission(permissions.blog_full_2) ||
+      hasWritePermission(permissions.blog_full_3) ||
+      hasWritePermission(permissions.admin_content) ||
+      payload.role >= 2;
+    const canEditContent = canPublishContent;
+    const canAccessUserManagement =
+      hasWritePermission(permissions.admin_users) || payload.role >= 1;
+    const canAccessContentManagement = canPublishContent;
+    const canAccessSystemSettings =
+      hasWritePermission(permissions.admin_settings) || payload.role >= 2;
+
+    return jsonResponse({
+      success: true,
+      role_level: roleLevel,
+      permissions,
+      ui: {
+        canPublishContent,
+        canEditContent,
+        canSaveDraft: canPublishContent,
+        canAccessUserManagement,
+        canAccessContentManagement,
+        canAccessSystemSettings,
+        canAddUser: payload.role >= 2,
+        canDeleteUser: payload.role >= 2,
+        canDeleteContent: payload.role >= 2,
+      },
+    });
+  } catch (error) {
+    console.error('Get my permissions error:', error);
+    return errorResponse('获取权限失败', 500);
   }
 }

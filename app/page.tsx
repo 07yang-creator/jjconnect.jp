@@ -4,7 +4,7 @@
  */
 
 import Link from 'next/link';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient, getCurrentUser, isAuthorizedUser } from '@/lib/supabase/server';
 import type { Post, Category } from '@/types/database';
 import { getCoverImageUrl } from '@/lib/cloudflare-image-url';
 
@@ -153,6 +153,10 @@ export default async function HomePage({ searchParams }: PageProps) {
   
   // 仅在无过滤时获取分类列表
   const categoriesWithPosts = !categorySlug ? await getCategoriesWithPosts() : [];
+  
+  // 仅授权用户可见「发布文章」入口
+  const user = await getCurrentUser();
+  const canPublish = user ? await isAuthorizedUser(user.id) : false;
 
   return (
     <div className="space-y-8">
@@ -211,7 +215,7 @@ export default async function HomePage({ searchParams }: PageProps) {
             ))}
           </div>
         ) : (
-          <EmptyState message={currentCategory ? `${currentCategory.name} 分类暂无文章` : '暂无文章'} />
+          <EmptyState message={currentCategory ? `${currentCategory.name} 分类暂无文章` : '暂无文章'} showPublishLink={canPublish} />
         )}
       </section>
 
@@ -252,7 +256,7 @@ export default async function HomePage({ searchParams }: PageProps) {
         </>
       )}
 
-      {/* CTA Section - Only show when not filtering */}
+      {/* CTA Section - Only show when not filtering; 发布入口仅授权用户可见 */}
       {!categorySlug && (
         <section className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 md:p-12 text-center text-white shadow-xl">
           <h2 className="text-3xl font-bold mb-4">
@@ -261,12 +265,21 @@ export default async function HomePage({ searchParams }: PageProps) {
           <p className="text-lg mb-6 text-blue-100">
             加入我们的社区，与志同道合的朋友交流经验
           </p>
-          <Link
-            href="/publish"
-            className="inline-block bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors shadow-lg hover:shadow-xl"
-          >
-            发布文章
-          </Link>
+          {canPublish ? (
+            <Link
+              href="/publish"
+              className="inline-block bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors shadow-lg hover:shadow-xl"
+            >
+              发布文章
+            </Link>
+          ) : (
+            <Link
+              href="/login.html"
+              className="inline-block bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors shadow-lg hover:shadow-xl"
+            >
+              登录后发布
+            </Link>
+          )}
         </section>
       )}
 
@@ -408,13 +421,19 @@ function PostCard({ post }: PostCardProps) {
   );
 }
 
-function EmptyState({ message }: { message: string }) {
+function EmptyState({ message, showPublishLink }: { message: string; showPublishLink?: boolean }) {
   return (
     <div className="text-center py-12 bg-white rounded-lg">
       <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
       </svg>
-      <p className="text-gray-500">{message}</p>
+      <p className="text-gray-500 mb-6">{message}</p>
+      <Link
+        href={showPublishLink ? '/publish' : '/login.html'}
+        className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+      >
+        {showPublishLink ? '发布文章' : '登录后发布'}
+      </Link>
     </div>
   );
 }

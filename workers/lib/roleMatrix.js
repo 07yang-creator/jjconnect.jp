@@ -34,6 +34,10 @@ const RESOURCE_MAP = {
   'mono_bb': 'mono_bb',
   'mono_cb': 'mono_cb',
   'mono_vb': 'mono_vb',
+  'admin_users': 'admin_users',
+  'admin_content': 'admin_content',
+  'admin_settings': 'admin_settings',
+  'publish': 'publish',
 };
 
 /** Normalize permission cell value to R, R/W, allow, deny */
@@ -169,4 +173,29 @@ export async function getPermission(roleLevel, resource, env) {
 /** Check if permission allows write (R/W or allow) */
 export function hasWritePermission(permission) {
   return permission === 'R/W' || permission === 'allow';
+}
+
+/**
+ * Get all permissions for a role_level from D1
+ * @param {string} roleLevel
+ * @param {object} env
+ * @returns {Promise<Record<string, string>>} - { resource: permission }
+ */
+export async function getAllPermissionsForRole(roleLevel, env) {
+  if (!roleLevel || !env.DB) return {};
+  try {
+    const { results } = await env.DB.prepare(
+      'SELECT resource, permission FROM role_permissions WHERE role_level = ?'
+    )
+      .bind(roleLevel)
+      .all();
+    const map = {};
+    for (const row of results || []) {
+      map[row.resource] = row.permission;
+    }
+    return map;
+  } catch (e) {
+    console.error('getAllPermissionsForRole error:', e);
+    return {};
+  }
 }

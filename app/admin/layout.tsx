@@ -1,10 +1,12 @@
 /**
  * Admin Layout - Notion-style sidebar + top bar
  * Sidebar: ~224px, collapse to 48px on mobile (drawer)
+ * 权限：is_authorized / role_level=A 或 矩阵中对 admin_content/blog_full_* 有 R/W
  */
 
 import { redirect } from 'next/navigation';
-import { getCurrentUser, isAuthorizedUser } from '@/lib/supabase/server';
+import { getCurrentUser, isAuthorizedUser, getRoleLevel } from '@/lib/supabase/server';
+import { getAllPermissionsForRole, canAccessAdmin } from '@/lib/supabase/roleMatrix';
 import AdminSidebar from './AdminSidebar';
 
 export default async function AdminLayout({
@@ -17,8 +19,12 @@ export default async function AdminLayout({
     redirect('/login.html');
   }
 
-  const authorized = await isAuthorizedUser(user.id);
-  if (!authorized) {
+  const byFlag = await isAuthorizedUser(user.id);
+  const roleLevel = await getRoleLevel(user.id);
+  const permissions = await getAllPermissionsForRole(roleLevel);
+  const byMatrix = canAccessAdmin(permissions);
+
+  if (!byFlag && !byMatrix) {
     redirect('/');
   }
 

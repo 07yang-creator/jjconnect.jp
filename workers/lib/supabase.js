@@ -17,8 +17,6 @@ export function getSupabaseConfig(env) {
     return null;
   }
 
-  console.log('[INFO] Supabase initialized:', supabaseUrl.substring(0, 30) + '...');
-
   return {
     url: supabaseUrl,
     key: supabaseKey,
@@ -28,6 +26,63 @@ export function getSupabaseConfig(env) {
       'Content-Type': 'application/json',
     },
   };
+}
+
+/**
+ * Get Supabase client with service role (bypasses RLS)
+ * Used for sync operations like role_permissions
+ */
+export function getSupabaseServiceConfig(env) {
+  const supabaseUrl = env.SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceKey) {
+    return null;
+  }
+
+  return {
+    url: supabaseUrl,
+    headers: {
+      apikey: serviceKey,
+      Authorization: `Bearer ${serviceKey}`,
+      'Content-Type': 'application/json',
+    },
+  };
+}
+
+/**
+ * Bulk replace role_permissions in Supabase (delete all + insert)
+ * Uses service role to bypass RLS
+ */
+export async function syncRolePermissionsToSupabase(config, rows) {
+  if (!config) return;
+  const base = `${config.url}/rest/v1/role_permissions`;
+
+  // Delete all
+  const delRes = await fetch(base, {
+    method: 'DELETE',
+    headers: { ...config.headers, Prefer: 'return=minimal' },
+  });
+  if (!delRes.ok) {
+    throw new Error(`Supabase role_permissions delete failed: ${delRes.status}`);
+  }
+
+  if (rows.length === 0) return;
+
+  // Bulk insert (PostgREST accepts array, max ~1000 per request)
+  const chunkSize = 500;
+  for (let i = 0; i < rows.length; i += chunkSize) {
+    const chunk = rows.slice(i, i + chunkSize);
+    const insRes = await fetch(base, {
+      method: 'POST',
+      headers: { ...config.headers, Prefer: 'return=minimal' },
+      body: JSON.stringify(chunk),
+    });
+    if (!insRes.ok) {
+      const err = await insRes.text();
+      throw new Error(`Supabase role_permissions insert failed: ${insRes.status} - ${err}`);
+    }
+  }
 }
 
 /**

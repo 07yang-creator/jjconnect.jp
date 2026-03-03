@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
   firstname TEXT NOT NULL,
   lastname TEXT NOT NULL,
   role INTEGER DEFAULT 0,     -- 0: Viewer, 1: Editor, 2: Admin
+  role_level TEXT DEFAULT 'T', -- A/B/CB/VB/T/S/W/WN/W1/W2/W3/S_writer (from Role Matrix)
   email_verified BOOLEAN DEFAULT 0, -- 0: false, 1: true
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -59,6 +60,19 @@ CREATE TABLE IF NOT EXISTS submissions (
 CREATE INDEX IF NOT EXISTS idx_submissions_user_id ON submissions(user_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_status ON submissions(status);
 CREATE INDEX IF NOT EXISTS idx_submissions_created_at ON submissions(created_at);
+
+-- Table: role_permissions
+-- Role Level Matrix: role_level + resource -> permission (R, R/W, allow, deny)
+-- Synced from Google Sheet via admin "更新授权" button
+CREATE TABLE IF NOT EXISTS role_permissions (
+  role_level TEXT NOT NULL,
+  resource TEXT NOT NULL,
+  permission TEXT NOT NULL,
+  PRIMARY KEY (role_level, resource)
+);
+
+CREATE INDEX IF NOT EXISTS idx_role_permissions_role ON role_permissions(role_level);
+CREATE INDEX IF NOT EXISTS idx_role_permissions_resource ON role_permissions(resource);
 
 -- Example of initial data (for development/testing)
 -- INSERT OR IGNORE INTO users (id, username, email, password_hash, firstname, lastname, role, email_verified)

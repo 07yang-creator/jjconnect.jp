@@ -69,7 +69,7 @@
                             </button>
                             <div class="jjc-user-dropdown" id="jjc-user-dropdown">
                                 <a href="profile.html?view=own" class="jjc-user-dropdown-item">My Profile</a>
-                                ${userData?.role >= 2 ? '<a href="admin.html" class="jjc-user-dropdown-item">Admin Dashboard</a>' : ''}
+                                ${(userData?.role >= 2 || userData?.role_level === 'A') ? '<a href="admin.html" class="jjc-user-dropdown-item">Admin Dashboard</a>' : ''}
                                 <button id="jjc-logout-btn" class="jjc-user-dropdown-item">Logout</button>
                             </div>
                         </div>
@@ -115,7 +115,7 @@
                 ${isLoggedIn ? `
                     <a href="profile.html?view=own" class="jjc-mobile-link">My Profile</a>
                     <div class="jjc-mobile-user">${avatarSrc ? '<img class="jjc-mobile-avatar" src="' + avatarSrc + '" alt="">' : '👤'} ${userData?.username || 'User'}</div>
-                    ${userData?.role >= 2 ? '<a href="admin.html" class="jjc-mobile-link">Admin Dashboard</a>' : ''}
+                    ${(userData?.role >= 2 || userData?.role_level === 'A') ? '<a href="admin.html" class="jjc-mobile-link">Admin Dashboard</a>' : ''}
                     <button id="jjc-mobile-logout" class="jjc-mobile-link">Logout</button>
                 ` : `
                     <a href="login.html" class="jjc-mobile-link">Sign in</a>

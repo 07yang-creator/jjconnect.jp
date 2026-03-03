@@ -55,13 +55,14 @@ export async function getCurrentUser() {
 
 /**
  * Check if the current user is authorized (admin)
+ * 兼容 is_authorized 与 role_level === 'A'
  */
 export async function isAuthorizedUser(userId: string) {
   const supabase = await createServerSupabaseClient();
   
   const { data, error } = await supabase
     .from('profiles')
-    .select('is_authorized')
+    .select('is_authorized, role_level')
     .eq('id', userId)
     .single();
   
@@ -69,5 +70,25 @@ export async function isAuthorizedUser(userId: string) {
     return false;
   }
   
-  return data.is_authorized === true;
+  return data.is_authorized === true || data.role_level === 'A';
+}
+
+/**
+ * Get role_level for a user (for Role Matrix permission checks)
+ * Returns 'T' if not found or null
+ */
+export async function getRoleLevel(userId: string): Promise<string> {
+  const supabase = await createServerSupabaseClient();
+  
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('role_level')
+    .eq('id', userId)
+    .single();
+  
+  if (error || !data?.role_level) {
+    return 'T';
+  }
+  
+  return data.role_level;
 }
