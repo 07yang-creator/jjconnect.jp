@@ -43,6 +43,7 @@ export async function handleLogin(request, env, data) {
       username: user.username,
       email: user.email,
       role: user.role,
+      role_level: user.role_level || 'T',
       name: `${user.firstname} ${user.lastname}`,
     };
 
@@ -113,6 +114,7 @@ export async function handleAuthCheck(request, env) {
         email: payload.email,
         avatar_url: avatar_url,
         role: payload.role,
+        role_level: payload.role_level || 'T',
         name: payload.name,
       },
     });
@@ -249,6 +251,7 @@ export async function handleRegister(request, env, data) {
       username: newUser.username,
       email: newUser.email,
       role: newUser.role,
+      role_level: newUser.role_level || 'T',
       name: `${newUser.firstname} ${newUser.lastname}`,
     };
 
@@ -264,6 +267,7 @@ export async function handleRegister(request, env, data) {
           username: newUser.username,
           email: newUser.email,
           role: newUser.role,
+          role_level: newUser.role_level || 'T',
           name: `${newUser.firstname} ${newUser.lastname}`,
         },
       },

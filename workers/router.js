@@ -33,6 +33,7 @@ import {
   handleGetSubmissions,
   handleUpdateSubmission,
 } from './handlers/submissions.js';
+import { handleSyncRoleMatrix } from './handlers/roleMatrix.js';
 import { validate } from './lib/validate.js';
 import {
   loginSchema,
@@ -76,6 +77,7 @@ export async function route(request, env) {
     if (path === '/api/auth/check' && method === 'GET') return await handleAuthCheck(request, env);
     if (path === '/api/auth/logout' && method === 'POST') return await handleLogout(request);
     if (path === '/api/users' && method === 'GET') return await handleGetUsers(request, env);
+    if (path === '/api/admin/sync-role-matrix' && method === 'POST') return await handleSyncRoleMatrix(request, env);
     if (path.startsWith('/api/profile') && method === 'GET') return await handleGetProfile(request, env);
     if (path === '/api/profile' && method === 'PUT') return await validate(profilePatchSchema, 'body')(handlePutProfile)(request, env);
     if (path === '/api/avatar/upload' && method === 'POST') return await handleAvatarUpload(request, env);

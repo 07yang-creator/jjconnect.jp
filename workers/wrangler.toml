@@ -18,11 +18,13 @@ database_id = "9bd1d32d-80fa-4c4c-8db7-1b3b67a09bdc"
 [[r2_buckets]]
 binding = "MY_BUCKET"
 bucket_name = "jjconnect"
-preview_bucket_name = "jjconnect-preview"  # Optional: for local development
+# preview_bucket_name 已移除：若需远程预览，请先在 Cloudflare 创建 jjconnect-preview 桶
 
 # Environment variables
 [vars]
 ENVIRONMENT = "production"
+# Google Sheet CSV export URL for Role Matrix (set via wrangler secret for production)
+# ROLE_MATRIX_SHEET_URL = "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv&gid=0"
 
 # Secrets (set via: wrangler secret put SECRET_NAME)
 # JWT_SECRET - Used for JWT token signing

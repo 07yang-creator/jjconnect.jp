@@ -10,3 +10,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 # Optional: JWT secret for auth
 # JWT_SECRET=your_jwt_secret
+
+# Role Matrix - Google Sheet CSV export URL (for admin "更新授权" sync)
+# ROLE_MATRIX_SHEET_URL=https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv&gid=0
