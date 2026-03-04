@@ -5,6 +5,7 @@
 import { jsonResponse, errorResponse } from '../lib/http.js';
 import {
   getSupabaseConfig,
+  getSupabaseServiceConfig,
   querySupabase,
   supabaseUpsert,
   supabasePatch,
@@ -143,7 +144,9 @@ export async function handleGetProfile(request, env) {
         updated_at: now,
       };
       try {
-        profile = await supabaseUpsert(supabase, 'user_profiles', defaultProfile);
+        const supabaseService = getSupabaseServiceConfig(env);
+        if (!supabaseService) return jsonResponse({ success: false, error: 'Supabase service not configured' }, 500);
+        profile = await supabaseUpsert(supabaseService, 'user_profiles', defaultProfile);
       } catch (upsertErr) {
         return jsonResponse({ success: false, error: upsertErr.message }, 500);
       }
@@ -191,7 +194,9 @@ export async function handlePutProfile(request, env, data) {
   const userId = String(payload.userId);
 
   const supabase = getSupabaseConfig(env);
+  const supabaseService = getSupabaseServiceConfig(env);
   if (!supabase) return jsonResponse({ success: false, error: 'Supabase not configured' }, 500);
+  if (!supabaseService) return jsonResponse({ success: false, error: 'Supabase service not configured' }, 500);
 
   try {
     const rows = await querySupabase(supabase, 'user_profiles', {
@@ -225,10 +230,10 @@ export async function handlePutProfile(request, env, data) {
         created_at: now,
         updated_at: now,
       };
-      await supabaseUpsert(supabase, 'user_profiles', fullRow);
+      await supabaseUpsert(supabaseService, 'user_profiles', fullRow);
     } else {
       patch.updated_at = new Date().toISOString();
-      await supabasePatch(supabase, 'user_profiles', { user_id: userId }, patch);
+      await supabasePatch(supabaseService, 'user_profiles', { user_id: userId }, patch);
     }
 
     const updated = await querySupabase(supabase, 'user_profiles', {
@@ -294,7 +299,8 @@ export async function handleAvatarUpload(request, env) {
     const avatarUrl = '/api/files/' + key;
 
     const supabase = getSupabaseConfig(env);
-    if (supabase) {
+    const supabaseService = getSupabaseServiceConfig(env);
+    if (supabase && supabaseService) {
       const rows = await querySupabase(supabase, 'user_profiles', {
         select: 'user_id',
         eq: { user_id: String(payload.userId) },
@@ -302,7 +308,7 @@ export async function handleAvatarUpload(request, env) {
       });
       const exists = Array.isArray(rows) ? rows[0] : rows;
       if (exists) {
-        await supabasePatch(supabase, 'user_profiles', { user_id: String(payload.userId) }, {
+        await supabasePatch(supabaseService, 'user_profiles', { user_id: String(payload.userId) }, {
           avatar_url: avatarUrl,
           updated_at: new Date().toISOString(),
         });
@@ -313,7 +319,7 @@ export async function handleAvatarUpload(request, env) {
         )
           .bind(payload.userId)
           .first();
-        await supabaseUpsert(supabase, 'user_profiles', {
+        await supabaseUpsert(supabaseService, 'user_profiles', {
           user_id: String(payload.userId),
           username: payload.username ?? d1User?.username ?? '',
           avatar_url: avatarUrl,

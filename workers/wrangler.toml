@@ -43,12 +43,15 @@ command = ""
 [env.development]
 name = "jjconnect-auth-worker-dev"
 
-[env.development.d1_databases]
+[env.development.vars]
+ENVIRONMENT = "development"
+
+[[env.development.d1_databases]]
 binding = "DB"
 database_name = "jjconnect-db"
 database_id = "9bd1d32d-80fa-4c4c-8db7-1b3b67a09bdc"
 
-[env.development.r2_buckets]
+[[env.development.r2_buckets]]
 binding = "MY_BUCKET"
 bucket_name = "jjconnect-dev"
 
