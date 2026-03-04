@@ -10,8 +10,8 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
-# Optional: JWT secret for auth
-# JWT_SECRET=your_jwt_secret
+# JWT secret for auth（本地开发必填，否则会使用不安全的默认值）
+JWT_SECRET=your_jwt_secret_change_in_local
 
 # Role Matrix - Google Sheet CSV export URL (for admin "更新授权" sync)
 # ROLE_MATRIX_SHEET_URL=https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv&gid=0
