@@ -237,7 +237,8 @@ export async function handleRegister(request, env, data) {
     try {
       const emailResult = await sendWelcomeEmail(
         newUser.email,
-        `${newUser.firstname} ${newUser.lastname}`
+        `${newUser.firstname} ${newUser.lastname}`,
+        env,
       );
       if (!emailResult.success) {
         console.error('⚠️ Failed to send welcome email:', emailResult.error);

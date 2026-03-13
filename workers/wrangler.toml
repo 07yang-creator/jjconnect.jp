@@ -48,8 +48,8 @@ ENVIRONMENT = "development"
 
 [[env.development.d1_databases]]
 binding = "DB"
-database_name = "jjconnect-db"
-database_id = "9bd1d32d-80fa-4c4c-8db7-1b3b67a09bdc"
+database_name = "jjconnect-db-dev"
+database_id = "0ab4abc7-6c52-410a-b6e4-42f368e25554"
 
 [[env.development.r2_buckets]]
 binding = "MY_BUCKET"

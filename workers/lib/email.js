@@ -12,8 +12,18 @@ import { getWelcomeEmailContent, getSubmissionNotificationContent } from './emai
  * @param {string} params.subject - Email subject
  * @param {string} params.html - HTML body
  * @param {string} params.text - Plain text body
+ * @param {object} [env] - Worker env (optional). If env.DKIM_PRIVATE_KEY is set, DKIM signing is used.
  */
-export async function sendEmail({ to, subject, html, text }) {
+export async function sendEmail({ to, subject, html, text }, env) {
+  const personalization = {
+    to: [{ email: to }],
+  };
+  if (env?.DKIM_PRIVATE_KEY) {
+    personalization.dkim_domain = env.DKIM_DOMAIN || 'jjconnect.jp';
+    personalization.dkim_selector = env.DKIM_SELECTOR || 'mcdkim';
+    personalization.dkim_private_key = env.DKIM_PRIVATE_KEY;
+  }
+
   try {
     const response = await fetch('https://api.mailchannels.net/tx/v1/send', {
       method: 'POST',
@@ -21,11 +31,7 @@ export async function sendEmail({ to, subject, html, text }) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        personalizations: [
-          {
-            to: [{ email: to }],
-          },
-        ],
+        personalizations: [personalization],
         from: {
           email: 'noreply@jjconnect.jp',
           name: 'JJConnect',
@@ -59,26 +65,34 @@ export async function sendEmail({ to, subject, html, text }) {
 
 /**
  * Send welcome email to new user
+ * @param {object} [env] - Worker env (for DKIM when DKIM_PRIVATE_KEY is set)
  */
-export async function sendWelcomeEmail(userEmail, userName) {
+export async function sendWelcomeEmail(userEmail, userName, env) {
   const { html, text } = getWelcomeEmailContent(userName);
-  return await sendEmail({
-    to: userEmail,
-    subject: '欢迎加入 JJConnect!',
-    html,
-    text,
-  });
+  return await sendEmail(
+    {
+      to: userEmail,
+      subject: '欢迎加入 JJConnect!',
+      html,
+      text,
+    },
+    env,
+  );
 }
 
 /**
  * Send submission notification to support team
+ * @param {object} [env] - Worker env (for DKIM when DKIM_PRIVATE_KEY is set)
  */
-export async function sendSubmissionNotification(submission) {
+export async function sendSubmissionNotification(submission, env) {
   const { html, text } = getSubmissionNotificationContent(submission);
-  return await sendEmail({
-    to: 'support@jjconnect.jp',
-    subject: `新提交 - Joint Mamori Project (${submission.relation_type || '未分類'})`,
-    html,
-    text,
-  });
+  return await sendEmail(
+    {
+      to: 'support@jjconnect.jp',
+      subject: `新提交 - Joint Mamori Project (${submission.relation_type || '未分類'})`,
+      html,
+      text,
+    },
+    env,
+  );
 }

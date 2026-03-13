@@ -81,14 +81,17 @@ export async function handleSubmit(request, env, data, formData) {
     const submissionId = insertResult.meta.last_row_id;
 
     try {
-      const emailResult = await sendSubmissionNotification({
-        user_name: name,
-        user_email: email,
-        relation_type: relation_type,
-        content: content,
-        media_url: mediaKey ? getFileUrl(mediaKey) : null,
-        media_filename: mediaFilename,
-      });
+      const emailResult = await sendSubmissionNotification(
+        {
+          user_name: name,
+          user_email: email,
+          relation_type: relation_type,
+          content: content,
+          media_url: mediaKey ? getFileUrl(mediaKey) : null,
+          media_filename: mediaFilename,
+        },
+        env,
+      );
       if (!emailResult.success) {
         console.error('⚠️ Failed to send notification email:', emailResult.error);
       }
