@@ -1,3 +1,4 @@
+'use client';
 /**
  * /editor - 独立编辑器页（用于测试 TipTap 完整功能）
  * 使用 src/components/EditorPage（气泡菜单、斜杠菜单、图片粘贴上传等）

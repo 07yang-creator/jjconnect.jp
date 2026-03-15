@@ -24,6 +24,12 @@ function applyMarks(text: string, marks?: ContentNode['marks']): string {
       case 'italic':
         out = `<em>${out}</em>`;
         break;
+      case 'strike':
+        out = `<s>${out}</s>`;
+        break;
+      case 'underline':
+        out = `<u>${out}</u>`;
+        break;
       case 'code':
         out = `<code>${out}</code>`;
         break;
@@ -58,7 +64,7 @@ function renderBlock(node: ContentNode): string {
       return inner ? `<p>${inner}</p>` : '<p></p>';
     }
     case 'heading': {
-      const level = Math.min(3, Math.max(1, (node.attrs?.level as number) || 1));
+      const level = Math.min(6, Math.max(1, (node.attrs?.level as number) || 1));
       const tag = `h${level}`;
       const inner = (node.content || []).map((n) => renderNode(n)).join('');
       return `<${tag}>${inner}</${tag}>`;
@@ -80,10 +86,15 @@ function renderBlock(node: ContentNode): string {
       return `<blockquote>${inner}</blockquote>`;
     }
     case 'codeBlock': {
+      const lang = (node.attrs?.language as string) || '';
+      const langAttr = lang ? ` class="language-${escapeHtml(lang)}"` : '';
       const inner = (node.content || [])
         .map((n) => (n.type === 'text' ? escapeHtml(n.text || '') : ''))
         .join('');
-      return `<pre><code>${inner}</code></pre>`;
+      return `<pre><code${langAttr}>${inner}</code></pre>`;
+    }
+    case 'horizontalRule': {
+      return '<hr>';
     }
     case 'image': {
       const src = (node.attrs?.src as string) || '';

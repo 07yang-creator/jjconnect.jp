@@ -92,3 +92,29 @@ export async function getRoleLevel(userId: string): Promise<string> {
   
   return data.role_level;
 }
+
+/**
+ * Fetch is_authorized and role_level in a single query.
+ * Use this when both values are needed to avoid two round-trips.
+ */
+export async function getUserProfileInfo(userId: string): Promise<{
+  is_authorized: boolean;
+  role_level: string;
+}> {
+  const supabase = await createServerSupabaseClient();
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('is_authorized, role_level')
+    .eq('id', userId)
+    .single();
+
+  if (error || !data) {
+    return { is_authorized: false, role_level: 'T' };
+  }
+
+  return {
+    is_authorized: data.is_authorized === true,
+    role_level: data.role_level ?? 'T',
+  };
+}

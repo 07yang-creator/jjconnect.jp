@@ -16,14 +16,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // 获取当前用户信息
   const user = await getCurrentUser();
-
-  // Supabase 环境变量配置
-  const env = {
-    SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
-  };
 
   return (
     <html lang="ja">
@@ -43,7 +36,7 @@ export default async function RootLayout({
             </main>
 
             {/* 右侧：固定边栏 */}
-            <RightSidebar env={env} user={user} />
+            <RightSidebar user={user} />
           </div>
         </div>
       </body>

@@ -1,31 +1,65 @@
 import { NextResponse } from 'next/server';
+import { createServerSupabaseClient, getCurrentUser } from '@/lib/supabase/server';
 
-/**
- * Mock 图片上传接口
- *
- * 前端会以 multipart/form-data 方式提交：
- * - file: File
- *
- * 这里暂时不做真实存储，只返回一个模拟的 CDN URL。
- * 后续可以接入实际的云存储（如 R2 / S3 / Supabase Storage）。
- */
+const BUCKET = 'editor-images';
+const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/avif'];
+const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+
 export async function POST(request: Request) {
-  const formData = await request.formData();
+  // Auth check
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  let formData: FormData;
+  try {
+    formData = await request.formData();
+  } catch {
+    return NextResponse.json({ error: 'Invalid form data' }, { status: 400 });
+  }
+
   const file = formData.get('file') as File | null;
+  if (!file) {
+    return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+  }
 
-  // 模拟生成一个图片地址
-  const fileName = file?.name || 'image';
-  const mockUrl = `https://cdn.example.com/uploads/${Date.now()}-${encodeURIComponent(
-    fileName,
-  )}`;
+  // Validate type
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    return NextResponse.json(
+      { error: `File type not allowed. Allowed: ${ALLOWED_TYPES.join(', ')}` },
+      { status: 400 },
+    );
+  }
 
-  return NextResponse.json(
-    {
-      url: mockUrl,
-    },
-    {
-      status: 200,
-    },
-  );
+  // Validate size
+  if (file.size > MAX_SIZE_BYTES) {
+    return NextResponse.json(
+      { error: `File too large. Maximum size is ${MAX_SIZE_BYTES / 1024 / 1024} MB` },
+      { status: 400 },
+    );
+  }
+
+  // Build storage path: editor-images/{userId}/{timestamp}.{ext}
+  const ext = file.type.split('/')[1].replace('jpeg', 'jpg');
+  const path = `${user.id}/${Date.now()}.${ext}`;
+
+  const supabase = await createServerSupabaseClient();
+  const arrayBuffer = await file.arrayBuffer();
+
+  const { data, error } = await supabase.storage
+    .from(BUCKET)
+    .upload(path, new Uint8Array(arrayBuffer), {
+      contentType: file.type,
+      upsert: false,
+    });
+
+  if (error) {
+    console.error('Editor image upload error:', error);
+    return NextResponse.json({ error: 'Upload failed: ' + error.message }, { status: 500 });
+  }
+
+  const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(data.path);
+
+  return NextResponse.json({ url: publicUrl }, { status: 200 });
 }
-

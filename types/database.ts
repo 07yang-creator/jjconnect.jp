@@ -11,6 +11,7 @@ export type PostStatus = 'draft' | 'published';
 
 /** Role Matrix permission row */
 export interface RolePermission {
+  [key: string]: unknown;
   role_level: string;
   resource: string;
   permission: string;
@@ -25,6 +26,7 @@ export interface RolePermission {
  * Used for global article categorization
  */
 export interface Category {
+  [key: string]: unknown;
   id: string;
   name: string;
   slug: string;
@@ -38,6 +40,7 @@ export interface Category {
  * Extends auth.users with additional profile information
  */
 export interface Profile {
+  [key: string]: unknown;
   id: string; // References auth.users.id
   display_name: string | null;
   avatar_url: string | null;
@@ -53,6 +56,7 @@ export interface Profile {
  * Core article/content table with paid content support
  */
 export interface Post {
+  [key: string]: unknown;
   id: string;
   title: string;
   content: PostContent; // JSONB field
@@ -68,10 +72,27 @@ export interface Post {
 }
 
 /**
+ * Comments Table
+ */
+export interface Comment {
+  [key: string]: unknown;
+  id: string;
+  post_id: string;
+  user_id: string;
+  content: string;
+  parent_id: string | null;
+  created_at: string;
+}
+
+export type CommentInsert = Omit<Comment, 'id' | 'created_at'>;
+export type CommentUpdate = Partial<Omit<Comment, 'id' | 'post_id' | 'user_id' | 'created_at'>>;
+
+/**
  * User Categories Table
  * Custom categories created by authorized users for their homepage
  */
 export interface UserCategory {
+  [key: string]: unknown;
   id: string;
   user_id: string;
   name: string;
@@ -89,29 +110,31 @@ export interface UserCategory {
  */
 export interface PostContent {
   // For rich text editors like TipTap, Slate, or ProseMirror
-  type?: 'doc' | 'text' | 'html';
+  type?: string;
   content?: Array<{
     type: string;
-    attrs?: Record<string, any>;
-    content?: any[];
+    attrs?: Record<string, unknown>;
+    content?: unknown[];
     text?: string;
   }>;
-  
+
   // Alternative: plain HTML string
   html?: string;
-  
+
   // Alternative: Markdown
   markdown?: string;
-  
+
   // Alternative: blocks-based (e.g. Notion-style)
   blocks?: Array<{
     id: string;
     type: string;
-    data: Record<string, any>;
+    data: Record<string, unknown>;
   }>;
 
   /** 审核流程：提交审核时为 'pending'，管理员通过/拒绝后为 'approved' | 'rejected' */
   review_state?: 'pending' | 'approved' | 'rejected';
+  /** 审核拒绝原因 */
+  review_reason?: string | null;
 }
 
 // ============================================================================
@@ -279,7 +302,7 @@ export interface ApiResponse<T> {
 export interface ApiError {
   code: string;
   message: string;
-  details?: any;
+  details?: unknown;
 }
 
 /**
@@ -310,26 +333,37 @@ export interface Database {
         Row: Category;
         Insert: CategoryInsert;
         Update: CategoryUpdate;
+        Relationships: [];
       };
       profiles: {
         Row: Profile;
         Insert: ProfileInsert;
         Update: ProfileUpdate;
+        Relationships: [];
       };
       posts: {
         Row: Post;
         Insert: PostInsert;
         Update: PostUpdate;
+        Relationships: [];
+      };
+      comments: {
+        Row: Comment;
+        Insert: CommentInsert;
+        Update: CommentUpdate;
+        Relationships: [];
       };
       user_categories: {
         Row: UserCategory;
         Insert: UserCategoryInsert;
         Update: UserCategoryUpdate;
+        Relationships: [];
       };
       role_permissions: {
         Row: RolePermission;
         Insert: RolePermission;
         Update: Partial<RolePermission>;
+        Relationships: [];
       };
     };
     Views: {

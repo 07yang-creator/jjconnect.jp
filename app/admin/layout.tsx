@@ -5,7 +5,7 @@
  */
 
 import { redirect } from 'next/navigation';
-import { getCurrentUser, isAuthorizedUser, getRoleLevel } from '@/lib/supabase/server';
+import { getCurrentUser, getUserProfileInfo } from '@/lib/supabase/server';
 import { getAllPermissionsForRole, canAccessAdmin } from '@/lib/supabase/roleMatrix';
 import AdminSidebar from './AdminSidebar';
 
@@ -16,11 +16,11 @@ export default async function AdminLayout({
 }) {
   const user = await getCurrentUser();
   if (!user) {
-    redirect('/login.html');
+    redirect('/login');
   }
 
-  const byFlag = await isAuthorizedUser(user.id);
-  const roleLevel = await getRoleLevel(user.id);
+  // Single profiles query for both flag and role_level
+  const { is_authorized: byFlag, role_level: roleLevel } = await getUserProfileInfo(user.id);
   const permissions = await getAllPermissionsForRole(roleLevel);
   const byMatrix = canAccessAdmin(permissions);
 

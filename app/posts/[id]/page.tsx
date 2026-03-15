@@ -1,9 +1,40 @@
 import { notFound, redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import sanitizeHtml from 'sanitize-html';
 import { createServerSupabaseClient, getCurrentUser } from '@/lib/supabase/server';
 import type { Post, PostContent } from '@/types/database';
 import { tiptapJsonToHtml } from '@/lib/tiptap-json-to-html';
 import { getCoverImageUrl } from '@/lib/cloudflare-image-url';
+
+const ALLOWED_HTML_OPTIONS: sanitizeHtml.IOptions = {
+  allowedTags: [
+    'p', 'br',
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'ul', 'ol', 'li',
+    'blockquote', 'pre', 'code',
+    'strong', 'em', 's', 'u',
+    'a', 'img', 'hr',
+    'div', 'span',
+  ],
+  allowedAttributes: {
+    'a': ['href', 'target', 'rel'],
+    'img': ['src', 'alt', 'title', 'class', 'loading'],
+    'code': ['class'],
+    'div': ['class'],
+    'span': ['class'],
+  },
+  allowedSchemes: ['http', 'https', 'mailto'],
+  // Force safe values on links
+  transformTags: {
+    'a': (tagName, attribs) => ({
+      tagName,
+      attribs: {
+        ...attribs,
+        rel: attribs.target === '_blank' ? 'noopener noreferrer' : (attribs.rel || ''),
+      },
+    }),
+  },
+};
 
 interface Comment {
   id: string;
@@ -96,16 +127,25 @@ async function getProfilesForUserIds(
   return map;
 }
 
-/** Render post body: prefer stored HTML, else TipTap JSON → HTML, else fallback. */
+/** Render post body: prefer stored HTML, else TipTap JSON → HTML, else fallback.
+ *  All HTML paths are sanitized before rendering to prevent XSS. */
 function renderPostContent(content: Post['content']): string {
   if (!content) return '';
-  if (typeof content === 'string') return content;
-  const c = content as PostContent & { html?: string };
-  if (c.html && typeof c.html === 'string') return c.html;
-  if (c.type === 'doc' && Array.isArray(c.content)) {
-    return tiptapJsonToHtml(content);
+
+  let raw = '';
+  if (typeof content === 'string') {
+    raw = content;
+  } else {
+    const c = content as PostContent & { html?: string };
+    if (c.html && typeof c.html === 'string') {
+      raw = c.html;
+    } else if (c.type === 'doc' && Array.isArray(c.content)) {
+      // tiptapJsonToHtml already escapes text nodes — sanitize for defence-in-depth
+      raw = tiptapJsonToHtml(content);
+    }
   }
-  return '';
+
+  return raw ? sanitizeHtml(raw, ALLOWED_HTML_OPTIONS) : '';
 }
 
 async function createComment(formData: FormData) {
@@ -173,12 +213,14 @@ async function createComment(formData: FormData) {
   revalidatePath(`/posts/${postId}`);
 }
 
+const MAX_COMMENT_DEPTH = 5;
+
 interface PostPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default async function PostPage({ params }: PostPageProps) {
-  const { id } = params;
+  const { id } = await params;
 
   const [post, comments, currentUser] = await Promise.all([
     getPost(id),
@@ -336,7 +378,7 @@ function CommentItem({ node, depth, canReply, postId, profilesMap }: CommentItem
         <p className="text-xs sm:text-sm text-gray-800 whitespace-pre-wrap break-words">
           {node.content}
         </p>
-        {canReply && depth < 3 && (
+        {canReply && depth < MAX_COMMENT_DEPTH && (
           <details className="mt-2">
             <summary className="text-xs text-blue-600 cursor-pointer select-none">
               回复
@@ -364,7 +406,7 @@ function CommentItem({ node, depth, canReply, postId, profilesMap }: CommentItem
         )}
       </div>
 
-      {node.children.length > 0 && (
+      {node.children.length > 0 && depth < MAX_COMMENT_DEPTH && (
         <div className="mt-2 sm:mt-3 space-y-2 sm:space-y-3 border-l border-gray-200 pl-2 sm:pl-3">
           {node.children.map((child) => (
             <CommentItem

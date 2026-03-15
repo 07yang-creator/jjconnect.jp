@@ -19,7 +19,10 @@ import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
 import { BubbleMenu } from '@tiptap/react/menus';
 import { Extension } from '@tiptap/core';
+import type { Editor } from '@tiptap/core';
 import Suggestion from '@tiptap/suggestion';
+import type { SuggestionProps, SuggestionKeyDownProps } from '@tiptap/suggestion';
+import type { PostContent } from '@/types/database';
 
 // ---------------- Image 扩展：支持 float-left / float-right ----------------
 
@@ -51,7 +54,7 @@ type SlashCommandItem = {
   title: string;
   description?: string;
   icon?: React.ReactNode;
-  command: (props: { editor: any; range: { from: number; to: number } }) => void;
+  command: (props: { editor: Editor; range: { from: number; to: number } }) => void;
 };
 
 const slashItems: SlashCommandItem[] = [
@@ -113,7 +116,8 @@ const slashItems: SlashCommandItem[] = [
         .chain()
         .focus()
         .deleteRange(range)
-        .setImage({ src: url, class: 'float-left' })
+        .setImage({ src: url })
+        .updateAttributes('image', { class: 'float-left' })
         .run();
     },
   },
@@ -127,7 +131,8 @@ const slashItems: SlashCommandItem[] = [
         .chain()
         .focus()
         .deleteRange(range)
-        .setImage({ src: url, class: 'float-right' })
+        .setImage({ src: url })
+        .updateAttributes('image', { class: 'float-right' })
         .run();
     },
   },
@@ -147,7 +152,7 @@ const SlashCommand = Extension.create({
             item.title.toLowerCase().includes(query.toLowerCase()),
           );
         },
-        command: ({ editor, range, props }: any) => {
+        command: ({ editor, range, props }: { editor: Editor; range: { from: number; to: number }; props: SlashCommandItem }) => {
           props.command({ editor, range });
         },
       },
@@ -155,7 +160,6 @@ const SlashCommand = Extension.create({
   },
 
   addProseMirrorPlugins() {
-    // @ts-ignore - Suggestion 类型定义与 TipTap 版本可能略有差异
     return [
       Suggestion({
         editor: this.editor,
@@ -253,7 +257,7 @@ export default function EditorPage() {
             let component: HTMLElement | null = null;
 
             return {
-              onStart: (props: any) => {
+              onStart: (props: SuggestionProps<SlashCommandItem>) => {
                 setSlashState({
                   isOpen: true,
                   items: props.items,
@@ -266,7 +270,7 @@ export default function EditorPage() {
                   document.body.appendChild(component);
                 }
               },
-              onUpdate(props: any) {
+              onUpdate(props: SuggestionProps<SlashCommandItem>) {
                 setSlashState(prev => ({
                   ...prev,
                   items: props.items,
@@ -274,7 +278,7 @@ export default function EditorPage() {
                   range: props.range,
                 }));
               },
-              onKeyDown(props: any) {
+              onKeyDown(props: SuggestionKeyDownProps) {
                 if (props.event.key === 'Escape') {
                   setSlashState(prev => ({ ...prev, isOpen: false }));
                   return true;
@@ -459,7 +463,7 @@ export default function EditorPage() {
 
       const draft = JSON.parse(raw) as {
         title?: string;
-        content?: any;
+        content?: PostContent;
       };
 
       if (!draft.content) return;
@@ -467,8 +471,9 @@ export default function EditorPage() {
       const shouldRestore = window.confirm('检测到未发布草稿，是否恢复？');
       if (!shouldRestore) return;
 
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (draft.title) setTitle(draft.title);
-      editor.commands.setContent(draft.content, false);
+      editor.commands.setContent(draft.content as Parameters<typeof editor.commands.setContent>[0], { emitUpdate: false });
     } catch (err) {
       console.error('Failed to restore draft', err);
     }
@@ -519,7 +524,7 @@ export default function EditorPage() {
 
           <div className="relative">
             {/* 气泡菜单 */}
-            <BubbleMenu editor={editor} tippyOptions={{ duration: 150 }}>
+            <BubbleMenu editor={editor}>
               <div className="tiptap-bubble-menu shadow-md border border-gray-200 bg-white rounded-full px-2 py-1 flex items-center gap-1 text-sm">
                 <button
                   type="button"

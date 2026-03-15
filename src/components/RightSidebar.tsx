@@ -2,24 +2,25 @@
 
 /**
  * Right Sidebar Component
- * 
+ *
  * 功能：
  * - 搜索栏
  * - 官方分类导航（从 categories 表读取）
  * - 授权用户管理入口
- * - 响应式设计（移动端隐藏）
+ * - 响应式设计（移动端底部导航 + 分类模态框）
  */
 
 import { useEffect, useState } from 'react';
-import { getSupabaseClient, Env } from '@/src/lib/supabase';
-import type { Category, Profile } from '@/types/database';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { createBrowserClient } from '@/lib/supabase/client';
+import type { Category } from '@/types/database';
 
 // ============================================================================
 // TYPES
 // ============================================================================
 
 interface RightSidebarProps {
-  env: Env;
   user?: {
     id: string;
     email?: string;
@@ -36,19 +37,19 @@ interface UserProfile {
 // MAIN COMPONENT
 // ============================================================================
 
-export default function RightSidebar({ env, user }: RightSidebarProps) {
+export default function RightSidebar({ user }: RightSidebarProps) {
+  const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
 
-  // 获取分类和用户信息
   useEffect(() => {
     async function fetchData() {
       try {
-        const supabase = getSupabaseClient(env);
+        const supabase = createBrowserClient();
 
-        // 获取官方分类
         const { data: categoriesData, error: categoriesError } = await supabase
           .from('categories')
           .select('*')
@@ -60,7 +61,6 @@ export default function RightSidebar({ env, user }: RightSidebarProps) {
           setCategories(categoriesData || []);
         }
 
-        // 如果用户已登录，获取用户资料
         if (user?.id) {
           const { data: profileData, error: profileError } = await supabase
             .from('profiles')
@@ -82,20 +82,19 @@ export default function RightSidebar({ env, user }: RightSidebarProps) {
     }
 
     fetchData();
-  }, [env, user]);
+  }, [user]);
 
-  // 处理搜索
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`;
+      router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
     }
   };
 
   return (
     <>
-      {/* 桌面端右侧边栏 - 固定位置，透明模糊背景 */}
-      <aside 
+      {/* 桌面端右侧边栏 */}
+      <aside
         className="hidden md:block fixed right-0 top-0 h-screen w-[260px] bg-white/80 backdrop-blur-md border-l border-gray-200/50 shadow-lg overflow-y-auto z-40"
         style={{
           backdropFilter: 'blur(12px)',
@@ -103,7 +102,7 @@ export default function RightSidebar({ env, user }: RightSidebarProps) {
         }}
       >
         <div className="p-5 space-y-6">
-          
+
           {/* 搜索栏 */}
           <section className="space-y-3">
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -135,14 +134,14 @@ export default function RightSidebar({ env, user }: RightSidebarProps) {
               <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 官方板块
               </h3>
-            <nav className="space-y-1">
-              {categories.map((category) => (
-                <a
-                  key={category.id}
-                  href={`/?category=${category.slug}`}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-blue-50/80 text-gray-700 hover:text-blue-600 transition-all duration-200 group"
-                  title={category.description || category.name}
-                >
+              <nav className="space-y-1">
+                {categories.map((category) => (
+                  <a
+                    key={category.id}
+                    href={`/?category=${category.slug}`}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-blue-50/80 text-gray-700 hover:text-blue-600 transition-all duration-200 group"
+                    title={category.description || category.name}
+                  >
                     <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 group-hover:scale-125 transition-transform"></span>
                     <span className="text-sm font-medium truncate">
                       {category.name}
@@ -154,7 +153,7 @@ export default function RightSidebar({ env, user }: RightSidebarProps) {
           )}
 
           {/* 授权用户入口 */}
-          {user && userProfile?.is_authorized && (
+          {!isLoading && user && userProfile?.is_authorized && (
             <section className="space-y-3">
               <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 管理中心
@@ -168,9 +167,7 @@ export default function RightSidebar({ env, user }: RightSidebarProps) {
                   <svg className="w-5 h-5 flex-shrink-0 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  <span className="text-sm font-semibold">
-                    我的管理主页
-                  </span>
+                  <span className="text-sm font-semibold">我的管理主页</span>
                 </a>
 
                 <a
@@ -182,9 +179,7 @@ export default function RightSidebar({ env, user }: RightSidebarProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  <span className="text-sm font-medium">
-                    管理后台
-                  </span>
+                  <span className="text-sm font-medium">管理后台</span>
                 </a>
 
                 <a
@@ -195,26 +190,22 @@ export default function RightSidebar({ env, user }: RightSidebarProps) {
                   <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
-                  <span className="text-sm font-medium">
-                    发布内容
-                  </span>
+                  <span className="text-sm font-medium">发布内容</span>
                 </a>
               </nav>
             </section>
           )}
 
           {/* 登录提示（未登录用户） */}
-          {!user && (
+          {!isLoading && !user && (
             <section className="space-y-3">
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 shadow-sm border border-blue-100">
-                <h4 className="text-sm font-semibold text-gray-900 mb-2">
-                  加入我们
-                </h4>
+                <h4 className="text-sm font-semibold text-gray-900 mb-2">加入我们</h4>
                 <p className="text-xs text-gray-600 mb-3 leading-relaxed">
                   登录后即可发布内容、关注作者、参与讨论
                 </p>
                 <a
-                  href="/login.html"
+                  href="/login"
                   className="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2.5 px-4 rounded-lg transition-all hover:shadow-md"
                 >
                   立即登录
@@ -224,7 +215,7 @@ export default function RightSidebar({ env, user }: RightSidebarProps) {
           )}
 
           {/* 用户信息（已登录但非授权用户） */}
-          {user && !userProfile?.is_authorized && (
+          {!isLoading && user && !userProfile?.is_authorized && (
             <section className="space-y-3">
               <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                 <div className="flex items-center gap-3 mb-3">
@@ -260,28 +251,21 @@ export default function RightSidebar({ env, user }: RightSidebarProps) {
         </div>
       </aside>
 
-      {/* 移动端底部导航栏（替代右侧边栏） */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-lg z-50 safe-area-inset-bottom">
+      {/* 移动端底部导航栏 */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-lg z-50 pb-safe">
         <div className="flex items-center justify-around px-2 py-3">
-          
+
           {/* 首页 */}
-          <a
-            href="/"
-            className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
-          >
+          <Link href="/" className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
             <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
             <span className="text-xs text-gray-600">首页</span>
-          </a>
+          </Link>
 
           {/* 分类 */}
           <button
-            onClick={() => {
-              // 可以实现一个弹出的分类菜单
-              const modal = document.getElementById('mobile-categories-modal');
-              if (modal) modal.classList.remove('hidden');
-            }}
+            onClick={() => setIsCategoriesModalOpen(true)}
             className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
           >
             <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -291,10 +275,7 @@ export default function RightSidebar({ env, user }: RightSidebarProps) {
           </button>
 
           {/* 搜索 */}
-          <a
-            href="/search"
-            className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
-          >
+          <a href="/search" className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
             <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
@@ -304,20 +285,14 @@ export default function RightSidebar({ env, user }: RightSidebarProps) {
           {/* 我的 / 登录 */}
           {user ? (
             userProfile?.is_authorized ? (
-              <a
-                href="/dashboard"
-                className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
-              >
+              <a href="/dashboard" className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
                 <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <span className="text-xs text-purple-600 font-semibold">管理</span>
               </a>
             ) : (
-              <a
-                href="/profile"
-                className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
-              >
+              <a href="/profile" className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
                 <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
@@ -325,10 +300,7 @@ export default function RightSidebar({ env, user }: RightSidebarProps) {
               </a>
             )
           ) : (
-            <a
-              href="/login.html"
-              className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
-            >
+            <a href="/login" className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
               <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
               </svg>
@@ -339,44 +311,41 @@ export default function RightSidebar({ env, user }: RightSidebarProps) {
       </nav>
 
       {/* 移动端分类模态框 */}
-      <div
-        id="mobile-categories-modal"
-        className="md:hidden hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-        onClick={(e) => {
-          if (e.target === e.currentTarget) {
-            e.currentTarget.classList.add('hidden');
-          }
-        }}
-      >
-        <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[70vh] overflow-y-auto animate-slide-up">
-          <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">官方分类</h3>
-            <button
-              onClick={() => {
-                const modal = document.getElementById('mobile-categories-modal');
-                if (modal) modal.classList.add('hidden');
-              }}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          <div className="p-4 space-y-2">
-            {categories.map((category) => (
-              <a
-                key={category.id}
-                href={`/category/${category.slug}`}
-                className="flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-600 transition-colors"
+      {isCategoriesModalOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsCategoriesModalOpen(false);
+          }}
+        >
+          <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[70vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">官方分类</h3>
+              <button
+                onClick={() => setIsCategoriesModalOpen(false)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
               >
-                <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                <span className="text-sm font-medium">{category.name}</span>
-              </a>
-            ))}
+                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-4 space-y-2">
+              {categories.map((category) => (
+                <a
+                  key={category.id}
+                  href={`/?category=${category.slug}`}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-600 transition-colors"
+                  onClick={() => setIsCategoriesModalOpen(false)}
+                >
+                  <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                  <span className="text-sm font-medium">{category.name}</span>
+                </a>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   );
 }

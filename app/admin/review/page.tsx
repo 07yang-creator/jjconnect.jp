@@ -5,8 +5,21 @@
  */
 
 import { redirect } from 'next/navigation';
-import { createServerSupabaseClient, getCurrentUser, isAuthorizedUser } from '@/lib/supabase/server';
+import { revalidatePath } from 'next/cache';
+import { createServerSupabaseClient, getCurrentUser, isAuthorizedUser, getRoleLevel } from '@/lib/supabase/server';
+import { getAllPermissionsForRole, canAccessAdmin } from '@/lib/supabase/roleMatrix';
 import { getCoverImageUrl } from '@/lib/cloudflare-image-url';
+import type { PostContent, PostUpdate } from '@/types/database';
+
+async function isAdminUser(userId: string): Promise<boolean> {
+  const [byFlag, roleLevel] = await Promise.all([
+    isAuthorizedUser(userId),
+    getRoleLevel(userId),
+  ]);
+  if (byFlag) return true;
+  const permissions = await getAllPermissionsForRole(roleLevel);
+  return canAccessAdmin(permissions);
+}
 
 interface ReviewPost {
   id: string;
@@ -63,7 +76,7 @@ async function updateReviewStatus(postId: string, action: 'approve' | 'reject', 
     redirect('/login');
   }
 
-  const authorized = await isAuthorizedUser(user.id);
+  const authorized = await isAdminUser(user.id);
   if (!authorized) {
     redirect('/');
   }
@@ -82,14 +95,14 @@ async function updateReviewStatus(postId: string, action: 'approve' | 'reject', 
     return;
   }
 
-  const currentContent = (existing.content || {}) as any;
-  const updatedContent = {
+  const currentContent = (existing.content || {}) as PostContent;
+  const updatedContent: PostContent = {
     ...currentContent,
     review_state: action === 'approve' ? 'approved' : 'rejected',
-    review_reason: action === 'reject' ? reason || null : currentContent.review_reason ?? null,
+    review_reason: action === 'reject' ? reason || null : (currentContent.review_reason as string | null) ?? null,
   };
 
-  const updateData: any = {
+  const updateData: PostUpdate = {
     content: updatedContent,
   };
 
@@ -106,31 +119,37 @@ async function updateReviewStatus(postId: string, action: 'approve' | 'reject', 
 
   if (updateError) {
     console.error('Failed to update review status:', updateError);
+    return;
   }
+
+  revalidatePath('/admin/review');
+  revalidatePath('/');
+  revalidatePath('/posts');
 }
 
 export default async function AdminReviewPage({
   searchParams,
 }: {
-  searchParams?: {
+  searchParams?: Promise<{
     categoryId?: string;
     author?: string;
-  };
+  }>;
 }) {
   const user = await getCurrentUser();
   if (!user) {
     redirect('/login');
   }
 
-  const authorized = await isAuthorizedUser(user.id);
+  const authorized = await isAdminUser(user.id);
   if (!authorized) {
     redirect('/');
   }
 
   const rawPosts = await fetchPendingPosts();
 
-  const categoryIdFilter = searchParams?.categoryId || '';
-  const authorFilter = searchParams?.author?.trim() || '';
+  const sp = searchParams ? await searchParams : {};
+  const categoryIdFilter = sp.categoryId || '';
+  const authorFilter = sp.author?.trim() || '';
 
   const posts = rawPosts.filter((post) => {
     const byCategory =
@@ -312,7 +331,7 @@ export default async function AdminReviewPage({
                           type="submit"
                           className="px-4 py-1.5 rounded-lg text-xs font-medium bg-red-600 text-white hover:bg-red-700"
                         >
-                          Reject
+                          驳回
                         </button>
                       </div>
                     </form>
@@ -323,7 +342,7 @@ export default async function AdminReviewPage({
                         type="submit"
                         className="px-4 py-1.5 rounded-lg text-xs font-medium bg-emerald-600 text-white hover:bg-emerald-700"
                       >
-                        Approve
+                        通过
                       </button>
                     </form>
                   </div>

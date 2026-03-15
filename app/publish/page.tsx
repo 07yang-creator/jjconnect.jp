@@ -11,7 +11,7 @@ import PublishForm from './PublishForm';
 export default async function PublishPage() {
   const user = await getCurrentUser();
   if (!user) {
-    redirect('/login.html');
+    redirect('/login');
   }
   const authorized = await isAuthorizedUser(user.id);
   if (!authorized) {

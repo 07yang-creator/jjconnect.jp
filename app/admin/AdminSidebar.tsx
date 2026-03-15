@@ -22,11 +22,8 @@ function NavIcon({ d }: { d: string }) {
   );
 }
 
-export default function AdminSidebar() {
-  const [open, setOpen] = useState(false);
-  const pathname = usePathname();
-
-  const SidebarContent = () => (
+function SidebarContent({ pathname, onClose }: { pathname: string; onClose: () => void }) {
+  return (
     <div className="flex flex-col h-full">
       <div className="p-4 border-b border-[var(--border)]">
         <h2 className="text-sm font-semibold text-[var(--text-primary)]">管理后台</h2>
@@ -38,7 +35,7 @@ export default function AdminSidebar() {
             <Link
               key={item.href}
               href={item.href}
-              onClick={() => setOpen(false)}
+              onClick={onClose}
               className={`flex items-center gap-3 px-3 py-2 rounded-[var(--radius)] text-sm transition-colors ${
                 active ? 'bg-[var(--hover)] text-[var(--text-primary)] font-medium' : 'text-[var(--text-secondary)] hover:bg-[var(--hover)]'
               }`}
@@ -51,6 +48,11 @@ export default function AdminSidebar() {
       </nav>
     </div>
   );
+}
+
+export default function AdminSidebar() {
+  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <>
@@ -68,7 +70,7 @@ export default function AdminSidebar() {
 
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex w-[var(--sidebar-width)] shrink-0 flex-col fixed left-0 top-0 bottom-0 bg-[var(--bg-sidebar)] border-r border-[var(--border)]">
-        <SidebarContent />
+        <SidebarContent pathname={pathname} onClose={() => setOpen(false)} />
       </aside>
 
       {/* Mobile drawer */}

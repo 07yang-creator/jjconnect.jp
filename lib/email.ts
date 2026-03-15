@@ -5,10 +5,12 @@
 
 import { escapeHtml } from './escape-html';
 
-const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@jjconnect.jp';
-const FROM_NAME = process.env.FROM_NAME || 'JJConnect';
 const REVIEW_ADMIN_EMAIL = process.env.REVIEW_ADMIN_EMAIL || 'review@jjconnect.jp';
-const MAILCHANNELS_API = 'https://api.mailchannels.net/tx/v1/send';
+
+// Worker proxy config — MailChannels only works in CF Workers runtime,
+// so Next.js delegates email sending to the deployed Worker.
+const WORKER_BASE_URL = (process.env.WORKER_BASE_URL || 'https://jjconnect.jp').replace(/\/$/, '');
+const INTERNAL_API_SECRET = process.env.INTERNAL_API_SECRET || '';
 
 export interface SendEmailParams {
   to: string;
@@ -23,7 +25,9 @@ export interface SendEmailResult {
 }
 
 /**
- * Send a single email via MailChannels API
+ * Send a single email by proxying through the Cloudflare Worker.
+ * The Worker uses MailChannels (CF Workers runtime only), so all
+ * email requests from Next.js are forwarded here.
  */
 export async function sendEmail({
   to,
@@ -31,30 +35,31 @@ export async function sendEmail({
   html,
   text,
 }: SendEmailParams): Promise<SendEmailResult> {
+  if (!INTERNAL_API_SECRET) {
+    console.warn('[email] INTERNAL_API_SECRET not set — email sending skipped');
+    return { success: false, error: 'INTERNAL_API_SECRET not configured' };
+  }
+
   try {
-    const response = await fetch(MAILCHANNELS_API, {
+    const response = await fetch(`${WORKER_BASE_URL}/api/internal/send-email`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        personalizations: [{ to: [{ email: to }] }],
-        from: { email: FROM_EMAIL, name: FROM_NAME },
-        subject,
-        content: [
-          { type: 'text/html', value: html },
-          { type: 'text/plain', value: text },
-        ],
-      }),
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Internal-Secret': INTERNAL_API_SECRET,
+      },
+      body: JSON.stringify({ to, subject, html, text }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`MailChannels API error: ${response.status} - ${errorText}`);
+      throw new Error(`Worker email API error: ${response.status} - ${errorText}`);
     }
 
-    return { success: true };
+    const data = (await response.json()) as SendEmailResult;
+    return data;
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Email send error:', message);
+    console.error('[email] Send error:', message);
     return { success: false, error: message };
   }
 }

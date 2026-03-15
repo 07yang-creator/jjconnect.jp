@@ -255,13 +255,16 @@ vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY
 ### Cloudflare Workers（Auth）
 
 ```bash
-# 1. 配置 wrangler.toml
-# 已包含完整配置
+# 1. 配置 workers/.dev.vars（本地）或 wrangler secret（生产）
 
-# 2. 部署
-wrangler deploy
+# 2. 部署（请在 workers 目录或使用 npm 脚本）
+cd workers && npx wrangler deploy
+# 或：npm run deploy / npm run deploy:development
 
-# 3. 测试
+# 3. 若使用 user_profiles RLS 修复：先部署 Worker，再在 Supabase 执行 005_user_profiles_rls_fix.sql
+# 详见 supabase/README.md 迁移顺序
+
+# 4. 测试
 curl https://your-worker.workers.dev/api/auth/status
 ```
 

@@ -13,258 +13,61 @@ import type { Category, UserCategory } from '@/types/database';
 import TipTapBasicEditor from '@/src/components/TipTapBasicEditor';
 import type { Editor } from '@tiptap/core';
 
-export default function PublishForm() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [userCategories, setUserCategories] = useState<UserCategory[]>([]);
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [coverPreview, setCoverPreview] = useState<string>('');
-  const [title, setTitle] = useState('');
-  const [summary, setSummary] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [categoryType, setCategoryType] = useState<'official' | 'personal'>('official');
-  const [isPaid, setIsPaid] = useState(false);
-  const [price, setPrice] = useState<string>('0');
-  const [status, setStatus] = useState<'draft' | 'published'>('draft');
-  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
-  const [hasLocalDraft, setHasLocalDraft] = useState(false);
-  const [editor, setEditor] = useState<Editor | null>(null);
+// ============================================================================
+// SETTINGS PANEL (hoisted outside PublishForm to avoid remount on every render)
+// ============================================================================
 
-  const DRAFT_STORAGE_KEY = 'jjconnect-publish-draft';
+interface SettingsPanelProps {
+  coverPreview: string;
+  onCoverChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onCoverRemove: () => void;
+  summary: string;
+  setSummary: (v: string) => void;
+  categoryType: 'official' | 'personal';
+  setCategoryType: (v: 'official' | 'personal') => void;
+  selectedCategory: string;
+  setSelectedCategory: (v: string) => void;
+  categories: Category[];
+  userCategories: UserCategory[];
+  isAuthorized: boolean;
+  isPaid: boolean;
+  setIsPaid: (v: boolean) => void;
+  price: string;
+  setPrice: (v: string) => void;
+}
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      const raw = window.localStorage.getItem(DRAFT_STORAGE_KEY);
-      if (!raw) return;
-      const draft = JSON.parse(raw) as { updatedAt?: number | null };
-      if (draft.updatedAt) {
-        setLastSavedAt(draft.updatedAt);
-      }
-      setHasLocalDraft(true);
-    } catch (err) {
-      console.error('Failed to read draft from localStorage', err);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  async function loadData() {
-    const supabase = createBrowserClient();
-    try {
-      const { data: categoriesData } = await supabase
-        .from('categories')
-        .select('*')
-        .order('name');
-      if (categoriesData) setCategories(categoriesData);
-
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_authorized')
-          .eq('id', user.id)
-          .single();
-        const authorized = profile?.is_authorized || false;
-        setIsAuthorized(authorized);
-        if (authorized) {
-          const { data: userCategoriesData } = await supabase
-            .from('user_categories')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('name');
-          if (userCategoriesData) setUserCategories(userCategoriesData);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to load data:', error);
-    }
-  }
-
-  useEffect(() => {
-    if (!editor) return;
-    const interval = setInterval(() => {
-      try {
-        const json = editor.getJSON();
-        const payload = {
-          title,
-          summary,
-          selectedCategory,
-          categoryType,
-          isPaid,
-          price,
-          content: json,
-          updatedAt: Date.now(),
-        };
-        if (typeof window !== 'undefined') {
-          window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(payload));
-        }
-        setLastSavedAt(payload.updatedAt);
-        setHasLocalDraft(true);
-      } catch (err) {
-        console.error('Auto-save draft failed', err);
-      }
-    }, 30000);
-    return () => clearInterval(interval);
-  }, [editor, title, summary, selectedCategory, categoryType, isPaid, price]);
-
-  function formatLastSaved() {
-    if (!lastSavedAt) return '';
-    try {
-      return new Date(lastSavedAt).toLocaleString('zh-CN', { hour12: false });
-    } catch {
-      return '';
-    }
-  }
-
-  function handleRestoreDraft() {
-    if (!editor || typeof window === 'undefined') return;
-    try {
-      const raw = window.localStorage.getItem(DRAFT_STORAGE_KEY);
-      if (!raw) {
-        alert('当前没有可恢复的草稿。');
-        return;
-      }
-      const draft = JSON.parse(raw) as {
-        title?: string;
-        summary?: string;
-        selectedCategory?: string;
-        categoryType?: 'official' | 'personal';
-        isPaid?: boolean;
-        price?: string | number;
-        content?: unknown;
-        updatedAt?: number;
-      };
-      if (draft.title) setTitle(draft.title);
-      if (typeof draft.summary === 'string') setSummary(draft.summary);
-      if (draft.categoryType === 'official' || draft.categoryType === 'personal') {
-        setCategoryType(draft.categoryType);
-      }
-      if (typeof draft.selectedCategory === 'string') {
-        setSelectedCategory(draft.selectedCategory);
-      }
-      if (typeof draft.isPaid === 'boolean') setIsPaid(draft.isPaid);
-      if (typeof draft.price === 'string' || typeof draft.price === 'number') {
-        setPrice(String(draft.price));
-      }
-      if (draft.content) {
-        editor.commands.setContent(draft.content, false);
-      }
-      if (draft.updatedAt) setLastSavedAt(draft.updatedAt);
-      alert('本地草稿已恢复。');
-    } catch (err) {
-      console.error('Failed to restore draft', err);
-      alert('恢复草稿失败，请稍后重试。');
-    }
-  }
-
-  function handleCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (file) {
-      setCoverFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => setCoverPreview(reader.result as string);
-      reader.readAsDataURL(file);
-    }
-  }
-
-  async function handleSubmit(e: React.FormEvent, publishStatus: 'draft' | 'published') {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      if (!editor) throw new Error('Editor not initialized');
-      const content = {
-        type: 'doc',
-        content: editor.getJSON().content,
-        html: editor.getHTML(),
-      };
-      const input = {
-        title: title.trim(),
-        content,
-        summary: summary.trim() || undefined,
-        category_id: categoryType === 'official' ? selectedCategory : undefined,
-        user_category_id: categoryType === 'personal' ? selectedCategory : undefined,
-        is_paid: isPaid,
-        price: isPaid ? parseFloat(price) : 0,
-        cover_image: coverFile || undefined,
-        status: publishStatus,
-      };
-      const result = await createPost(input);
-      if (result.success) {
-        if (publishStatus === 'published') {
-          router.push(`/posts/${result.data?.post_id}`);
-        } else {
-          router.push('/profile/drafts');
-        }
-      } else {
-        alert(result.error?.message || '发布失败');
-      }
-    } catch (error) {
-      console.error('Submit error:', error);
-      alert(error instanceof Error ? error.message : '发生错误');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleSubmitForReview(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      if (!editor) throw new Error('Editor not initialized');
-      const content = {
-        type: 'doc',
-        content: editor.getJSON().content,
-        html: editor.getHTML(),
-        review_state: 'pending' as const,
-      };
-      const input = {
-        title: title.trim(),
-        content,
-        summary: summary.trim() || undefined,
-        category_id: categoryType === 'official' ? selectedCategory : undefined,
-        user_category_id: categoryType === 'personal' ? selectedCategory : undefined,
-        is_paid: isPaid,
-        price: isPaid ? parseFloat(price) : 0,
-        cover_image: coverFile || undefined,
-        status: 'draft' as const,
-      };
-      const result = await createPost(input);
-      if (result.success) {
-        alert('已提交审核，管理员通过后将自动公开。');
-        router.push('/profile/drafts');
-      } else {
-        alert(result.error?.message || '提交审核失败');
-      }
-    } catch (error) {
-      console.error('Submit for review error:', error);
-      alert(error instanceof Error ? error.message : '发生错误');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [actionsOpen, setActionsOpen] = useState(false);
-
-  const SettingsPanel = () => (
+function SettingsPanel({
+  coverPreview,
+  onCoverChange,
+  onCoverRemove,
+  summary,
+  setSummary,
+  categoryType,
+  setCategoryType,
+  selectedCategory,
+  setSelectedCategory,
+  categories,
+  userCategories,
+  isAuthorized,
+  isPaid,
+  setIsPaid,
+  price,
+  setPrice,
+}: SettingsPanelProps) {
+  return (
     <div className="space-y-4">
       <div>
         <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">封面图片</label>
         {coverPreview ? (
           <div className="relative">
             <img src={coverPreview} alt="Cover preview" className="w-full h-40 object-cover rounded-[var(--radius)]" />
-            <button type="button" onClick={() => { setCoverFile(null); setCoverPreview(''); }} className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">移除</button>
+            <button type="button" onClick={onCoverRemove} className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">移除</button>
           </div>
         ) : (
           <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[var(--border)] rounded-[var(--radius)] cursor-pointer hover:border-blue-400 transition-colors">
             <svg className="w-8 h-8 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
             <span className="text-xs text-[var(--text-secondary)]">点击上传</span>
-            <input type="file" accept="image/*" onChange={handleCoverChange} className="hidden" />
+            <input type="file" accept="image/*" onChange={onCoverChange} className="hidden" />
           </label>
         )}
       </div>
@@ -299,6 +102,271 @@ export default function PublishForm() {
       </div>
     </div>
   );
+}
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
+export default function PublishForm() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [userCategories, setUserCategories] = useState<UserCategory[]>([]);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string>('');
+  const [title, setTitle] = useState('');
+  const [summary, setSummary] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [categoryType, setCategoryType] = useState<'official' | 'personal'>('official');
+  const [isPaid, setIsPaid] = useState(false);
+  const [price, setPrice] = useState<string>('0');
+  const [status, setStatus] = useState<'draft' | 'published'>('draft');
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
+  const [hasLocalDraft, setHasLocalDraft] = useState(false);
+  const [editor, setEditor] = useState<Editor | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [actionsOpen, setActionsOpen] = useState(false);
+
+  // Draft storage key is user-scoped to prevent cross-user data leakage
+  const getDraftKey = (uid: string) => `jjconnect-publish-draft-${uid}`;
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  async function loadData() {
+    const supabase = createBrowserClient();
+    try {
+      const { data: categoriesData } = await supabase
+        .from('categories')
+        .select('*')
+        .order('name');
+      if (categoriesData) setCategories(categoriesData);
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+
+        // Check for existing draft now that we have the user ID
+        try {
+          const raw = window.localStorage.getItem(getDraftKey(user.id));
+          if (raw) {
+            const draft = JSON.parse(raw) as { updatedAt?: number | null };
+            if (draft.updatedAt) setLastSavedAt(draft.updatedAt);
+            setHasLocalDraft(true);
+          }
+        } catch {
+          // ignore malformed draft
+        }
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_authorized')
+          .eq('id', user.id)
+          .single();
+        const authorized = profile?.is_authorized || false;
+        setIsAuthorized(authorized);
+        if (authorized) {
+          const { data: userCategoriesData } = await supabase
+            .from('user_categories')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('name');
+          if (userCategoriesData) setUserCategories(userCategoriesData);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load data:', error);
+    }
+  }
+
+  useEffect(() => {
+    if (!editor || !userId) return;
+    const draftKey = getDraftKey(userId);
+    const interval = setInterval(() => {
+      try {
+        const json = editor.getJSON();
+        const payload = {
+          title,
+          summary,
+          selectedCategory,
+          categoryType,
+          isPaid,
+          price,
+          content: json,
+          updatedAt: Date.now(),
+        };
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem(draftKey, JSON.stringify(payload));
+        }
+        setLastSavedAt(payload.updatedAt);
+        setHasLocalDraft(true);
+      } catch (err) {
+        console.error('Auto-save draft failed', err);
+      }
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [editor, userId, title, summary, selectedCategory, categoryType, isPaid, price]);
+
+  function formatLastSaved() {
+    if (!lastSavedAt) return '';
+    try {
+      return new Date(lastSavedAt).toLocaleString('zh-CN', { hour12: false });
+    } catch {
+      return '';
+    }
+  }
+
+  function clearDraft() {
+    if (!userId || typeof window === 'undefined') return;
+    try {
+      window.localStorage.removeItem(getDraftKey(userId));
+      setHasLocalDraft(false);
+      setLastSavedAt(null);
+    } catch {
+      // ignore
+    }
+  }
+
+  function handleRestoreDraft() {
+    if (!editor || typeof window === 'undefined' || !userId) return;
+    try {
+      const raw = window.localStorage.getItem(getDraftKey(userId));
+      if (!raw) {
+        alert('当前没有可恢复的草稿。');
+        return;
+      }
+      const draft = JSON.parse(raw) as {
+        title?: string;
+        summary?: string;
+        selectedCategory?: string;
+        categoryType?: 'official' | 'personal';
+        isPaid?: boolean;
+        price?: string | number;
+        content?: unknown;
+        updatedAt?: number;
+      };
+      if (draft.title) setTitle(draft.title);
+      if (typeof draft.summary === 'string') setSummary(draft.summary);
+      if (draft.categoryType === 'official' || draft.categoryType === 'personal') {
+        setCategoryType(draft.categoryType);
+      }
+      if (typeof draft.selectedCategory === 'string') {
+        setSelectedCategory(draft.selectedCategory);
+      }
+      if (typeof draft.isPaid === 'boolean') setIsPaid(draft.isPaid);
+      if (typeof draft.price === 'string' || typeof draft.price === 'number') {
+        setPrice(String(draft.price));
+      }
+      if (draft.content) {
+        editor.commands.setContent(draft.content, { emitUpdate: false });
+      }
+      if (draft.updatedAt) setLastSavedAt(draft.updatedAt);
+      alert('本地草稿已恢复。');
+    } catch (err) {
+      console.error('Failed to restore draft', err);
+      alert('恢复草稿失败，请稍后重试。');
+    }
+  }
+
+  function handleCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCoverFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setCoverPreview(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  }
+
+  async function handleSubmit(e: React.SyntheticEvent, publishStatus: 'draft' | 'published') {
+    e.preventDefault();
+    if (!title.trim()) {
+      alert('请输入文章标题');
+      return;
+    }
+    setLoading(true);
+    try {
+      if (!editor) throw new Error('Editor not initialized');
+      const content = {
+        type: 'doc',
+        content: editor.getJSON().content,
+        html: editor.getHTML(),
+      };
+      const input = {
+        title: title.trim(),
+        content,
+        summary: summary.trim() || undefined,
+        category_id: categoryType === 'official' ? selectedCategory : undefined,
+        user_category_id: categoryType === 'personal' ? selectedCategory : undefined,
+        is_paid: isPaid,
+        price: isPaid ? parseFloat(price) : 0,
+        cover_image: coverFile || undefined,
+        status: publishStatus,
+      };
+      const result = await createPost(input);
+      if (result.success) {
+        clearDraft();
+        if (publishStatus === 'published') {
+          router.push(`/posts/${result.data?.post_id}`);
+        } else {
+          router.push('/profile/drafts');
+        }
+      } else {
+        alert(result.error?.message || '发布失败');
+      }
+    } catch (error) {
+      console.error('Submit error:', error);
+      alert(error instanceof Error ? error.message : '发生错误');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleSubmitForReview(e: React.SyntheticEvent) {
+    e.preventDefault();
+    if (!title.trim()) {
+      alert('请输入文章标题');
+      return;
+    }
+    setLoading(true);
+    try {
+      if (!editor) throw new Error('Editor not initialized');
+      const content = {
+        type: 'doc',
+        content: editor.getJSON().content,
+        html: editor.getHTML(),
+        review_state: 'pending' as const,
+      };
+      const input = {
+        title: title.trim(),
+        content,
+        summary: summary.trim() || undefined,
+        category_id: categoryType === 'official' ? selectedCategory : undefined,
+        user_category_id: categoryType === 'personal' ? selectedCategory : undefined,
+        is_paid: isPaid,
+        price: isPaid ? parseFloat(price) : 0,
+        cover_image: coverFile || undefined,
+        status: 'draft' as const,
+      };
+      const result = await createPost(input);
+      if (result.success) {
+        clearDraft();
+        alert('已提交审核，管理员通过后将自动公开。');
+        router.push('/profile/drafts');
+      } else {
+        alert(result.error?.message || '提交审核失败');
+      }
+    } catch (error) {
+      console.error('Submit for review error:', error);
+      alert(error instanceof Error ? error.message : '发生错误');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[var(--bg-page)] overflow-x-hidden">
@@ -348,7 +416,24 @@ export default function PublishForm() {
           {/* Right sidebar - desktop */}
           <aside className="hidden lg:block w-[var(--sidebar-width)] shrink-0 border-l border-[var(--border)] bg-[var(--bg-sidebar)] p-4 overflow-y-auto">
             <h3 className="text-sm font-medium text-[var(--text-primary)] mb-4">设置</h3>
-            <SettingsPanel />
+            <SettingsPanel
+              coverPreview={coverPreview}
+              onCoverChange={handleCoverChange}
+              onCoverRemove={() => { setCoverFile(null); setCoverPreview(''); }}
+              summary={summary}
+              setSummary={setSummary}
+              categoryType={categoryType}
+              setCategoryType={setCategoryType}
+              selectedCategory={selectedCategory}
+              setSelectedCategory={setSelectedCategory}
+              categories={categories}
+              userCategories={userCategories}
+              isAuthorized={isAuthorized}
+              isPaid={isPaid}
+              setIsPaid={setIsPaid}
+              price={price}
+              setPrice={setPrice}
+            />
           </aside>
 
           {/* Mobile settings drawer */}
@@ -360,7 +445,24 @@ export default function PublishForm() {
                   <h3 className="text-sm font-medium text-[var(--text-primary)]">设置</h3>
                   <button type="button" onClick={() => setSettingsOpen(false)} className="p-1 rounded-[var(--radius)] hover:bg-[var(--hover)]">×</button>
                 </div>
-                <SettingsPanel />
+                <SettingsPanel
+                  coverPreview={coverPreview}
+                  onCoverChange={handleCoverChange}
+                  onCoverRemove={() => { setCoverFile(null); setCoverPreview(''); }}
+                  summary={summary}
+                  setSummary={setSummary}
+                  categoryType={categoryType}
+                  setCategoryType={setCategoryType}
+                  selectedCategory={selectedCategory}
+                  setSelectedCategory={setSelectedCategory}
+                  categories={categories}
+                  userCategories={userCategories}
+                  isAuthorized={isAuthorized}
+                  isPaid={isPaid}
+                  setIsPaid={setIsPaid}
+                  price={price}
+                  setPrice={setPrice}
+                />
               </aside>
             </>
           )}

@@ -7,7 +7,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createServerSupabaseClient, getCurrentUser, isAuthorizedUser } from '@/lib/supabase/server';
-import type { PostInsert, PostContent } from '@/types/database';
+import type { PostInsert, PostUpdate, PostContent } from '@/types/database';
 import { createPostSchema, parseSafe, type CreatePostInput as SchemaCreatePostInput } from '@/lib/schemas';
 import {
   sendPostSubmittedConfirmationToAuthor,
@@ -39,7 +39,7 @@ export interface CreatePostResult {
   error?: {
     code: string;
     message: string;
-    details?: any;
+    details?: unknown;
   };
 }
 
@@ -60,9 +60,15 @@ async function uploadCoverImage(
   try {
     const supabase = await createServerSupabaseClient();
     
-    // Generate unique filename
+    // Generate unique filename with validated extension
     const timestamp = Date.now();
-    const fileExt = file.name.split('.').pop();
+    const nameParts = file.name.split('.');
+    const rawExt = nameParts.length > 1 ? nameParts.pop()!.toLowerCase() : null;
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'];
+    if (!rawExt || !allowedExtensions.includes(rawExt)) {
+      return { url: null, error: `Invalid file type. Allowed: ${allowedExtensions.join(', ')}` };
+    }
+    const fileExt = rawExt;
     const fileName = `${userId}/${timestamp}.${fileExt}`;
     
     // Convert File to ArrayBuffer
@@ -225,10 +231,9 @@ export async function createPost(input: CreatePostInput): Promise<CreatePostResu
     };
     
     // 6. Insert post
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: post, error: insertError } = await supabase
       .from('posts')
-      .insert(postData as any)
+      .insert(postData)
       .select('id')
       .single();
     
@@ -278,11 +283,19 @@ export async function createPost(input: CreatePostInput): Promise<CreatePostResu
 
     // 7. Revalidate relevant paths
     revalidatePath('/posts');
+    revalidatePath('/');
     revalidatePath(`/profile/${user.id}`);
     if (validatedInput.category_id) {
-      revalidatePath(`/category/${validatedInput.category_id}`);
+      const { data: catData } = await supabase
+        .from('categories')
+        .select('slug')
+        .eq('id', validatedInput.category_id)
+        .single();
+      if (catData?.slug) {
+        revalidatePath(`/category/${catData.slug}`);
+      }
     }
-    
+
     // 8. Return success
     return {
       success: true,
@@ -378,7 +391,7 @@ export async function updatePost(
     }
     
     // 4. Build update data
-    const updateData: any = {};
+    const updateData: PostUpdate = {};
     if (input.title) updateData.title = input.title.trim();
     if (input.content) updateData.content = input.content;
     if (input.summary !== undefined) updateData.summary = input.summary?.trim() || null;
@@ -408,8 +421,19 @@ export async function updatePost(
     
     // 6. Revalidate paths
     revalidatePath('/posts');
+    revalidatePath('/');
     revalidatePath(`/posts/${postId}`);
     revalidatePath(`/profile/${user.id}`);
+    if (input.category_id) {
+      const { data: catData } = await supabase
+        .from('categories')
+        .select('slug')
+        .eq('id', input.category_id)
+        .single();
+      if (catData?.slug) {
+        revalidatePath(`/category/${catData.slug}`);
+      }
+    }
     
     return {
       success: true,
@@ -485,13 +509,23 @@ export async function deletePost(postId: string): Promise<CreatePostResult> {
     // 3. Delete cover image from storage if exists
     if (existingPost.cover_image) {
       try {
-        const path = existingPost.cover_image.split('/covers/')[1];
-        if (path) {
-          await supabase.storage.from('covers').remove([path]);
+        const coverUrl = existingPost.cover_image;
+        let storagePath: string | null = null;
+        try {
+          const parsed = new URL(coverUrl);
+          const match = parsed.pathname.match(/\/public\/covers\/(.+)$/);
+          storagePath = match ? match[1] : null;
+        } catch {
+          const parts = coverUrl.split('/covers/');
+          storagePath = parts.length > 1 ? parts[1] : null;
+        }
+        if (storagePath) {
+          await supabase.storage.from('covers').remove([storagePath]);
+        } else {
+          console.warn('Could not parse cover storage path from URL:', coverUrl);
         }
       } catch (error) {
         console.error('Failed to delete cover image:', error);
-        // Continue with post deletion even if image deletion fails
       }
     }
     

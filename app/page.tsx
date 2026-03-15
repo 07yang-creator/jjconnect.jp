@@ -25,9 +25,9 @@ interface CategoryWithPosts extends Category {
 }
 
 interface PageProps {
-  searchParams: {
+  searchParams: Promise<{
     category?: string;
-  };
+  }>;
 }
 
 // ============================================================================
@@ -67,8 +67,8 @@ async function getLatestPosts(
     console.error('Failed to fetch latest posts:', error);
     return [];
   }
-  
-  return data || [];
+
+  return (data as unknown as PostWithAuthor[]) || [];
 }
 
 /**
@@ -125,7 +125,7 @@ async function getCategoriesWithPosts(): Promise<CategoryWithPosts[]> {
       
       return {
         ...category,
-        posts: posts || [],
+        posts: (posts as unknown as PostWithAuthor[]) || [],
       };
     })
   );
@@ -139,8 +139,7 @@ async function getCategoriesWithPosts(): Promise<CategoryWithPosts[]> {
 // ============================================================================
 
 export default async function HomePage({ searchParams }: PageProps) {
-  // 获取分类过滤参数
-  const categorySlug = searchParams.category;
+  const { category: categorySlug } = await searchParams;
   
   // 如果有分类过滤，先获取分类信息
   let currentCategory: Category | null = null;
@@ -195,17 +194,6 @@ export default async function HomePage({ searchParams }: PageProps) {
           <h2 className="text-2xl font-bold text-gray-900">
             {currentCategory ? `${currentCategory.name} - 最新文章` : '最新发布'}
           </h2>
-          {!currentCategory && (
-            <Link
-              href="/posts"
-              className="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center gap-1"
-            >
-              查看全部
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-          )}
         </div>
         
         {latestPosts.length > 0 ? (
@@ -274,7 +262,7 @@ export default async function HomePage({ searchParams }: PageProps) {
             </Link>
           ) : (
             <Link
-              href="/login.html"
+              href="/login"
               className="inline-block bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors shadow-lg hover:shadow-xl"
             >
               登录后发布
@@ -301,7 +289,7 @@ function PostCard({ post }: PostCardProps) {
     const date = new Date(dateString);
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
     
     if (diffDays === 0) return '今天';
     if (diffDays === 1) return '昨天';
@@ -429,7 +417,7 @@ function EmptyState({ message, showPublishLink }: { message: string; showPublish
       </svg>
       <p className="text-gray-500 mb-6">{message}</p>
       <Link
-        href={showPublishLink ? '/publish' : '/login.html'}
+        href={showPublishLink ? '/publish' : '/login'}
         className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
       >
         {showPublishLink ? '发布文章' : '登录后发布'}

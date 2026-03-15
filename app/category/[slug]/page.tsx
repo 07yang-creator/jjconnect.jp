@@ -5,6 +5,7 @@
 
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { cache } from 'react';
 import { createServerSupabaseClient, getCurrentUser, isAuthorizedUser } from '@/lib/supabase/server';
 import type { Category, Post } from '@/types/database';
 import { getCoverImageUrl } from '@/lib/cloudflare-image-url';
@@ -20,21 +21,23 @@ interface PostWithAuthor extends Post {
 // DATA FETCHING
 // ============================================================================
 
-async function getCategoryBySlug(slug: string): Promise<Category | null> {
+// cache() deduplicates identical calls within the same request,
+// so generateMetadata and CategoryPage share one DB round-trip.
+const getCategoryBySlug = cache(async (slug: string): Promise<Category | null> => {
   const supabase = await createServerSupabaseClient();
-  
+
   const { data, error } = await supabase
     .from('categories')
     .select('*')
     .eq('slug', slug)
     .single();
-  
+
   if (error || !data) {
     return null;
   }
-  
+
   return data;
-}
+});
 
 async function getPostsByCategory(categoryId: string): Promise<PostWithAuthor[]> {
   const supabase = await createServerSupabaseClient();
@@ -53,8 +56,8 @@ async function getPostsByCategory(categoryId: string): Promise<PostWithAuthor[]>
     console.error('Failed to fetch posts:', error);
     return [];
   }
-  
-  return data || [];
+
+  return (data as unknown as PostWithAuthor[]) || [];
 }
 
 async function getRelatedCategories(currentSlug: string): Promise<Category[]> {
@@ -79,15 +82,14 @@ async function getRelatedCategories(currentSlug: string): Promise<Category[]> {
 // METADATA
 // ============================================================================
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const category = await getCategoryBySlug(params.slug);
-  
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const category = await getCategoryBySlug(slug);
+
   if (!category) {
-    return {
-      title: 'Category Not Found',
-    };
+    return { title: 'Category Not Found' };
   }
-  
+
   return {
     title: `${category.name} - JJConnect`,
     description: category.description || `Browse articles in ${category.name} category`,
@@ -101,16 +103,17 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 export default async function CategoryPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const category = await getCategoryBySlug(params.slug);
+  const { slug } = await params;
+  const category = await getCategoryBySlug(slug);
   
   if (!category) {
     notFound();
   }
   
   const posts = await getPostsByCategory(category.id);
-  const relatedCategories = await getRelatedCategories(params.slug);
+  const relatedCategories = await getRelatedCategories(slug);
   
   const user = await getCurrentUser();
   const canPublish = user ? await isAuthorizedUser(user.id) : false;
@@ -200,7 +203,7 @@ export default async function CategoryPage({
                 在这个分类下发布你的文章
               </p>
               <Link
-                href={canPublish ? '/publish' : '/login.html'}
+                href={canPublish ? '/publish' : '/login'}
                 className="block w-full text-center bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-blue-50 transition-colors"
               >
                 {canPublish ? '发布文章' : '登录后发布'}
@@ -323,7 +326,7 @@ function EmptyState({ showPublishLink }: { showPublishLink?: boolean }) {
         </Link>
       ) : (
         <Link
-          href="/login.html"
+          href="/login"
           className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
         >
           登录后发布
