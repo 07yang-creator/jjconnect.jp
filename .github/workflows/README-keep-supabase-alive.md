@@ -20,5 +20,5 @@ The workflow [keep-supabase-alive.yml](keep-supabase-alive.yml) pings your Supab
 
 ## Schedule
 
-- Default: every **Monday and Thursday** at 00:00 UTC.
-- To run more often (e.g. daily or every 6 hours), edit the `cron` in `keep-supabase-alive.yml`.
+- Default: every **12 hours** (UTC).
+- To run more or less often, edit the `cron` in `keep-supabase-alive.yml`.
