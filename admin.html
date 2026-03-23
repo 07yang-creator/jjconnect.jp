@@ -1362,9 +1362,9 @@ async function syncRoleMatrix() {
         if (btn) btn.disabled = false;
         return;
     }
-    const apiBase = getApiBase();
+    const apiBase = (typeof API_ENDPOINT === 'string' && API_ENDPOINT) ? API_ENDPOINT : getApiBase();
     try {
-        const res = await fetch(`${apiBase}/api/admin/sync-role-matrix`, {
+        const res = await fetch(`${apiBase}/api/sync-role-matrix`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1373,7 +1373,7 @@ async function syncRoleMatrix() {
         });
         const data = await res.json();
         if (res.ok && data.success) {
-            alert(`授权矩阵已更新\n\n更新行数: ${data.rowsUpdated || 0}\n同步时间: ${data.lastSyncAt || '-'}`);
+            alert(`授权矩阵已更新\n\n更新行数: ${data.updated || 0}`);
         } else {
             alert(`同步失败: ${data.error || data.message || res.statusText}`);
         }

@@ -27,6 +27,21 @@
      */
     function createNavbarHTML(isLoggedIn, userData, hideSignIn) {
         const showSignIn = !hideSignIn;
+        const currentRole = userData?.role || 'T';
+        const isAdmin = currentRole === 'A';
+        const canUseAiTool = isLoggedIn && currentRole !== 'T';
+        let monoPageLinkDesktop = '';
+        let monoPageLinkMobile = '';
+        if (currentRole === 'B') {
+            monoPageLinkDesktop = '<a href="mono_bb.html" class="jjc-user-dropdown-item">Mono Page BB</a>';
+            monoPageLinkMobile = '<a href="mono_bb.html" class="jjc-mobile-link">Mono Page BB</a>';
+        } else if (currentRole === 'CB') {
+            monoPageLinkDesktop = '<a href="mono_cb.html" class="jjc-user-dropdown-item">Mono Page CB</a>';
+            monoPageLinkMobile = '<a href="mono_cb.html" class="jjc-mobile-link">Mono Page CB</a>';
+        } else if (currentRole === 'VB') {
+            monoPageLinkDesktop = '<a href="mono_vb.html" class="jjc-user-dropdown-item">Mono Page VB</a>';
+            monoPageLinkMobile = '<a href="mono_vb.html" class="jjc-mobile-link">Mono Page VB</a>';
+        }
         const avatarUrl = userData?.avatar_url || (typeof localStorage !== 'undefined' ? localStorage.getItem('jjc_avatar_url') : null);
         const avatarSrc = avatarUrl ? (avatarUrl.startsWith('http') ? avatarUrl : (API_ENDPOINT || (typeof window !== 'undefined' && window.location.origin) || '') + avatarUrl) : '';
         return `
@@ -61,7 +76,7 @@
                             </a>
                         </div>
                     </div>
-                    ${showSignIn ? '<a href="ai.html" class="jjc-nav-link">✨AI empowered</a>' : ''}
+                    ${canUseAiTool ? '<a href="ai.html" class="jjc-nav-link">✨AI empowered</a>' : ''}
                 </div>
                 
                 <!-- 用户区域（桌面端），首页未登录时不显示 -->
@@ -75,7 +90,8 @@
                             </button>
                             <div class="jjc-user-dropdown" id="jjc-user-dropdown">
                                 <a href="profile.html?view=own" class="jjc-user-dropdown-item">My Profile</a>
-                                ${(userData?.role >= 2) ? '<a href="admin.html" class="jjc-user-dropdown-item">Admin Dashboard</a>' : ''}
+                                ${isAdmin ? '<a href="admin.html" class="jjc-user-dropdown-item">Admin Dashboard</a>' : ''}
+                                ${monoPageLinkDesktop}
                                 <button id="jjc-logout-btn" class="jjc-user-dropdown-item">Logout</button>
                             </div>
                         </div>
@@ -114,14 +130,15 @@
                         <span>地产报告</span>
                     </a>
                 </div>
-                ${showSignIn ? '<a href="ai.html" class="jjc-mobile-link">✨AI empowered</a>' : ''}
+                ${canUseAiTool ? '<a href="ai.html" class="jjc-mobile-link">✨AI empowered</a>' : ''}
                 
                 ${(isLoggedIn || showSignIn) ? `
                 <div class="jjc-mobile-divider"></div>
                 ${isLoggedIn ? `
                     <a href="profile.html?view=own" class="jjc-mobile-link">My Profile</a>
                     <div class="jjc-mobile-user">${avatarSrc ? '<img class="jjc-mobile-avatar" src="' + avatarSrc + '" alt="">' : '👤'} ${userData?.username || 'User'}</div>
-                    ${(userData?.role >= 2) ? '<a href="admin.html" class="jjc-mobile-link">Admin Dashboard</a>' : ''}
+                    ${isAdmin ? '<a href="admin.html" class="jjc-mobile-link">Admin Dashboard</a>' : ''}
+                    ${monoPageLinkMobile}
                     <button id="jjc-mobile-logout" class="jjc-mobile-link">Logout</button>
                 ` : `
                     <a href="login.html" class="jjc-mobile-link">Sign in</a>
@@ -149,13 +166,21 @@
 
             const { data: userDataResp } = await supabase.auth.getUser();
             const user = userDataResp?.user;
+            const { data: profileData, error: profileError } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single();
+            if (profileError) {
+                console.warn('Failed to load profile role, fallback to T:', profileError);
+            }
             return {
                 isLoggedIn: true,
                 userData: {
                     username: user?.user_metadata?.username || user?.email || 'User',
                     email: user?.email || '',
                     avatar_url: user?.user_metadata?.avatar_url || null,
-                    role: Number(user?.user_metadata?.role ?? 0)
+                    role: profileData?.role || 'T'
                 }
             };
         } catch (error) {
