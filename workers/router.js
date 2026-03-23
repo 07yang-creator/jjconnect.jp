@@ -16,11 +16,7 @@ import {
   handleHealth,
 } from './handlers/content.js';
 import {
-  handleLogin,
-  handleAuthCheck,
-  handleLogout,
   handleAccountCheck,
-  handleRegister,
 } from './handlers/auth.js';
 import {
   handleGetUsers,
@@ -37,8 +33,6 @@ import { handleSyncRoleMatrix, handleGetMyPermissions } from './handlers/roleMat
 import { handleSendEmail } from './handlers/email.js';
 import { validate } from './lib/validate.js';
 import {
-  loginSchema,
-  registerSchema,
   accountCheckSchema,
   profilePatchSchema,
   submitFormSchema,
@@ -73,10 +67,6 @@ export async function route(request, env) {
     if (path === '/api/health' && method === 'GET') return await handleHealth();
 
     if (path === '/api/account/check' && method === 'GET') return await validate(accountCheckSchema, 'query')(handleAccountCheck)(request, env);
-    if (path === '/api/login' && method === 'POST') return await validate(loginSchema, 'body')(handleLogin)(request, env);
-    if (path === '/api/register' && method === 'POST') return await validate(registerSchema, 'body')(handleRegister)(request, env);
-    if (path === '/api/auth/check' && method === 'GET') return await handleAuthCheck(request, env);
-    if (path === '/api/auth/logout' && method === 'POST') return await handleLogout(request);
     if (path === '/api/users' && method === 'GET') return await handleGetUsers(request, env);
     if (path === '/api/admin/sync-role-matrix' && method === 'POST') return await handleSyncRoleMatrix(request, env);
     if (path === '/api/my-permissions' && method === 'GET') return await handleGetMyPermissions(request, env);

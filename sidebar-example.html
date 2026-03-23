@@ -10,6 +10,7 @@
   
   <!-- Supabase Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   
   <style>
     /* Custom styles */
@@ -172,9 +173,8 @@
   <!-- Right Sidebar JavaScript -->
   <script src="cloudflare-image-url.js"></script>
   <script>
-    // Replace with your Supabase credentials
-    const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+    const SUPABASE_URL = window.JJCONNECT_CONFIG.supabaseUrl;
+    const SUPABASE_ANON_KEY = window.JJCONNECT_CONFIG.supabaseAnonKey;
     
     // Initialize Supabase
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);

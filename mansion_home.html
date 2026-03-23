@@ -189,7 +189,9 @@
 </head>
 <body>
     <!-- Navbar will be injected here -->
-    <script src="navbar.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="navbar.js"></script>
     
     <!-- Hero Section -->
     <div class="hero">
@@ -254,21 +256,20 @@
     
     <script>
         const API_ENDPOINT = 'http://localhost:8787';
+        const supabaseCfg = window.JJCONNECT_CONFIG || {};
+        const SUPABASE_URL = supabaseCfg.supabaseUrl;
+        const SUPABASE_ANON_KEY = supabaseCfg.supabaseAnonKey;
+        const supabase = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
+            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+            : null;
         
         // Check if user is logged in
         async function checkAuth() {
-            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
-            
-            if (!token) {
-                return false;
-            }
-            
+            if (!supabase) return false;
+
             try {
-                const response = await fetch(`${API_ENDPOINT}/api/auth/check`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await response.json();
-                return data.authenticated;
+                const { data } = await supabase.auth.getSession();
+                return !!data?.session;
             } catch (error) {
                 return false;
             }
@@ -295,28 +296,24 @@
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const username = document.getElementById('username').value;
+            const email = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
             
             try {
-                const response = await fetch(`${API_ENDPOINT}/api/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
                 });
                 
-                const data = await response.json();
-                
-                if (data.success) {
-                    localStorage.setItem('auth_token', data.token);
-                    localStorage.setItem('user_info', JSON.stringify(data.user));
+                if (!error && data?.session) {
+                    localStorage.setItem('user_info', JSON.stringify(data.user || {}));
                     showMessage('登录成功！');
                     setTimeout(() => {
                         hideModal();
                         location.reload();
                     }, 1000);
                 } else {
-                    showMessage(data.error || '登录失败', 'error');
+                    showMessage(error?.message || '登录失败', 'error');
                 }
             } catch (error) {
                 showMessage('网络错误，请重试', 'error');

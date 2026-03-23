@@ -406,6 +406,8 @@
 </style>
 </head>
 <body class="login-page">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config.js"></script>
 <script src="navbar.js"></script>
 <style>#masthead, #mobile-header { display: none !important; }</style>
 
@@ -516,7 +518,7 @@
                                 <input type="file" id="reg-avatar-upload" class="avatar-upload-input" accept="image/*">
                                 <button type="button" class="avatar-upload-btn" id="reg-avatar-upload-btn">Upload avatar</button>
                             </div>
-                            <p class="avatar-reg-hint">Choose preset, regenerate (Multiavatar), or upload your own image</p>
+                            <p class="avatar-reg-hint">Choose preset, regenerate (DiceBear), or upload your own image</p>
                         </div>
                     </div>
                 </div>
@@ -567,8 +569,14 @@
 
 <script>
 const API_ENDPOINT = (window.location.protocol === 'file:' || (window.location.hostname === 'localhost' && window.location.port && window.location.port !== '8787')) ? 'http://localhost:8787' : '';
+const supabaseCfg = window.JJCONNECT_CONFIG || {};
+const SUPABASE_URL = supabaseCfg.supabaseUrl;
+const SUPABASE_ANON_KEY = supabaseCfg.supabaseAnonKey;
+const supabase = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null;
 
-const MULTIAVATAR_BASE = 'https://api.multiavatar.com';
+const DICEBEAR_BASE = 'https://api.dicebear.com/9.x/initials/svg';
 const AVATAR_PRESETS = ['smile', 'happy', 'alice', 'bob', 'carlos', 'denise'];
 
 let currentIdentifier = '';
@@ -640,7 +648,7 @@ document.getElementById('identifier-form').addEventListener('submit', async func
 });
 
 function multiavatarUrl(seed) {
-    return MULTIAVATAR_BASE + '/' + encodeURIComponent(seed) + '.svg';
+    return DICEBEAR_BASE + '?seed=' + encodeURIComponent(seed);
 }
 
 function setupRegAvatarPicker() {
@@ -697,17 +705,29 @@ function setupRegAvatarPicker() {
 function updateCreateAccountButtonState() {
     const btn = document.getElementById('reg-create-account-btn');
     if (!btn) return;
+    const registerForm = document.getElementById('register-form');
+    if (!registerForm) return;
     const firstname = (document.getElementById('reg-firstname')?.value || '').trim();
     const lastname = (document.getElementById('reg-lastname')?.value || '').trim();
-    const username = (document.getElementById('reg-username')?.value || '').trim();
-    const email = (document.getElementById('reg-email')?.value || '').trim();
     const password = document.getElementById('reg-password')?.value || '';
     const confirm = document.getElementById('reg-confirm-password')?.value || '';
     const termsChecked = document.getElementById('terms')?.checked || false;
-    const usernameValid = /^[a-zA-Z0-9_]{3,20}$/.test(username);
-    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    const allFilled = firstname && lastname && usernameValid && emailValid && password.length >= 8 && confirm === password && termsChecked;
+    const baseValid = registerForm.checkValidity();
+    const allFilled = firstname && lastname && baseValid && password.length >= 8 && confirm === password && termsChecked;
     btn.disabled = !allFilled;
+}
+
+function enableManualRegisterIdentityFields() {
+    const regUsername = document.getElementById('reg-username');
+    const regEmail = document.getElementById('reg-email');
+    if (regUsername) {
+        regUsername.removeAttribute('readonly');
+        if (!regUsername.value.trim()) regUsername.placeholder = 'Choose a username';
+    }
+    if (regEmail) {
+        regEmail.removeAttribute('readonly');
+        if (!regEmail.value.trim()) regEmail.placeholder = 'your.email@example.com';
+    }
 }
 
 // Terms checkbox and required fields: enable Create account button only when all valid
@@ -718,37 +738,68 @@ document.getElementById('terms')?.addEventListener('change', updateCreateAccount
 });
 
 // "Create one" - go directly to registration form
-document.getElementById('go-create-account').addEventListener('click', function(e) {
-    e.preventDefault();
-    document.getElementById('register-identifier-bar').style.display = 'none';
-    document.getElementById('register-sign-in-instead').style.display = 'block';
-    document.getElementById('reg-firstname').value = '';
-    document.getElementById('reg-lastname').value = '';
-    document.getElementById('reg-username').value = '';
-    document.getElementById('reg-username').removeAttribute('readonly');
-    document.getElementById('reg-username').placeholder = 'Choose a username';
-    document.getElementById('reg-email').value = '';
-    document.getElementById('reg-email').removeAttribute('readonly');
-    document.getElementById('reg-email').placeholder = 'your.email@example.com';
-    document.getElementById('reg-telephone').value = '';
-    document.getElementById('reg-password').value = '';
-    document.getElementById('reg-confirm-password').value = '';
-    document.getElementById('reg-selfdesc').value = '';
-    document.getElementById('reg-company').value = '';
-    document.getElementById('reg-address').value = '';
-    document.getElementById('reg-mailcode').value = '';
-    document.getElementById('reg-remarks').value = '';
-    document.getElementById('terms').checked = false;
-    document.querySelectorAll('input[name="product_service"]').forEach(cb => cb.checked = false);
-    document.getElementById('reg-avatar-upload') && (document.getElementById('reg-avatar-upload').value = '');
-    selectedAvatarUrl = '';
-    document.getElementById('reg-avatar-img').style.display = 'none';
-    document.getElementById('reg-avatar-placeholder').style.display = 'flex';
-    document.getElementById('reg-avatar-placeholder').textContent = '?';
-    document.querySelectorAll('.avatar-preset-reg').forEach(x => x.classList.remove('selected'));
-    showStep('step-register');
-    updateCreateAccountButtonState();
-});
+const goCreateAccountLink = document.getElementById('go-create-account');
+if (goCreateAccountLink) {
+    goCreateAccountLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        const registerIdentifierBar = document.getElementById('register-identifier-bar');
+        const registerSignInInstead = document.getElementById('register-sign-in-instead');
+        if (registerIdentifierBar) registerIdentifierBar.style.display = 'none';
+        if (registerSignInInstead) registerSignInInstead.style.display = 'block';
+
+        const regFirstname = document.getElementById('reg-firstname');
+        const regLastname = document.getElementById('reg-lastname');
+        const regUsername = document.getElementById('reg-username');
+        const regEmail = document.getElementById('reg-email');
+        const regTelephone = document.getElementById('reg-telephone');
+        const regPassword = document.getElementById('reg-password');
+        const regConfirmPassword = document.getElementById('reg-confirm-password');
+        const regSelfDesc = document.getElementById('reg-selfdesc');
+        const regCompany = document.getElementById('reg-company');
+        const regAddress = document.getElementById('reg-address');
+        const regMailcode = document.getElementById('reg-mailcode');
+        const regRemarks = document.getElementById('reg-remarks');
+        const terms = document.getElementById('terms');
+        const regAvatarUpload = document.getElementById('reg-avatar-upload');
+        const regAvatarImg = document.getElementById('reg-avatar-img');
+        const regAvatarPlaceholder = document.getElementById('reg-avatar-placeholder');
+
+        if (regFirstname) regFirstname.value = '';
+        if (regLastname) regLastname.value = '';
+        if (regUsername) {
+            regUsername.value = '';
+            regUsername.removeAttribute('readonly');
+            regUsername.placeholder = 'Choose a username';
+        }
+        if (regEmail) {
+            regEmail.value = '';
+            regEmail.removeAttribute('readonly');
+            regEmail.placeholder = 'your.email@example.com';
+        }
+        if (regTelephone) regTelephone.value = '';
+        if (regPassword) regPassword.value = '';
+        if (regConfirmPassword) regConfirmPassword.value = '';
+        if (regSelfDesc) regSelfDesc.value = '';
+        if (regCompany) regCompany.value = '';
+        if (regAddress) regAddress.value = '';
+        if (regMailcode) regMailcode.value = '';
+        if (regRemarks) regRemarks.value = '';
+        if (terms) terms.checked = false;
+
+        document.querySelectorAll('input[name="product_service"]').forEach(cb => cb.checked = false);
+        if (regAvatarUpload) regAvatarUpload.value = '';
+        selectedAvatarUrl = '';
+        if (regAvatarImg) regAvatarImg.style.display = 'none';
+        if (regAvatarPlaceholder) {
+            regAvatarPlaceholder.style.display = 'flex';
+            regAvatarPlaceholder.textContent = '?';
+        }
+        document.querySelectorAll('.avatar-preset-reg').forEach(x => x.classList.remove('selected'));
+
+        showStep('step-register');
+        updateCreateAccountButtonState();
+    });
+}
 
 // "Already have an account? Sign in" - back to step 1
 document.getElementById('back-to-signin').addEventListener('click', function(e) {
@@ -778,20 +829,17 @@ document.getElementById('login-form').addEventListener('submit', async function(
     btn.textContent = 'Signing in...';
     
     try {
-        const res = await fetch(`${API_ENDPOINT}/api/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: currentIdentifier, password })
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: currentIdentifier,
+            password
         });
-        const data = await res.json();
-        
-        if (data.success) {
-            localStorage.setItem('auth_token', data.token);
-            localStorage.setItem('user_info', JSON.stringify(data.user));
+
+        if (!error && data?.session) {
+            localStorage.setItem('user_info', JSON.stringify(data.user || {}));
             showMessage('Sign in successful! Redirecting...', 'success');
             setTimeout(() => { window.location.href = 'profile.html?view=own'; }, 800);
         } else {
-            showMessage(data.error || 'Wrong password. Try again.', 'error');
+            showMessage(error?.message || 'Wrong password. Try again.', 'error');
             btn.disabled = false;
             btn.textContent = 'Sign in';
         }
@@ -835,38 +883,42 @@ document.getElementById('register-form').addEventListener('submit', async functi
     btn.textContent = 'Creating account...';
     
     try {
-        const res = await fetch(`${API_ENDPOINT}/api/register`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ firstname, lastname, username, email, telephone: telephone || undefined, password, role })
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                data: {
+                    username,
+                    firstname,
+                    lastname,
+                    avatar_url: selectedAvatarUrl || null
+                }
+            }
         });
-        const data = await res.json();
-        
-        if (data.success) {
+
+        if (!error) {
             showMessage('Account created! Redirecting to profile...', 'success');
-            if (data.token) {
-                localStorage.setItem('auth_token', data.token);
-                localStorage.setItem('user_info', JSON.stringify(data.user));
-                const profilePayload = {
-                    telephone: telephone || undefined,
-                    avatar_url: selectedAvatarUrl || undefined,
-                    self_description: document.getElementById('reg-selfdesc').value.trim() || undefined,
-                    company_name: document.getElementById('reg-company').value.trim() || undefined,
-                    address: document.getElementById('reg-address').value.trim() || undefined,
-                    mail_code: document.getElementById('reg-mailcode').value.trim() || undefined,
-                    personal_remarks: document.getElementById('reg-remarks').value.trim() || undefined
-                };
-                if (Object.keys(profilePayload).some(k => profilePayload[k] !== undefined)) {
-                    fetch(`${API_ENDPOINT}/api/profile`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + data.token },
-                        body: JSON.stringify(profilePayload)
-                    }).catch(() => {});
+            if (data?.session) {
+                localStorage.setItem('user_info', JSON.stringify(data.user || {}));
+                if (selectedAvatarUrl) {
+                    localStorage.setItem('jjc_avatar_url', selectedAvatarUrl);
+                    try {
+                        await fetch(API_ENDPOINT + '/api/profile', {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Authorization: 'Bearer ' + data.session.access_token
+                            },
+                            body: JSON.stringify({ avatar_url: selectedAvatarUrl })
+                        });
+                    } catch (avatarSaveErr) {
+                        console.warn('Avatar save during registration failed:', avatarSaveErr);
+                    }
                 }
             }
             setTimeout(() => { window.location.href = 'profile.html?view=own'; }, 1000);
         } else {
-            showMessage(data.error || 'Registration failed.', 'error');
+            showMessage(error?.message || 'Registration failed.', 'error');
             btn.disabled = false;
             btn.textContent = 'Create account';
         }
@@ -886,17 +938,27 @@ document.querySelector('.forgot-password').addEventListener('click', function(e)
 // On load: show register if ?create=1, or redirect if already logged in
 window.addEventListener('load', function() {
     const params = new URLSearchParams(window.location.search);
-    const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
-    if (token) {
-        fetch(`${API_ENDPOINT}/api/auth/check`, { headers: { 'Authorization': `Bearer ${token}` } })
-            .then(r => r.json())
-            .then(d => { if (d.authenticated) window.location.href = 'profile.html?view=own'; })
-            .catch(() => {});
-    } else if (params.get('create') === '1') {
-        document.getElementById('register-identifier-bar').style.display = 'none';
-        document.getElementById('register-sign-in-instead').style.display = 'block';
-        showStep('step-register');
-    }
+    supabase?.auth.getSession()
+        .then(({ data }) => {
+            if (data?.session) {
+                window.location.href = 'profile.html?view=own';
+                return;
+            }
+            if (params.get('create') === '1') {
+                document.getElementById('register-identifier-bar').style.display = 'none';
+                document.getElementById('register-sign-in-instead').style.display = 'block';
+                enableManualRegisterIdentityFields();
+                showStep('step-register');
+            }
+        })
+        .catch(() => {
+            if (params.get('create') === '1') {
+                document.getElementById('register-identifier-bar').style.display = 'none';
+                document.getElementById('register-sign-in-instead').style.display = 'block';
+                enableManualRegisterIdentityFields();
+                showStep('step-register');
+            }
+        });
     updateCreateAccountButtonState();
 });
 </script>

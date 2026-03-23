@@ -12,6 +12,7 @@
   
   <!-- Supabase Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   
   <style>
     /* Custom scrollbar for sidebar */
@@ -102,9 +103,8 @@
   <!-- 4. Add JavaScript before closing </body> (include cloudflare-image-url.js if showing cover images) -->
   <script src="cloudflare-image-url.js"></script>
   <script>
-    // ⚠️ IMPORTANT: Replace with your actual Supabase credentials
-    const SUPABASE_URL = 'https://your-project.supabase.co';
-    const SUPABASE_ANON_KEY = 'your-anon-key-here';
+    const SUPABASE_URL = window.JJCONNECT_CONFIG.supabaseUrl;
+    const SUPABASE_ANON_KEY = window.JJCONNECT_CONFIG.supabaseAnonKey;
     
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 

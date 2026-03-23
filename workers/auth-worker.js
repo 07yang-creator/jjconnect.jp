@@ -7,11 +7,7 @@
  * - GET /api/* - API endpoints
  *
  * API Endpoints:
- * - POST /api/login - User login
  * - GET /api/account/check - Check if account exists (?identifier=email|username)
- * - GET /api/auth/check - Check authentication status
- * - POST /api/auth/logout - User logout
- * - POST /api/register - User registration
  * - GET /api/users - Get user list
  * - POST /api/submit - Submit joint-mamori form
  * - GET /api/submissions - Get submissions list (Admin only)

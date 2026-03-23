@@ -46,6 +46,7 @@ export interface Profile {
   avatar_url: string | null;
   bio: string | null;
   is_authorized: boolean; // Admin/authorized user flag
+  role?: string | null; // Default traveller role: T
   role_level?: string | null; // Role Matrix: A/B/CB/VB/T/S/W/WN/W1/W2/W3/S_writer
   created_at: string;
   updated_at: string;
@@ -199,6 +200,7 @@ export type CategoryUpdate = Partial<Omit<Category, 'id' | 'created_at' | 'updat
  */
 export type ProfileInsert = Omit<Profile, 'created_at' | 'updated_at' | 'is_authorized' | 'role_level'> & {
   is_authorized?: boolean;
+  role?: string | null;
   role_level?: string | null;
 };
 

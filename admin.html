@@ -521,6 +521,8 @@ tr:hover {
 </style>
 </head>
 <body class="admin-page">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
 <script src="navbar.js"></script>
 <style>
 /* Hide any existing headers */
@@ -1026,6 +1028,24 @@ function getApiBase() {
     return (typeof window !== 'undefined' && (window.location.protocol === 'file:' || (window.location.hostname === 'localhost' && window.location.port && window.location.port !== '8787'))) ? 'http://localhost:8787' : '';
 }
 
+const supabaseCfg = window.JJCONNECT_CONFIG || {};
+const SUPABASE_URL = supabaseCfg.supabaseUrl;
+const SUPABASE_ANON_KEY = supabaseCfg.supabaseAnonKey;
+const supabase = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null;
+
+async function getAccessToken() {
+    if (!supabase) return '';
+    try {
+        const { data } = await supabase.auth.getSession();
+        return data?.session?.access_token || '';
+    } catch (error) {
+        console.error('Failed to get Supabase session:', error);
+        return '';
+    }
+}
+
 /**
  * Check authentication and get user role from Cloudflare Workers
  * API Endpoint: GET /api/auth/check
@@ -1036,35 +1056,32 @@ function getApiBase() {
  */
 async function checkAuth() {
     try {
-        const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
-        const apiBase = getApiBase();
-        
-        if (token && apiBase) {
-            const authRes = await fetch(`${apiBase}/api/auth/check`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const authData = await authRes.json();
-            if (authData.authenticated && authData.user) {
-                userRole = authData.user.role ?? userRole;
+        if (supabase) {
+            const { data: sessionData } = await supabase.auth.getSession();
+            const session = sessionData?.session;
+            if (session) {
+                const { data: userResp } = await supabase.auth.getUser();
+                const user = userResp?.user;
+                userRole = Number(user?.user_metadata?.role ?? userRole);
+
                 const nameEl = document.querySelector('.user-name');
-                if (nameEl && authData.user.username) nameEl.textContent = authData.user.username;
+                if (nameEl) nameEl.textContent = user?.user_metadata?.username || user?.email || 'User';
                 const avatarEl = document.querySelector('.user-avatar');
-                if (avatarEl) avatarEl.textContent = (authData.user.username || 'AD').substring(0, 2).toUpperCase();
-                const permRes = await fetch(`${apiBase}/api/my-permissions`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const permData = await permRes.json();
-                matrixPermissions = (permData.success && permData.ui) ? permData.ui : null;
+                if (avatarEl) {
+                    const display = (user?.user_metadata?.username || user?.email || 'AD').substring(0, 2).toUpperCase();
+                    avatarEl.textContent = display;
+                }
+
                 applyPermissionControls();
-                return authData;
+                return { authenticated: true, user: { role: userRole } };
             }
         }
-        
+
         // Fallback: test role or default
         matrixPermissions = null;
         applyPermissionControls();
         return { authenticated: true, role: userRole, username: 'Test User', email: 'test@jjconnect.jp' };
-        
+
     } catch (error) {
         console.error('Authentication error:', error);
         matrixPermissions = null;
@@ -1339,7 +1356,7 @@ function addRoleIndicator() {
 async function syncRoleMatrix() {
     const btn = document.getElementById('sync-role-matrix-btn');
     if (btn) btn.disabled = true;
-    const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+    const token = await getAccessToken();
     if (!token) {
         alert('请先登录');
         if (btn) btn.disabled = false;
@@ -1817,7 +1834,7 @@ async function loadSubmissions() {
         
         const response = await fetch(apiUrl, {
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                'Authorization': `Bearer ${await getAccessToken()}`
             }
         });
         
@@ -1984,7 +2001,7 @@ async function markAsReviewed(submissionId) {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                'Authorization': `Bearer ${await getAccessToken()}`
             },
             body: JSON.stringify({
                 status: 'reviewed'
@@ -2056,7 +2073,7 @@ async function viewSubmission(submissionId) {
         const apiBase = getApiBase();
         const response = await fetch(`${apiBase}/api/submissions?limit=1000`, {
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                'Authorization': `Bearer ${await getAccessToken()}`
             }
         });
         
@@ -2220,7 +2237,7 @@ async function updateSubmissionStatus(submissionId) {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                'Authorization': `Bearer ${await getAccessToken()}`
             },
             body: JSON.stringify({
                 status: newStatus

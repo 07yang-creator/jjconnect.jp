@@ -275,6 +275,8 @@
     </style>
 </head>
 <body>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
     <script src="navbar.js"></script>
     
     <div class="profile-page" id="profile-page">
@@ -406,8 +408,14 @@
     
     <script>
         const API_ENDPOINT = (window.location.protocol === 'file:' || (window.location.hostname === 'localhost' && window.location.port && window.location.port !== '8787')) ? 'http://localhost:8787' : '';
+        const supabaseCfg = window.JJCONNECT_CONFIG || {};
+        const SUPABASE_URL = supabaseCfg.supabaseUrl;
+        const SUPABASE_ANON_KEY = supabaseCfg.supabaseAnonKey;
+        const supabase = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
+            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+            : null;
         
-        const MULTIAVATAR_BASE = 'https://api.multiavatar.com';
+        const DICEBEAR_BASE = 'https://api.dicebear.com/9.x/initials/svg';
         const AVATAR_PRESETS = ['smile', 'happy', 'alice', 'bob', 'carlos', 'denise', 'eva', 'frank', 'grace', 'henry'];
         const MAX_AVATAR_SIZE = 500 * 1024; // 500KB
         
@@ -417,8 +425,19 @@
             2: 'Admin'
         };
         
-        function getAuthHeaders() {
-            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+        async function getAccessToken() {
+            if (!supabase) return '';
+            try {
+                const { data } = await supabase.auth.getSession();
+                return data?.session?.access_token || '';
+            } catch (error) {
+                console.error('Failed to get Supabase session:', error);
+                return '';
+            }
+        }
+
+        async function getAuthHeaders() {
+            const token = await getAccessToken();
             const h = { 'Content-Type': 'application/json' };
             if (token) h['Authorization'] = 'Bearer ' + token;
             return h;
@@ -503,13 +522,13 @@
             if (el) el.value = val || '';
         }
         
-        function multiavatarUrl(seed) { return MULTIAVATAR_BASE + '/' + encodeURIComponent(seed) + '.svg'; }
+        function multiavatarUrl(seed) { return DICEBEAR_BASE + '?seed=' + encodeURIComponent(seed); }
         
         async function saveAvatar(avatarUrl) {
             try {
                 const res = await fetch(API_ENDPOINT + '/api/profile', {
                     method: 'PUT',
-                    headers: getAuthHeaders(),
+                    headers: await getAuthHeaders(),
                     body: JSON.stringify({ avatar_url: avatarUrl })
                 });
                 const data = await res.json();
@@ -559,9 +578,12 @@
                 const fd = new FormData();
                 fd.append('avatar', f);
                 try {
+                    const token = await getAccessToken();
+                    const uploadHeaders = {};
+                    if (token) uploadHeaders.Authorization = 'Bearer ' + token;
                     const res = await fetch(API_ENDPOINT + '/api/avatar/upload', {
                         method: 'POST',
-                        headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token') || '') },
+                        headers: uploadHeaders,
                         body: fd
                     });
                     const data = await res.json();
@@ -616,7 +638,7 @@
             try {
                 const res = await fetch(API_ENDPOINT + '/api/profile', {
                     method: 'PUT',
-                    headers: getAuthHeaders(),
+                    headers: await getAuthHeaders(),
                     body: JSON.stringify(payload)
                 });
                 const data = await res.json();
@@ -642,7 +664,7 @@
             const targetUser = params.get('user');
             
             const isPublicView = viewMode === 'public' || targetUser;
-            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            const token = await getAccessToken();
             
             if (!token && !targetUser) {
                 showError('Please sign in to view your profile.');
@@ -656,7 +678,7 @@
             
             try {
                 const res = await fetch(url, {
-                    headers: targetUser ? {} : getAuthHeaders()
+                    headers: targetUser ? {} : await getAuthHeaders()
                 });
                 const data = await res.json();
                 

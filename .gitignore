@@ -13,6 +13,7 @@ wrangler.toml.backup
 .env.local
 .env.development
 .env.production
+config.js
 scripts/backup.env
 scripts/backup.log
 scripts/backup.err

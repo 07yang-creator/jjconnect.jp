@@ -22,3 +22,20 @@ The workflow [keep-supabase-alive.yml](keep-supabase-alive.yml) pings your Supab
 
 - Default: every **12 hours** (UTC).
 - To run more or less often, edit the `cron` in `keep-supabase-alive.yml`.
+
+## Incident log
+
+### 2026-03-22: Supabase pause warning received
+
+- **Symptom**: Received "project is going to be paused" email from Supabase.
+- **Root cause**:
+  - Keep-alive ping was changed to a weaker endpoint (`/rest/v1/`) instead of a concrete table query.
+  - Workflow updates were local at first; GitHub Actions only uses committed and pushed workflow files.
+  - Local `.env` keys were present, but Actions depends on **repository secrets**, not local env files.
+- **Fix applied**:
+  - Restored ping to a concrete read endpoint:
+    - `GET /rest/v1/categories?select=id&limit=1`
+  - Confirmed repository secrets:
+    - `SUPABASE_URL`
+    - `SUPABASE_ANON_KEY`
+  - Ran workflow manually in GitHub Actions and confirmed **Success**.

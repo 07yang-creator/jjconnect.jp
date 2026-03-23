@@ -11,6 +11,7 @@
 5. `003_profiles_role_level.sql`
 6. `004_role_permissions.sql`
 7. **先部署 Worker（含 getSupabaseServiceConfig）后** 再执行 `005_user_profiles_rls_fix.sql`
+8. `008_profiles_role_and_signup_trigger.sql`
 
 若库中已存在 `posts` / `categories`（例如在 Dashboard 手动建过），可直接执行 006、007（幂等），再按需执行其余迁移。
 
@@ -38,6 +39,7 @@ supabase db push
 | 002 | comments | 评论（依赖 posts） |
 | 003 | profiles | Supabase Auth 用户资料 + role_level |
 | 004 | role_permissions | 权限矩阵 |
+| 008 | profiles trigger | profiles.role 默认值 + auth.users 注册自动建档 |
 
 ## user_profiles schema
 

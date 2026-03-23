@@ -7,6 +7,12 @@
     'use strict';
     
     const API_ENDPOINT = (typeof window !== 'undefined' && (window.location.protocol === 'file:' || (window.location.hostname === 'localhost' && window.location.port && window.location.port !== '8787'))) ? 'http://localhost:8787' : '';
+    const supabaseCfg = window.JJCONNECT_CONFIG || {};
+    const SUPABASE_URL = supabaseCfg.supabaseUrl;
+    const SUPABASE_ANON_KEY = supabaseCfg.supabaseAnonKey;
+    const supabase = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        : null;
     
     /**
      * 判断是否为首页（仅首页隐藏 Sign in 按钮）
@@ -69,7 +75,7 @@
                             </button>
                             <div class="jjc-user-dropdown" id="jjc-user-dropdown">
                                 <a href="profile.html?view=own" class="jjc-user-dropdown-item">My Profile</a>
-                                ${(userData?.role >= 2 || userData?.role_level === 'A') ? '<a href="admin.html" class="jjc-user-dropdown-item">Admin Dashboard</a>' : ''}
+                                ${(userData?.role >= 2) ? '<a href="admin.html" class="jjc-user-dropdown-item">Admin Dashboard</a>' : ''}
                                 <button id="jjc-logout-btn" class="jjc-user-dropdown-item">Logout</button>
                             </div>
                         </div>
@@ -115,7 +121,7 @@
                 ${isLoggedIn ? `
                     <a href="profile.html?view=own" class="jjc-mobile-link">My Profile</a>
                     <div class="jjc-mobile-user">${avatarSrc ? '<img class="jjc-mobile-avatar" src="' + avatarSrc + '" alt="">' : '👤'} ${userData?.username || 'User'}</div>
-                    ${(userData?.role >= 2 || userData?.role_level === 'A') ? '<a href="admin.html" class="jjc-mobile-link">Admin Dashboard</a>' : ''}
+                    ${(userData?.role >= 2) ? '<a href="admin.html" class="jjc-mobile-link">Admin Dashboard</a>' : ''}
                     <button id="jjc-mobile-logout" class="jjc-mobile-link">Logout</button>
                 ` : `
                     <a href="login.html" class="jjc-mobile-link">Sign in</a>
@@ -130,43 +136,50 @@
      * 检查登录状态
      */
     async function checkAuthStatus() {
-        const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
-        
-        if (!token) {
+        if (!supabase) {
             return { isLoggedIn: false, userData: null };
         }
-        
+
         try {
-            const response = await fetch(`${API_ENDPOINT}/api/auth/check`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            
-            const data = await response.json();
-            
-            if (data.authenticated) {
-                return { 
-                    isLoggedIn: true, 
-                    userData: data.user 
-                };
+            const { data: sessionData } = await supabase.auth.getSession();
+            const session = sessionData?.session;
+            if (!session) {
+                return { isLoggedIn: false, userData: null };
             }
+
+            const { data: userDataResp } = await supabase.auth.getUser();
+            const user = userDataResp?.user;
+            return {
+                isLoggedIn: true,
+                userData: {
+                    username: user?.user_metadata?.username || user?.email || 'User',
+                    email: user?.email || '',
+                    avatar_url: user?.user_metadata?.avatar_url || null,
+                    role: Number(user?.user_metadata?.role ?? 0)
+                }
+            };
         } catch (error) {
             console.error('Auth check failed:', error);
+            return { isLoggedIn: false, userData: null };
         }
-        
-        return { isLoggedIn: false, userData: null };
     }
     
     /**
      * 退出登录
      */
     function handleLogout() {
-        localStorage.removeItem('auth_token');
-        sessionStorage.removeItem('auth_token');
-        localStorage.removeItem('user_info');
-        localStorage.removeItem('jjc_avatar_url');
-        window.location.reload();
+        const finalize = () => {
+            localStorage.removeItem('user_info');
+            localStorage.removeItem('jjc_avatar_url');
+            window.location.reload();
+        };
+        if (!supabase) {
+            finalize();
+            return;
+        }
+        supabase.auth.signOut()
+            .catch((error) => console.error('Logout failed:', error))
+            .finally(finalize);
     }
     
     /**
