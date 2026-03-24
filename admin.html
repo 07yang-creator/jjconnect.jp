@@ -539,6 +539,7 @@ tr:hover {
             <span class="user-name">Admin User</span>
         </div>
         <button id="sync-role-matrix-btn" class="logout-btn" onclick="syncRoleMatrix()" style="display: none;">更新授权</button>
+        <span id="role-matrix-sync-status" style="font-size: 12px; color: var(--global-palette6); white-space: nowrap; margin-left: 0.5rem;"></span>
         <button class="logout-btn" onclick="handleLogout()">Logout</button>
     </div>
 </header>
@@ -1034,6 +1035,8 @@ const SUPABASE_ANON_KEY = supabaseCfg.supabaseAnonKey;
 const supabase = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
     : null;
+const ROLE_MATRIX_SYNC_SESSION_DONE_KEY = 'jjc_role_matrix_sync_done';
+const ROLE_MATRIX_SYNC_LAST_TS_KEY = 'jjc_role_matrix_sync_last_ts';
 
 async function getAccessToken() {
     if (!supabase) return '';
@@ -1043,6 +1046,94 @@ async function getAccessToken() {
     } catch (error) {
         console.error('Failed to get Supabase session:', error);
         return '';
+    }
+}
+
+function formatSyncTime(ts) {
+    try {
+        return new Date(ts).toLocaleString('ja-JP', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+    } catch {
+        return '';
+    }
+}
+
+function updateRoleMatrixSyncStatus(ts) {
+    const statusEl = document.getElementById('role-matrix-sync-status');
+    if (!statusEl) return;
+    if (!ts) {
+        statusEl.textContent = '';
+        return;
+    }
+    const formatted = formatSyncTime(ts);
+    statusEl.textContent = formatted ? `Last synced: ${formatted}` : '';
+}
+
+function showRoleMatrixSyncFailedToast() {
+    const toast = document.createElement('div');
+    toast.textContent = 'Role matrix sync failed — check sheet access';
+    toast.style.cssText = [
+        'position: fixed',
+        'right: 20px',
+        'bottom: 20px',
+        'background: #C53030',
+        'color: #fff',
+        'padding: 10px 14px',
+        'border-radius: 8px',
+        'font-size: 13px',
+        'box-shadow: 0 4px 12px rgba(0,0,0,0.2)',
+        'z-index: 10000',
+        'animation: slideIn 0.2s ease'
+    ].join(';');
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.2s ease';
+        setTimeout(() => toast.remove(), 220);
+    }, 4000);
+}
+
+async function syncRoleMatrixSilentlyOncePerSession() {
+    const alreadyDone = sessionStorage.getItem(ROLE_MATRIX_SYNC_SESSION_DONE_KEY) === '1';
+    if (alreadyDone) {
+        const lastTs = sessionStorage.getItem(ROLE_MATRIX_SYNC_LAST_TS_KEY);
+        if (lastTs) updateRoleMatrixSyncStatus(lastTs);
+        return;
+    }
+
+    sessionStorage.setItem(ROLE_MATRIX_SYNC_SESSION_DONE_KEY, '1');
+
+    const token = await getAccessToken();
+    if (!token) return;
+
+    const apiBase = (typeof API_ENDPOINT === 'string' && API_ENDPOINT) ? API_ENDPOINT : getApiBase();
+
+    try {
+        const res = await fetch(`${apiBase}/api/sync-role-matrix`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+            const nowTs = new Date().toISOString();
+            sessionStorage.setItem(ROLE_MATRIX_SYNC_LAST_TS_KEY, nowTs);
+            updateRoleMatrixSyncStatus(nowTs);
+        } else {
+            showRoleMatrixSyncFailedToast();
+        }
+    } catch (error) {
+        console.error('Silent role matrix sync failed:', error);
+        showRoleMatrixSyncFailedToast();
     }
 }
 
@@ -2321,6 +2412,9 @@ async function initializeDashboard() {
         console.error('❌ Authentication failed');
         return;
     }
+
+    updateRoleMatrixSyncStatus(sessionStorage.getItem(ROLE_MATRIX_SYNC_LAST_TS_KEY));
+    syncRoleMatrixSilentlyOncePerSession();
     
     console.log('✓ Admin Dashboard initialized successfully');
     console.log('✓ All API endpoints are documented in function comments');
