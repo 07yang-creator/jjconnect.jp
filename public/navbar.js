@@ -298,28 +298,12 @@
         const productsDropdown = document.getElementById('jjc-products-dropdown');
         if (productsDropdown) {
             const toggle = productsDropdown.querySelector('.jjc-nav-dropdown-toggle');
-            
-            // 鼠标悬停显示下拉菜单
-            productsDropdown.addEventListener('mouseenter', (e) => {
-                productsDropdown.classList.add('active');
-            });
-            
-            productsDropdown.addEventListener('mouseleave', (e) => {
-                productsDropdown.classList.remove('active');
-            });
-            
-            // 点击链接时允许跳转
+
+            // 点击切换下拉菜单，避免 hover 导致菜单无法点击
             toggle.addEventListener('click', (e) => {
-                // 如果下拉菜单已显示，允许链接跳转
-                if (productsDropdown.classList.contains('active')) {
-                    // 让链接正常工作
-                    return true;
-                } else {
-                    // 首次点击显示下拉菜单
-                    e.preventDefault();
-                    e.stopPropagation();
-                    productsDropdown.classList.add('active');
-                }
+                e.preventDefault();
+                e.stopPropagation();
+                productsDropdown.classList.toggle('active');
             });
             
             // 点击外部关闭
@@ -327,6 +311,13 @@
                 if (!productsDropdown.contains(e.target)) {
                     productsDropdown.classList.remove('active');
                 }
+            });
+
+            // 点击菜单项后关闭下拉菜单
+            productsDropdown.querySelectorAll('.jjc-nav-dropdown-item').forEach((item) => {
+                item.addEventListener('click', () => {
+                    productsDropdown.classList.remove('active');
+                });
             });
         }
         

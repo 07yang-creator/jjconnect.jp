@@ -243,6 +243,22 @@
       width: 20px;
       height: 20px;
     }
+
+    .newsletter-toast {
+      position: fixed;
+      top: 96px;
+      right: 20px;
+      max-width: min(420px, calc(100vw - 40px));
+      padding: 0.85rem 1rem;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: #e5e7eb;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+      font-size: 0.92rem;
+      line-height: 1.45;
+      z-index: 10020;
+    }
     
     @media (max-width: 640px) {
       .newsletter-form {
@@ -296,9 +312,9 @@
       to get latest updates about our site please sign up to our newsletter
     </p>
     
-    <form class="newsletter-form" id="newsletter-form" onsubmit="return false;">
-      <input type="email" class="newsletter-input" placeholder="Enter email and get updates" required>
-      <button type="submit" class="newsletter-btn" aria-label="Subscribe">
+    <form class="newsletter-form" id="newsletter-form">
+      <input type="email" id="newsletter-email" class="newsletter-input" placeholder="Enter email and get updates" required>
+      <button type="submit" class="newsletter-btn" id="newsletter-submit" aria-label="Subscribe">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
         </svg>
@@ -392,6 +408,75 @@
       }
     }
     
+    let activeToast = null;
+    let removeToastOnOutsideClick = null;
+
+    function dismissToast() {
+      if (activeToast) {
+        activeToast.remove();
+        activeToast = null;
+      }
+      if (removeToastOnOutsideClick) {
+        document.removeEventListener('click', removeToastOnOutsideClick, true);
+        removeToastOnOutsideClick = null;
+      }
+    }
+
+    function showToast(message) {
+      dismissToast();
+      activeToast = document.createElement('div');
+      activeToast.className = 'newsletter-toast';
+      activeToast.textContent = message;
+      document.body.appendChild(activeToast);
+
+      // Delay binding to avoid immediate close from the same click event.
+      setTimeout(() => {
+        removeToastOnOutsideClick = (event) => {
+          if (activeToast && !activeToast.contains(event.target)) {
+            dismissToast();
+          }
+        };
+        document.addEventListener('click', removeToastOnOutsideClick, true);
+      }, 0);
+    }
+
+    const newsletterForm = document.getElementById('newsletter-form');
+    const newsletterEmail = document.getElementById('newsletter-email');
+    const newsletterSubmit = document.getElementById('newsletter-submit');
+
+    newsletterForm?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!newsletterEmail?.checkValidity()) {
+        newsletterEmail?.reportValidity();
+        return;
+      }
+
+      const email = newsletterEmail.value.trim();
+      if (!email) return;
+
+      showToast('Thanks for you attention to us, we will be in touch very soon.');
+      newsletterForm.reset();
+
+      if (newsletterSubmit) {
+        newsletterSubmit.disabled = true;
+      }
+      try {
+        await fetch('/api/newsletter-interest', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email }),
+        });
+      } catch (error) {
+        console.warn('Failed to notify admin mailbox:', error);
+      } finally {
+        if (newsletterSubmit) {
+          newsletterSubmit.disabled = false;
+        }
+      }
+    });
+
     createStars();
     updateCountdown();
     setInterval(updateCountdown, 1000);

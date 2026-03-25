@@ -30,7 +30,7 @@ import {
   handleUpdateSubmission,
 } from './handlers/submissions.js';
 import { handleSyncRoleMatrix, handleGetMyPermissions } from './handlers/roleMatrix.js';
-import { handleSendEmail } from './handlers/email.js';
+import { handleSendEmail, handleNewsletterInterest } from './handlers/email.js';
 import { validate } from './lib/validate.js';
 import {
   accountCheckSchema,
@@ -78,6 +78,7 @@ export async function route(request, env) {
     if (path.startsWith('/api/submissions/') && method === 'PATCH') return await validate(updateSubmissionSchema, 'body')(handleUpdateSubmission)(request, env);
     if (path.startsWith('/api/files/') && method === 'GET') return await handleGetFile(request, env);
     if (path === '/api/internal/send-email' && method === 'POST') return await handleSendEmail(request, env);
+    if (path === '/api/newsletter-interest' && method === 'POST') return await handleNewsletterInterest(request, env);
 
     return errorResponse('API 端点不存在', 404);
   } catch (error) {

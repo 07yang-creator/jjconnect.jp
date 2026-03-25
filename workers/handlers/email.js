@@ -34,3 +34,57 @@ export async function handleSendEmail(request, env) {
   const result = await sendEmail({ to, subject, html, text }, env);
   return jsonResponse(result, result.success ? 200 : 500);
 }
+
+export async function handleNewsletterInterest(request, env) {
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ success: false, error: 'Invalid JSON body' }, 400);
+  }
+
+  const email = String(body?.email || '').trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return jsonResponse({ success: false, error: 'Invalid email' }, 400);
+  }
+
+  const adminMailbox = env.REVIEW_ADMIN_EMAIL || env.ADMIN_EMAIL || 'support@jjconnect.jp';
+  const submittedAt = new Date().toISOString();
+  const sourceIp = request.headers.get('CF-Connecting-IP') || 'unknown';
+  const sourceUa = request.headers.get('User-Agent') || 'unknown';
+
+  const html = `
+    <h2>New Getting Ready newsletter interest</h2>
+    <p>A visitor left an email on gettingready page.</p>
+    <ul>
+      <li><strong>Email:</strong> ${email}</li>
+      <li><strong>Submitted at:</strong> ${submittedAt}</li>
+      <li><strong>IP:</strong> ${sourceIp}</li>
+      <li><strong>User-Agent:</strong> ${sourceUa}</li>
+    </ul>
+  `;
+  const text = [
+    'New Getting Ready newsletter interest',
+    `Email: ${email}`,
+    `Submitted at: ${submittedAt}`,
+    `IP: ${sourceIp}`,
+    `User-Agent: ${sourceUa}`,
+  ].join('\n');
+
+  const result = await sendEmail(
+    {
+      to: adminMailbox,
+      subject: 'New newsletter interest from gettingready page',
+      html,
+      text,
+    },
+    env,
+  );
+
+  if (!result.success) {
+    return jsonResponse({ success: false, error: result.error || 'Failed to send email' }, 500);
+  }
+
+  return jsonResponse({ success: true });
+}

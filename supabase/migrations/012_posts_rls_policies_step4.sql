@@ -44,96 +44,196 @@ $$ LANGUAGE sql IMMUTABLE;
 
 ALTER TABLE public.posts ENABLE ROW LEVEL SECURITY;
 
--- remove old/broad or incompatible policies
-DROP POLICY IF EXISTS "Posts readable by all" ON public.posts;
-DROP POLICY IF EXISTS "Authenticated can insert own post" ON public.posts;
-DROP POLICY IF EXISTS "Authors can update own post" ON public.posts;
-DROP POLICY IF EXISTS "Authors can delete own post" ON public.posts;
-DROP POLICY IF EXISTS "Public can read published posts" ON public.posts;
-DROP POLICY IF EXISTS "Role-based full post read" ON public.posts;
-DROP POLICY IF EXISTS "Role-based post insert" ON public.posts;
-DROP POLICY IF EXISTS "Role-based post update" ON public.posts;
-DROP POLICY IF EXISTS "Role-based post delete" ON public.posts;
+-- non-destructive policy creation:
+-- avoid dropping existing policies in this migration; only add if missing
 
 -- 1) Public preview access (published rows; app should expose brief as preview)
-CREATE POLICY "Public can read published posts"
-ON public.posts
-FOR SELECT
-USING (status = 'published');
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'posts'
+      AND policyname = 'Public can read published posts'
+  ) THEN
+    CREATE POLICY "Public can read published posts"
+    ON public.posts
+    FOR SELECT
+    USING (status = 'published');
+  END IF;
+END
+$$;
 
 -- 2) Authenticated full read: admin OR matrix permission in ('R', 'R/W')
-CREATE POLICY "Role-based full post read"
-ON public.posts
-FOR SELECT
-TO authenticated
-USING (
-  public.get_my_role() = 'A'
-  OR EXISTS (
+DO $$
+DECLARE
+  has_topic BOOLEAN;
+BEGIN
+  SELECT EXISTS (
     SELECT 1
-    FROM public.role_permissions rp
-    WHERE rp.role_level = public.normalize_role_level(public.get_my_role())
-      AND public.normalize_resource_name(rp.resource)
-          = public.normalize_resource_name(public.topic_to_sheet_resource(posts.topic))
-      AND rp.permission IN ('R', 'R/W')
-  )
-);
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'posts'
+      AND column_name = 'topic'
+  ) INTO has_topic;
+
+  IF NOT has_topic THEN
+    RAISE NOTICE 'Skipping policy "Role-based full post read": public.posts.topic not found';
+  ELSIF NOT EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'posts'
+      AND policyname = 'Role-based full post read'
+  ) THEN
+    CREATE POLICY "Role-based full post read"
+    ON public.posts
+    FOR SELECT
+    TO authenticated
+    USING (
+      public.get_my_role() = 'A'
+      OR EXISTS (
+        SELECT 1
+        FROM public.role_permissions rp
+        WHERE rp.role_level = public.normalize_role_level(public.get_my_role())
+          AND public.normalize_resource_name(rp.resource)
+              = public.normalize_resource_name(public.topic_to_sheet_resource(topic))
+          AND rp.permission IN ('R', 'R/W')
+      )
+    );
+  END IF;
+END
+$$;
 
 -- 3) Writes: admin OR matrix permission = 'R/W'
-CREATE POLICY "Role-based post insert"
-ON public.posts
-FOR INSERT
-TO authenticated
-WITH CHECK (
-  public.get_my_role() = 'A'
-  OR EXISTS (
+DO $$
+DECLARE
+  has_topic BOOLEAN;
+BEGIN
+  SELECT EXISTS (
     SELECT 1
-    FROM public.role_permissions rp
-    WHERE rp.role_level = public.normalize_role_level(public.get_my_role())
-      AND public.normalize_resource_name(rp.resource)
-          = public.normalize_resource_name(public.topic_to_sheet_resource(topic))
-      AND rp.permission IN ('R/W')
-  )
-);
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'posts'
+      AND column_name = 'topic'
+  ) INTO has_topic;
 
-CREATE POLICY "Role-based post update"
-ON public.posts
-FOR UPDATE
-TO authenticated
-USING (
-  public.get_my_role() = 'A'
-  OR EXISTS (
+  IF NOT has_topic THEN
+    RAISE NOTICE 'Skipping policy "Role-based post insert": public.posts.topic not found';
+  ELSIF NOT EXISTS (
     SELECT 1
-    FROM public.role_permissions rp
-    WHERE rp.role_level = public.normalize_role_level(public.get_my_role())
-      AND public.normalize_resource_name(rp.resource)
-          = public.normalize_resource_name(public.topic_to_sheet_resource(posts.topic))
-      AND rp.permission IN ('R/W')
-  )
-)
-WITH CHECK (
-  public.get_my_role() = 'A'
-  OR EXISTS (
-    SELECT 1
-    FROM public.role_permissions rp
-    WHERE rp.role_level = public.normalize_role_level(public.get_my_role())
-      AND public.normalize_resource_name(rp.resource)
-          = public.normalize_resource_name(public.topic_to_sheet_resource(topic))
-      AND rp.permission IN ('R/W')
-  )
-);
+    FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'posts'
+      AND policyname = 'Role-based post insert'
+  ) THEN
+    CREATE POLICY "Role-based post insert"
+    ON public.posts
+    FOR INSERT
+    TO authenticated
+    WITH CHECK (
+      public.get_my_role() = 'A'
+      OR EXISTS (
+        SELECT 1
+        FROM public.role_permissions rp
+        WHERE rp.role_level = public.normalize_role_level(public.get_my_role())
+          AND public.normalize_resource_name(rp.resource)
+              = public.normalize_resource_name(public.topic_to_sheet_resource(topic))
+          AND rp.permission IN ('R/W')
+      )
+    );
+  END IF;
+END
+$$;
 
-CREATE POLICY "Role-based post delete"
-ON public.posts
-FOR DELETE
-TO authenticated
-USING (
-  public.get_my_role() = 'A'
-  OR EXISTS (
+DO $$
+DECLARE
+  has_topic BOOLEAN;
+BEGIN
+  SELECT EXISTS (
     SELECT 1
-    FROM public.role_permissions rp
-    WHERE rp.role_level = public.normalize_role_level(public.get_my_role())
-      AND public.normalize_resource_name(rp.resource)
-          = public.normalize_resource_name(public.topic_to_sheet_resource(posts.topic))
-      AND rp.permission IN ('R/W')
-  )
-);
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'posts'
+      AND column_name = 'topic'
+  ) INTO has_topic;
+
+  IF NOT has_topic THEN
+    RAISE NOTICE 'Skipping policy "Role-based post update": public.posts.topic not found';
+  ELSIF NOT EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'posts'
+      AND policyname = 'Role-based post update'
+  ) THEN
+    CREATE POLICY "Role-based post update"
+    ON public.posts
+    FOR UPDATE
+    TO authenticated
+    USING (
+      public.get_my_role() = 'A'
+      OR EXISTS (
+        SELECT 1
+        FROM public.role_permissions rp
+        WHERE rp.role_level = public.normalize_role_level(public.get_my_role())
+          AND public.normalize_resource_name(rp.resource)
+              = public.normalize_resource_name(public.topic_to_sheet_resource(topic))
+          AND rp.permission IN ('R/W')
+      )
+    )
+    WITH CHECK (
+      public.get_my_role() = 'A'
+      OR EXISTS (
+        SELECT 1
+        FROM public.role_permissions rp
+        WHERE rp.role_level = public.normalize_role_level(public.get_my_role())
+          AND public.normalize_resource_name(rp.resource)
+              = public.normalize_resource_name(public.topic_to_sheet_resource(topic))
+          AND rp.permission IN ('R/W')
+      )
+    );
+  END IF;
+END
+$$;
+
+DO $$
+DECLARE
+  has_topic BOOLEAN;
+BEGIN
+  SELECT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'posts'
+      AND column_name = 'topic'
+  ) INTO has_topic;
+
+  IF NOT has_topic THEN
+    RAISE NOTICE 'Skipping policy "Role-based post delete": public.posts.topic not found';
+  ELSIF NOT EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'posts'
+      AND policyname = 'Role-based post delete'
+  ) THEN
+    CREATE POLICY "Role-based post delete"
+    ON public.posts
+    FOR DELETE
+    TO authenticated
+    USING (
+      public.get_my_role() = 'A'
+      OR EXISTS (
+        SELECT 1
+        FROM public.role_permissions rp
+        WHERE rp.role_level = public.normalize_role_level(public.get_my_role())
+          AND public.normalize_resource_name(rp.resource)
+              = public.normalize_resource_name(public.topic_to_sheet_resource(topic))
+          AND rp.permission IN ('R/W')
+      )
+    );
+  END IF;
+END
+$$;
