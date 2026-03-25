@@ -25,6 +25,8 @@ bucket_name = "jjconnect"
 ENVIRONMENT = "production"
 # Google Sheet CSV export URL for Role Matrix (set via wrangler secret for production)
 # ROLE_MATRIX_SHEET_URL = "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv&gid=0"
+# Google Sheet CSV export URL for Role Assignments (emails under role columns)
+# ROLE_ASSIGNMENTS_SHEET_URL = "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv&gid=123456789"
 
 # Secrets (set via: wrangler secret put SECRET_NAME)
 # JWT_SECRET - Used for JWT token signing

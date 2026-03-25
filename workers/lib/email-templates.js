@@ -153,7 +153,7 @@ export function getSubmissionNotificationContent(submission) {
       </div>
       ` : ''}
       
-      <a href="https://jjconnect.jp/admin.html#submissions" class="button">前往後台處理</a>
+      <a href="https://jjconnect.jp/admin_dashboard.html#submissions" class="button">前往後台處理</a>
     </div>
     <div class="footer">
       <p>© ${year} JJConnect Support System</p>
@@ -180,7 +180,7 @@ ${hasMedia ? `
 文件連結: ${fileUrl}
 ` : ''}
 
-前往後台處理: https://jjconnect.jp/admin.html#submissions
+前往後台處理: https://jjconnect.jp/admin_dashboard.html#submissions
 
 © ${year} JJConnect Support System
   `;

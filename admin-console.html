@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Console | JJConnect</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #fff;
+      --text: #1a202c;
+      --muted: #64748b;
+      --primary: #2b6cb0;
+      --border: #e2e8f0;
+      --ok: #16a34a;
+      --warn: #f59e0b;
+      --bad: #dc2626;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
+    .wrap { max-width: 1280px; margin: 0 auto; padding: 24px; }
+    .header { margin-bottom: 20px; }
+    .header h1 { font-size: 28px; margin-bottom: 8px; }
+    .header p { color: var(--muted); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 16px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; min-height: 180px; }
+    .card h2 { font-size: 18px; margin-bottom: 10px; }
+    .muted { color: var(--muted); font-size: 13px; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .btn { border: 0; border-radius: 8px; padding: 8px 12px; cursor: pointer; background: var(--primary); color: #fff; font-size: 13px; }
+    .btn.secondary { background: #334155; }
+    .btn.ghost { background: #e2e8f0; color: #111827; }
+    .status { margin-top: 10px; font-size: 13px; color: var(--muted); }
+    .mono { font-family: ui-monospace, Menlo, Monaco, monospace; }
+    .table-wrap { overflow: auto; max-height: 260px; border: 1px solid var(--border); border-radius: 8px; margin-top: 10px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { border-bottom: 1px solid var(--border); padding: 6px 8px; text-align: left; }
+    th { background: #f8fafc; position: sticky; top: 0; }
+    .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; }
+    .pill.ok { background: #dcfce7; color: #166534; }
+    .pill.warn { background: #fef3c7; color: #92400e; }
+    .pill.bad { background: #fee2e2; color: #991b1b; }
+    .links a { color: var(--primary); text-decoration: none; margin-right: 10px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <h1>Admin Console</h1>
+      <p>Homepage for role matrix operations, exports, monitoring, and admin quick actions.</p>
+      <p class="muted">Logged role: <span id="role-level" class="mono">-</span></p>
+    </div>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Role Matrix Sync</h2>
+        <p class="muted">Sync permissions and assignments from Google Sheets.</p>
+        <div class="row">
+          <button class="btn" onclick="syncEndpoint('/api/admin/sync-role-matrix')">Sync Permissions</button>
+          <button class="btn secondary" onclick="syncEndpoint('/api/admin/sync-role-assignments')">Sync Assignments</button>
+          <button class="btn ghost" onclick="syncEndpoint('/api/admin/sync-auth-all')">Sync All</button>
+        </div>
+        <div class="row">
+          <button class="btn secondary" onclick="previewMatrixSync()">Preview Diff</button>
+          <button class="btn ghost" onclick="rollbackRoleMatrix()">Rollback Snapshot</button>
+        </div>
+        <div id="sync-status" class="status">No sync executed in this session.</div>
+      </section>
+
+      <section class="card">
+        <h2>Live Permission Matrix</h2>
+        <p class="muted">Current matrix from Supabase role_permissions.</p>
+        <div class="row">
+          <button class="btn" onclick="loadRoleMatrix()">Refresh Matrix</button>
+        </div>
+        <div id="matrix-wrap" class="table-wrap"></div>
+      </section>
+
+      <section class="card">
+        <h2>Export Tools</h2>
+        <p class="muted">Download matrix and assignments snapshots.</p>
+        <div class="row">
+          <button class="btn" onclick="download('/api/admin/export-role-matrix?format=csv')">Matrix CSV</button>
+          <button class="btn secondary" onclick="download('/api/admin/export-role-matrix?format=json')">Matrix JSON</button>
+          <button class="btn ghost" onclick="download('/api/admin/export-role-assignments?format=csv')">Assignments CSV</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>User Stats by Role</h2>
+        <p class="muted">User count distribution by role level.</p>
+        <div class="row">
+          <button class="btn" onclick="loadRoleStats()">Refresh Stats</button>
+        </div>
+        <div id="role-stats" class="status"></div>
+      </section>
+
+      <section class="card">
+        <h2>Quick Navigation</h2>
+        <div class="links">
+          <a href="admin_dashboard.html">Admin Dashboard</a>
+          <a href="login.html">Login</a>
+          <a href="home.html">Homepage</a>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>System Status</h2>
+        <p class="muted">Health from worker and supabase checks.</p>
+        <div class="row">
+          <button class="btn" onclick="loadHealth()">Refresh Health</button>
+          <button class="btn secondary" onclick="loadOpsTraffic()">Ops Traffic</button>
+          <button class="btn ghost" onclick="loadOpsErrors()">Recent Errors</button>
+        </div>
+        <div id="health-status" class="status">No data</div>
+        <div id="ops-status" class="status"></div>
+      </section>
+
+      <section class="card">
+        <h2>Pending New Users</h2>
+        <p class="muted">Users currently in default traveller role.</p>
+        <div class="row">
+          <button class="btn" onclick="loadPendingUsers()">Refresh Pending</button>
+        </div>
+        <div id="pending-wrap" class="table-wrap"></div>
+      </section>
+
+      <section class="card">
+        <h2>New Articles</h2>
+        <p class="muted">Recent posts from Supabase.</p>
+        <div class="row">
+          <button class="btn" onclick="loadNewArticles()">Refresh Articles</button>
+        </div>
+        <div id="articles-wrap" class="table-wrap"></div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const supabaseCfg = window.JJCONNECT_CONFIG || {};
+    const SUPABASE_URL = supabaseCfg.supabaseUrl;
+    const SUPABASE_ANON_KEY = supabaseCfg.supabaseAnonKey;
+    const supabase = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+      : null;
+
+    function getApiBase() {
+      return (typeof window !== 'undefined' && (window.location.protocol === 'file:' || (window.location.hostname === 'localhost' && window.location.port && window.location.port !== '8787'))) ? 'http://localhost:8787' : '';
+    }
+
+    async function getAccessToken() {
+      if (!supabase) return '';
+      const { data } = await supabase.auth.getSession();
+      return data?.session?.access_token || '';
+    }
+
+    async function authedFetch(path, init = {}) {
+      const token = await getAccessToken();
+      const headers = Object.assign({}, init.headers || {}, token ? { Authorization: `Bearer ${token}` } : {});
+      return fetch(`${getApiBase()}${path}`, Object.assign({}, init, { headers }));
+    }
+
+    function renderSimpleTable(targetId, rows, columns) {
+      const root = document.getElementById(targetId);
+      if (!rows || rows.length === 0) {
+        root.innerHTML = '<div class="status">No data.</div>';
+        return;
+      }
+      const head = columns.map((c) => `<th>${c}</th>`).join('');
+      const body = rows.map((r) => `<tr>${columns.map((c) => `<td>${r[c] ?? ''}</td>`).join('')}</tr>`).join('');
+      root.innerHTML = `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+    }
+
+    async function syncEndpoint(path) {
+      const status = document.getElementById('sync-status');
+      status.textContent = 'Sync running...';
+      try {
+        const res = await authedFetch(path, { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || data.message || 'Sync failed');
+        const extra = data.newSnapshotId ? ` | snapshot=${data.newSnapshotId}` : '';
+        status.textContent = `OK: ${data.message || 'done'} @ ${new Date().toLocaleString()}${extra}`;
+      } catch (e) {
+        status.textContent = `Error: ${e.message}`;
+      }
+    }
+
+    async function previewMatrixSync() {
+      const status = document.getElementById('sync-status');
+      status.textContent = 'Previewing diff...';
+      try {
+        const res = await authedFetch('/api/admin/preview-role-matrix-sync');
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Preview failed');
+        const d = data.diff || {};
+        status.textContent = `Preview -> added:${d.addedCount || 0}, removed:${d.removedCount || 0}, changed:${d.changedCount || 0}`;
+      } catch (e) {
+        status.textContent = `Preview error: ${e.message}`;
+      }
+    }
+
+    async function rollbackRoleMatrix() {
+      const id = prompt('Enter snapshot_id to rollback to:');
+      if (!id) return;
+      const status = document.getElementById('sync-status');
+      status.textContent = `Rolling back to snapshot ${id}...`;
+      try {
+        const res = await authedFetch('/api/admin/rollback-role-matrix', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ snapshot_id: id })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Rollback failed');
+        status.textContent = `Rollback OK: rows=${data.rowsUpdated || 0}, new snapshot=${data.newSnapshotId || '-'}`;
+      } catch (e) {
+        status.textContent = `Rollback error: ${e.message}`;
+      }
+    }
+
+    async function loadRoleMatrix() {
+      const res = await authedFetch('/api/admin/export-role-matrix?format=json');
+      const data = await res.json();
+      renderSimpleTable('matrix-wrap', data.rows || [], ['role_level', 'resource', 'permission']);
+    }
+
+    async function loadRoleStats() {
+      const root = document.getElementById('role-stats');
+      const res = await authedFetch('/api/admin/stats/roles');
+      const data = await res.json();
+      if (!res.ok) {
+        root.textContent = data.error || 'Failed';
+        return;
+      }
+      const parts = Object.entries(data.counts || {})
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([role, count]) => `${role}: ${count}`);
+      root.textContent = parts.length ? parts.join(' | ') : 'No users found.';
+    }
+
+    async function loadHealth() {
+      const root = document.getElementById('health-status');
+      const res = await authedFetch('/api/admin/metrics/health');
+      const data = await res.json();
+      if (!res.ok) {
+        root.textContent = data.error || 'Failed';
+        return;
+      }
+      root.innerHTML = [
+        `<span class="pill ok">web:${data.web?.status || '-'}</span>`,
+        `<span class="pill ok">worker:${data.worker?.status || '-'}</span>`,
+        `<span class="pill ${data.supabase?.status === 'ok' ? 'ok' : 'bad'}">supabase:${data.supabase?.status || '-'}</span>`,
+        `<span class="pill warn">latency:${data.supabase?.latencyMs ?? '-'}ms</span>`,
+      ].join(' ');
+    }
+
+    async function loadOpsTraffic() {
+      const root = document.getElementById('ops-status');
+      try {
+        const res = await authedFetch('/api/admin/metrics/traffic');
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed');
+        root.textContent = `24h runs: total=${data.runs?.total || 0}, ok=${data.runs?.ok || 0}, error=${data.runs?.error || 0}`;
+      } catch (e) {
+        root.textContent = `Ops traffic error: ${e.message}`;
+      }
+    }
+
+    async function loadOpsErrors() {
+      const root = document.getElementById('ops-status');
+      try {
+        const res = await authedFetch('/api/admin/metrics/errors');
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed');
+        const first = (data.rows || [])[0];
+        if (!first) {
+          root.textContent = 'No recent sync errors.';
+          return;
+        }
+        root.textContent = `Latest error: ${first.run_type} @ ${first.created_at} -> ${first.error_message || 'unknown'}`;
+      } catch (e) {
+        root.textContent = `Ops errors load failed: ${e.message}`;
+      }
+    }
+
+    async function loadPendingUsers() {
+      const res = await authedFetch('/api/admin/pending-users');
+      const data = await res.json();
+      renderSimpleTable('pending-wrap', data.rows || [], ['email', 'role_level', 'created_at']);
+    }
+
+    async function loadNewArticles() {
+      const res = await authedFetch('/api/admin/new-articles?limit=10');
+      const data = await res.json();
+      renderSimpleTable('articles-wrap', data.rows || [], ['id', 'title', 'status', 'created_at']);
+    }
+
+    async function download(path) {
+      const res = await authedFetch(path);
+      if (!res.ok) return;
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const suggested = res.headers.get('Content-Disposition');
+      const m = suggested && suggested.match(/filename="([^"]+)"/);
+      a.download = m ? m[1] : 'download.dat';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    async function init() {
+      document.body.style.visibility = 'hidden';
+      try {
+        const res = await authedFetch('/api/my-permissions');
+        const data = await res.json();
+        const isAdmin = res.ok && data?.success && (data?.role_level === 'A' || data?.ui?.canAccessSystemSettings === true);
+        if (!isAdmin) {
+          window.location.href = 'login.html?redirect=admin-console.html';
+          return;
+        }
+        document.getElementById('role-level').textContent = data?.role_level || 'unknown';
+      } catch (_) {
+        window.location.href = 'login.html?redirect=admin-console.html';
+        return;
+      }
+      loadRoleStats();
+      loadHealth();
+      loadPendingUsers();
+      loadNewArticles();
+      document.body.style.visibility = 'visible';
+    }
+
+    init();
+  </script>
+</body>
+</html>

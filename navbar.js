@@ -10,8 +10,61 @@
     const supabaseCfg = window.JJCONNECT_CONFIG || {};
     const SUPABASE_URL = supabaseCfg.supabaseUrl;
     const SUPABASE_ANON_KEY = supabaseCfg.supabaseAnonKey;
+
+    function createSafeStorage() {
+        const memory = {};
+        const canUseLocalStorage = (() => {
+            try {
+                if (typeof localStorage === 'undefined') return false;
+                const testKey = '__jjc_storage_test__';
+                localStorage.setItem(testKey, '1');
+                localStorage.removeItem(testKey);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        })();
+
+        return {
+            getItem(key) {
+                if (canUseLocalStorage) {
+                    try {
+                        const value = localStorage.getItem(key);
+                        if (value !== null) return value;
+                    } catch (_) {
+                        // fallback to memory storage
+                    }
+                }
+                return Object.prototype.hasOwnProperty.call(memory, key) ? memory[key] : null;
+            },
+            setItem(key, value) {
+                memory[key] = String(value);
+                if (!canUseLocalStorage) return;
+                try {
+                    localStorage.setItem(key, String(value));
+                } catch (_) {
+                    // Ignore quota/storage errors and keep in memory.
+                }
+            },
+            removeItem(key) {
+                delete memory[key];
+                if (!canUseLocalStorage) return;
+                try {
+                    localStorage.removeItem(key);
+                } catch (_) {
+                    // Ignore storage errors.
+                }
+            }
+        };
+    }
+
     const supabase = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
-        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: {
+                storage: createSafeStorage(),
+                detectSessionInUrl: true
+            }
+        })
         : null;
     
     /**
@@ -90,7 +143,7 @@
                             </button>
                             <div class="jjc-user-dropdown" id="jjc-user-dropdown">
                                 <a href="profile.html?view=own" class="jjc-user-dropdown-item">My Profile</a>
-                                ${isAdmin ? '<a href="admin.html" class="jjc-user-dropdown-item">Admin Dashboard</a>' : ''}
+                                ${isAdmin ? '<a href="admin-console.html" class="jjc-user-dropdown-item">Admin Console</a>' : ''}
                                 ${monoPageLinkDesktop}
                                 <button id="jjc-logout-btn" class="jjc-user-dropdown-item">Logout</button>
                             </div>
@@ -137,7 +190,7 @@
                 ${isLoggedIn ? `
                     <a href="profile.html?view=own" class="jjc-mobile-link">My Profile</a>
                     <div class="jjc-mobile-user">${avatarSrc ? '<img class="jjc-mobile-avatar" src="' + avatarSrc + '" alt="">' : '👤'} ${userData?.username || 'User'}</div>
-                    ${isAdmin ? '<a href="admin.html" class="jjc-mobile-link">Admin Dashboard</a>' : ''}
+                    ${isAdmin ? '<a href="admin-console.html" class="jjc-mobile-link">Admin Console</a>' : ''}
                     ${monoPageLinkMobile}
                     <button id="jjc-mobile-logout" class="jjc-mobile-link">Logout</button>
                 ` : `
@@ -196,6 +249,7 @@
         const finalize = () => {
             localStorage.removeItem('user_info');
             localStorage.removeItem('jjc_avatar_url');
+            document.cookie = 'jjc_sb_access_token=; Path=/; Max-Age=0; SameSite=Lax';
             window.location.reload();
         };
         if (!supabase) {

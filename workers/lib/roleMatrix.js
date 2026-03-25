@@ -3,6 +3,10 @@
  * Synced from Google Sheet, stored in D1 role_permissions
  */
 
+export const ROLE_LEVELS = [
+  'A', 'B', 'CB', 'VB', 'T', 'S', 'W', 'WN', 'W1', 'W2', 'W3', 'S_writer',
+];
+
 /** Column header (or partial match) -> resource ID mapping */
 const RESOURCE_MAP = {
   '新闻': 'news',
@@ -39,6 +43,12 @@ const RESOURCE_MAP = {
   'admin_settings': 'admin_settings',
   'publish': 'publish',
 };
+
+function normalizeRoleLevel(val) {
+  if (!val) return '';
+  const normalized = String(val).trim().replace(/-/g, '_');
+  return normalized;
+}
 
 /** Normalize permission cell value to R, R/W, allow, deny */
 function normalizePermission(val) {
@@ -89,6 +99,57 @@ function parseCSV(text) {
   });
 }
 
+function isLikelyRoleCode(value) {
+  const role = normalizeRoleLevel(value);
+  return ROLE_LEVELS.includes(role);
+}
+
+function isLikelyEmail(value) {
+  if (!value) return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value).trim());
+}
+
+function getMappedResource(header) {
+  const headerText = String(header || '').trim();
+  if (!headerText) return null;
+  for (const [key, resource] of Object.entries(RESOURCE_MAP)) {
+    if (headerText.includes(key) || headerText === key) {
+      return resource;
+    }
+  }
+  return null;
+}
+
+function detectRoleColumn(allRows, maxProbeRows = 12) {
+  if (!allRows?.length) return 0;
+  let best = { col: 0, score: -1 };
+  const maxCols = allRows.reduce((m, row) => Math.max(m, row.length), 0);
+  const probeEnd = Math.min(allRows.length, maxProbeRows);
+  for (let c = 0; c < maxCols; c++) {
+    let score = 0;
+    for (let r = 0; r < probeEnd; r++) {
+      const cell = normalizeRoleLevel((allRows[r] || [])[c]);
+      if (isLikelyRoleCode(cell)) score++;
+    }
+    if (score > best.score) best = { col: c, score };
+  }
+  return best.col;
+}
+
+function detectMatrixHeaderRow(allRows, roleColumn) {
+  const scanEnd = Math.min(allRows.length, 12);
+  for (let r = 0; r < scanEnd; r++) {
+    let mapped = 0;
+    const row = allRows[r] || [];
+    for (let c = 0; c < row.length; c++) {
+      if (c === roleColumn) continue;
+      if (getMappedResource(row[c])) mapped++;
+    }
+    if (mapped >= 2) return r;
+  }
+  return -1;
+}
+
 /**
  * Parse Role Matrix CSV into { role_level, resource, permission }[]
  * @param {string} csvText - Raw CSV from Google Sheet
@@ -104,38 +165,137 @@ export function parseRoleMatrixCSV(csvText) {
     return { rows: [], parseReport: { total: 0, skipped: 0, errors: ['CSV too short'] } };
   }
 
-  // Row 0 or 1: headers. Row 2 (index 2) might be sub-headers. Data from row 3 (index 3).
-  const headerRow = allRows[1] || allRows[0];
+  const roleColumn = detectRoleColumn(allRows);
+  const headerIndex = detectMatrixHeaderRow(allRows, roleColumn);
+  const headerRow = headerIndex >= 0 ? allRows[headerIndex] : (allRows[1] || allRows[0]);
   const colToResource = {};
-  for (let c = 2; c < headerRow.length; c++) {
-    const header = String(headerRow[c] || '').trim();
-    for (const [key, resource] of Object.entries(RESOURCE_MAP)) {
-      if (header.includes(key) || header === key) {
-        colToResource[c] = resource;
-        break;
-      }
-    }
+  for (let c = 0; c < headerRow.length; c++) {
+    if (c === roleColumn) continue;
+    const resource = getMappedResource(headerRow[c]);
+    if (resource) colToResource[c] = resource;
+  }
+  if (Object.keys(colToResource).length === 0) {
+    return {
+      rows: [],
+      parseReport: { total: 0, skipped: allRows.length, errors: ['Cannot locate resource header row'] },
+    };
   }
 
-  const dataStartIndex = 3;
+  const dataStartIndex = Math.max(headerIndex + 1, 1);
   for (let r = dataStartIndex; r < allRows.length; r++) {
     const row = allRows[r];
-    if (!row || row.length < 2) {
+    if (!row || row.length === 0) {
       skipped++;
       continue;
     }
-    const roleLevelRaw = String(row[0] || '').trim();
-    if (!roleLevelRaw) {
+    const roleLevel = normalizeRoleLevel(row[roleColumn]);
+    if (!roleLevel || !ROLE_LEVELS.includes(roleLevel)) {
       skipped++;
       continue;
     }
-    // Normalize S-writer -> S_writer
-    const roleLevel = roleLevelRaw.replace(/-/g, '_');
     for (const [col, resource] of Object.entries(colToResource)) {
       const cellVal = row[parseInt(col, 10)];
       const permission = normalizePermission(cellVal);
       rows.push({ role_level: roleLevel, resource, permission });
     }
+  }
+
+  return {
+    rows,
+    parseReport: {
+      total: rows.length,
+      skipped,
+      errors: errors.length ? errors : undefined,
+    },
+  };
+}
+
+/**
+ * Parse assignments CSV where role codes are in a header row
+ * and emails are listed under each role column.
+ * @param {string} csvText
+ * @returns {{ rows: Array<{email:string, role_level:string}>, parseReport: { total: number, skipped: number, errors?: string[] } }}
+ */
+export function parseRoleAssignmentsCSV(csvText) {
+  const allRows = parseCSV(csvText);
+  if (allRows.length < 2) {
+    return { rows: [], parseReport: { total: 0, skipped: 0, errors: ['CSV too short'] } };
+  }
+
+  let headerIdx = -1;
+  let roleColumns = {};
+  const errors = [];
+  let skipped = 0;
+
+  for (let r = 0; r < Math.min(allRows.length, 10); r++) {
+    const row = allRows[r] || [];
+    const cols = {};
+    let hits = 0;
+    for (let c = 0; c < row.length; c++) {
+      const cell = normalizeRoleLevel(row[c]);
+      if (isLikelyRoleCode(cell)) {
+        cols[c] = cell;
+        hits++;
+      }
+    }
+    // Usually row has A/B/CB/... across many columns
+    if (hits >= 3) {
+      headerIdx = r;
+      roleColumns = cols;
+      break;
+    }
+  }
+
+  const dedup = new Set();
+  const rows = [];
+  if (headerIdx !== -1) {
+    for (let r = headerIdx + 1; r < allRows.length; r++) {
+      const row = allRows[r] || [];
+      let hasAny = false;
+      for (const [col, roleLevel] of Object.entries(roleColumns)) {
+        const emailCell = String(row[parseInt(col, 10)] || '').trim();
+        if (!emailCell) continue;
+        hasAny = true;
+        if (!isLikelyEmail(emailCell)) {
+          skipped++;
+          continue;
+        }
+        const key = `${emailCell.toLowerCase()}::${roleLevel}`;
+        if (dedup.has(key)) continue;
+        dedup.add(key);
+        rows.push({ email: emailCell.toLowerCase(), role_level: roleLevel });
+      }
+      if (!hasAny) skipped++;
+    }
+  } else {
+    // Fallback: "email, role" rows format.
+    const header = (allRows[0] || []).map((x) => String(x || '').trim().toLowerCase());
+    let emailCol = header.findIndex((x) => x === 'email' || x === 'mail' || x.includes('email'));
+    let roleCol = header.findIndex((x) => x === 'role' || x === 'role_level' || x.includes('role'));
+    let startAt = 1;
+    if (emailCol === -1 || roleCol === -1) {
+      emailCol = 0;
+      roleCol = 1;
+      startAt = 0;
+    }
+    for (let r = startAt; r < allRows.length; r++) {
+      const row = allRows[r] || [];
+      const email = String(row[emailCol] || '').trim().toLowerCase();
+      const roleLevel = normalizeRoleLevel(row[roleCol]);
+      if (!email && !roleLevel) {
+        skipped++;
+        continue;
+      }
+      if (!isLikelyEmail(email) || !isLikelyRoleCode(roleLevel)) {
+        skipped++;
+        continue;
+      }
+      const key = `${email}::${roleLevel}`;
+      if (dedup.has(key)) continue;
+      dedup.add(key);
+      rows.push({ email, role_level: roleLevel });
+    }
+    if (rows.length === 0) errors.push('Cannot locate role header row and no valid email-role rows found');
   }
 
   return {

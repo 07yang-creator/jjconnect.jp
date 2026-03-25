@@ -29,7 +29,22 @@ import {
   handleGetSubmissions,
   handleUpdateSubmission,
 } from './handlers/submissions.js';
-import { handleSyncRoleMatrix, handleGetMyPermissions } from './handlers/roleMatrix.js';
+import {
+  handleSyncRoleMatrix,
+  handleSyncRoleAssignments,
+  handleSyncAuthAll,
+  handlePreviewRoleMatrixSync,
+  handleRollbackRoleMatrix,
+  handleGetMyPermissions,
+  handleExportRoleMatrix,
+  handleExportRoleAssignments,
+  handleRoleStats,
+  handlePendingUsers,
+  handleNewArticles,
+  handleMetricsHealth,
+  handleMetricsTraffic,
+  handleMetricsErrors,
+} from './handlers/roleMatrix.js';
 import { handleSendEmail, handleNewsletterInterest } from './handlers/email.js';
 import { validate } from './lib/validate.js';
 import {
@@ -69,7 +84,19 @@ export async function route(request, env) {
     if (path === '/api/account/check' && method === 'GET') return await validate(accountCheckSchema, 'query')(handleAccountCheck)(request, env);
     if (path === '/api/users' && method === 'GET') return await handleGetUsers(request, env);
     if (path === '/api/admin/sync-role-matrix' && method === 'POST') return await handleSyncRoleMatrix(request, env);
+    if (path === '/api/admin/sync-role-assignments' && method === 'POST') return await handleSyncRoleAssignments(request, env);
+    if (path === '/api/admin/sync-auth-all' && method === 'POST') return await handleSyncAuthAll(request, env);
+    if (path === '/api/admin/preview-role-matrix-sync' && method === 'GET') return await handlePreviewRoleMatrixSync(request, env);
+    if (path === '/api/admin/rollback-role-matrix' && method === 'POST') return await handleRollbackRoleMatrix(request, env);
     if (path === '/api/my-permissions' && method === 'GET') return await handleGetMyPermissions(request, env);
+    if (path === '/api/admin/export-role-matrix' && method === 'GET') return await handleExportRoleMatrix(request, env);
+    if (path === '/api/admin/export-role-assignments' && method === 'GET') return await handleExportRoleAssignments(request, env);
+    if (path === '/api/admin/stats/roles' && method === 'GET') return await handleRoleStats(request, env);
+    if (path === '/api/admin/pending-users' && method === 'GET') return await handlePendingUsers(request, env);
+    if (path === '/api/admin/new-articles' && method === 'GET') return await handleNewArticles(request, env);
+    if (path === '/api/admin/metrics/health' && method === 'GET') return await handleMetricsHealth(request, env);
+    if (path === '/api/admin/metrics/traffic' && method === 'GET') return await handleMetricsTraffic(request, env);
+    if (path === '/api/admin/metrics/errors' && method === 'GET') return await handleMetricsErrors(request, env);
     if (path.startsWith('/api/profile') && method === 'GET') return await handleGetProfile(request, env);
     if (path === '/api/profile' && method === 'PUT') return await validate(profilePatchSchema, 'body')(handlePutProfile)(request, env);
     if (path === '/api/avatar/upload' && method === 'POST') return await handleAvatarUpload(request, env);

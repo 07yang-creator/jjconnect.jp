@@ -55,3 +55,11 @@ Sheet ID 从表格 URL 获取：`https://docs.google.com/spreadsheets/d/{SHEET_I
 - 权限单元格：R、R/W、✓、–
 
 详见计划文档中的「Role Matrix 命名约定」。
+
+## 5. 运维与回滚
+
+请参考 `ADMIN_ROLE_MATRIX_RUNBOOK.md`：
+
+- 预览/同步/导出/回滚标准流程
+- 解析校验项（parseReport、syncReport）
+- 异常处理与安全注意事项

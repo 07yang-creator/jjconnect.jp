@@ -9,7 +9,13 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/admin.html',
+        source: '/admin_dashboard.html',
+        headers: [
+          { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate' },
+        ],
+      },
+      {
+        source: '/admin-console.html',
         headers: [
           { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate' },
         ],

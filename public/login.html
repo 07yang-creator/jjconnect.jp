@@ -429,7 +429,7 @@
                     <button type="submit" class="auth-button auth-button-primary" id="next-btn">Next</button>
                 </div>
                 <p class="create-account-prompt">
-                    Don't have an account? <a href="login.html?create=1" id="go-create-account">Create one</a>
+                    Don't have an account? <a href="?create=1" id="go-create-account">Create one</a>
                 </p>
             </form>
         </div>
@@ -800,22 +800,38 @@ if (goCreateAccountLink) {
 }
 
 // "Already have an account? Sign in" - back to step 1
-document.getElementById('back-to-signin').addEventListener('click', function(e) {
-    e.preventDefault();
-    document.getElementById('register-identifier-bar').style.display = '';
-    document.getElementById('register-sign-in-instead').style.display = 'none';
-    showStep('step-identifier');
-});
+const backToSigninLink = document.getElementById('back-to-signin');
+if (backToSigninLink) {
+    backToSigninLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        const registerIdentifierBar = document.getElementById('register-identifier-bar');
+        const registerSignInInstead = document.getElementById('register-sign-in-instead');
+        if (registerIdentifierBar) registerIdentifierBar.style.display = '';
+        if (registerSignInInstead) registerSignInInstead.style.display = 'none';
+        showStep('step-identifier');
+    });
+}
 
 // Back to step 1 (from "Use different account/email")
 ['change-account-login', 'change-account-register'].forEach(id => {
-    document.getElementById(id).addEventListener('click', function(e) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('click', function(e) {
         e.preventDefault();
         currentIdentifier = '';
-        document.getElementById('identifier').value = '';
+        const identifierInput = document.getElementById('identifier');
+        if (identifierInput) identifierInput.value = '';
         showStep('step-identifier');
     });
 });
+
+function setAdminGuardTokenCookie(session) {
+    const token = session?.access_token;
+    if (!token) return;
+    const maxAge = Number(session?.expires_in) || 3600;
+    const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+    document.cookie = `jjc_sb_access_token=${encodeURIComponent(token)}; Path=/; Max-Age=${maxAge}; SameSite=Lax${secure}`;
+}
 
 // Step 2a: Login
 document.getElementById('login-form').addEventListener('submit', async function(e) {
@@ -834,6 +850,7 @@ document.getElementById('login-form').addEventListener('submit', async function(
 
         if (!error && data?.session) {
             localStorage.setItem('user_info', JSON.stringify(data.user || {}));
+            setAdminGuardTokenCookie(data.session);
             showMessage('Sign in successful! Redirecting...', 'success');
             setTimeout(() => { window.location.href = 'profile.html?view=own'; }, 800);
         } else {
@@ -898,6 +915,7 @@ document.getElementById('register-form').addEventListener('submit', async functi
             showMessage('Account created! Redirecting to profile...', 'success');
             if (data?.session) {
                 localStorage.setItem('user_info', JSON.stringify(data.user || {}));
+                setAdminGuardTokenCookie(data.session);
                 if (selectedAvatarUrl) {
                     localStorage.setItem('jjc_avatar_url', selectedAvatarUrl);
                     try {
@@ -936,23 +954,32 @@ document.querySelector('.forgot-password').addEventListener('click', function(e)
 // On load: show register if ?create=1, or redirect if already logged in
 window.addEventListener('load', function() {
     const params = new URLSearchParams(window.location.search);
-    supabase?.auth.getSession()
+    const sessionPromise = (supabase && supabase.auth && typeof supabase.auth.getSession === 'function')
+        ? supabase.auth.getSession()
+        : Promise.resolve({ data: { session: null } });
+
+    sessionPromise
         .then(({ data }) => {
             if (data?.session) {
+                setAdminGuardTokenCookie(data.session);
                 window.location.href = 'profile.html?view=own';
                 return;
             }
             if (params.get('create') === '1') {
-                document.getElementById('register-identifier-bar').style.display = 'none';
-                document.getElementById('register-sign-in-instead').style.display = 'block';
+                const registerIdentifierBar = document.getElementById('register-identifier-bar');
+                const registerSignInInstead = document.getElementById('register-sign-in-instead');
+                if (registerIdentifierBar) registerIdentifierBar.style.display = 'none';
+                if (registerSignInInstead) registerSignInInstead.style.display = 'block';
                 enableManualRegisterIdentityFields();
                 showStep('step-register');
             }
         })
         .catch(() => {
             if (params.get('create') === '1') {
-                document.getElementById('register-identifier-bar').style.display = 'none';
-                document.getElementById('register-sign-in-instead').style.display = 'block';
+                const registerIdentifierBar = document.getElementById('register-identifier-bar');
+                const registerSignInInstead = document.getElementById('register-sign-in-instead');
+                if (registerIdentifierBar) registerIdentifierBar.style.display = 'none';
+                if (registerSignInInstead) registerSignInInstead.style.display = 'block';
                 enableManualRegisterIdentityFields();
                 showStep('step-register');
             }

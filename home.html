@@ -88,12 +88,66 @@
   </div>
 
   <script>
+    (function () {
     // ========================================================================
     // CONFIGURATION
     // ========================================================================
-    const SUPABASE_URL = window.JJCONNECT_CONFIG.supabaseUrl;
-    const SUPABASE_ANON_KEY = window.JJCONNECT_CONFIG.supabaseAnonKey;
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const HOME_SUPABASE_URL = window.JJCONNECT_CONFIG.supabaseUrl;
+    const HOME_SUPABASE_ANON_KEY = window.JJCONNECT_CONFIG.supabaseAnonKey;
+
+    function createSafeStorage() {
+      const memory = {};
+      const canUseLocalStorage = (() => {
+        try {
+          if (typeof localStorage === 'undefined') return false;
+          const testKey = '__jjc_storage_test__';
+          localStorage.setItem(testKey, '1');
+          localStorage.removeItem(testKey);
+          return true;
+        } catch (_) {
+          return false;
+        }
+      })();
+
+      return {
+        getItem(key) {
+          if (canUseLocalStorage) {
+            try {
+              const value = localStorage.getItem(key);
+              if (value !== null) return value;
+            } catch (_) {
+              // fallback to memory storage
+            }
+          }
+          return Object.prototype.hasOwnProperty.call(memory, key) ? memory[key] : null;
+        },
+        setItem(key, value) {
+          memory[key] = String(value);
+          if (!canUseLocalStorage) return;
+          try {
+            localStorage.setItem(key, String(value));
+          } catch (_) {
+            // Ignore quota/storage errors and keep in memory.
+          }
+        },
+        removeItem(key) {
+          delete memory[key];
+          if (!canUseLocalStorage) return;
+          try {
+            localStorage.removeItem(key);
+          } catch (_) {
+            // Ignore storage errors.
+          }
+        }
+      };
+    }
+
+    const homeSupabaseClient = window.supabase.createClient(HOME_SUPABASE_URL, HOME_SUPABASE_ANON_KEY, {
+      auth: {
+        storage: createSafeStorage(),
+        detectSessionInUrl: true
+      }
+    });
     let currentUserRole = 'ANON';
     const DIRECT_NAV_ROLES = new Set(['B', 'CB', 'VB', 'A', 'W', 'WN', 'W1', 'W2', 'W3', 'S', 'S-writer', 'S_writer']);
 
@@ -156,13 +210,13 @@
 
     async function loadCurrentUserRole() {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user } } = await homeSupabaseClient.auth.getUser();
         if (!user) {
           currentUserRole = 'ANON';
           return;
         }
 
-        const { data, error } = await supabase
+        const { data, error } = await homeSupabaseClient
           .from('profiles')
           .select('role, role_level')
           .eq('id', user.id)
@@ -212,20 +266,17 @@
     
     async function loadPostsByCategorySlug(slug, limit = 3) {
       try {
-        const { data: category, error: catError } = await supabase
+        const { data: category, error: catError } = await homeSupabaseClient
           .from('categories')
-          .select('id, name, slug, description')
+          .select('id, name, slug')
           .eq('slug', slug)
           .single();
         
         if (catError || !category) return { category: null, posts: [] };
         
-        const { data: posts, error: postsError } = await supabase
+        const { data: posts, error: postsError } = await homeSupabaseClient
           .from('posts')
-          .select(`
-            *,
-            author:profiles(display_name, avatar_url)
-          `)
+          .select('*')
           .eq('status', 'published')
           .eq('category_id', category.id)
           .order('created_at', { ascending: false })
@@ -236,6 +287,24 @@
       } catch (error) {
         console.error('Failed to load posts for slug:', slug, error);
         return { category: null, posts: [] };
+      }
+    }
+
+    async function loadUncategorizedPosts(limit = 6) {
+      try {
+        const { data: posts, error } = await homeSupabaseClient
+          .from('posts')
+          .select('*')
+          .eq('status', 'published')
+          .is('category_id', null)
+          .order('created_at', { ascending: false })
+          .limit(limit);
+
+        if (error) throw error;
+        return posts || [];
+      } catch (error) {
+        console.error('Failed to load uncategorized posts:', error);
+        return [];
       }
     }
 
@@ -331,10 +400,28 @@
       `;
     }
 
-    function renderTypeSections(sections) {
+    function renderUncategorizedSection(posts) {
+      if (!posts.length) return '';
+
+      return `
+        <section class="mb-16">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h2 class="text-2xl font-bold" style="color: #1A202C;">Top Story</h2>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            ${posts.map(post => renderPostCard(post)).join('')}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderTypeSections(sections, uncategorizedPosts = []) {
       const container = document.getElementById('type-sections');
+      const uncategorizedSectionHtml = renderUncategorizedSection(uncategorizedPosts);
       
-      container.innerHTML = sections.map((section) => {
+      const categoriesHtml = sections.map((section) => {
         const displayName = section.category?.name || section.label;
         const categorySlug = section.category?.slug || section.slug;
         const hasLink = section.category && section.posts.length > 0;
@@ -364,7 +451,13 @@
         </section>
         `;
       }).join('');
+
+      container.innerHTML = `${uncategorizedSectionHtml}${categoriesHtml}`;
     }
+
+    // Keep card interaction handlers accessible for inline onclick/onkeydown attributes.
+    window.handleArticleCardClick = handleArticleCardClick;
+    window.handleArticleCardKeydown = handleArticleCardKeydown;
 
     // ========================================================================
     // INITIALIZATION
@@ -373,8 +466,9 @@
     async function init() {
       try {
         await loadCurrentUserRole();
+        const uncategorizedPosts = await loadUncategorizedPosts();
         const sections = await loadTypeSections();
-        renderTypeSections(sections);
+        renderTypeSections(sections, uncategorizedPosts);
       } catch (error) {
         console.error('Initialization error:', error);
         document.getElementById('type-sections').innerHTML = `
@@ -391,6 +485,7 @@
     } else {
       init();
     }
+    })();
   </script>
 
 </body>

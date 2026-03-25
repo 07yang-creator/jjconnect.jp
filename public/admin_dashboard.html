@@ -1,16 +1,4 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="refresh" content="0; url=admin-console.html">
-  <title>Redirecting...</title>
-</head>
-<body>
-  <p>Redirecting to <a href="admin-console.html">Admin Console</a>...</p>
-</body>
-</html>
-<!doctype html>
 <html lang="en-US" class="no-js" itemtype="https://schema.org/WebPage" itemscope>
 <head>
 <meta charset="UTF-8">
@@ -1160,6 +1148,9 @@ async function syncRoleMatrixSilentlyOncePerSession() {
  */
 async function checkAuth() {
     try {
+        if (!supabase) {
+            return { authenticated: false, reason: 'supabase_not_configured' };
+        }
         if (supabase) {
             const { data: sessionData } = await supabase.auth.getSession();
             const session = sessionData?.session;
@@ -1181,12 +1172,16 @@ async function checkAuth() {
                         matrixPermissions = permData.ui || null;
                         currentRoleLevel = permData.role_level || currentRoleLevel;
                         if (currentRoleLevel === 'A') userRole = ROLE.ADMIN;
+                        const isAdmin = currentRoleLevel === 'A' || permData?.ui?.canAccessSystemSettings === true;
+                        if (!isAdmin) {
+                            return { authenticated: false, reason: 'not_admin' };
+                        }
                     } else {
-                        matrixPermissions = null;
+                        return { authenticated: false, reason: 'permission_api_failed' };
                     }
                 } catch (permErr) {
                     console.warn('Failed to load matrix permissions:', permErr);
-                    matrixPermissions = null;
+                    return { authenticated: false, reason: 'permission_api_exception' };
                 }
 
                 const nameEl = document.querySelector('.user-name');
@@ -1202,16 +1197,11 @@ async function checkAuth() {
             }
         }
 
-        // Fallback: test role or default
-        matrixPermissions = null;
-        applyPermissionControls();
-        return { authenticated: true, role: userRole, username: 'Test User', email: 'test@jjconnect.jp' };
+        return { authenticated: false, reason: 'no_session' };
 
     } catch (error) {
         console.error('Authentication error:', error);
-        matrixPermissions = null;
-        applyPermissionControls();
-        return null;
+        return { authenticated: false, reason: 'auth_exception' };
     }
 }
 
@@ -2432,6 +2422,7 @@ function handleLogout() {
  */
 async function initializeDashboard() {
     console.log('🚀 Initializing Admin Dashboard...');
+    document.body.style.visibility = 'hidden';
     
     // Set debug panel role selector to current role
     const roleSelector = document.getElementById('role-switcher');
@@ -2441,9 +2432,10 @@ async function initializeDashboard() {
     
     // Check authentication and get user role
     const authResult = await checkAuth();
-    
-    if (!authResult) {
-        console.error('❌ Authentication failed');
+
+    if (!authResult?.authenticated) {
+        console.error('❌ Authentication failed or not admin:', authResult?.reason);
+        window.location.href = 'login.html?redirect=admin_dashboard.html';
         return;
     }
 
@@ -2458,6 +2450,7 @@ async function initializeDashboard() {
     console.log('- Use debug panel (bottom-right) to switch roles dynamically');
     console.log('- Uncomment checkAuth() fetch code to integrate with Cloudflare Workers');
     console.log('- All functions have permission checks built-in');
+    document.body.style.visibility = 'visible';
 }
 
 // Run initialization when DOM is ready
