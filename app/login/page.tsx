@@ -1,0 +1,330 @@
+'use client';
+
+import { FormEvent, Suspense, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { createBrowserClient } from '@/lib/supabase/client';
+import { SUPPORT_PAGE_PATH } from '@/lib/support';
+
+function loginErrorQueryMessage(code: string | null): string | null {
+  if (!code) return null;
+  const map: Record<string, string> = {
+    missing_code: 'Sign-in was cancelled or the link was incomplete. Please try again.',
+    oauth_callback_failed:
+      'We could not finish sign-in with your provider. Please try again or use another method.',
+    session_missing: 'Your session could not be established. Please sign in again.',
+  };
+  return map[code] ?? 'Sign-in could not be completed. Please try again.';
+}
+
+type ConnectionMap = Partial<Record<'google' | 'facebook' | 'line' | 'yahoo', string>>;
+
+const FALLBACK_CONNECTIONS: Required<ConnectionMap> = {
+  google: 'google-oauth2',
+  facebook: 'facebook',
+  line: 'line',
+  yahoo: 'yahoo',
+};
+
+function LoginPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const urlErrorMessage = loginErrorQueryMessage(searchParams.get('error'));
+  const supabase = useMemo(() => createBrowserClient(), []);
+  /** Resolved from `/api/public-config` so it matches server (JJC_AUTH_PROVIDER precedence). */
+  const [authMode, setAuthMode] = useState<'loading' | 'auth0' | 'supabase'>('loading');
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isOAuthSubmitting, setIsOAuthSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [connections, setConnections] = useState<ConnectionMap | null>(null);
+
+  useEffect(() => {
+    fetch('/api/public-config', { credentials: 'include' })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (!json || typeof json.authProvider !== 'string') {
+          const fb = process.env.NEXT_PUBLIC_AUTH_PROVIDER === 'auth0' ? 'auth0' : 'supabase';
+          setAuthMode(fb);
+          if (fb === 'auth0') setConnections(FALLBACK_CONNECTIONS);
+          return;
+        }
+        const isA = json.authProvider === 'auth0';
+        setAuthMode(isA ? 'auth0' : 'supabase');
+        if (isA) {
+          if (json.auth0Connections && typeof json.auth0Connections === 'object') {
+            setConnections(json.auth0Connections as ConnectionMap);
+          } else {
+            setConnections(FALLBACK_CONNECTIONS);
+          }
+        }
+      })
+      .catch(() => {
+        const fb = process.env.NEXT_PUBLIC_AUTH_PROVIDER === 'auth0' ? 'auth0' : 'supabase';
+        setAuthMode(fb);
+        if (fb === 'auth0') setConnections(FALLBACK_CONNECTIONS);
+      });
+  }, []);
+
+  const isAuth0 = authMode === 'auth0';
+
+  function connectionFor(key: keyof typeof FALLBACK_CONNECTIONS): string {
+    return connections?.[key]?.trim() || FALLBACK_CONNECTIONS[key];
+  }
+
+  function authLoginUrl(params: Record<string, string>) {
+    const u = new URL('/auth/login', window.location.origin);
+    Object.entries(params).forEach(([k, v]) => u.searchParams.set(k, v));
+    return u.pathname + u.search;
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setErrorMessage(null);
+    if (authMode === 'loading') return;
+    setIsSubmitting(true);
+
+    if (isAuth0) {
+      const loginHint = email.trim();
+      window.location.href = authLoginUrl({
+        returnTo: '/publish',
+        ...(loginHint ? { login_hint: loginHint } : {}),
+      });
+      return;
+    }
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    setIsSubmitting(false);
+
+    if (error) {
+      setErrorMessage(error.message || 'Login failed. Please try again.');
+      return;
+    }
+
+    const user = data.user;
+    if (!user) {
+      router.push('/publish');
+      router.refresh();
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role, country_region, preferred_language, call_name, upgrade_profile_completed_at')
+      .eq('id', user.id)
+      .single();
+
+    const basicComplete = Boolean(
+      profile?.country_region?.trim() &&
+        profile?.preferred_language?.trim() &&
+        profile?.call_name?.trim()
+    );
+    const upgradedRole = Boolean(profile?.role && profile.role !== 'T');
+
+    if (!basicComplete) {
+      router.push('/onboarding?next=%2Fpublish');
+      router.refresh();
+      return;
+    }
+
+    if (upgradedRole && (!profile?.upgrade_profile_completed_at || !user.email_confirmed_at)) {
+      router.push('/upgrade/complete-profile?next=%2Fpublish');
+      router.refresh();
+      return;
+    }
+
+    router.push('/publish');
+    router.refresh();
+  }
+
+  async function handleOAuth(provider: 'google' | 'facebook') {
+    if (authMode === 'loading') return;
+    if (isAuth0) {
+      const connection = connectionFor(provider);
+      window.location.href = authLoginUrl({
+        returnTo: '/publish',
+        connection,
+      });
+      return;
+    }
+
+    setErrorMessage(null);
+    setIsOAuthSubmitting(true);
+
+    const redirectTo = `${window.location.origin}/auth/supabase-callback?next=${encodeURIComponent('/publish')}`;
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo },
+    });
+
+    if (error) {
+      setErrorMessage(error.message || 'OAuth login failed. Please try again.');
+      setIsOAuthSubmitting(false);
+    }
+  }
+
+  function goAuth0Social(key: keyof typeof FALLBACK_CONNECTIONS) {
+    const connection = connectionFor(key);
+    window.location.href = authLoginUrl({
+      returnTo: '/publish',
+      connection,
+    });
+  }
+
+  if (authMode === 'loading') {
+    return (
+      <main className="mx-auto max-w-md px-4 py-12">
+        <h1 className="mb-6 text-2xl font-bold text-gray-900">Login</h1>
+        <p className="text-sm text-gray-600">Loading sign-in options…</p>
+      </main>
+    );
+  }
+
+  return (
+    <main className="mx-auto max-w-md px-4 py-12">
+      <h1 className="mb-6 text-2xl font-bold text-gray-900">Login</h1>
+
+      <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        {urlErrorMessage && (
+          <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+            <p>{urlErrorMessage}</p>
+            <p className="mt-2">
+              <Link href={SUPPORT_PAGE_PATH} className="font-medium text-amber-950 underline decoration-amber-950/30 hover:decoration-amber-950">
+                Help &amp; support
+              </Link>
+            </p>
+          </div>
+        )}
+
+        <div>
+          <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">
+            {isAuth0 ? 'Email (optional hint for Auth0)' : 'Email'}
+          </label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required={!isAuth0}
+            autoComplete="email"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+          />
+        </div>
+
+        {!isAuth0 && (
+          <div>
+            <label htmlFor="password" className="mb-1 block text-sm font-medium text-gray-700">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+              autoComplete="current-password"
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+        )}
+
+        {errorMessage && (
+          <div className="space-y-2 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+            <p>{errorMessage}</p>
+            <p>
+              <Link href={SUPPORT_PAGE_PATH} className="font-medium text-red-800 underline">
+                Help &amp; support
+              </Link>
+            </p>
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isAuth0 ? 'Continue with Auth0' : isSubmitting ? 'Signing in...' : 'Sign in'}
+        </button>
+
+        <div className="border-t border-gray-200 pt-4">
+          <p className="mb-3 text-center text-xs text-gray-500">Or continue with social account</p>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => handleOAuth('google')}
+              disabled={isOAuthSubmitting || (isAuth0 && !connections)}
+              className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Continue with Google
+            </button>
+            <button
+              type="button"
+              onClick={() => handleOAuth('facebook')}
+              disabled={isOAuthSubmitting || (isAuth0 && !connections)}
+              className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Continue with Facebook
+            </button>
+            {isAuth0 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => goAuth0Social('line')}
+                  disabled={!connections}
+                  className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Continue with LINE
+                </button>
+                <button
+                  type="button"
+                  onClick={() => goAuth0Social('yahoo')}
+                  disabled={!connections}
+                  className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Continue with Yahoo
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="space-y-2 text-center text-sm text-gray-600">
+          <p>
+            Need help signing in?{' '}
+            <Link href={SUPPORT_PAGE_PATH} className="text-blue-600 hover:underline">
+              Help &amp; support
+            </Link>
+          </p>
+          <p>
+            Need full registration form?{' '}
+            <a href="/login.html?create=1" className="text-blue-600 hover:underline">
+              Create one
+            </a>
+          </p>
+        </div>
+      </form>
+    </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="mx-auto max-w-md px-4 py-12">
+          <h1 className="mb-6 text-2xl font-bold text-gray-900">Login</h1>
+          <p className="text-sm text-gray-600">Loading sign-in options…</p>
+        </main>
+      }
+    >
+      <LoginPageContent />
+    </Suspense>
+  );
+}

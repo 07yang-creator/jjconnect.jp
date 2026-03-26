@@ -390,6 +390,40 @@
     color: #5f6368;
 }
 
+.social-create-section {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #e8eaed;
+}
+
+.social-create-title {
+    margin: 0 0 10px 0;
+    font-size: 13px;
+    color: #5f6368;
+    text-align: center;
+}
+
+.social-create-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.social-oauth-btn {
+    flex: 1 1 140px;
+    border: 1px solid #dadce0;
+    background: #fff;
+    color: #202124;
+    border-radius: 20px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.social-oauth-btn:hover {
+    background: #f8f9fa;
+}
+
 .optional-hint {
     font-weight: 400;
     color: #5f6368;
@@ -429,8 +463,20 @@
                     <button type="submit" class="auth-button auth-button-primary" id="next-btn">Next</button>
                 </div>
                 <p class="create-account-prompt">
-                    Don't have an account? <a href="?create=1" id="go-create-account">Create one</a>
+                    Don't have an account? <a href="#" id="go-create-account">Create one</a>
                 </p>
+                <p class="create-account-prompt" style="margin-top: 0.35rem;">
+                    <a href="/support">Help &amp; support</a>
+                </p>
+                <div class="social-create-section">
+                    <p class="social-create-title">Or continue with social account</p>
+                    <div class="social-create-buttons">
+                        <button type="button" class="social-oauth-btn" data-provider="google">Google</button>
+                        <button type="button" class="social-oauth-btn" data-provider="facebook">Facebook</button>
+                        <button type="button" class="social-oauth-btn" data-provider="line">LINE</button>
+                        <button type="button" class="social-oauth-btn" data-provider="yahoo">Yahoo</button>
+                    </div>
+                </div>
             </form>
         </div>
 
@@ -451,6 +497,8 @@
                 </div>
                 <div class="auth-links">
                     <a href="#" class="forgot-password">Forgot password?</a>
+                    <span aria-hidden="true"> · </span>
+                    <a href="/support">Help &amp; support</a>
                 </div>
             </form>
         </div>
@@ -570,7 +618,39 @@ const API_ENDPOINT = (window.location.protocol === 'file:' || (window.location.h
 const supabaseCfg = window.JJCONNECT_CONFIG || {};
 const SUPABASE_URL = supabaseCfg.supabaseUrl;
 const SUPABASE_ANON_KEY = supabaseCfg.supabaseAnonKey;
-const supabase = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
+
+const DEFAULT_AUTH0_CONNECTIONS = {
+    google: 'google-oauth2',
+    facebook: 'facebook',
+    line: 'line',
+    yahoo: 'yahoo'
+};
+let auth0ConnectionMap = { ...DEFAULT_AUTH0_CONNECTIONS };
+
+function auth0Enabled() {
+    return ((window.JJCONNECT_CONFIG || {}).authProvider || 'supabase').toLowerCase() === 'auth0';
+}
+
+(function mergeRemotePublicConfig() {
+    const origin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : '';
+    if (!origin || origin === 'null') return;
+    fetch(origin + '/api/public-config', { credentials: 'include' })
+        .then(function(res) { return res.ok ? res.json() : null; })
+        .then(function(j) {
+            if (!j) return;
+            window.JJCONNECT_CONFIG = Object.assign({}, window.JJCONNECT_CONFIG || {}, {
+                authProvider: j.authProvider || (window.JJCONNECT_CONFIG && window.JJCONNECT_CONFIG.authProvider),
+                supabaseUrl: j.supabaseUrl || (window.JJCONNECT_CONFIG && window.JJCONNECT_CONFIG.supabaseUrl),
+                supabaseAnonKey: j.supabaseAnonKey || (window.JJCONNECT_CONFIG && window.JJCONNECT_CONFIG.supabaseAnonKey)
+            });
+            if (j.auth0Connections && typeof j.auth0Connections === 'object') {
+                auth0ConnectionMap = Object.assign({}, DEFAULT_AUTH0_CONNECTIONS, j.auth0Connections);
+            }
+        })
+        .catch(function() { /* keep defaults */ });
+})();
+
+const sbClient = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
     : null;
 
@@ -579,6 +659,85 @@ const AVATAR_PRESETS = ['smile', 'happy', 'alice', 'bob', 'carlos', 'denise'];
 
 let currentIdentifier = '';
 let selectedAvatarUrl = '';
+
+function getSocialRedirectUrl() {
+    if (auth0Enabled()) return '/profile.html?view=own';
+    const callbackUrl = new URL('/auth/supabase-callback', window.location.origin);
+    callbackUrl.searchParams.set('next', '/profile.html?view=own');
+    return callbackUrl.toString();
+}
+
+function getOAuthAvatar(user) {
+    const meta = user?.user_metadata || {};
+    return meta.avatar_url || meta.picture || meta.profile_image_url || meta.photo_url || null;
+}
+
+function getOAuthDisplayName(user) {
+    const meta = user?.user_metadata || {};
+    return meta.name || meta.full_name || meta.user_name || meta.preferred_username || null;
+}
+
+async function applySocialProfileDefaults(user) {
+    if (!sbClient || !user?.id) return;
+    const avatarUrl = getOAuthAvatar(user);
+    const displayName = getOAuthDisplayName(user);
+    if (!avatarUrl && !displayName) return;
+
+    try {
+        const { data: profile, error: profileError } = await sbClient
+            .from('profiles')
+            .select('avatar_url, display_name')
+            .eq('id', user.id)
+            .single();
+        if (profileError || !profile) return;
+
+        const updates = {};
+        if (avatarUrl && !profile.avatar_url) updates.avatar_url = avatarUrl;
+        if (displayName && !profile.display_name) updates.display_name = displayName;
+        if (!Object.keys(updates).length) return;
+
+        const { error: updateError } = await sbClient
+            .from('profiles')
+            .update(updates)
+            .eq('id', user.id);
+        if (!updateError && updates.avatar_url) {
+            localStorage.setItem('jjc_avatar_url', updates.avatar_url);
+        }
+    } catch (err) {
+        console.warn('Failed to apply social profile defaults:', err);
+    }
+}
+
+async function startSocialSignIn(provider) {
+    if (auth0Enabled()) {
+        const connection = auth0ConnectionMap[provider];
+        if (!connection) {
+            showMessage('Provider not configured yet.', 'error');
+            return;
+        }
+        const returnTo = getSocialRedirectUrl();
+        window.location.href = `/auth/login?returnTo=${encodeURIComponent(returnTo)}&connection=${encodeURIComponent(connection)}`;
+        return;
+    }
+
+    if (!sbClient) {
+        showMessage('Social sign-in is unavailable right now.', 'error');
+        return;
+    }
+    try {
+        localStorage.setItem('jjc_pending_social_provider', provider);
+        const { error } = await sbClient.auth.signInWithOAuth({
+            provider,
+            options: {
+                redirectTo: getSocialRedirectUrl()
+            }
+        });
+        if (error) throw error;
+    } catch (err) {
+        localStorage.removeItem('jjc_pending_social_provider');
+        showMessage(err?.message || 'Failed to start social sign-in.', 'error');
+    }
+}
 
 function showStep(stepId) {
     document.querySelectorAll('.auth-step').forEach(s => s.classList.remove('active'));
@@ -602,6 +761,11 @@ document.getElementById('identifier-form').addEventListener('submit', async func
     e.preventDefault();
     const identifier = document.getElementById('identifier').value.trim();
     if (!identifier) return;
+
+    if (auth0Enabled()) {
+        window.location.href = `/auth/login?returnTo=${encodeURIComponent('/profile.html?view=own')}&login_hint=${encodeURIComponent(identifier)}`;
+        return;
+    }
     
     const btn = document.getElementById('next-btn');
     btn.disabled = true;
@@ -735,69 +899,94 @@ document.getElementById('terms')?.addEventListener('change', updateCreateAccount
     if (el) el.addEventListener('input', updateCreateAccountButtonState);
 });
 
+function openCreateAccountView() {
+    // Always switch view first, even if later reset logic fails
+    showStep('step-register');
+    const registerIdentifierBar = document.getElementById('register-identifier-bar');
+    const registerSignInInstead = document.getElementById('register-sign-in-instead');
+    if (registerIdentifierBar) registerIdentifierBar.style.display = 'none';
+    if (registerSignInInstead) registerSignInInstead.style.display = 'block';
+
+    const regFirstname = document.getElementById('reg-firstname');
+    const regLastname = document.getElementById('reg-lastname');
+    const regUsername = document.getElementById('reg-username');
+    const regEmail = document.getElementById('reg-email');
+    const regTelephone = document.getElementById('reg-telephone');
+    const regPassword = document.getElementById('reg-password');
+    const regConfirmPassword = document.getElementById('reg-confirm-password');
+    const regSelfDesc = document.getElementById('reg-selfdesc');
+    const regCompany = document.getElementById('reg-company');
+    const regAddress = document.getElementById('reg-address');
+    const regMailcode = document.getElementById('reg-mailcode');
+    const regRemarks = document.getElementById('reg-remarks');
+    const terms = document.getElementById('terms');
+    const regAvatarUpload = document.getElementById('reg-avatar-upload');
+    const regAvatarImg = document.getElementById('reg-avatar-img');
+    const regAvatarPlaceholder = document.getElementById('reg-avatar-placeholder');
+
+    if (regFirstname) regFirstname.value = '';
+    if (regLastname) regLastname.value = '';
+    if (regUsername) {
+        regUsername.value = '';
+        regUsername.removeAttribute('readonly');
+        regUsername.placeholder = 'Choose a username';
+    }
+    if (regEmail) {
+        regEmail.value = '';
+        regEmail.removeAttribute('readonly');
+        regEmail.placeholder = 'your.email@example.com';
+    }
+    if (regTelephone) regTelephone.value = '';
+    if (regPassword) regPassword.value = '';
+    if (regConfirmPassword) regConfirmPassword.value = '';
+    if (regSelfDesc) regSelfDesc.value = '';
+    if (regCompany) regCompany.value = '';
+    if (regAddress) regAddress.value = '';
+    if (regMailcode) regMailcode.value = '';
+    if (regRemarks) regRemarks.value = '';
+    if (terms) terms.checked = false;
+
+    document.querySelectorAll('input[name="product_service"]').forEach(cb => cb.checked = false);
+    if (regAvatarUpload) regAvatarUpload.value = '';
+    selectedAvatarUrl = '';
+    if (regAvatarImg) regAvatarImg.style.display = 'none';
+    if (regAvatarPlaceholder) {
+        regAvatarPlaceholder.style.display = 'flex';
+        regAvatarPlaceholder.textContent = '?';
+    }
+    document.querySelectorAll('.avatar-preset-reg').forEach(x => x.classList.remove('selected'));
+
+    updateCreateAccountButtonState();
+}
+
 // "Create one" - go directly to registration form
 const goCreateAccountLink = document.getElementById('go-create-account');
 if (goCreateAccountLink) {
     goCreateAccountLink.addEventListener('click', function(e) {
         e.preventDefault();
-        const registerIdentifierBar = document.getElementById('register-identifier-bar');
-        const registerSignInInstead = document.getElementById('register-sign-in-instead');
-        if (registerIdentifierBar) registerIdentifierBar.style.display = 'none';
-        if (registerSignInInstead) registerSignInInstead.style.display = 'block';
-
-        const regFirstname = document.getElementById('reg-firstname');
-        const regLastname = document.getElementById('reg-lastname');
-        const regUsername = document.getElementById('reg-username');
-        const regEmail = document.getElementById('reg-email');
-        const regTelephone = document.getElementById('reg-telephone');
-        const regPassword = document.getElementById('reg-password');
-        const regConfirmPassword = document.getElementById('reg-confirm-password');
-        const regSelfDesc = document.getElementById('reg-selfdesc');
-        const regCompany = document.getElementById('reg-company');
-        const regAddress = document.getElementById('reg-address');
-        const regMailcode = document.getElementById('reg-mailcode');
-        const regRemarks = document.getElementById('reg-remarks');
-        const terms = document.getElementById('terms');
-        const regAvatarUpload = document.getElementById('reg-avatar-upload');
-        const regAvatarImg = document.getElementById('reg-avatar-img');
-        const regAvatarPlaceholder = document.getElementById('reg-avatar-placeholder');
-
-        if (regFirstname) regFirstname.value = '';
-        if (regLastname) regLastname.value = '';
-        if (regUsername) {
-            regUsername.value = '';
-            regUsername.removeAttribute('readonly');
-            regUsername.placeholder = 'Choose a username';
+        if (auth0Enabled()) {
+            window.location.href = `/auth/login?returnTo=${encodeURIComponent('/onboarding?next=/profile.html?view=own')}&screen_hint=signup`;
+            return;
         }
-        if (regEmail) {
-            regEmail.value = '';
-            regEmail.removeAttribute('readonly');
-            regEmail.placeholder = 'your.email@example.com';
+        const url = new URL(window.location.href);
+        url.searchParams.set('create', '1');
+        window.history.replaceState({}, '', url.toString());
+        try {
+            openCreateAccountView();
+        } catch (err) {
+            console.error('Failed to open create-account view:', err);
+            showStep('step-register');
         }
-        if (regTelephone) regTelephone.value = '';
-        if (regPassword) regPassword.value = '';
-        if (regConfirmPassword) regConfirmPassword.value = '';
-        if (regSelfDesc) regSelfDesc.value = '';
-        if (regCompany) regCompany.value = '';
-        if (regAddress) regAddress.value = '';
-        if (regMailcode) regMailcode.value = '';
-        if (regRemarks) regRemarks.value = '';
-        if (terms) terms.checked = false;
-
-        document.querySelectorAll('input[name="product_service"]').forEach(cb => cb.checked = false);
-        if (regAvatarUpload) regAvatarUpload.value = '';
-        selectedAvatarUrl = '';
-        if (regAvatarImg) regAvatarImg.style.display = 'none';
-        if (regAvatarPlaceholder) {
-            regAvatarPlaceholder.style.display = 'flex';
-            regAvatarPlaceholder.textContent = '?';
-        }
-        document.querySelectorAll('.avatar-preset-reg').forEach(x => x.classList.remove('selected'));
-
-        showStep('step-register');
-        updateCreateAccountButtonState();
     });
 }
+
+document.querySelectorAll('.social-oauth-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const provider = this.dataset.provider;
+        if (!provider) return;
+        startSocialSignIn(provider);
+    });
+});
 
 // "Already have an account? Sign in" - back to step 1
 const backToSigninLink = document.getElementById('back-to-signin');
@@ -833,6 +1022,41 @@ function setAdminGuardTokenCookie(session) {
     document.cookie = `jjc_sb_access_token=${encodeURIComponent(token)}; Path=/; Max-Age=${maxAge}; SameSite=Lax${secure}`;
 }
 
+async function routeAfterAuth(user) {
+    if (!user?.id || !sbClient) {
+        window.location.href = 'profile.html?view=own';
+        return;
+    }
+    try {
+        const { data: profile } = await sbClient
+            .from('profiles')
+            .select('role, country_region, preferred_language, call_name, upgrade_profile_completed_at')
+            .eq('id', user.id)
+            .single();
+
+        const basicComplete = Boolean(
+            profile?.country_region?.trim() &&
+            profile?.preferred_language?.trim() &&
+            profile?.call_name?.trim()
+        );
+        if (!basicComplete) {
+            window.location.href = '/onboarding?next=' + encodeURIComponent('/profile.html?view=own');
+            return;
+        }
+
+        const upgradedRole = Boolean(profile?.role && profile.role !== 'T');
+        if (upgradedRole && (!profile?.upgrade_profile_completed_at || !user.email_confirmed_at)) {
+            window.location.href = '/upgrade/complete-profile?next=' + encodeURIComponent('/profile.html?view=own');
+            return;
+        }
+
+        window.location.href = 'profile.html?view=own';
+    } catch (err) {
+        console.warn('Failed to determine post-auth route:', err);
+        window.location.href = 'profile.html?view=own';
+    }
+}
+
 // Step 2a: Login
 document.getElementById('login-form').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -843,7 +1067,7 @@ document.getElementById('login-form').addEventListener('submit', async function(
     btn.textContent = 'Signing in...';
     
     try {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await sbClient.auth.signInWithPassword({
             email: currentIdentifier,
             password
         });
@@ -852,7 +1076,9 @@ document.getElementById('login-form').addEventListener('submit', async function(
             localStorage.setItem('user_info', JSON.stringify(data.user || {}));
             setAdminGuardTokenCookie(data.session);
             showMessage('Sign in successful! Redirecting...', 'success');
-            setTimeout(() => { window.location.href = 'profile.html?view=own'; }, 800);
+            setTimeout(() => {
+                routeAfterAuth(data.user);
+            }, 800);
         } else {
             showMessage(error?.message || 'Wrong password. Try again.', 'error');
             btn.disabled = false;
@@ -898,7 +1124,7 @@ document.getElementById('register-form').addEventListener('submit', async functi
     btn.textContent = 'Creating account...';
     
     try {
-        const { data, error } = await supabase.auth.signUp({
+        const { data, error } = await sbClient.auth.signUp({
             email,
             password,
             options: {
@@ -932,7 +1158,9 @@ document.getElementById('register-form').addEventListener('submit', async functi
                     }
                 }
             }
-            setTimeout(() => { window.location.href = 'profile.html?view=own'; }, 1000);
+            setTimeout(() => {
+                routeAfterAuth(data?.user);
+            }, 1000);
         } else {
             showMessage(error?.message || 'Registration failed.', 'error');
             btn.disabled = false;
@@ -954,15 +1182,20 @@ document.querySelector('.forgot-password').addEventListener('click', function(e)
 // On load: show register if ?create=1, or redirect if already logged in
 window.addEventListener('load', function() {
     const params = new URLSearchParams(window.location.search);
-    const sessionPromise = (supabase && supabase.auth && typeof supabase.auth.getSession === 'function')
-        ? supabase.auth.getSession()
+    const sessionPromise = (sbClient && sbClient.auth && typeof sbClient.auth.getSession === 'function')
+        ? sbClient.auth.getSession()
         : Promise.resolve({ data: { session: null } });
 
     sessionPromise
-        .then(({ data }) => {
+        .then(async ({ data }) => {
             if (data?.session) {
+                const shouldApplySocialDefaults = params.get('oauth') === '1' || !!localStorage.getItem('jjc_pending_social_provider');
+                if (shouldApplySocialDefaults) {
+                    await applySocialProfileDefaults(data.session.user);
+                    localStorage.removeItem('jjc_pending_social_provider');
+                }
                 setAdminGuardTokenCookie(data.session);
-                window.location.href = 'profile.html?view=own';
+                await routeAfterAuth(data.session.user);
                 return;
             }
             if (params.get('create') === '1') {
@@ -971,7 +1204,7 @@ window.addEventListener('load', function() {
                 if (registerIdentifierBar) registerIdentifierBar.style.display = 'none';
                 if (registerSignInInstead) registerSignInInstead.style.display = 'block';
                 enableManualRegisterIdentityFields();
-                showStep('step-register');
+                openCreateAccountView();
             }
         })
         .catch(() => {
@@ -981,7 +1214,7 @@ window.addEventListener('load', function() {
                 if (registerIdentifierBar) registerIdentifierBar.style.display = 'none';
                 if (registerSignInInstead) registerSignInInstead.style.display = 'block';
                 enableManualRegisterIdentityFields();
-                showStep('step-register');
+                openCreateAccountView();
             }
         });
     updateCreateAccountButtonState();

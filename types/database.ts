@@ -17,6 +17,17 @@ export interface RolePermission {
   permission: string;
 }
 
+export interface ExternalIdentity {
+  [key: string]: unknown;
+  id: number;
+  provider: string;
+  external_user_id: string;
+  supabase_user_id: string;
+  email: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // ============================================================================
 // BASE TABLE INTERFACES
 // ============================================================================
@@ -45,9 +56,19 @@ export interface Profile {
   display_name: string | null;
   avatar_url: string | null;
   bio: string | null;
+  country_region?: string | null;
+  preferred_language?: string | null;
+  call_name?: string | null;
+  full_name?: string | null;
+  phone_number?: string | null;
+  company_name?: string | null;
+  address_line1?: string | null;
+  postal_code?: string | null;
+  basic_profile_completed_at?: string | null;
+  upgrade_profile_completed_at?: string | null;
+  email_verified_at?: string | null;
   is_authorized: boolean; // Admin/authorized user flag
   role?: string | null; // Default traveller role: T
-  role_level?: string | null; // Role Matrix: A/B/CB/VB/T/S/W/WN/W1/W2/W3/S_writer
   created_at: string;
   updated_at: string;
 }
@@ -87,6 +108,8 @@ export interface Comment {
 
 export type CommentInsert = Omit<Comment, 'id' | 'created_at'>;
 export type CommentUpdate = Partial<Omit<Comment, 'id' | 'post_id' | 'user_id' | 'created_at'>>;
+export type ExternalIdentityInsert = Omit<ExternalIdentity, 'id' | 'created_at' | 'updated_at'>;
+export type ExternalIdentityUpdate = Partial<Omit<ExternalIdentity, 'id' | 'created_at' | 'updated_at'>>;
 
 /**
  * User Categories Table
@@ -367,6 +390,12 @@ export interface Database {
         Update: Partial<RolePermission>;
         Relationships: [];
       };
+      external_identities: {
+        Row: ExternalIdentity;
+        Insert: ExternalIdentityInsert;
+        Update: ExternalIdentityUpdate;
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -375,6 +404,16 @@ export interface Database {
       is_admin: {
         Args: Record<string, never>;
         Returns: boolean;
+      };
+      get_profile_completion_state: {
+        Args: {
+          p_user_id: string;
+        };
+        Returns: {
+          role: string;
+          basic_complete: boolean;
+          upgrade_complete: boolean;
+        }[];
       };
     };
     Enums: {

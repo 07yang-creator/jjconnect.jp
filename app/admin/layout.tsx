@@ -5,7 +5,7 @@
  */
 
 import { redirect } from 'next/navigation';
-import { getCurrentUser, getUserProfileInfo } from '@/lib/supabase/server';
+import { getCurrentUser, getProfileGateStatus, getUserProfileInfo, isUpgradedRole } from '@/lib/supabase/server';
 import { getAllPermissionsForRole, canAccessAdmin } from '@/lib/supabase/roleMatrix';
 import AdminSidebar from './AdminSidebar';
 
@@ -19,13 +19,21 @@ export default async function AdminLayout({
     redirect('/login');
   }
 
-  // Single profiles query for both flag and role_level
-  const { is_authorized: byFlag, role_level: roleLevel } = await getUserProfileInfo(user.id);
+  // Single profiles query for both flag and role
+  const { is_authorized: byFlag, role: roleLevel } = await getUserProfileInfo(user.id);
   const permissions = await getAllPermissionsForRole(roleLevel);
   const byMatrix = canAccessAdmin(permissions);
 
   if (!byFlag && !byMatrix) {
     redirect('/');
+  }
+
+  const gateStatus = await getProfileGateStatus(user.id);
+  if (!gateStatus.basic_complete) {
+    redirect('/onboarding?next=%2Fadmin');
+  }
+  if (isUpgradedRole(gateStatus.role) && (!gateStatus.upgrade_complete || !user.email_confirmed_at)) {
+    redirect('/upgrade/complete-profile?next=%2Fadmin');
   }
 
   return (

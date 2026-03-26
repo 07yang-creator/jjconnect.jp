@@ -6,7 +6,7 @@
 
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import { createServerSupabaseClient, getCurrentUser, isAuthorizedUser, getRoleLevel } from '@/lib/supabase/server';
+import { createServerSupabaseClient, getCurrentUser, isAuthorizedUser, getUserRole } from '@/lib/supabase/server';
 import { getAllPermissionsForRole, canAccessAdmin } from '@/lib/supabase/roleMatrix';
 import { getCoverImageUrl } from '@/lib/cloudflare-image-url';
 import type { PostContent, PostUpdate } from '@/types/database';
@@ -14,7 +14,7 @@ import type { PostContent, PostUpdate } from '@/types/database';
 async function isAdminUser(userId: string): Promise<boolean> {
   const [byFlag, roleLevel] = await Promise.all([
     isAuthorizedUser(userId),
-    getRoleLevel(userId),
+    getUserRole(userId),
   ]);
   if (byFlag) return true;
   const permissions = await getAllPermissionsForRole(roleLevel);

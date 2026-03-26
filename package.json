@@ -19,7 +19,8 @@
     "tail:dev": "cd workers && wrangler tail --env development",
     "login": "cd workers && wrangler login",
     "logout": "cd workers && wrangler logout",
-    "whoami": "cd workers && wrangler whoami"
+    "whoami": "cd workers && wrangler whoami",
+    "verify:auth": "node scripts/verify-auth-diagnostics.mjs"
   },
   "keywords": [
     "cloudflare",
@@ -44,6 +45,7 @@
     "wrangler": "^3.0.0"
   },
   "dependencies": {
+    "@auth0/nextjs-auth0": "^4.16.0",
     "@floating-ui/dom": "^1.7.6",
     "@supabase/ssr": "^0.9.0",
     "@supabase/supabase-js": "^2.95.3",

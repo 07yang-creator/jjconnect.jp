@@ -48,9 +48,14 @@ async function getLatestPosts(
   let query = supabase
     .from('posts')
     .select(`
-      *,
-      author:profiles(display_name, avatar_url),
-      category:categories(name, slug)
+      id,
+      title,
+      brief,
+      topic,
+      status,
+      cover_image,
+      created_at,
+      author_id
     `)
     .eq('status', 'published')
     .order('created_at', { ascending: false })
@@ -114,9 +119,14 @@ async function getCategoriesWithPosts(): Promise<CategoryWithPosts[]> {
       const { data: posts } = await supabase
         .from('posts')
         .select(`
-          *,
-          author:profiles(display_name, avatar_url),
-          category:categories(name, slug)
+          id,
+          title,
+          brief,
+          topic,
+          status,
+          cover_image,
+          created_at,
+          author_id
         `)
         .eq('status', 'published')
         .eq('category_id', category.id)

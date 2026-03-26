@@ -108,7 +108,12 @@ function SettingsPanel({
 // MAIN COMPONENT
 // ============================================================================
 
-export default function PublishForm() {
+export default function PublishForm({
+  useAuth0Identity = false,
+}: {
+  /** Server-resolved: when true, always load identity from `/api/me` (Auth0-mapped user). */
+  useAuth0Identity?: boolean;
+}) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -147,12 +152,43 @@ export default function PublishForm() {
       if (categoriesData) setCategories(categoriesData);
 
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUserId(user.id);
+      let resolvedUserId: string | null = user?.id ?? null;
+      let resolvedAuthorized = false;
+      let resolvedUserCategories: UserCategory[] = [];
+
+      if (!resolvedUserId || useAuth0Identity) {
+        const meRes = await fetch('/api/me', { credentials: 'include' });
+        if (meRes.ok) {
+          const meJson = await meRes.json();
+          resolvedUserId = meJson?.userData?.id ?? null;
+          resolvedAuthorized = meJson?.userData?.is_authorized === true;
+          resolvedUserCategories = (meJson?.userCategories ?? []) as UserCategory[];
+        }
+      } else {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_authorized')
+          .eq('id', resolvedUserId)
+          .single();
+        resolvedAuthorized = profile?.is_authorized || false;
+        if (resolvedAuthorized) {
+          const { data: userCategoriesData } = await supabase
+            .from('user_categories')
+            .select('*')
+            .eq('user_id', resolvedUserId)
+            .order('name');
+          resolvedUserCategories = userCategoriesData ?? [];
+        }
+      }
+
+      if (resolvedUserId) {
+        setUserId(resolvedUserId);
+        setIsAuthorized(resolvedAuthorized);
+        setUserCategories(resolvedUserCategories);
 
         // Check for existing draft now that we have the user ID
         try {
-          const raw = window.localStorage.getItem(getDraftKey(user.id));
+          const raw = window.localStorage.getItem(getDraftKey(resolvedUserId));
           if (raw) {
             const draft = JSON.parse(raw) as { updatedAt?: number | null };
             if (draft.updatedAt) setLastSavedAt(draft.updatedAt);
@@ -160,22 +196,6 @@ export default function PublishForm() {
           }
         } catch {
           // ignore malformed draft
-        }
-
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_authorized')
-          .eq('id', user.id)
-          .single();
-        const authorized = profile?.is_authorized || false;
-        setIsAuthorized(authorized);
-        if (authorized) {
-          const { data: userCategoriesData } = await supabase
-            .from('user_categories')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('name');
-          if (userCategoriesData) setUserCategories(userCategoriesData);
         }
       }
     } catch (error) {

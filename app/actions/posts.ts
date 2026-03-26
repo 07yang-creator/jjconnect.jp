@@ -6,7 +6,7 @@
  */
 
 import { revalidatePath } from 'next/cache';
-import { createServerSupabaseClient, getCurrentUser, isAuthorizedUser } from '@/lib/supabase/server';
+import { createServerSupabaseClient, getCurrentUser, getProfileGateStatus, isAuthorizedUser, isUpgradedRole } from '@/lib/supabase/server';
 import type { PostInsert, PostUpdate, PostContent } from '@/types/database';
 import { createPostSchema, parseSafe, type CreatePostInput as SchemaCreatePostInput } from '@/lib/schemas';
 import {
@@ -158,6 +158,37 @@ export async function createPost(input: CreatePostInput): Promise<CreatePostResu
         error: {
           code: 'UNAUTHORIZED',
           message: 'You must be logged in to create posts',
+        },
+      };
+    }
+
+    const gateStatus = await getProfileGateStatus(user.id);
+    if (!gateStatus.basic_complete) {
+      return {
+        success: false,
+        error: {
+          code: 'PROFILE_INCOMPLETE',
+          message: 'Please complete the 3-question onboarding profile first.',
+        },
+      };
+    }
+
+    if (isUpgradedRole(gateStatus.role) && (!gateStatus.upgrade_complete || !user.email_confirmed_at)) {
+      return {
+        success: false,
+        error: {
+          code: 'UPGRADE_PROFILE_INCOMPLETE',
+          message: 'Please verify email and complete upgrade profile before using upgraded features.',
+        },
+      };
+    }
+
+    if (validatedInput.is_paid && (!gateStatus.upgrade_complete || !user.email_confirmed_at)) {
+      return {
+        success: false,
+        error: {
+          code: 'PAID_PROFILE_REQUIRED',
+          message: 'Paid content requires verified email and completed upgrade profile.',
         },
       };
     }

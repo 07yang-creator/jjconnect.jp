@@ -8,8 +8,11 @@
     
     const API_ENDPOINT = (typeof window !== 'undefined' && (window.location.protocol === 'file:' || (window.location.hostname === 'localhost' && window.location.port && window.location.port !== '8787'))) ? 'http://localhost:8787' : '';
     const supabaseCfg = window.JJCONNECT_CONFIG || {};
-    const SUPABASE_URL = supabaseCfg.supabaseUrl;
-    const SUPABASE_ANON_KEY = supabaseCfg.supabaseAnonKey;
+    let runtimeAuthProvider = (supabaseCfg.authProvider || 'supabase').toLowerCase();
+
+    function isAuth0() {
+        return runtimeAuthProvider === 'auth0';
+    }
 
     function createSafeStorage() {
         const memory = {};
@@ -58,14 +61,45 @@
         };
     }
 
-    const supabase = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
-        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-            auth: {
-                storage: createSafeStorage(),
-                detectSessionInUrl: true
-            }
-        })
-        : null;
+    let supabase = null;
+
+    function recreateSupabaseClient() {
+        const cfg = window.JJCONNECT_CONFIG || {};
+        const url = cfg.supabaseUrl;
+        const key = cfg.supabaseAnonKey;
+        if (window.supabase && url && key) {
+            supabase = window.supabase.createClient(url, key, {
+                auth: {
+                    storage: createSafeStorage(),
+                    detectSessionInUrl: true
+                }
+            });
+        } else {
+            supabase = null;
+        }
+    }
+
+    recreateSupabaseClient();
+
+    /** Align with Next `/api/public-config` (JJC_AUTH_PROVIDER precedence) so Sign in uses Auth0 without editing config.js. */
+    async function mergeRemotePublicConfig() {
+        const origin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : '';
+        if (!origin || origin === 'null') return;
+        try {
+            const res = await fetch(origin + '/api/public-config', { credentials: 'include' });
+            const j = res.ok ? await res.json() : null;
+            if (!j) return;
+            window.JJCONNECT_CONFIG = Object.assign({}, window.JJCONNECT_CONFIG || {}, {
+                authProvider: j.authProvider || (window.JJCONNECT_CONFIG && window.JJCONNECT_CONFIG.authProvider),
+                supabaseUrl: j.supabaseUrl || (window.JJCONNECT_CONFIG && window.JJCONNECT_CONFIG.supabaseUrl),
+                supabaseAnonKey: j.supabaseAnonKey || (window.JJCONNECT_CONFIG && window.JJCONNECT_CONFIG.supabaseAnonKey),
+            });
+            runtimeAuthProvider = ((window.JJCONNECT_CONFIG || {}).authProvider || 'supabase').toLowerCase();
+            recreateSupabaseClient();
+        } catch (_) {
+            /* keep config.js defaults */
+        }
+    }
     
     /**
      * 判断是否为首页（仅首页隐藏 Sign in 按钮）
@@ -80,6 +114,9 @@
      */
     function createNavbarHTML(isLoggedIn, userData, hideSignIn) {
         const showSignIn = !hideSignIn;
+        const signInHref = isAuth0()
+            ? `/auth/login?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`
+            : 'login.html';
         const currentRole = userData?.role || 'T';
         const isAdmin = currentRole === 'A';
         const canUseAiTool = isLoggedIn && currentRole !== 'T';
@@ -149,7 +186,7 @@
                             </div>
                         </div>
                     ` : `
-                        <a href="login.html" class="jjc-btn jjc-btn-primary">Sign in</a>
+                        <a href="${signInHref}" class="jjc-btn jjc-btn-primary">Sign in</a>
                     `}
                 </div>
                 ` : ''}
@@ -194,7 +231,7 @@
                     ${monoPageLinkMobile}
                     <button id="jjc-mobile-logout" class="jjc-mobile-link">Logout</button>
                 ` : `
-                    <a href="login.html" class="jjc-mobile-link">Sign in</a>
+                    <a href="${signInHref}" class="jjc-mobile-link">Sign in</a>
                 `}
                 ` : ''}
             </div>
@@ -206,6 +243,21 @@
      * 检查登录状态
      */
     async function checkAuthStatus() {
+        if (isAuth0()) {
+            try {
+                const res = await fetch('/api/me', { credentials: 'include' });
+                if (!res.ok) return { isLoggedIn: false, userData: null };
+                const payload = await res.json();
+                if (!payload?.isLoggedIn || !payload?.userData) {
+                    return { isLoggedIn: false, userData: null };
+                }
+                return { isLoggedIn: true, userData: payload.userData };
+            } catch (error) {
+                console.error('Auth0 auth check failed:', error);
+                return { isLoggedIn: false, userData: null };
+            }
+        }
+
         if (!supabase) {
             return { isLoggedIn: false, userData: null };
         }
@@ -246,6 +298,14 @@
      * 退出登录
      */
     function handleLogout() {
+        if (isAuth0()) {
+            localStorage.removeItem('user_info');
+            localStorage.removeItem('jjc_avatar_url');
+            document.cookie = 'jjc_sb_access_token=; Path=/; Max-Age=0; SameSite=Lax';
+            window.location.href = `/auth/logout?returnTo=${encodeURIComponent(window.location.origin)}`;
+            return;
+        }
+
         const finalize = () => {
             localStorage.removeItem('user_info');
             localStorage.removeItem('jjc_avatar_url');
@@ -272,6 +332,7 @@
                 <div class="jjc-footer-logo">
                     <img src="wp-content/uploads/2025/08/cropped-cropped-logo-icon-1.png" alt="JJCONNECT">
                     <span class="jjc-footer-copy">©JJCONNECT 2025</span>
+                    <a href="/support" class="jjc-footer-support-link" style="display:block;margin-top:8px;font-size:0.8125rem;color:inherit;text-decoration:underline;text-underline-offset:2px;opacity:0.88;">Help &amp; support</a>
                 </div>
                 
                 <!-- Social Media Links -->
@@ -303,6 +364,8 @@
      * 初始化导航栏
      */
     async function initNavbar() {
+        await mergeRemotePublicConfig();
+
         // 检查是否已存在导航栏
         if (document.getElementById('jjconnect-navbar')) {
             return;
@@ -425,11 +488,11 @@
      */
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
-            initNavbar();
+            void initNavbar();
             initFooter();
         });
     } else {
-        initNavbar();
+        void initNavbar();
         initFooter();
     }
     
