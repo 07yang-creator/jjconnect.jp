@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 /**
  * GitHub Pages often publishes the repository root; Next.js serves from public/.
- * After editing files under public/, run this (or npm run build) so root copies match.
+ * After editing files under public/, run: npm run sync:static-root (or npm run build).
  *
- * Does not copy index.html, about.html, or other root-only marketing pages.
+ * - Canonical source: public/ (except index.html — see below).
+ * - index.html stays at repo root only so Next app/page.tsx keeps serving "/".
  */
 import { copyFileSync, mkdirSync, cpSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
@@ -52,6 +53,19 @@ const pairs = [
   ['public/admin-console.html', 'admin-console.html'],
   ['public/admin.html', 'admin.html'],
   ['public/admin_dashboard.html', 'admin_dashboard.html'],
+  // Marketing & legacy static (phase 2 — canonical in public/)
+  ['public/about.html', 'about.html'],
+  ['public/gettingready.html', 'gettingready.html'],
+  ['public/publish.html', 'publish.html'],
+  ['public/category.html', 'category.html'],
+  ['public/profile.html', 'profile.html'],
+  ['public/raft_home.html', 'raft_home.html'],
+  ['public/mansion_home.html', 'mansion_home.html'],
+  ['public/terms.html', 'terms.html'],
+  ['public/ai.html', 'ai.html'],
+  ['public/feedback.html', 'feedback.html'],
+  ['public/backend-status.html', 'backend-status.html'],
+  ['public/joint-mamori-submission.html', 'joint-mamori-submission.html'],
 ];
 
 for (const [from, to] of pairs) {
@@ -63,4 +77,4 @@ if (existsSync(cfg)) {
   copyFile('public/config.js', 'config.js');
 }
 
-console.log('[sync-static-root] done.');
+console.log('[sync-static-root] done. (index.html is root-only — not in public/ for Next "/" )');

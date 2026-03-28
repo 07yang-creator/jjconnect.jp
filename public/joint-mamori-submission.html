@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joint Mamori Project Submission - JJConnect</title>
+    <link rel="icon" href="wp-content/uploads/2025/08/cropped-cropped-logo-icon-1.png">
+    <link rel="stylesheet" href="navbar.css">
+    <style>
+        :root {
+            --primary-color: #2B6CB0;
+            --primary-hover: #215387;
+            --text-dark: #1A202C;
+            --text-gray: #4A5568;
+            --bg-light: #F7FAFC;
+            --border-color: #EDF2F7;
+            --success-color: #48BB78;
+            --error-color: #E53E3E;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background: var(--bg-light);
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .hero h1 {
+            font-size: 2.5rem;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+        }
+        
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--text-gray);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .poster-section {
+            display: flex;
+            gap: 2rem;
+            margin: 3rem 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .poster-section img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .poster-horizontal {
+            flex: 1 1 100%;
+            max-width: 100%;
+        }
+        
+        .poster-vertical {
+            flex: 1 1 45%;
+            max-width: 450px;
+        }
+        
+        .form-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+        
+        .form-card h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+        
+        .form-card .subtitle {
+            color: var(--text-gray);
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        
+        .form-group label .required {
+            color: var(--error-color);
+            margin-left: 0.25rem;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.1);
+        }
+        
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-upload input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+        
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--bg-light);
+        }
+        
+        .file-upload-label:hover {
+            border-color: var(--primary-color);
+            background: white;
+        }
+        
+        .file-upload-label svg {
+            width: 24px;
+            height: 24px;
+            margin-right: 0.75rem;
+            color: var(--text-gray);
+        }
+        
+        .file-name {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-gray);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: start;
+            gap: 0.75rem;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 0.125rem;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        
+        .checkbox-group label {
+            margin: 0;
+            font-weight: 400;
+            cursor: pointer;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(43, 108, 176, 0.2);
+        }
+        
+        .submit-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(43, 108, 176, 0.3);
+        }
+        
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+        
+        .submit-btn:disabled {
+            background: #CBD5E0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .message {
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+        
+        .message.success {
+            background: #C6F6D5;
+            border: 1px solid var(--success-color);
+            color: #22543D;
+        }
+        
+        .message.error {
+            background: #FED7D7;
+            border: 1px solid var(--error-color);
+            color: #742A2A;
+        }
+        
+        .message.show {
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .form-card {
+                padding: 1.5rem;
+            }
+            
+            .poster-vertical {
+                flex: 1 1 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <script src="navbar.js"></script>
+    
+    <div class="container">
+        <div class="hero">
+            <h1>Joint Mamori Project</h1>
+            <p>安心な暮らしは みんなで守る</p>
+        </div>
+        
+        <div class="poster-section">
+            <img src="wp-content/uploads/2025/12/NFC-poster-title-2-lines_0001_安心な暮らしは-みんなで守る-scaled-e1766109326245-1024x327.jpg" 
+                 alt="Joint Mamori Project Banner" 
+                 class="poster-horizontal">
+            
+            <img src="wp-content/uploads/2025/12/NFC-poster-title-2-lines_0006_背景-724x1024.jpg" 
+                 alt="との地" 
+                 class="poster-vertical">
+        </div>
+        
+        <div class="form-card">
+            <h2>提出フォーム</h2>
+            <p class="subtitle">気になることがありましたら、こちらからお知らせください</p>
+            
+            <div id="message" class="message"></div>
+            
+            <form id="submission-form">
+                <div class="form-group">
+                    <label for="name">
+                        お名前 <span class="required">*</span>
+                    </label>
+                    <input type="text" id="name" name="name" placeholder="例: 武田" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">
+                        メールアドレス <span class="required">*</span>
+                    </label>
+                    <input type="email" id="email" name="email" placeholder="例: takeda@yahoo.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="relation">関係</label>
+                    <select id="relation" name="relation">
+                        <option value="">選択してください</option>
+                        <option value="環境問題">環境問題</option>
+                        <option value="建物の状況">建物の状況</option>
+                        <option value="設備の状況">設備の状況</option>
+                        <option value="部外者の不適切な行動">部外者の不適切な行動</option>
+                        <option value="その他">その他</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="content">コメント</label>
+                    <textarea id="content" name="content" placeholder="何が起きたのか、またご意見を教えていただけますか。&#10;ありがとうございます。"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="media">写真や動画をアップロードする</label>
+                    <div class="file-upload">
+                        <input type="file" id="media" name="media" accept="image/*,video/*">
+                        <label for="media" class="file-upload-label">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                            <span>ファイルを選択してください</span>
+                        </label>
+                        <div class="file-name" id="file-name"></div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="consent" name="consent" required>
+                        <label for="consent">
+                            本ページの使用方法および目的を理解し、プライバシーポリシーに同意します。<span class="required">*</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-btn" id="submit-btn">記録を提出する</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // API endpoint (update with your Cloudflare Worker URL)
+        const API_ENDPOINT = 'http://localhost:8787'; // Change to your worker URL in production
+        
+        // File upload handling
+        const fileInput = document.getElementById('media');
+        const fileNameDisplay = document.getElementById('file-name');
+        
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file type
+                const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/quicktime', 'video/webm'];
+                if (!validTypes.includes(file.type)) {
+                    alert('不支持的文件类型。请上传图片或视频文件。');
+                    fileInput.value = '';
+                    fileNameDisplay.textContent = '';
+                    return;
+                }
+                
+                // Validate file size (max 50MB)
+                const maxSize = 50 * 1024 * 1024; // 50MB
+                if (file.size > maxSize) {
+                    alert(`文件过大 (${(file.size / 1024 / 1024).toFixed(2)}MB)。最大允许 50MB。`);
+                    fileInput.value = '';
+                    fileNameDisplay.textContent = '';
+                    return;
+                }
+                
+                fileNameDisplay.textContent = `選択済み: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+            } else {
+                fileNameDisplay.textContent = '';
+            }
+        });
+        
+        // Form submission
+        const form = document.getElementById('submission-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const messageDiv = document.getElementById('message');
+        
+        function showMessage(text, type) {
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type} show`;
+            messageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.textContent = '送信中...';
+            
+            try {
+                // Create FormData for multipart/form-data upload
+                const formData = new FormData();
+                formData.append('name', document.getElementById('name').value.trim());
+                formData.append('email', document.getElementById('email').value.trim());
+                formData.append('relation_type', document.getElementById('relation').value);
+                formData.append('content', document.getElementById('content').value.trim());
+                
+                // Add file if selected
+                const file = fileInput.files[0];
+                if (file) {
+                    formData.append('media', file);
+                    console.log('Uploading file:', file.name, file.type, file.size);
+                }
+                
+                // Send to API (multipart/form-data)
+                const response = await fetch(`${API_ENDPOINT}/api/submit`, {
+                    method: 'POST',
+                    body: formData
+                    // Note: Don't set Content-Type header, browser will set it automatically with boundary
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    let message = '✓ ' + result.message;
+                    if (result.media_uploaded) {
+                        message += '\n✓ ファイルが正常にアップロードされました';
+                    }
+                    showMessage(message, 'success');
+                    form.reset();
+                    fileNameDisplay.textContent = '';
+                    
+                    // Scroll to top after 2 seconds
+                    setTimeout(() => {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }, 2000);
+                } else {
+                    throw new Error(result.error || '提出に失敗しました');
+                }
+            } catch (error) {
+                console.error('Submission error:', error);
+                showMessage('✗ エラー: ' + error.message, 'error');
+            } finally {
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.textContent = '記録を提出する';
+            }
+        });
+    </script>
+</body>
+</html>

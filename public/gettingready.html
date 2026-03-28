@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>We're Getting Ready - JJConnect</title>
+  <link rel="stylesheet" href="navbar.css">
+  <link rel="icon" href="wp-content/uploads/2025/08/cropped-cropped-logo-icon-1.png">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    :root {
+      --space-dark: #030712;
+      --space-mid: #0c1222;
+      --space-light: #0f172a;
+      --countdown-bg: rgba(255, 255, 255, 0.15);
+      --btn-blue: #2563eb;
+    }
+    
+    /* 背景：使用真实银河星空图 */
+    body {
+      min-height: 100vh;
+      background: #030712;
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+    .bg-milky-way {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .bg-milky-way img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      display: block;
+    }
+    
+    /* Stars background（叠加在图片上增强闪烁） */
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 12s ease-in-out infinite;
+    }
+    .star:nth-child(odd) { animation-delay: 1.5s; }
+    .star:nth-child(3n) { animation-delay: 4s; }
+    .star:nth-child(5n) { animation-delay: 6.5s; }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+    
+    /* 火流星：无尾迹，仅明亮光点 */
+    .meteors {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: visible;
+      z-index: 1;
+    }
+    .meteor {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      transform-origin: center center;
+      will-change: transform, opacity;
+      animation: fireball-fall 1.5s linear forwards;
+      opacity: 0;
+    }
+    @keyframes fireball-fall {
+      0% {
+        opacity: 0;
+        transform: translate(0, 0);
+      }
+      5% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 0.9;
+      }
+      100% {
+        opacity: 0;
+        transform: translate(500px, 500px);
+      }
+    }
+    
+    /* Main content - centered */
+    .gettingready-main {
+      min-height: calc(100vh - 80px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem 1.5rem;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .gettingready-title {
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-weight: 700;
+      color: white;
+      margin-bottom: 2rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    
+    /* Countdown box */
+    .countdown-box {
+      background: var(--countdown-bg);
+      backdrop-filter: blur(8px);
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .countdown-unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 60px;
+    }
+    
+    .countdown-number {
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      font-weight: 700;
+      color: white;
+      line-height: 1.2;
+    }
+    
+    .countdown-label {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.9);
+      text-transform: capitalize;
+    }
+    
+    .countdown-separator {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: white;
+      margin: 0 0.25rem;
+      padding-bottom: 1.25rem;
+    }
+    
+    .gettingready-text {
+      color: rgba(255, 255, 255, 0.95);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      max-width: 420px;
+    }
+    
+    /* Newsletter form */
+    .newsletter-form {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 420px;
+    }
+    
+    .newsletter-input {
+      flex: 1;
+      min-width: 200px;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      border: none;
+      background: rgba(255, 255, 255, 0.9);
+      color: #1a1a2e;
+      font-size: 0.95rem;
+    }
+    
+    .newsletter-input::placeholder {
+      color: #718096;
+    }
+    
+    .newsletter-btn {
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      border: none;
+      background: var(--btn-blue);
+      color: white;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.2s;
+    }
+    
+    .newsletter-btn:hover {
+      opacity: 0.9;
+    }
+    
+    /* 右下角 Home 按钮：默认无文字无边框，悬停时显示 */
+    .home-btn-wrap {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 10;
+    }
+    .home-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2.5rem;
+      min-height: 2.5rem;
+      padding: 0 0.75rem;
+      background: #000;
+      color: transparent;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      transition: color 0.2s, border-color 0.2s, padding 0.2s;
+    }
+    .home-btn:hover {
+      color: #fff;
+      border-color: rgba(255,255,255,0.25);
+      padding: 0 1.25rem;
+    }
+    
+    .newsletter-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .newsletter-toast {
+      position: fixed;
+      top: 96px;
+      right: 20px;
+      max-width: min(420px, calc(100vw - 40px));
+      padding: 0.85rem 1rem;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: #e5e7eb;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+      font-size: 0.92rem;
+      line-height: 1.45;
+      z-index: 10020;
+    }
+    
+    @media (max-width: 640px) {
+      .newsletter-form {
+        flex-direction: column;
+      }
+      .newsletter-input {
+        min-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <script src="navbar.js"></script>
+
+  <!-- 银河星空背景图 -->
+  <div class="bg-milky-way" aria-hidden="true">
+    <img src="milky-way-bg.png" alt="" role="presentation" loading="eager">
+  </div>
+  <!-- Stars decoration -->
+  <div class="stars" id="stars"></div>
+  <!-- Meteors (50-100 per hour) -->
+  <div class="meteors" id="meteors"></div>
+
+  <div class="gettingready-main">
+    <h1 class="gettingready-title">We're Getting Ready</h1>
+    
+    <div class="countdown-box">
+      <div class="countdown-unit">
+        <span class="countdown-number" id="days">0</span>
+        <span class="countdown-label">Days</span>
+      </div>
+      <span class="countdown-separator">:</span>
+      <div class="countdown-unit">
+        <span class="countdown-number" id="hours">0</span>
+        <span class="countdown-label">Hours</span>
+      </div>
+      <span class="countdown-separator">:</span>
+      <div class="countdown-unit">
+        <span class="countdown-number" id="minutes">0</span>
+        <span class="countdown-label">Minutes</span>
+      </div>
+      <span class="countdown-separator">:</span>
+      <div class="countdown-unit">
+        <span class="countdown-number" id="seconds">0</span>
+        <span class="countdown-label">Seconds</span>
+      </div>
+    </div>
+    
+    <p class="gettingready-text">
+      We will back to something amazing<br>
+      to get latest updates about our site please sign up to our newsletter
+    </p>
+    
+    <form class="newsletter-form" id="newsletter-form">
+      <input type="email" id="newsletter-email" class="newsletter-input" placeholder="Enter email and get updates" required>
+      <button type="submit" class="newsletter-btn" id="newsletter-submit" aria-label="Subscribe">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        </svg>
+      </button>
+    </form>
+  </div>
+
+  <div class="home-btn-wrap">
+    <a href="home.html" class="home-btn">Home</a>
+  </div>
+
+  <script>
+    // 2026年3月31日24:00 JST = 2026-04-01 00:00 JST
+    const endDate = new Date('2026-04-01T00:00:00+09:00');
+    
+    function updateCountdown() {
+      const now = new Date();
+      const diff = endDate - now;
+      
+      if (diff <= 0) {
+        document.getElementById('days').textContent = '0';
+        document.getElementById('hours').textContent = '00';
+        document.getElementById('minutes').textContent = '00';
+        document.getElementById('seconds').textContent = '00';
+        return;
+      }
+      
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      
+      document.getElementById('days').textContent = days;
+      document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+      document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+      document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+    }
+    
+    // 火流星 - 50-100 per hour，随机颜色
+    const meteorColors = [
+      { main: '255,255,255', glow: '255,240,220' },   // 白
+      { main: '255,240,200', glow: '255,220,150' },   // 暖白
+      { main: '255,200,100', glow: '255,180,80' },    // 金黄
+      { main: '255,150,80', glow: '255,120,50' },     // 橙
+      { main: '200,220,255', glow: '150,190,255' },   // 淡蓝
+      { main: '180,240,255', glow: '120,220,255' },   // 青
+      { main: '255,180,220', glow: '255,150,200' },   // 粉
+    ];
+    function spawnMeteor() {
+      const container = document.getElementById('meteors');
+      if (!container) return;
+      const meteor = document.createElement('div');
+      meteor.className = 'meteor';
+      const c = meteorColors[Math.floor(Math.random() * meteorColors.length)];
+      meteor.style.background = `radial-gradient(circle at 30% 30%, rgba(${c.main},1) 0%, rgba(${c.main},0.6) 50%, transparent 100%)`;
+      meteor.style.boxShadow = `0 0 4px 1px rgba(${c.glow},0.6)`;
+      meteor.style.left = (Math.random() * 85) + '%';
+      meteor.style.top = (Math.random() * 35) + '%';
+      container.appendChild(meteor);
+      const onEnd = function() {
+        meteor.remove();
+        meteor.removeEventListener('animationend', onEnd);
+        meteor.removeEventListener('webkitAnimationEnd', onEnd);
+      };
+      meteor.addEventListener('animationend', onEnd);
+      meteor.addEventListener('webkitAnimationEnd', onEnd);
+    }
+    
+    function scheduleNextMeteor() {
+      const intervalMs = 36000 + Math.random() * 36000; // 36-72 seconds
+      setTimeout(function() {
+        spawnMeteor();
+        scheduleNextMeteor();
+      }, intervalMs);
+    }
+    
+    // 页面加载后立即出现第一颗流星，0.5 秒后开始按 50-100/小时 持续出现
+    spawnMeteor();
+    setTimeout(scheduleNextMeteor, 500);
+    
+    // Generate stars（仅在上部 70% 区域，下部 30% 无星点）
+    function createStars() {
+      const container = document.getElementById('stars');
+      for (let i = 0; i < 80; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.width = star.style.height = (Math.random() * 2 + 1) + 'px';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 70 + '%'; // 0~70%，下部 30% 无星点
+        container.appendChild(star);
+      }
+    }
+    
+    let activeToast = null;
+    let removeToastOnOutsideClick = null;
+
+    function dismissToast() {
+      if (activeToast) {
+        activeToast.remove();
+        activeToast = null;
+      }
+      if (removeToastOnOutsideClick) {
+        document.removeEventListener('click', removeToastOnOutsideClick, true);
+        removeToastOnOutsideClick = null;
+      }
+    }
+
+    function showToast(message) {
+      dismissToast();
+      activeToast = document.createElement('div');
+      activeToast.className = 'newsletter-toast';
+      activeToast.textContent = message;
+      document.body.appendChild(activeToast);
+
+      // Delay binding to avoid immediate close from the same click event.
+      setTimeout(() => {
+        removeToastOnOutsideClick = (event) => {
+          if (activeToast && !activeToast.contains(event.target)) {
+            dismissToast();
+          }
+        };
+        document.addEventListener('click', removeToastOnOutsideClick, true);
+      }, 0);
+    }
+
+    const newsletterForm = document.getElementById('newsletter-form');
+    const newsletterEmail = document.getElementById('newsletter-email');
+    const newsletterSubmit = document.getElementById('newsletter-submit');
+
+    newsletterForm?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!newsletterEmail?.checkValidity()) {
+        newsletterEmail?.reportValidity();
+        return;
+      }
+
+      const email = newsletterEmail.value.trim();
+      if (!email) return;
+
+      showToast('Thanks for you attention to us, we will be in touch very soon.');
+      newsletterForm.reset();
+
+      if (newsletterSubmit) {
+        newsletterSubmit.disabled = true;
+      }
+      try {
+        await fetch('/api/newsletter-interest', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email }),
+        });
+      } catch (error) {
+        console.warn('Failed to notify admin mailbox:', error);
+      } finally {
+        if (newsletterSubmit) {
+          newsletterSubmit.disabled = false;
+        }
+      }
+    });
+
+    createStars();
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  </script>
+</body>
+</html>

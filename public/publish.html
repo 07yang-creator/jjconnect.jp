@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>发布文章 - JJConnect</title>
+  <link rel="stylesheet" href="navbar.css">
+  <link rel="icon" href="wp-content/uploads/2025/08/cropped-cropped-logo-icon-1.png">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Supabase Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  
+  <style>
+    /* Custom switch styles */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+    
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #cbd5e0;
+      transition: .4s;
+      border-radius: 24px;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+      background-color: #2B6CB0;
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+    :root {
+      --jjc-primary: #2B6CB0;
+      --jjc-bg: #F7FAFC;
+    }
+    .jjc-btn-primary { background: var(--jjc-primary) !important; color: white !important; }
+  </style>
+</head>
+<body class="min-h-screen" style="background: var(--jjc-bg);">
+  <script src="navbar.js"></script>
+
+  <div class="min-h-screen py-8 px-4">
+    <div class="max-w-4xl mx-auto">
+      
+      <!-- Header -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold mb-2" style="color: #1A202C;">发布文章</h1>
+        <p style="color: #4A5568;">分享你的想法和经验</p>
+      </div>
+
+      <form id="publish-form" class="space-y-6">
+        
+        <!-- Title Input -->
+        <div class="bg-white rounded-lg p-6" style="box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <input
+            type="text"
+            id="title"
+            placeholder="输入文章标题..."
+            class="w-full text-4xl font-bold border-none focus:outline-none focus:ring-0 placeholder-gray-300"
+            required
+          />
+        </div>
+
+        <!-- Cover Image -->
+        <div class="bg-white rounded-lg p-6" style="box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <label class="block text-sm font-medium text-gray-700 mb-3">
+            封面图片（可选）
+          </label>
+          
+          <div id="cover-preview-container" class="hidden">
+            <div class="relative">
+              <img id="cover-preview" alt="Cover preview" class="w-full h-64 object-cover rounded-lg" />
+              <button
+                type="button"
+                data-action="remove-cover"
+                class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-red-600"
+              >
+                移除
+              </button>
+            </div>
+          </div>
+
+          <label id="cover-upload-area" class="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer transition-colors hover:opacity-80" style="border-color: #E2E8F0;" data-hover-border="var(--jjc-primary)">
+            <svg class="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <p class="text-sm text-gray-600">点击上传封面图片</p>
+            <p class="text-xs text-gray-500 mt-1">支持 JPG, PNG, GIF (最大 5MB)</p>
+            <input
+              type="file"
+              id="cover-input"
+              accept="image/*"
+              class="hidden"
+            />
+          </label>
+        </div>
+
+        <!-- Summary -->
+        <div class="bg-white rounded-lg p-6" style="box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <label class="block text-sm font-medium text-gray-700 mb-3">
+            摘要（可选）
+          </label>
+          <textarea
+            id="summary"
+            placeholder="简要描述文章内容..."
+            rows="3"
+            class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:border-transparent resize-none" style="border-color: #E2E8F0;"
+          ></textarea>
+        </div>
+
+        <!-- Category Selection -->
+        <div class="bg-white rounded-lg p-6" style="box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <label class="block text-sm font-medium text-gray-700 mb-3">
+            分类
+          </label>
+          
+          <!-- Category Type Toggle -->
+          <div class="flex gap-4 mb-4" id="category-type-container">
+            <button
+              type="button"
+              id="official-category-btn"
+              class="flex-1 py-2 px-4 rounded-lg font-medium transition-colors jjc-btn-primary"
+            >
+              网站官方板块
+            </button>
+            
+            <button
+              type="button"
+              id="personal-category-btn"
+              class="hidden flex-1 py-2 px-4 rounded-lg font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200"
+            >
+              我的个人分类
+            </button>
+          </div>
+
+          <!-- Category Select -->
+          <select
+            id="category-select"
+            class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:border-transparent" style="border-color: #E2E8F0;"
+          >
+            <option value="">请选择分类...</option>
+          </select>
+        </div>
+
+        <!-- 正文内容 -->
+        <div class="bg-white rounded-lg p-6 overflow-hidden" style="box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <label class="block text-sm font-medium text-gray-700 mb-3">正文</label>
+          <textarea
+            id="content"
+            placeholder="请输入文章正文..."
+            rows="16"
+            class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:border-transparent resize-y font-sans text-base" style="border-color: #E2E8F0; min-height: 400px;"
+          ></textarea>
+        </div>
+
+        <!-- Paid Content Settings -->
+        <div class="bg-white rounded-lg p-6" style="box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-sm font-medium text-gray-900">付费内容</h3>
+              <p class="text-xs text-gray-500 mt-1">开启后此文章需要付费阅读</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="is-paid-toggle">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div id="price-input-container" class="hidden mt-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              价格（人民币）
+            </label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">¥</span>
+              <input
+                type="number"
+                id="price-input"
+                min="0"
+                step="0.01"
+                value="0"
+                class="w-full pl-8 pr-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent" style="border-color: #E2E8F0;"
+              />
+            </div>
+            <p class="text-xs text-gray-500 mt-2">
+              建议定价：9.9 - 99.9 元
+            </p>
+          </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="flex items-center justify-between bg-white rounded-lg p-6" style="box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <button
+            type="button"
+            onclick="history.back()"
+            class="px-6 py-2 text-gray-700 hover:text-gray-900 font-medium"
+          >
+            取消
+          </button>
+
+          <div class="flex gap-3">
+            <button
+              type="button"
+              id="save-draft-btn"
+              class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium"
+            >
+              保存草稿
+            </button>
+
+            <button
+              type="button"
+              id="publish-btn"
+              class="px-6 py-2 text-white rounded-lg hover:opacity-95 font-medium transition-opacity" style="background: var(--jjc-primary);"
+            >
+              立即发布
+            </button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="publish.js"></script>
+
+</body>
+</html>
