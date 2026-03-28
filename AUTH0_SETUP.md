@@ -142,7 +142,10 @@ Also confirm **Applications →** your connection → **Applications** tab: your
 
 ### Static HTML (`navbar.js`, `login.html`)
 
-These pages call **`/api/public-config`** on the **same origin** as the Next app (e.g. `https://www.jjconnect.jp`). If you open HTML from `file://` or from a host that does not serve the Next API, the merge step is skipped and `config.js` values are used as-is.
+These pages load **`/config.js`** (generated at build by `npm run generate:public-config` / `npm run build` from env) and call **`/api/public-config`** on the **same origin** as the Next app.
+
+- **`GET /config.js` 404**: Run a production build with `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` set so `public/config.js` is emitted, or run `npm run generate:public-config` locally before deploy.
+- **`GET /api/public-config` 404**: The hostname must be served by **Next.js** (Node), not a static-only bucket. If `login.html` is on a CDN without the Next server, either deploy the full Next app on that host or proxy `/api/*` to your Next origin. When the fetch fails, `navbar.js` falls back to `config.js` only.
 
 ### Other “Failed Checks” (usually not why social login breaks)
 

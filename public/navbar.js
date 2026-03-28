@@ -101,22 +101,27 @@
         }
     }
     
-    /**
-     * 判断是否为首页（仅首页隐藏 Sign in 按钮）
-     */
-    function isHomepage() {
-        const path = window.location.pathname || '';
-        return !path || path === '/' || path === '/index.html' || path.endsWith('/index.html');
+    /** Root-relative so logo/home work on nested App Router paths (e.g. /article/…). */
+    /** Bundled mark: `public/brand/jjconnect-logo.png` (no WordPress path). Fallback: JJ monogram SVG. */
+    const LOGO_IMG_PRIMARY = '/brand/jjconnect-logo.png';
+    const LOGO_IMG_FALLBACK = '/brand/jjconnect-navbar-logo.svg';
+
+    const USER_PLACEHOLDER_SVG = '<svg class="jjc-user-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
+
+    function signInHrefForCurrentPage() {
+        const returnPath = typeof window !== 'undefined'
+            ? (window.location.pathname || '') + (window.location.search || '')
+            : '/';
+        return isAuth0()
+            ? `/auth/login?returnTo=${encodeURIComponent(returnPath)}`
+            : `/login?next=${encodeURIComponent(returnPath)}`;
     }
-    
+
     /**
      * 生成导航栏 HTML
      */
-    function createNavbarHTML(isLoggedIn, userData, hideSignIn) {
-        const showSignIn = !hideSignIn;
-        const signInHref = isAuth0()
-            ? `/auth/login?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`
-            : 'login.html';
+    function createNavbarHTML(isLoggedIn, userData) {
+        const signInHref = signInHrefForCurrentPage();
         const currentRole = userData?.role || 'T';
         const isAdmin = currentRole === 'A';
         const canUseAiTool = isLoggedIn && currentRole !== 'T';
@@ -138,45 +143,43 @@
         <nav class="jjc-navbar">
             <div class="jjc-navbar-container">
                 <!-- Logo -->
-                <a href="index.html" class="jjc-navbar-logo">
-                    <img src="wp-content/uploads/2025/08/cropped-cropped-logo-icon-1.png" alt="JJCONNECT">
+                <a href="/" class="jjc-navbar-logo" aria-label="JJCONNECT home">
+                    <img src="${LOGO_IMG_PRIMARY}" alt="" height="40" decoding="async" onerror="this.onerror=null;this.src='${LOGO_IMG_FALLBACK}'">
                     <span>JJCONNECT</span>
                 </a>
                 
                 <!-- 导航链接（桌面端） -->
                 <div class="jjc-navbar-nav">
                     <a href="gettingready.html" class="jjc-nav-link">Home</a>
-                    <a href="about.html" class="jjc-nav-link">About Us</a>
-                    
-                    <!-- 产品下拉菜单 -->
-                    <div class="jjc-nav-dropdown" id="jjc-products-dropdown">
-                        <a href="product.html" class="jjc-nav-link jjc-nav-dropdown-toggle">Products & Services</a>
+                    <a href="/" class="jjc-nav-link">Articles</a>
+                    <!-- Services dropdown -->
+                    <div class="jjc-nav-dropdown" id="jjc-services-dropdown">
+                        <a href="services.html" class="jjc-nav-link jjc-nav-dropdown-toggle">Services</a>
                         <div class="jjc-nav-dropdown-menu">
-                            <a href="raft_info.html" class="jjc-nav-dropdown-item">
+                            <a href="/raft_info.html" class="jjc-nav-dropdown-item">
                                 <span class="jjc-nav-dropdown-icon">🚢</span>
                                 <span>RAFT2.03</span>
                             </a>
-                            <a href="mansion_info.html" class="jjc-nav-dropdown-item">
+                            <a href="/mansion_info.html" class="jjc-nav-dropdown-item">
                                 <span class="jjc-nav-dropdown-icon">🏢</span>
-                                <span>Mansion管理主任</span>
+                                <span>Mansion Manager</span>
                             </a>
-                            <a href="property_report_info.html" class="jjc-nav-dropdown-item">
+                            <a href="/property_report_info.html" class="jjc-nav-dropdown-item">
                                 <span class="jjc-nav-dropdown-icon">📊</span>
-                                <span>地产报告</span>
+                                <span>Property Report</span>
                             </a>
                         </div>
                     </div>
                     ${canUseAiTool ? '<a href="ai.html" class="jjc-nav-link">✨AI empowered</a>' : ''}
+                    <a href="about.html" class="jjc-nav-link">About Us</a>
                 </div>
                 
-                <!-- 用户区域（桌面端），首页未登录时不显示 -->
-                ${(isLoggedIn || showSignIn) ? `
+                <!-- 用户区域：已登录为头像+菜单；未登录为占位图标，点击去登录 -->
                 <div class="jjc-navbar-user">
                     ${isLoggedIn ? `
                         <div class="jjc-user-menu">
-                            <button class="jjc-user-button" id="jjc-user-menu-btn">
-                                ${avatarSrc ? '<img class="jjc-user-avatar" src="' + avatarSrc + '" alt="">' : '<svg class="jjc-user-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>'}
-                                <span>${userData?.username || 'User'}</span>
+                            <button type="button" class="jjc-user-button" id="jjc-user-menu-btn" aria-label="Account menu" aria-haspopup="true">
+                                ${avatarSrc ? '<img class="jjc-user-avatar" src="' + avatarSrc + '" alt="">' : USER_PLACEHOLDER_SVG}
                             </button>
                             <div class="jjc-user-dropdown" id="jjc-user-dropdown">
                                 <a href="profile.html?view=own" class="jjc-user-dropdown-item">My Profile</a>
@@ -186,10 +189,11 @@
                             </div>
                         </div>
                     ` : `
-                        <a href="${signInHref}" class="jjc-btn jjc-btn-primary">Sign in</a>
+                        <a href="${signInHref}" class="jjc-user-button jjc-user-button--guest" id="jjc-user-signin-link" aria-label="Sign in">
+                            ${USER_PLACEHOLDER_SVG}
+                        </a>
                     `}
                 </div>
-                ` : ''}
                 
                 <!-- 移动端菜单按钮 -->
                 <button class="jjc-mobile-toggle" id="jjc-mobile-toggle">
@@ -202,38 +206,37 @@
             <!-- 移动端菜单 -->
             <div class="jjc-mobile-menu" id="jjc-mobile-menu">
                 <a href="gettingready.html" class="jjc-mobile-link">Home</a>
-                <a href="about.html" class="jjc-mobile-link">About Us</a>
+                <a href="/" class="jjc-mobile-link">Articles</a>
                 
                 <div class="jjc-mobile-divider"></div>
-                <a href="product.html" class="jjc-mobile-link" style="font-weight: 600;">Products & Services</a>
-                <div class="jjc-mobile-products">
-                    <a href="raft_info.html" class="jjc-mobile-product-link">
+                <a href="services.html" class="jjc-mobile-link" style="font-weight: 600;">Services</a>
+                <div class="jjc-mobile-services">
+                    <a href="/raft_info.html" class="jjc-mobile-service-link">
                         <span>🚢</span>
                         <span>RAFT2.03</span>
                     </a>
-                    <a href="mansion_info.html" class="jjc-mobile-product-link">
+                    <a href="/mansion_info.html" class="jjc-mobile-service-link">
                         <span>🏢</span>
-                        <span>Mansion管理主任</span>
+                        <span>Mansion Manager</span>
                     </a>
-                    <a href="property_report_info.html" class="jjc-mobile-product-link">
+                    <a href="/property_report_info.html" class="jjc-mobile-service-link">
                         <span>📊</span>
-                        <span>地产报告</span>
+                        <span>Property Report</span>
                     </a>
                 </div>
                 ${canUseAiTool ? '<a href="ai.html" class="jjc-mobile-link">✨AI empowered</a>' : ''}
+                <a href="about.html" class="jjc-mobile-link">About Us</a>
                 
-                ${(isLoggedIn || showSignIn) ? `
                 <div class="jjc-mobile-divider"></div>
                 ${isLoggedIn ? `
                     <a href="profile.html?view=own" class="jjc-mobile-link">My Profile</a>
-                    <div class="jjc-mobile-user">${avatarSrc ? '<img class="jjc-mobile-avatar" src="' + avatarSrc + '" alt="">' : '👤'} ${userData?.username || 'User'}</div>
+                    <div class="jjc-mobile-user" aria-hidden="true">${avatarSrc ? '<img class="jjc-mobile-avatar" src="' + avatarSrc + '" alt="">' : '<span class="jjc-mobile-user-fallback">👤</span>'}</div>
                     ${isAdmin ? '<a href="admin-console.html" class="jjc-mobile-link">Admin Console</a>' : ''}
                     ${monoPageLinkMobile}
                     <button id="jjc-mobile-logout" class="jjc-mobile-link">Logout</button>
                 ` : `
                     <a href="${signInHref}" class="jjc-mobile-link">Sign in</a>
                 `}
-                ` : ''}
             </div>
         </nav>
         `;
@@ -330,7 +333,7 @@
             <div class="jjc-footer-container">
                 <!-- Logo & Copyright -->
                 <div class="jjc-footer-logo">
-                    <img src="wp-content/uploads/2025/08/cropped-cropped-logo-icon-1.png" alt="JJCONNECT">
+                    <img src="${LOGO_IMG_PRIMARY}" alt="" height="40" decoding="async" onerror="this.onerror=null;this.src='${LOGO_IMG_FALLBACK}'">
                     <span class="jjc-footer-copy">©JJCONNECT 2025</span>
                     <a href="/support" class="jjc-footer-support-link" style="display:block;margin-top:8px;font-size:0.8125rem;color:inherit;text-decoration:underline;text-underline-offset:2px;opacity:0.88;">Help &amp; support</a>
                 </div>
@@ -374,13 +377,10 @@
         // 检查登录状态
         const { isLoggedIn, userData } = await checkAuthStatus();
         
-        // 首页隐藏 Sign in 按钮
-        const hideSignIn = isHomepage();
-        
         // 创建导航栏容器
         const navContainer = document.createElement('div');
         navContainer.id = 'jjconnect-navbar';
-        navContainer.innerHTML = createNavbarHTML(isLoggedIn, userData, hideSignIn);
+        navContainer.innerHTML = createNavbarHTML(isLoggedIn, userData);
         
         // 插入到 body 开头
         document.body.insertBefore(navContainer.firstElementChild, document.body.firstChild);
@@ -411,29 +411,26 @@
      * 设置事件监听
      */
     function setupEventListeners(isLoggedIn) {
-        // 产品下拉菜单
-        const productsDropdown = document.getElementById('jjc-products-dropdown');
-        if (productsDropdown) {
-            const toggle = productsDropdown.querySelector('.jjc-nav-dropdown-toggle');
+        // Services dropdown
+        const servicesDropdown = document.getElementById('jjc-services-dropdown');
+        if (servicesDropdown) {
+            const toggle = servicesDropdown.querySelector('.jjc-nav-dropdown-toggle');
 
-            // 点击切换下拉菜单，避免 hover 导致菜单无法点击
             toggle.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                productsDropdown.classList.toggle('active');
+                servicesDropdown.classList.toggle('active');
             });
             
-            // 点击外部关闭
             document.addEventListener('click', (e) => {
-                if (!productsDropdown.contains(e.target)) {
-                    productsDropdown.classList.remove('active');
+                if (!servicesDropdown.contains(e.target)) {
+                    servicesDropdown.classList.remove('active');
                 }
             });
 
-            // 点击菜单项后关闭下拉菜单
-            productsDropdown.querySelectorAll('.jjc-nav-dropdown-item').forEach((item) => {
+            servicesDropdown.querySelectorAll('.jjc-nav-dropdown-item').forEach((item) => {
                 item.addEventListener('click', () => {
-                    productsDropdown.classList.remove('active');
+                    servicesDropdown.classList.remove('active');
                 });
             });
         }

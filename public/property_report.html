@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>地产报告 - JJConnect</title>
+    <link rel="icon" href="wp-content/uploads/2025/08/cropped-cropped-logo-icon-1.png">
+    <link rel="stylesheet" href="navbar.css">
+    <style>
+        :root {
+            --product-color: #F59E0B; /* Orange */
+            --product-color-light: #FEF3C7;
+            --product-color-dark: #D97706;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1A202C;
+        }
+        
+        .hero {
+            background: linear-gradient(135deg, var(--product-color) 0%, var(--product-color-dark) 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .hero p {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-card h3 {
+            color: var(--product-color);
+            margin-bottom: 1rem;
+        }
+        
+        .cta-section {
+            text-align: center;
+            padding: 3rem;
+            background: var(--product-color-light);
+            border-radius: 12px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: var(--product-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .btn:hover {
+            background: var(--product-color-dark);
+        }
+        
+        .locked-content {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        
+        /* Login Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #718096;
+        }
+        
+        .modal h2 {
+            margin-bottom: 1.5rem;
+            color: var(--product-color);
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--product-color);
+        }
+        
+        .alert {
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-success {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+        
+        .alert-error {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar will be injected here -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="navbar.js"></script>
+    
+    <!-- Hero Section -->
+    <div class="hero">
+        <h1>📊 地产报告</h1>
+        <p>专业的房地产市场分析与报告生成平台</p>
+    </div>
+    
+    <!-- Content -->
+    <div class="container">
+        <!-- Feature Cards -->
+        <div class="features">
+            <div class="feature-card">
+                <h3>📍 区域分析</h3>
+                <p>深入的区域市场调研，掌握最新房价走势</p>
+            </div>
+            <div class="feature-card">
+                <h3>📄 报告定制</h3>
+                <p>根据需求生成专业报告，支持多种模板</p>
+            </div>
+            <div class="feature-card">
+                <h3>📈 数据可视化</h3>
+                <p>直观的图表展示，让数据一目了然</p>
+            </div>
+        </div>
+        
+        <!-- CTA Section -->
+        <div class="cta-section">
+            <h2>开始使用地产报告</h2>
+            <p style="margin-bottom: 1.5rem;">登录后即可生成专业报告</p>
+            <button class="btn" id="access-btn">立即访问</button>
+        </div>
+        
+        <!-- Locked Content Demo -->
+        <div class="locked-content" style="margin-top: 3rem;">
+            <h2>报告库预览</h2>
+            <p>此内容需要登录后查看...</p>
+        </div>
+    </div>
+    
+    <!-- Login Modal -->
+    <div class="modal" id="login-modal">
+        <div class="modal-content">
+            <button class="modal-close" id="modal-close">&times;</button>
+            <h2>登录以继续</h2>
+            <div id="message-container"></div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">登录</button>
+            </form>
+            <p style="text-align: center; margin-top: 1rem;">
+                还没有账号？<a href="login.html" style="color: var(--product-color);">立即注册</a>
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        const API_ENDPOINT = 'http://localhost:8787';
+        const supabaseCfg = window.JJCONNECT_CONFIG || {};
+        const SUPABASE_URL = supabaseCfg.supabaseUrl;
+        const SUPABASE_ANON_KEY = supabaseCfg.supabaseAnonKey;
+        const supabase = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
+            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+            : null;
+        
+        // Check if user is logged in
+        async function checkAuth() {
+            if (!supabase) return false;
+
+            try {
+                const { data } = await supabase.auth.getSession();
+                return !!data?.session;
+            } catch (error) {
+                return false;
+            }
+        }
+        
+        // Show modal
+        function showModal() {
+            document.getElementById('login-modal').classList.add('active');
+        }
+        
+        // Hide modal
+        function hideModal() {
+            document.getElementById('login-modal').classList.remove('active');
+        }
+        
+        // Show message
+        function showMessage(text, type = 'success') {
+            const container = document.getElementById('message-container');
+            container.innerHTML = `<div class="alert alert-${type}">${text}</div>`;
+            setTimeout(() => container.innerHTML = '', 3000);
+        }
+        
+        // Handle login
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+                
+                if (!error && data?.session) {
+                    localStorage.setItem('user_info', JSON.stringify(data.user || {}));
+                    showMessage('登录成功！');
+                    setTimeout(() => {
+                        hideModal();
+                        location.reload();
+                    }, 1000);
+                } else {
+                    showMessage(error?.message || '登录失败', 'error');
+                }
+            } catch (error) {
+                showMessage('网络错误，请重试', 'error');
+            }
+        });
+        
+        // Access button handler
+        document.getElementById('access-btn').addEventListener('click', async () => {
+            const isLoggedIn = await checkAuth();
+            if (!isLoggedIn) {
+                showModal();
+            } else {
+                alert('欢迎使用地产报告！（此处为功能页面占位）');
+            }
+        });
+        
+        // Close modal
+        document.getElementById('modal-close').addEventListener('click', hideModal);
+        
+        // Close modal on outside click
+        document.getElementById('login-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'login-modal') {
+                hideModal();
+            }
+        });
+        
+        // Initialize page
+        (async function init() {
+            const isLoggedIn = await checkAuth();
+            if (isLoggedIn) {
+                document.querySelector('.locked-content').classList.remove('locked-content');
+                document.querySelector('.locked-content h2').textContent = '报告库';
+                document.querySelector('.locked-content p').textContent = '您已登录，可以访问所有报告...';
+            }
+        })();
+    </script>
+</body>
+</html>

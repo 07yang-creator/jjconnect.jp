@@ -34,3 +34,13 @@ export function getAuth0ConnectionForProvider(provider: string): string | null {
   if (provider in map) return map[provider as Auth0ProviderKey];
   return null;
 }
+
+/**
+ * Auth0 Database connection used for email/password signup flow.
+ * Typical default is "Username-Password-Authentication".
+ */
+export function getAuth0DatabaseConnection(): string {
+  const pub = process.env.NEXT_PUBLIC_AUTH0_CONNECTION_DATABASE;
+  const server = process.env.AUTH0_CONNECTION_DATABASE;
+  return (typeof pub === 'string' && pub.trim()) || (typeof server === 'string' && server.trim()) || 'Username-Password-Authentication';
+}

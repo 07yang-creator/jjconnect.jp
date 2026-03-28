@@ -9,6 +9,7 @@ import { revalidatePath } from 'next/cache';
 import { createServerSupabaseClient, getCurrentUser, isAuthorizedUser, getUserRole } from '@/lib/supabase/server';
 import { getAllPermissionsForRole, canAccessAdmin } from '@/lib/supabase/roleMatrix';
 import { getCoverImageUrl } from '@/lib/cloudflare-image-url';
+import { categoryDisplayName } from '@/lib/categories/displayName';
 import type { PostContent, PostUpdate } from '@/types/database';
 
 async function isAdminUser(userId: string): Promise<boolean> {
@@ -303,7 +304,8 @@ export default async function AdminReviewPage({
 
                   {post.category && (
                     <p className="mt-1 text-xs text-gray-500">
-                      分类：<span className="font-medium">{post.category.name}</span>
+                      分类：
+                      <span className="font-medium">{categoryDisplayName(post.category)}</span>
                     </p>
                   )}
 

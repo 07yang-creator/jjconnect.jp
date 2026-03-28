@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { createBrowserClient } from '@/lib/supabase/client';
 import { SUPPORT_PAGE_PATH } from '@/lib/support';
 
-function safeNextPath(input: string | null, fallback = '/publish'): string {
+function safeNextPath(input: string | null, fallback = '/'): string {
   if (!input) return fallback;
   if (!input.startsWith('/')) return fallback;
   if (input.startsWith('//')) return fallback;
@@ -37,35 +37,61 @@ export default function OnboardingPage() {
         data: { user },
       } = await supabase.auth.getUser();
 
-      if (!user) {
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select(
+            'country_region, preferred_language, call_name, role, basic_profile_completed_at, upgrade_profile_completed_at'
+          )
+          .eq('id', user.id)
+          .single();
+
+        if (!mounted) return;
+
+        if (profile) {
+          setCountryRegion(profile.country_region ?? '');
+          setPreferredLanguage(profile.preferred_language ?? '');
+          setCallName(profile.call_name ?? '');
+          setRole(profile.role ?? 'T');
+          setUpgradeComplete(Boolean(profile.upgrade_profile_completed_at));
+          if (profile.basic_profile_completed_at) {
+            if ((profile.role ?? 'T') !== 'T' && !profile.upgrade_profile_completed_at) {
+              router.replace(`/upgrade/complete-profile?next=${encodeURIComponent(next)}`);
+            } else {
+              router.replace(next);
+            }
+            return;
+          }
+        }
+
+        setLoading(false);
+        return;
+      }
+
+      const meRes = await fetch('/api/me', { credentials: 'include' });
+      const me = await meRes.json();
+
+      if (!mounted) return;
+
+      if (!me?.isLoggedIn || !me?.userData?.id) {
         router.replace('/login');
         return;
       }
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select(
-          'country_region, preferred_language, call_name, role, basic_profile_completed_at, upgrade_profile_completed_at'
-        )
-        .eq('id', user.id)
-        .single();
+      const ud = me.userData;
+      setCountryRegion(ud.country_region ?? '');
+      setPreferredLanguage(ud.preferred_language ?? '');
+      setCallName(ud.call_name ?? '');
+      setRole(ud.role ?? 'T');
+      setUpgradeComplete(Boolean(ud.upgrade_complete));
 
-      if (!mounted) return;
-
-      if (profile) {
-        setCountryRegion(profile.country_region ?? '');
-        setPreferredLanguage(profile.preferred_language ?? '');
-        setCallName(profile.call_name ?? '');
-        setRole(profile.role ?? 'T');
-        setUpgradeComplete(Boolean(profile.upgrade_profile_completed_at));
-        if (profile.basic_profile_completed_at) {
-          if ((profile.role ?? 'T') !== 'T' && !profile.upgrade_profile_completed_at) {
-            router.replace(`/upgrade/complete-profile?next=${encodeURIComponent(next)}`);
-          } else {
-            router.replace(next);
-          }
-          return;
+      if (ud.basic_profile_completed_at) {
+        if ((ud.role ?? 'T') !== 'T' && !ud.upgrade_complete) {
+          router.replace(`/upgrade/complete-profile?next=${encodeURIComponent(next)}`);
+        } else {
+          router.replace(next);
         }
+        return;
       }
 
       setLoading(false);
@@ -87,16 +113,6 @@ export default function OnboardingPage() {
     setError(null);
     setSaving(true);
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      setSaving(false);
-      router.replace('/login');
-      return;
-    }
-
     const payload = {
       country_region: countryRegion.trim(),
       preferred_language: preferredLanguage.trim(),
@@ -104,12 +120,30 @@ export default function OnboardingPage() {
       basic_profile_completed_at: new Date().toISOString(),
     };
 
-    const { error: updateError } = await supabase.from('profiles').update(payload).eq('id', user.id);
-    setSaving(false);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (updateError) {
-      setError(updateError.message || 'Failed to save profile');
-      return;
+    if (user) {
+      const { error: updateError } = await supabase.from('profiles').update(payload).eq('id', user.id);
+      setSaving(false);
+      if (updateError) {
+        setError(updateError.message || 'Failed to save profile');
+        return;
+      }
+    } else {
+      const res = await fetch('/api/me/profile', {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const body = await res.json().catch(() => ({}));
+      setSaving(false);
+      if (!res.ok) {
+        setError(typeof body.error === 'string' ? body.error : 'Failed to save profile');
+        return;
+      }
     }
 
     if (role !== 'T' && !upgradeComplete) {

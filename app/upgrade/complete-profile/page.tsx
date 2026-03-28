@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { createBrowserClient } from '@/lib/supabase/client';
 import { SUPPORT_PAGE_PATH } from '@/lib/support';
 
-function safeNextPath(input: string | null, fallback = '/publish'): string {
+function safeNextPath(input: string | null, fallback = '/'): string {
   if (!input) return fallback;
   if (!input.startsWith('/')) return fallback;
   if (input.startsWith('//')) return fallback;
@@ -27,6 +27,7 @@ export default function UpgradeCompleteProfilePage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [emailVerified, setEmailVerified] = useState(false);
+  const [emailConfirmedAt, setEmailConfirmedAt] = useState<string | null>(null);
 
   const next = safeNextPath(searchParams.get('next'));
 
@@ -38,33 +39,58 @@ export default function UpgradeCompleteProfilePage() {
         data: { user },
       } = await supabase.auth.getUser();
 
-      if (!user) {
+      if (user) {
+        setEmailVerified(Boolean(user.email_confirmed_at));
+        setEmailConfirmedAt(user.email_confirmed_at ?? null);
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select(
+            'full_name, phone_number, company_name, address_line1, postal_code, upgrade_profile_completed_at'
+          )
+          .eq('id', user.id)
+          .single();
+
+        if (!mounted) return;
+
+        if (profile) {
+          setFullName(profile.full_name ?? '');
+          setPhoneNumber(profile.phone_number ?? '');
+          setCompanyName(profile.company_name ?? '');
+          setAddressLine1(profile.address_line1 ?? '');
+          setPostalCode(profile.postal_code ?? '');
+          if (profile.upgrade_profile_completed_at) {
+            router.replace(next);
+            return;
+          }
+        }
+
+        setLoading(false);
+        return;
+      }
+
+      const meRes = await fetch('/api/me', { credentials: 'include' });
+      const me = await meRes.json();
+
+      if (!mounted) return;
+
+      if (!me?.isLoggedIn || !me?.userData?.id) {
         router.replace('/login');
         return;
       }
 
-      setEmailVerified(Boolean(user.email_confirmed_at));
+      const ud = me.userData;
+      setEmailVerified(Boolean(ud.email_verified));
+      setEmailConfirmedAt(ud.email_confirmed_at ?? null);
+      setFullName(ud.full_name ?? '');
+      setPhoneNumber(ud.phone_number ?? '');
+      setCompanyName(ud.company_name ?? '');
+      setAddressLine1(ud.address_line1 ?? '');
+      setPostalCode(ud.postal_code ?? '');
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select(
-          'full_name, phone_number, company_name, address_line1, postal_code, upgrade_profile_completed_at'
-        )
-        .eq('id', user.id)
-        .single();
-
-      if (!mounted) return;
-
-      if (profile) {
-        setFullName(profile.full_name ?? '');
-        setPhoneNumber(profile.phone_number ?? '');
-        setCompanyName(profile.company_name ?? '');
-        setAddressLine1(profile.address_line1 ?? '');
-        setPostalCode(profile.postal_code ?? '');
-        if (profile.upgrade_profile_completed_at) {
-          router.replace(next);
-          return;
-        }
+      if (ud.upgrade_complete) {
+        router.replace(next);
+        return;
       }
 
       setLoading(false);
@@ -86,17 +112,7 @@ export default function UpgradeCompleteProfilePage() {
     setError(null);
     setSaving(true);
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      setSaving(false);
-      router.replace('/login');
-      return;
-    }
-
-    if (!user.email_confirmed_at) {
+    if (!emailVerified || !emailConfirmedAt) {
       setSaving(false);
       setError('Please verify your email before completing paid/granted upgrade.');
       return;
@@ -108,16 +124,34 @@ export default function UpgradeCompleteProfilePage() {
       company_name: companyName.trim() || null,
       address_line1: addressLine1.trim(),
       postal_code: postalCode.trim(),
-      email_verified_at: user.email_confirmed_at,
+      email_verified_at: emailConfirmedAt,
       upgrade_profile_completed_at: new Date().toISOString(),
     };
 
-    const { error: updateError } = await supabase.from('profiles').update(payload).eq('id', user.id);
-    setSaving(false);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (updateError) {
-      setError(updateError.message || 'Failed to save upgrade profile');
-      return;
+    if (user) {
+      const { error: updateError } = await supabase.from('profiles').update(payload).eq('id', user.id);
+      setSaving(false);
+      if (updateError) {
+        setError(updateError.message || 'Failed to save upgrade profile');
+        return;
+      }
+    } else {
+      const res = await fetch('/api/me/profile', {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const body = await res.json().catch(() => ({}));
+      setSaving(false);
+      if (!res.ok) {
+        setError(typeof body.error === 'string' ? body.error : 'Failed to save upgrade profile');
+        return;
+      }
     }
 
     router.replace(next);

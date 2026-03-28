@@ -6,9 +6,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createPost } from '@/app/actions/posts';
+import { SUPPORT_PAGE_PATH } from '@/lib/support';
 import { createBrowserClient } from '@/lib/supabase/client';
+import { categoryDisplayName } from '@/lib/categories/displayName';
 import type { Category, UserCategory } from '@/types/database';
 import TipTapBasicEditor from '@/src/components/TipTapBasicEditor';
 import type { Editor } from '@tiptap/core';
@@ -83,7 +86,17 @@ function SettingsPanel({
         </div>
         <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} className="w-full border border-[var(--border)] rounded-[var(--radius)] px-3 py-2 text-sm">
           <option value="">请选择...</option>
-          {categoryType === 'official' ? categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>) : userCategories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          {categoryType === 'official'
+            ? categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {categoryDisplayName(c)}
+                </option>
+              ))
+            : userCategories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
         </select>
       </div>
       <div>
@@ -393,22 +406,20 @@ export default function PublishForm({
       <form onSubmit={(e) => handleSubmit(e, status)}>
         {/* Notion-style top bar */}
         <header className="sticky top-0 z-20 flex items-center justify-between gap-3 px-3 sm:px-6 py-3 bg-[var(--bg-sidebar)] border-b border-[var(--border)]">
-          <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <button type="button" onClick={() => router.back()} className="p-1.5 rounded-[var(--radius)] hover:bg-[var(--hover)] text-[var(--text-secondary)] shrink-0" title="返回">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
             <span className="text-xs text-[var(--text-secondary)] truncate">{lastSavedAt ? `已保存 ${formatLastSaved()}` : '未保存'}</span>
             <button type="button" onClick={handleRestoreDraft} disabled={!hasLocalDraft || !editor} className="text-xs text-blue-600 hover:underline disabled:opacity-40 disabled:no-underline shrink-0">从草稿恢复</button>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="relative">
+            <div className="relative ml-auto sm:ml-2">
               <button type="button" onClick={() => setActionsOpen(!actionsOpen)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius)] hover:bg-[var(--hover)] text-sm text-[var(--text-primary)]">
                 分享 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
               </button>
               {actionsOpen && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setActionsOpen(false)} aria-hidden />
-                  <div className="absolute right-0 top-full mt-1 z-20 w-48 py-1 bg-white rounded-[var(--radius)] shadow-lg border border-[var(--border)]">
+                  <div className="absolute left-0 sm:left-auto sm:right-0 top-full mt-1 z-20 w-48 py-1 bg-white rounded-[var(--radius)] shadow-lg border border-[var(--border)]">
                     <button type="button" onClick={(e) => { setActionsOpen(false); if (!loading) handleSubmitForReview(e); }} disabled={loading} className="w-full px-4 py-2 text-left text-sm text-amber-800 hover:bg-amber-50">提交审核</button>
                     <button type="button" onClick={(e) => { setActionsOpen(false); setStatus('draft'); handleSubmit(e, 'draft'); }} disabled={loading} className="w-full px-4 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--hover)]">保存草稿</button>
                     <button type="button" onClick={(e) => { setActionsOpen(false); setStatus('published'); handleSubmit(e, 'published'); }} disabled={loading} className="w-full px-4 py-2 text-left text-sm text-blue-600 hover:bg-blue-50 font-medium">立即发布</button>
@@ -416,9 +427,17 @@ export default function PublishForm({
                 </>
               )}
             </div>
-            <button type="button" onClick={() => setSettingsOpen(!settingsOpen)} className="md:hidden p-2 rounded-[var(--radius)] hover:bg-[var(--hover)] text-[var(--text-secondary)]" title="设置">
+            <button type="button" onClick={() => setSettingsOpen(!settingsOpen)} className="md:hidden p-2 rounded-[var(--radius)] hover:bg-[var(--hover)] text-[var(--text-secondary)] shrink-0" title="设置">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
             </button>
+          </div>
+          <div className="flex items-center shrink-0">
+            <Link
+              href={SUPPORT_PAGE_PATH}
+              className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline px-2 py-1.5 whitespace-nowrap"
+            >
+              Help &amp; support
+            </Link>
           </div>
         </header>
 

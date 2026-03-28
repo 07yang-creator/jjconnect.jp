@@ -60,8 +60,39 @@ export async function createServerSupabaseClient() {
 export async function getCurrentUser() {
   if (isAuth0Enabled()) {
     const auth0User = await getAuth0SessionUser();
-    if (!auth0User) return null;
-    return resolveOrCreateSupabaseIdentityFromAuth0User(auth0User);
+    if (auth0User) {
+      return resolveOrCreateSupabaseIdentityFromAuth0User(auth0User);
+    }
+
+    // Hybrid mode fallback: allow native Supabase session users to work
+    // even when auth provider is configured as Auth0.
+    const cookieStore = await cookies();
+    const supabase = createClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll();
+          },
+          setAll(cookiesToSet) {
+            try {
+              cookiesToSet.forEach(({ name, value, options }) =>
+                cookieStore.set(name, value, options)
+              );
+            } catch {
+              // Ignore in Server Components.
+            }
+          },
+        },
+      }
+    );
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+    if (!error && user) return user;
+    return null;
   }
 
   const supabase = await createServerSupabaseClient();

@@ -12,18 +12,31 @@ export async function GET() {
     const { data: profile } = await supabase
       .from('profiles')
       .select(
-        'display_name, avatar_url, role, is_authorized, country_region, preferred_language, call_name, upgrade_profile_completed_at'
+        'display_name, avatar_url, role, is_authorized, country_region, preferred_language, call_name, basic_profile_completed_at, upgrade_profile_completed_at, full_name, phone_number, company_name, address_line1, postal_code'
       )
       .eq('id', user.id)
       .single();
+
+    const emailConfirmedAt =
+      'email_confirmed_at' in user ? (user as { email_confirmed_at?: string | null }).email_confirmed_at ?? null : null;
 
     const userData = {
       id: user.id,
       username: profile?.display_name || user.email || 'User',
       email: user.email || '',
+      email_confirmed_at: emailConfirmedAt,
       avatar_url: profile?.avatar_url || null,
       role: profile?.role || 'T',
       is_authorized: profile?.is_authorized === true,
+      country_region: profile?.country_region ?? null,
+      preferred_language: profile?.preferred_language ?? null,
+      call_name: profile?.call_name ?? null,
+      basic_profile_completed_at: profile?.basic_profile_completed_at ?? null,
+      full_name: profile?.full_name ?? null,
+      phone_number: profile?.phone_number ?? null,
+      company_name: profile?.company_name ?? null,
+      address_line1: profile?.address_line1 ?? null,
+      postal_code: profile?.postal_code ?? null,
       basic_complete: Boolean(
         profile?.country_region?.trim() &&
           profile?.preferred_language?.trim() &&

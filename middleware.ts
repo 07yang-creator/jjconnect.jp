@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { isAuth0Enabled } from '@/lib/auth/provider';
+import { createClient } from '@supabase/supabase-js';
 
 const ADMIN_PATHS = new Set([
   '/admin-console.html',
@@ -8,6 +9,54 @@ const ADMIN_PATHS = new Set([
   '/admin.html',
   '/admin-test.html',
 ]);
+
+const PROFILE_GATE_EXEMPT_PREFIXES = ['/auth/', '/api/', '/_next/'];
+const PROFILE_GATE_EXEMPT_PATHS = new Set([
+  '/login',
+  '/login.html',
+  '/onboarding',
+  '/upgrade/complete-profile',
+  '/favicon.ico',
+  '/robots.txt',
+  '/sitemap.xml',
+]);
+
+function isProfileGateExemptPath(pathname: string): boolean {
+  if (PROFILE_GATE_EXEMPT_PATHS.has(pathname)) return true;
+  return PROFILE_GATE_EXEMPT_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
+
+function trimmed(v: string | null | undefined): string {
+  return (v ?? '').trim();
+}
+
+async function readAuth0MappedProfile(auth0Sub: string) {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !serviceRoleKey) return null;
+
+  const admin = createClient(url, serviceRoleKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  const { data: identity } = await admin
+    .from('external_identities')
+    .select('supabase_user_id')
+    .eq('provider', 'auth0')
+    .eq('external_user_id', auth0Sub)
+    .maybeSingle();
+
+  const supabaseUserId = identity?.supabase_user_id;
+  if (!supabaseUserId) return null;
+
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('role, country_region, preferred_language, call_name, upgrade_profile_completed_at')
+    .eq('id', supabaseUserId)
+    .maybeSingle();
+
+  return profile ?? null;
+}
 
 function redirectToLogin(request: NextRequest) {
   if (isAuth0Enabled()) {
@@ -76,6 +125,37 @@ export async function middleware(request: NextRequest) {
 
   if (pathname.startsWith('/auth/')) {
     return auth0Response;
+  }
+
+  if (!isProfileGateExemptPath(pathname)) {
+    const session = await auth0.getSession(request);
+    if (session?.user?.sub) {
+      const profile = await readAuth0MappedProfile(session.user.sub);
+      if (!profile) {
+        const onboardingUrl = new URL('/onboarding', request.url);
+        onboardingUrl.searchParams.set('next', `${pathname}${request.nextUrl.search}`);
+        return NextResponse.redirect(onboardingUrl);
+      }
+
+      const basicComplete =
+        Boolean(trimmed(profile.country_region)) &&
+        Boolean(trimmed(profile.preferred_language)) &&
+        Boolean(trimmed(profile.call_name));
+      const role = profile.role ?? 'T';
+      const upgradeComplete = Boolean(profile.upgrade_profile_completed_at);
+
+      if (!basicComplete) {
+        const onboardingUrl = new URL('/onboarding', request.url);
+        onboardingUrl.searchParams.set('next', `${pathname}${request.nextUrl.search}`);
+        return NextResponse.redirect(onboardingUrl);
+      }
+
+      if (role !== 'T' && !upgradeComplete && pathname !== '/upgrade/complete-profile') {
+        const upgradeUrl = new URL('/upgrade/complete-profile', request.url);
+        upgradeUrl.searchParams.set('next', `${pathname}${request.nextUrl.search}`);
+        return NextResponse.redirect(upgradeUrl);
+      }
+    }
   }
 
   if (ADMIN_PATHS.has(pathname)) {

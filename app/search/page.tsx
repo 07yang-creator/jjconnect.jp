@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import type { Post } from '@/types/database';
 import { getCoverImageUrl } from '@/lib/cloudflare-image-url';
+import { categoryDisplayName } from '@/lib/categories/displayName';
 
 interface PostWithAuthor extends Post {
   author: {
@@ -168,7 +169,7 @@ function SearchResultCard({ post, query }: { post: PostWithAuthor; query: string
         {post.category && (
           <div className="absolute bottom-2 left-2">
             <span className="inline-block bg-white/90 backdrop-blur-sm text-gray-700 px-2 py-0.5 rounded-full text-xs font-medium">
-              {post.category.name}
+              {categoryDisplayName(post.category)}
             </span>
           </div>
         )}

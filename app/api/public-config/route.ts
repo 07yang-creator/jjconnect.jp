@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAuthProvider } from '@/lib/auth/provider';
-import { getAuth0ConnectionMap } from '@/lib/auth0/connections';
+import { getAuth0ConnectionMap, getAuth0DatabaseConnection } from '@/lib/auth0/connections';
 
 /**
  * Public config endpoint for static HTML/JS pages (e.g. publish.js)
@@ -23,6 +23,7 @@ export async function GET() {
 
   if (authProvider === 'auth0') {
     payload.auth0Connections = getAuth0ConnectionMap();
+    payload.auth0DatabaseConnection = getAuth0DatabaseConnection();
   }
 
   return NextResponse.json(payload);

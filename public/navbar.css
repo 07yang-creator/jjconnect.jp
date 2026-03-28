@@ -157,16 +157,10 @@
    用户区域
    ======================================== */
 .jjc-navbar-user {
-    display: none !important;
+    display: flex !important;
     align-items: center !important;
     gap: 1rem !important;
     flex-shrink: 0 !important;
-}
-
-@media (min-width: 1024px) {
-    .jjc-navbar-user {
-        display: flex !important;
-    }
 }
 
 /* 登录按钮 */
@@ -215,17 +209,16 @@
 .jjc-user-button {
     display: flex !important;
     align-items: center !important;
-    gap: 0.5rem !important;
-    padding: 0.5rem 1rem !important;
+    justify-content: center !important;
+    padding: 0.25rem !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
     background: #EDF2F7 !important;
     border: none !important;
-    border-radius: 6px !important;
+    border-radius: 50% !important;
     cursor: pointer !important;
-    font-weight: 600 !important;
-    font-size: 0.875rem !important;
     color: #1A202C !important;
     transition: all 0.2s !important;
-    white-space: nowrap !important;
 }
 
 .jjc-user-button:hover {
@@ -233,15 +226,29 @@
     color: white !important;
 }
 
+a.jjc-user-button {
+    text-decoration: none !important;
+}
+
+.jjc-user-button--guest {
+    background: #E2E8F0 !important;
+    color: #4A5568 !important;
+}
+
+.jjc-user-button--guest:hover {
+    background: #CBD5E0 !important;
+    color: #1A202C !important;
+}
+
 .jjc-user-icon {
-    width: 18px !important;
-    height: 18px !important;
+    width: 22px !important;
+    height: 22px !important;
     flex-shrink: 0 !important;
 }
 
 .jjc-user-avatar {
-    width: 28px !important;
-    height: 28px !important;
+    width: 32px !important;
+    height: 32px !important;
     border-radius: 50% !important;
     object-fit: cover !important;
     flex-shrink: 0 !important;
@@ -350,28 +357,30 @@
 }
 
 .jjc-mobile-user {
-    padding: 0.75rem 0 !important;
-    font-weight: 600 !important;
-    color: #1A202C !important;
-    font-size: 1rem !important;
+    padding: 0.5rem 0 !important;
     display: flex !important;
     align-items: center !important;
-    gap: 0.5rem !important;
+    justify-content: flex-start !important;
+}
+
+.jjc-mobile-user-fallback {
+    font-size: 1.5rem !important;
+    line-height: 1 !important;
 }
 
 .jjc-mobile-avatar {
-    width: 24px !important;
-    height: 24px !important;
+    width: 32px !important;
+    height: 32px !important;
     border-radius: 50% !important;
     object-fit: cover !important;
 }
 
-/* 移动端产品子菜单 */
-.jjc-mobile-products {
+/* Mobile services submenu */
+.jjc-mobile-services {
     padding-left: 1rem !important;
 }
 
-.jjc-mobile-product-link {
+.jjc-mobile-service-link {
     display: flex !important;
     align-items: center !important;
     gap: 0.5rem !important;
@@ -381,7 +390,7 @@
     font-size: 0.875rem !important;
 }
 
-.jjc-mobile-product-link:hover {
+.jjc-mobile-service-link:hover {
     color: #2B6CB0 !important;
 }
 

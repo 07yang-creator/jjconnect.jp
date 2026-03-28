@@ -371,7 +371,7 @@
 
 .remember-me label { font-size: 14px; color: #5f6368; cursor: pointer; margin: 0; }
 
-.product-services-checkboxes { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+.service-offerings-checkboxes { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
 .checkbox-label { display: flex; align-items: center; gap: 12px; font-size: 14px; color: #202124; cursor: pointer; font-weight: 400; }
 .checkbox-label input { width: 18px; height: 18px; accent-color: #1a73e8; flex-shrink: 0; }
 
@@ -441,7 +441,7 @@
 </head>
 <body class="login-page">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
+<script src="/config.js"></script>
 <script src="navbar.js"></script>
 <style>#masthead, #mobile-header { display: none !important; }</style>
 
@@ -523,8 +523,9 @@
                 </div>
                 <div class="form-group full-width">
                     <label for="reg-username">Username <span class="required">*</span></label>
-                    <input type="text" id="reg-username" name="username" placeholder="Choose a username" required 
-                        autocomplete="username" pattern="[a-zA-Z0-9_]{3,20}" title="3-20 characters, letters, numbers, underscores only">
+                    <input type="text" id="reg-username" name="username" placeholder="Choose a username" required
+                        autocomplete="username" minlength="3" maxlength="40"
+                        title="3–40 characters (letters, numbers, spaces, common punctuation)">
                 </div>
                 <div class="form-group full-width">
                     <label for="reg-email">Email <span class="required">*</span></label>
@@ -545,11 +546,11 @@
                     </div>
                 </div>
                 <div class="form-group full-width">
-                    <label class="form-section-title">Products &amp; Services</label>
-                    <div class="product-services-checkboxes">
-                        <label class="checkbox-label"><input type="checkbox" name="product_service" value="raft"> RAFT2.03 – Financial analysis &amp; forecasting</label>
-                        <label class="checkbox-label"><input type="checkbox" name="product_service" value="mansion"> Mansion Manager – Property management</label>
-                        <label class="checkbox-label"><input type="checkbox" name="product_service" value="property_report"> Property Report – Real estate market analysis</label>
+                    <label class="form-section-title">Services of interest</label>
+                    <div class="service-offerings-checkboxes">
+                        <label class="checkbox-label"><input type="checkbox" name="service_interest" value="raft"> RAFT2.03 – Financial analysis &amp; forecasting</label>
+                        <label class="checkbox-label"><input type="checkbox" name="service_interest" value="mansion"> Mansion Manager – Property management</label>
+                        <label class="checkbox-label"><input type="checkbox" name="service_interest" value="property_report"> Property Report – Real estate market analysis</label>
                     </div>
                 </div>
 
@@ -603,6 +604,7 @@
                 </div>
                 <div class="auth-actions">
                     <button type="submit" class="auth-button auth-button-primary" id="reg-create-account-btn" disabled>Create account</button>
+                    <p id="reg-submit-hint" class="reg-submit-hint" style="display:none;margin-top:10px;font-size:13px;color:#5f6368;text-align:center;"></p>
                 </div>
             </form>
         </div>
@@ -660,10 +662,46 @@ const AVATAR_PRESETS = ['smile', 'happy', 'alice', 'bob', 'carlos', 'denise'];
 let currentIdentifier = '';
 let selectedAvatarUrl = '';
 
+function safeInternalPath(raw) {
+    if (raw == null || typeof raw !== 'string') return null;
+    const t = raw.trim();
+    if (!t.startsWith('/') || t.startsWith('//')) return null;
+    if (t.toLowerCase().indexOf('://') !== -1) return null;
+    const noHash = t.split('#')[0];
+    return noHash || '/';
+}
+
+function isAuthUiPath(pathWithQuery) {
+    if (!pathWithQuery || typeof pathWithQuery !== 'string') return true;
+    const pathOnly = pathWithQuery.split('?')[0];
+    if (pathOnly === '/login' || pathOnly === '/login.html') return true;
+    if (pathWithQuery.indexOf('/auth/login') === 0) return true;
+    return false;
+}
+
+function getPostAuthDestination() {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const explicit = safeInternalPath(params.get('next')) || safeInternalPath(params.get('returnTo'));
+        if (explicit && !isAuthUiPath(explicit)) return explicit;
+        if (document.referrer) {
+            const u = new URL(document.referrer);
+            if (u.origin === window.location.origin) {
+                const candidate = safeInternalPath(u.pathname + u.search);
+                if (candidate && !isAuthUiPath(candidate)) return candidate;
+            }
+        }
+    } catch (_) { /* ignore */ }
+    return '/';
+}
+
 function getSocialRedirectUrl() {
-    if (auth0Enabled()) return '/profile.html?view=own';
+    const dest = getPostAuthDestination();
+    if (auth0Enabled()) {
+        return window.location.origin + dest;
+    }
     const callbackUrl = new URL('/auth/supabase-callback', window.location.origin);
-    callbackUrl.searchParams.set('next', '/profile.html?view=own');
+    callbackUrl.searchParams.set('next', dest);
     return callbackUrl.toString();
 }
 
@@ -864,19 +902,57 @@ function setupRegAvatarPicker() {
     });
 }
 
+function registerEmailLooksValid(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((email || '').trim());
+}
+
+function registerUsernameLooksValid(username) {
+    const u = (username || '').trim();
+    return u.length >= 3 && u.length <= 40;
+}
+
 function updateCreateAccountButtonState() {
     const btn = document.getElementById('reg-create-account-btn');
+    const hint = document.getElementById('reg-submit-hint');
     if (!btn) return;
-    const registerForm = document.getElementById('register-form');
-    if (!registerForm) return;
     const firstname = (document.getElementById('reg-firstname')?.value || '').trim();
     const lastname = (document.getElementById('reg-lastname')?.value || '').trim();
+    const username = (document.getElementById('reg-username')?.value || '').trim();
+    const email = (document.getElementById('reg-email')?.value || '').trim();
     const password = document.getElementById('reg-password')?.value || '';
     const confirm = document.getElementById('reg-confirm-password')?.value || '';
     const termsChecked = document.getElementById('terms')?.checked || false;
-    const baseValid = registerForm.checkValidity();
-    const allFilled = firstname && lastname && baseValid && password.length >= 8 && confirm === password && termsChecked;
+
+    const allFilled =
+        Boolean(firstname) &&
+        Boolean(lastname) &&
+        registerUsernameLooksValid(username) &&
+        registerEmailLooksValid(email) &&
+        password.length >= 8 &&
+        confirm === password &&
+        termsChecked;
+
     btn.disabled = !allFilled;
+
+    if (hint) {
+        if (allFilled) {
+            hint.style.display = 'none';
+            hint.textContent = '';
+        } else {
+            const parts = [];
+            if (!firstname) parts.push('first name');
+            if (!lastname) parts.push('last name');
+            if (!registerUsernameLooksValid(username)) parts.push('username (3–40 characters)');
+            if (!registerEmailLooksValid(email)) parts.push('valid email');
+            if (password.length < 8) parts.push('password (8+ characters)');
+            if (confirm !== password) parts.push('matching password confirmation');
+            if (!termsChecked) parts.push('accept Terms');
+            hint.textContent = parts.length
+                ? 'Still needed: ' + parts.join(', ') + '. (Scroll up if the fields are above.)'
+                : '';
+            hint.style.display = parts.length ? 'block' : 'none';
+        }
+    }
 }
 
 function enableManualRegisterIdentityFields() {
@@ -896,7 +972,12 @@ function enableManualRegisterIdentityFields() {
 document.getElementById('terms')?.addEventListener('change', updateCreateAccountButtonState);
 ['reg-firstname', 'reg-lastname', 'reg-username', 'reg-email', 'reg-password', 'reg-confirm-password'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.addEventListener('input', updateCreateAccountButtonState);
+    if (!el) return;
+    el.addEventListener('input', updateCreateAccountButtonState);
+    el.addEventListener('change', updateCreateAccountButtonState);
+    el.addEventListener('paste', function() {
+        requestAnimationFrame(updateCreateAccountButtonState);
+    });
 });
 
 function openCreateAccountView() {
@@ -946,7 +1027,7 @@ function openCreateAccountView() {
     if (regRemarks) regRemarks.value = '';
     if (terms) terms.checked = false;
 
-    document.querySelectorAll('input[name="product_service"]').forEach(cb => cb.checked = false);
+    document.querySelectorAll('input[name="service_interest"]').forEach(cb => cb.checked = false);
     if (regAvatarUpload) regAvatarUpload.value = '';
     selectedAvatarUrl = '';
     if (regAvatarImg) regAvatarImg.style.display = 'none';
@@ -964,12 +1045,21 @@ const goCreateAccountLink = document.getElementById('go-create-account');
 if (goCreateAccountLink) {
     goCreateAccountLink.addEventListener('click', function(e) {
         e.preventDefault();
-        if (auth0Enabled()) {
-            window.location.href = `/auth/login?returnTo=${encodeURIComponent('/onboarding?next=/profile.html?view=own')}&screen_hint=signup`;
-            return;
-        }
         const url = new URL(window.location.href);
         url.searchParams.set('create', '1');
+        if (!url.searchParams.get('next') && !url.searchParams.get('returnTo')) {
+            try {
+                if (document.referrer) {
+                    const u = new URL(document.referrer);
+                    if (u.origin === window.location.origin) {
+                        const candidate = safeInternalPath(u.pathname + u.search);
+                        if (candidate && !isAuthUiPath(candidate)) {
+                            url.searchParams.set('next', candidate);
+                        }
+                    }
+                }
+            } catch (_) { /* ignore */ }
+        }
         window.history.replaceState({}, '', url.toString());
         try {
             openCreateAccountView();
@@ -1023,8 +1113,11 @@ function setAdminGuardTokenCookie(session) {
 }
 
 async function routeAfterAuth(user) {
+    const rawDest = getPostAuthDestination();
+    const safeDest = isAuthUiPath(rawDest) ? '/' : rawDest;
+
     if (!user?.id || !sbClient) {
-        window.location.href = 'profile.html?view=own';
+        window.location.href = safeDest;
         return;
     }
     try {
@@ -1040,20 +1133,20 @@ async function routeAfterAuth(user) {
             profile?.call_name?.trim()
         );
         if (!basicComplete) {
-            window.location.href = '/onboarding?next=' + encodeURIComponent('/profile.html?view=own');
+            window.location.href = '/onboarding?next=' + encodeURIComponent(safeDest);
             return;
         }
 
         const upgradedRole = Boolean(profile?.role && profile.role !== 'T');
         if (upgradedRole && (!profile?.upgrade_profile_completed_at || !user.email_confirmed_at)) {
-            window.location.href = '/upgrade/complete-profile?next=' + encodeURIComponent('/profile.html?view=own');
+            window.location.href = '/upgrade/complete-profile?next=' + encodeURIComponent(safeDest);
             return;
         }
 
-        window.location.href = 'profile.html?view=own';
+        window.location.href = safeDest;
     } catch (err) {
         console.warn('Failed to determine post-auth route:', err);
-        window.location.href = 'profile.html?view=own';
+        window.location.href = safeDest;
     }
 }
 
@@ -1138,7 +1231,7 @@ document.getElementById('register-form').addEventListener('submit', async functi
         });
 
         if (!error) {
-            showMessage('Account created! Redirecting to profile...', 'success');
+            showMessage('Account created! Redirecting...', 'success');
             if (data?.session) {
                 localStorage.setItem('user_info', JSON.stringify(data.user || {}));
                 setAdminGuardTokenCookie(data.session);

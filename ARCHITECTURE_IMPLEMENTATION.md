@@ -71,11 +71,11 @@
 
 ---
 
-### 2. 独立产品页面 (Product Entry Pages)
+### 2. 服务专题页 (Service entry pages)
 
-#### 产品列表
+#### 服务列表
 
-| 产品 | 文件 | 主题色 | 图标 |
+| 服务 | 文件 | 主题色 | 图标 |
 |------|------|--------|------|
 | RAFT2.03 | `raft_home.html` | 蓝色 (#2563EB) | 🚢 |
 | Mansion管理主任 | `mansion_home.html` | 青色 (#06B6D4) | 🏢 |
@@ -83,10 +83,10 @@
 
 #### 页面结构
 
-每个产品页面包含：
+每个服务专题页包含：
 
-1. **Hero Section**：产品名称、slogan、渐变背景
-2. **Feature Cards**：3个核心功能卡片，展示产品特点
+1. **Hero Section**：服务名称、slogan、渐变背景
+2. **Feature Cards**：3个核心功能卡片，展示服务特点
 3. **CTA Section**：「立即访问」按钮（触发登录检查）
 4. **Locked Content**：登录后解锁的内容区域
 5. **Login Modal**：内嵌登录模态框（非跳转式）
@@ -128,7 +128,7 @@ document.getElementById('access-btn').addEventListener('click', async () => {
   if (!isLoggedIn) {
     showModal(); // 弹出登录模态框，不跳转
   } else {
-    // 已登录，显示产品功能
+    // 已登录，显示服务功能
   }
 });
 
@@ -149,16 +149,16 @@ if (data.success) {
 
 #### 功能定位
 
-- **产品展示中心**：以视觉卡片形式展示三个产品
-- **导航枢纽**：每个卡片包含「立即进入」按钮，链接到对应产品主页
+- **服务展示中心**：以视觉卡片形式展示三项服务
+- **导航枢纽**：每个卡片包含「立即进入」按钮，链接到对应服务主页
 - **品牌介绍**：包含公司介绍、团队信息等内容
 
-#### 产品卡片设计
+#### 服务卡片设计
 
 ```html
-<div class="jjc-product-cards">
+<div class="jjc-service-cards">
   <!-- RAFT2.03 Card -->
-  <div class="jjc-product-card jjc-card-blue">
+  <div class="jjc-service-card jjc-card-blue">
     <div class="jjc-card-icon">🚢</div>
     <h3>RAFT2.03</h3>
     <p>智能财务分析与预测系统，助您驾驭商业海洋</p>
@@ -171,12 +171,12 @@ if (data.success) {
   </div>
   
   <!-- Mansion管理主任 Card -->
-  <div class="jjc-product-card jjc-card-cyan">
+  <div class="jjc-service-card jjc-card-cyan">
     <!-- 类似结构 -->
   </div>
   
   <!-- 地产报告 Card -->
-  <div class="jjc-product-card jjc-card-orange">
+  <div class="jjc-service-card jjc-card-orange">
     <!-- 类似结构 -->
   </div>
 </div>

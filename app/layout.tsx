@@ -1,14 +1,15 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import RightSidebar from '@/src/components/RightSidebar';
+import LegacyJjconnectNavbar from '@/src/components/LegacyJjconnectNavbar';
 import { getCurrentUser } from '@/lib/auth';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'JJConnect - 日本人コミュニティ',
-  description: '日本人のための情報交流プラットフォーム',
+  title: 'JJConnect — community & stories',
+  description: 'Share knowledge, connect with others, and publish your story.',
 };
 
 export default async function RootLayout({
@@ -19,23 +20,17 @@ export default async function RootLayout({
   const user = await getCurrentUser();
 
   return (
-    <html lang="ja">
+    <html lang="en">
       <body className={inter.className}>
-        {/* 使用 Flex 布局实现左右分栏 */}
+        <LegacyJjconnectNavbar />
         <div className="min-h-screen bg-gray-50 flex flex-col">
-          
-          {/* 主内容容器 */}
           <div className="flex-1 flex relative">
-            
-            {/* 左侧：主内容区 - 为右侧边栏预留空间 */}
             <main className="flex-1 md:mr-[260px] transition-all duration-300">
-              {/* 内容包装器，添加适当的内边距 */}
               <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                 {children}
               </div>
             </main>
 
-            {/* 右侧：固定边栏 */}
             <RightSidebar user={user} />
           </div>
         </div>

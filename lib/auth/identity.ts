@@ -27,14 +27,17 @@ export async function resolveOrCreateSupabaseIdentityFromAuth0User(
   let supabaseUserId = existingMap?.supabase_user_id ?? null;
 
   if (!supabaseUserId) {
+    // Always use a synthetic internal email for mapped Auth0 identities.
+    // This prevents hard failures when a real email already exists in Supabase auth.
     const randomEmail = `auth0-${crypto.randomUUID()}@jjconnect.local`;
     const created = await admin.auth.admin.createUser({
-      email: auth0User.email || randomEmail,
+      email: randomEmail,
       password: makeSyntheticPassword(),
       email_confirm: auth0User.email_verified,
       user_metadata: {
         auth0_sub: auth0User.sub,
         provider,
+        email: auth0User.email,
         name: auth0User.name,
         picture: auth0User.picture,
       },

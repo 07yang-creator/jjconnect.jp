@@ -28,6 +28,48 @@ export interface ExternalIdentity {
   updated_at: string;
 }
 
+/** User-submitted request for publishing (writer) access */
+export interface PublishAccessRequest {
+  [key: string]: unknown;
+  id: string;
+  user_id: string;
+  applicant_email: string;
+  status: 'pending' | 'approved' | 'declined' | 'cancelled';
+  full_name: string;
+  org_name: string;
+  org_type: string;
+  role_in_org: string;
+  org_url: string | null;
+  intent_summary: string;
+  publishing_experience: string;
+  language_pref: string | null;
+  attestation_accepted: boolean;
+  admin_note: string | null;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type PublishAccessRequestInsert = {
+  user_id: string;
+  applicant_email: string;
+  status?: 'pending';
+  full_name: string;
+  org_name: string;
+  org_type: string;
+  role_in_org: string;
+  org_url?: string | null;
+  intent_summary: string;
+  publishing_experience: string;
+  language_pref?: string | null;
+  attestation_accepted: boolean;
+};
+
+export type PublishAccessRequestUpdate = Partial<
+  Omit<PublishAccessRequest, 'id' | 'user_id' | 'created_at'>
+>;
+
 // ============================================================================
 // BASE TABLE INTERFACES
 // ============================================================================
@@ -394,6 +436,12 @@ export interface Database {
         Row: ExternalIdentity;
         Insert: ExternalIdentityInsert;
         Update: ExternalIdentityUpdate;
+        Relationships: [];
+      };
+      publish_access_requests: {
+        Row: PublishAccessRequest;
+        Insert: PublishAccessRequestInsert;
+        Update: PublishAccessRequestUpdate;
         Relationships: [];
       };
     };

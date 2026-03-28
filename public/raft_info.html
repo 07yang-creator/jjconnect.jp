@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAFT2.03 - 智能财务分析系统 | JJConnect</title>
+    <link rel="icon" href="wp-content/uploads/2025/08/cropped-cropped-logo-icon-1.png">
+    <link rel="stylesheet" href="navbar.css">
+    <style>
+        :root {
+            --product-color: #2B6CB0;
+            --product-color-light: #EBF4FA;
+            --product-color-dark: #215387;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1A202C;
+            background: #F7FAFC;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--product-color) 0%, var(--product-color-dark) 100%);
+            color: white;
+            padding: 5rem 2rem 3rem;
+            text-align: center;
+        }
+        
+        .hero-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        
+        .hero-tagline {
+            font-size: 1.5rem;
+            opacity: 0.95;
+            margin-bottom: 2rem;
+        }
+        
+        .hero-description {
+            max-width: 700px;
+            margin: 0 auto;
+            font-size: 1.125rem;
+            opacity: 0.9;
+        }
+        
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+        
+        /* Section */
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .section-title {
+            font-size: 2rem;
+            color: var(--product-color);
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .section-subtitle {
+            font-size: 1.25rem;
+            color: #2D3748;
+            margin-bottom: 2rem;
+            margin-top: 2rem;
+            font-weight: 600;
+        }
+        
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .feature-card {
+            background: var(--product-color-light);
+            padding: 2rem;
+            border-radius: 8px;
+            transition: transform 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-card h3 {
+            color: var(--product-color-dark);
+            margin-bottom: 0.75rem;
+            font-size: 1.25rem;
+        }
+        
+        .feature-card p {
+            color: #2D3748;
+            line-height: 1.7;
+        }
+        
+        /* Benefits List */
+        .benefits-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .benefits-list li {
+            padding: 1rem 0;
+            border-bottom: 1px solid #EDF2F7;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .benefits-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .benefit-icon {
+            color: var(--product-color);
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .benefit-content h4 {
+            color: #1A202C;
+            margin-bottom: 0.5rem;
+            font-size: 1.125rem;
+        }
+        
+        .benefit-content p {
+            color: #4A5568;
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, var(--product-color-light) 0%, white 100%);
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            margin-top: 3rem;
+        }
+        
+        .cta-section h2 {
+            font-size: 2rem;
+            color: var(--product-color-dark);
+            margin-bottom: 1rem;
+        }
+        
+        .cta-section p {
+            font-size: 1.125rem;
+            color: #4A5568;
+            margin-bottom: 2rem;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 3rem;
+            background: var(--product-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.125rem;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .cta-button:hover {
+            background: var(--product-color-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        
+        /* Login Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #718096;
+        }
+        
+        .modal h2 {
+            margin-bottom: 1.5rem;
+            color: var(--product-color);
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--product-color);
+        }
+        
+        .alert {
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-success {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+        
+        .alert-error {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero-tagline {
+                font-size: 1.25rem;
+            }
+            
+            .section {
+                padding: 2rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar will be injected here -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="navbar.js"></script>
+    
+    <!-- Hero Section -->
+    <div class="hero">
+        <div class="hero-icon">🚢</div>
+        <h1>RAFT2.03</h1>
+        <p class="hero-tagline">智能财务分析与预测系统</p>
+        <p class="hero-description">助您驾驭商业海洋，用数据洞察未来，用智能决策现在</p>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Introduction -->
+        <div class="section">
+            <h2 class="section-title">产品简介</h2>
+            <p style="font-size: 1.125rem; line-height: 1.8; color: #2D3748;">
+                RAFT2.03 是一款专为现代企业打造的智能财务分析与预测系统。通过整合先进的数据分析技术和人工智能算法，
+                RAFT2.03 能够帮助企业实时追踪财务指标、预测未来趋势、生成专业报表，让财务管理变得更加简单高效。
+            </p>
+            <p style="font-size: 1.125rem; line-height: 1.8; color: #2D3748; margin-top: 1rem;">
+                无论您是初创企业还是成熟公司，RAFT2.03 都能为您提供量身定制的财务解决方案，帮助您在商业海洋中稳健前行。
+            </p>
+        </div>
+        
+        <!-- Core Features -->
+        <div class="section">
+            <h2 class="section-title">核心功能</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>实时数据分析</h3>
+                    <p>强大的数据可视化工具，实时追踪您的财务指标，让每一笔收支都清晰可见。支持多维度数据展示和自定义仪表盘。</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🔮</div>
+                    <h3>AI 智能预测</h3>
+                    <p>基于机器学习的趋势分析引擎，结合历史数据和市场环境，为您提供精准的财务预测和风险预警。</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h3>专业报表生成</h3>
+                    <p>一键生成符合财务标准的专业报表，支持损益表、资产负债表、现金流量表等多种格式，可直接导出 PDF、Excel。</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3>深度财务分析</h3>
+                    <p>多维度财务比率分析，自动计算盈利能力、偿债能力、运营效率等关键指标，并提供专业解读建议。</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🔔</div>
+                    <h3>智能预警系统</h3>
+                    <p>自动监测异常财务活动，及时发现潜在风险，通过邮件、短信或应用内通知及时提醒管理者。</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🌐</div>
+                    <h3>多平台协同</h3>
+                    <p>支持 Web、移动 APP、API 接口等多种访问方式，团队成员可随时随地查看和管理财务数据。</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Benefits -->
+        <div class="section">
+            <h2 class="section-title">为什么选择 RAFT2.03？</h2>
+            <ul class="benefits-list">
+                <li>
+                    <span class="benefit-icon">✅</span>
+                    <div class="benefit-content">
+                        <h4>提升决策效率</h4>
+                        <p>通过实时数据和智能分析，帮助管理层快速做出明智的财务决策，减少决策时间达 60%。</p>
+                    </div>
+                </li>
+                <li>
+                    <span class="benefit-icon">✅</span>
+                    <div class="benefit-content">
+                        <h4>降低运营成本</h4>
+                        <p>自动化财务流程，减少人工操作和错误，每月可节省财务团队 40% 的工作时间。</p>
+                    </div>
+                </li>
+                <li>
+                    <span class="benefit-icon">✅</span>
+                    <div class="benefit-content">
+                        <h4>增强风险控制</h4>
+                        <p>智能预警系统能够提前发现潜在风险，帮助企业及时采取应对措施，降低财务损失。</p>
+                    </div>
+                </li>
+                <li>
+                    <span class="benefit-icon">✅</span>
+                    <div class="benefit-content">
+                        <h4>数据安全可靠</h4>
+                        <p>采用银行级加密技术，多重备份机制，确保您的财务数据绝对安全，符合国际数据保护标准。</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Use Cases -->
+        <div class="section">
+            <h2 class="section-title">适用场景</h2>
+            
+            <h3 class="section-subtitle">初创企业</h3>
+            <p style="color: #4A5568; line-height: 1.8;">
+                快速建立财务管理体系，实时监控现金流，为融资决策提供数据支持。
+            </p>
+            
+            <h3 class="section-subtitle">中小企业</h3>
+            <p style="color: #4A5568; line-height: 1.8;">
+                优化财务流程，提升管理效率，通过数据分析发现业务增长机会。
+            </p>
+            
+            <h3 class="section-subtitle">集团企业</h3>
+            <p style="color: #4A5568; line-height: 1.8;">
+                统一管理多子公司财务数据，实现集团财务的集中监控和分析，支持合并报表生成。
+            </p>
+        </div>
+        
+        <!-- CTA -->
+        <div class="cta-section">
+            <h2>准备好开始使用了吗？</h2>
+            <p>立即进入 RAFT2.03 系统，体验智能财务管理的强大功能</p>
+            <button class="cta-button" id="enter-system-btn">立即进入系统</button>
+        </div>
+    </div>
+    
+    <!-- Login Modal -->
+    <div class="modal" id="login-modal">
+        <div class="modal-content">
+            <button class="modal-close" id="modal-close">&times;</button>
+            <h2>登录以继续</h2>
+            <div id="message-container"></div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="cta-button" style="width: 100%;">登录</button>
+            </form>
+            <p style="text-align: center; margin-top: 1rem;">
+                还没有账号？<a href="login.html" style="color: var(--product-color);">立即注册</a>
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        const API_ENDPOINT = 'http://localhost:8787';
+        const supabaseCfg = window.JJCONNECT_CONFIG || {};
+        const SUPABASE_URL = supabaseCfg.supabaseUrl;
+        const SUPABASE_ANON_KEY = supabaseCfg.supabaseAnonKey;
+        const supabase = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
+            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+            : null;
+        
+        // Check if user is logged in
+        async function checkAuth() {
+            if (!supabase) return false;
+
+            try {
+                const { data } = await supabase.auth.getSession();
+                return !!data?.session;
+            } catch (error) {
+                return false;
+            }
+        }
+        
+        // Show modal
+        function showModal() {
+            document.getElementById('login-modal').classList.add('active');
+        }
+        
+        // Hide modal
+        function hideModal() {
+            document.getElementById('login-modal').classList.remove('active');
+        }
+        
+        // Show message
+        function showMessage(text, type = 'success') {
+            const container = document.getElementById('message-container');
+            container.innerHTML = `<div class="alert alert-${type}">${text}</div>`;
+            setTimeout(() => container.innerHTML = '', 3000);
+        }
+        
+        // Handle login
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+                
+                if (!error && data?.session) {
+                    localStorage.setItem('user_info', JSON.stringify(data.user || {}));
+                    showMessage('登录成功！正在跳转...');
+                    setTimeout(() => {
+                        window.location.href = 'raft_home.html';
+                    }, 1000);
+                } else {
+                    showMessage(error?.message || '登录失败', 'error');
+                }
+            } catch (error) {
+                showMessage('网络错误，请重试', 'error');
+            }
+        });
+        
+        // Enter system button handler
+        document.getElementById('enter-system-btn').addEventListener('click', async () => {
+            const isLoggedIn = await checkAuth();
+            if (!isLoggedIn) {
+                showModal();
+            } else {
+                window.location.href = 'raft_home.html';
+            }
+        });
+        
+        // Close modal
+        document.getElementById('modal-close').addEventListener('click', hideModal);
+        
+        // Close modal on outside click
+        document.getElementById('login-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'login-modal') {
+                hideModal();
+            }
+        });
+    </script>
+</body>
+</html>

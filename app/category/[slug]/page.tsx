@@ -9,6 +9,7 @@ import { cache } from 'react';
 import { createServerSupabaseClient, getCurrentUser, isAuthorizedUser } from '@/lib/supabase/server';
 import type { Category, Post } from '@/types/database';
 import { getCoverImageUrl } from '@/lib/cloudflare-image-url';
+import { categoryDisplayName } from '@/lib/categories/displayName';
 
 interface PostWithAuthor extends Post {
   author: {
@@ -90,9 +91,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     return { title: 'Category Not Found' };
   }
 
+  const label = categoryDisplayName(category);
   return {
-    title: `${category.name} - JJConnect`,
-    description: category.description || `Browse articles in ${category.name} category`,
+    title: `${label} - JJConnect`,
+    description: category.description || `Browse articles in ${label}`,
   };
 }
 
@@ -130,13 +132,13 @@ export default async function CategoryPage({
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
-          <span className="text-gray-900 font-medium">{category.name}</span>
+          <span className="text-gray-900 font-medium">{categoryDisplayName(category)}</span>
         </nav>
 
         {/* Category Header */}
         <header className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-3">
-            {category.name}
+            {categoryDisplayName(category)}
           </h1>
           {category.description && (
             <p className="text-lg text-gray-600 max-w-3xl">
@@ -189,7 +191,7 @@ export default async function CategoryPage({
                       href={`/category/${cat.slug}`}
                       className="block px-3 py-2 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-600 transition-colors"
                     >
-                      {cat.name}
+                      {categoryDisplayName(cat)}
                     </Link>
                   ))}
                 </div>
