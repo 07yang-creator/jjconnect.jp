@@ -13,7 +13,9 @@ wrangler.toml.backup
 .env.local
 .env.development
 .env.production
-config.js
+# Generated Supabase client config (run npm run generate:public-config locally or in CI)
+/config.js
+public/config.js
 scripts/backup.env
 scripts/backup.log
 scripts/backup.err

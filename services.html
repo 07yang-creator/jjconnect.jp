@@ -4,73 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Services | JJConnect</title>
-    <link rel="icon" href="wp-content/uploads/2025/08/cropped-cropped-logo-icon-1.png">
-    <link rel="stylesheet" href="navbar.css">
+    <link rel="icon" href="/brand/jjconnect-logo.png">
+    <link rel="stylesheet" href="/navbar.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             line-height: 1.6;
             color: #1A202C;
             background: #F7FAFC;
         }
-        
         .hero {
             background: linear-gradient(135deg, #2B6CB0 0%, #215387 100%);
             color: white;
             padding: 5rem 2rem 3rem;
             text-align: center;
         }
-        
-        .hero h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            font-weight: 700;
-        }
-        
-        .hero p {
-            font-size: 1.25rem;
-            opacity: 0.95;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 4rem 2rem;
-        }
-        
-        .intro-text {
-            text-align: center;
-            max-width: 800px;
-            margin: 0 auto 4rem;
-        }
-        
-        .intro-text h2 {
-            font-size: 2rem;
-            color: #1A202C;
-            margin-bottom: 1rem;
-        }
-        
-        .intro-text p {
-            font-size: 1.125rem;
-            color: #4A5568;
-            line-height: 1.8;
-        }
-        
+        .hero h1 { font-size: 3rem; margin-bottom: 1rem; font-weight: 700; }
+        .hero p { font-size: 1.25rem; opacity: 0.95; max-width: 600px; margin: 0 auto; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 4rem 2rem; }
+        .intro-text { text-align: center; max-width: 800px; margin: 0 auto 4rem; }
+        .intro-text h2 { font-size: 2rem; color: #1A202C; margin-bottom: 1rem; }
+        .intro-text p { font-size: 1.125rem; color: #4A5568; line-height: 1.8; }
         .service-cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 2rem;
             margin-top: 3rem;
         }
-        
         .service-card {
             background: white;
             border-radius: 8px;
@@ -80,54 +41,19 @@
             text-align: center;
             border: 2px solid transparent;
         }
-        
         .service-card:hover {
             transform: translateY(-10px);
             box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
         }
-        
-        .service-card.blue {
-            border-color: #2B6CB0;
-        }
-        
-        .service-card.blue:hover {
-            background: linear-gradient(135deg, #EBF4FA 0%, white 100%);
-        }
-        
-        .service-card.cyan {
-            border-color: #06B6D4;
-        }
-        
-        .service-card.cyan:hover {
-            background: linear-gradient(135deg, #CFFAFE 0%, white 100%);
-        }
-        
-        .service-card.orange {
-            border-color: #F59E0B;
-        }
-        
-        .service-card.orange:hover {
-            background: linear-gradient(135deg, #FEF3C7 0%, white 100%);
-        }
-        
-        .service-icon {
-            font-size: 4rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .service-card h3 {
-            font-size: 1.75rem;
-            margin-bottom: 1rem;
-            color: #1A202C;
-        }
-        
-        .service-card p {
-            font-size: 1.125rem;
-            color: #4A5568;
-            margin-bottom: 2rem;
-            line-height: 1.7;
-        }
-        
+        .service-card.blue { border-color: #2B6CB0; }
+        .service-card.blue:hover { background: linear-gradient(135deg, #EBF4FA 0%, white 100%); }
+        .service-card.cyan { border-color: #06B6D4; }
+        .service-card.cyan:hover { background: linear-gradient(135deg, #CFFAFE 0%, white 100%); }
+        .service-card.orange { border-color: #F59E0B; }
+        .service-card.orange:hover { background: linear-gradient(135deg, #FEF3C7 0%, white 100%); }
+        .service-icon { font-size: 4rem; margin-bottom: 1.5rem; }
+        .service-card h3 { font-size: 1.75rem; margin-bottom: 1rem; color: #1A202C; }
+        .service-card p { font-size: 1.125rem; color: #4A5568; margin-bottom: 2rem; line-height: 1.7; }
         .service-cta {
             display: inline-block;
             padding: 0.875rem 2rem;
@@ -138,61 +64,26 @@
             transition: all 0.3s;
             color: white;
         }
-        
-        .service-cta.blue {
-            background: #2B6CB0;
-        }
-        
-        .service-cta.blue:hover {
-            background: #215387;
-            transform: scale(1.05);
-        }
-        
-        .service-cta.cyan {
-            background: #06B6D4;
-        }
-        
-        .service-cta.cyan:hover {
-            background: #0891B2;
-            transform: scale(1.05);
-        }
-        
-        .service-cta.orange {
-            background: #F59E0B;
-        }
-        
-        .service-cta.orange:hover {
-            background: #D97706;
-            transform: scale(1.05);
-        }
-        
+        .service-cta.blue { background: #2B6CB0; }
+        .service-cta.blue:hover { background: #215387; transform: scale(1.05); }
+        .service-cta.cyan { background: #06B6D4; }
+        .service-cta.cyan:hover { background: #0891B2; transform: scale(1.05); }
+        .service-cta.orange { background: #F59E0B; }
+        .service-cta.orange:hover { background: #D97706; transform: scale(1.05); }
         @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2rem;
-            }
-            
-            .hero p {
-                font-size: 1rem;
-            }
-            
-            .service-cards {
-                grid-template-columns: 1fr;
-            }
-            
-            .service-card {
-                padding: 2rem 1.5rem;
-            }
+            .hero h1 { font-size: 2rem; }
+            .hero p { font-size: 1rem; }
+            .service-cards { grid-template-columns: 1fr; }
+            .service-card { padding: 2rem 1.5rem; }
         }
     </style>
 </head>
 <body>
-    <script src="navbar.js"></script>
-    
+    <script src="/navbar.js"></script>
     <div class="hero">
         <h1>JJConnect Services</h1>
         <p>Professional services and digital solutions for your business</p>
     </div>
-    
     <div class="container">
         <div class="intro-text">
             <h2>What we offer</h2>
@@ -202,53 +93,29 @@
                 and decisions backed by data—so your team can move faster with confidence.
             </p>
         </div>
-        
         <div class="service-cards">
             <div class="service-card blue">
                 <div class="service-icon">🚢</div>
                 <h3>RAFT2.03</h3>
                 <p>Financial analysis and forecasting support to help you read the market and plan ahead</p>
-                <a href="raft_info.html" class="service-cta blue">Learn more →</a>
+                <a href="/raft_info.html" class="service-cta blue">Learn more →</a>
             </div>
-            
             <div class="service-card cyan">
                 <div class="service-icon">🏢</div>
                 <h3>Mansion Manager</h3>
                 <p>Structured apartment and building operations support for owners and managers</p>
-                <a href="mansion_info.html" class="service-cta cyan">Learn more →</a>
+                <a href="/mansion_info.html" class="service-cta cyan">Learn more →</a>
             </div>
-            
             <div class="service-card orange">
                 <div class="service-icon">📊</div>
                 <h3>Property Report</h3>
                 <p>Real estate market insight and reporting tailored to your questions</p>
-                <a href="property_report_info.html" class="service-cta orange">Learn more →</a>
+                <a href="/property_report_info.html" class="service-cta orange">Learn more →</a>
             </div>
         </div>
-
         <div style="margin-top: 3rem; text-align: center;">
-            <a
-                href="/publish"
-                style="
-                    display: inline-block;
-                    padding: 0.85rem 2.75rem;
-                    border-radius: 9999px;
-                    background: #2B6CB0;
-                    color: #ffffff;
-                    font-weight: 600;
-                    font-size: 1rem;
-                    text-decoration: none;
-                    box-shadow: 0 10px 25px rgba(43, 108, 176, 0.3);
-                    transition: all 0.2s ease;
-                "
-                onmouseover="this.style.transform='translateY(-2px)';"
-                onmouseout="this.style.transform='translateY(0)';"
-            >
-                Contribute
-            </a>
-            <p style="margin-top: 0.75rem; color: #1A202C; font-weight: 500;">
-                Post your insights on jjconnect.jp. NOW!
-            </p>
+            <a href="/publish" style="display:inline-block;padding:0.85rem 2.75rem;border-radius:9999px;background:#2B6CB0;color:#fff;font-weight:600;font-size:1rem;text-decoration:none;box-shadow:0 10px 25px rgba(43,108,176,0.3);">Contribute</a>
+            <p style="margin-top: 0.75rem; color: #1A202C; font-weight: 500;">Post your insights on jjconnect.jp. NOW!</p>
         </div>
     </div>
 </body>

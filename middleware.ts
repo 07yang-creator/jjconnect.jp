@@ -7,7 +7,6 @@ const ADMIN_PATHS = new Set([
   '/admin-console.html',
   '/admin_dashboard.html',
   '/admin.html',
-  '/admin-test.html',
 ]);
 
 const PROFILE_GATE_EXEMPT_PREFIXES = ['/auth/', '/api/', '/_next/'];

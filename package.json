@@ -6,9 +6,10 @@
   "scripts": {
     "inject-env": "node scripts/inject-env-into-html.js",
     "generate:public-config": "node scripts/generate-public-config-js.mjs",
+    "sync:static-root": "node scripts/sync-static-to-github-pages-root.mjs",
     "dev": "next dev",
     "predev": "node scripts/generate-public-config-js.mjs",
-    "build": "node scripts/generate-public-config-js.mjs && next build",
+    "build": "node scripts/generate-public-config-js.mjs && node scripts/sync-static-to-github-pages-root.mjs && next build",
     "start": "next start",
     "lint": "next lint",
     "build:worker": "echo 'Build step - copying worker files' && mkdir -p .wrangler/dist && cp workers/auth-worker.js .wrangler/dist/index.js",

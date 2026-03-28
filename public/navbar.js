@@ -87,8 +87,16 @@
         if (!origin || origin === 'null') return;
         try {
             const res = await fetch(origin + '/api/public-config', { credentials: 'include' });
-            const j = res.ok ? await res.json() : null;
-            if (!j) return;
+            if (!res.ok) return;
+            const text = await res.text();
+            if (!text || !String(text).trim()) return;
+            let j;
+            try {
+                j = JSON.parse(text);
+            } catch (_) {
+                return;
+            }
+            if (!j || typeof j !== 'object') return;
             window.JJCONNECT_CONFIG = Object.assign({}, window.JJCONNECT_CONFIG || {}, {
                 authProvider: j.authProvider || (window.JJCONNECT_CONFIG && window.JJCONNECT_CONFIG.authProvider),
                 supabaseUrl: j.supabaseUrl || (window.JJCONNECT_CONFIG && window.JJCONNECT_CONFIG.supabaseUrl),
@@ -151,7 +159,7 @@
                 <!-- 导航链接（桌面端） -->
                 <div class="jjc-navbar-nav">
                     <a href="gettingready.html" class="jjc-nav-link">Home</a>
-                    <a href="/" class="jjc-nav-link">Articles</a>
+                    <a href="/home.html" class="jjc-nav-link">Articles</a>
                     <!-- Services dropdown -->
                     <div class="jjc-nav-dropdown" id="jjc-services-dropdown">
                         <a href="services.html" class="jjc-nav-link jjc-nav-dropdown-toggle">Services</a>
@@ -206,7 +214,7 @@
             <!-- 移动端菜单 -->
             <div class="jjc-mobile-menu" id="jjc-mobile-menu">
                 <a href="gettingready.html" class="jjc-mobile-link">Home</a>
-                <a href="/" class="jjc-mobile-link">Articles</a>
+                <a href="/home.html" class="jjc-mobile-link">Articles</a>
                 
                 <div class="jjc-mobile-divider"></div>
                 <a href="services.html" class="jjc-mobile-link" style="font-weight: 600;">Services</a>
