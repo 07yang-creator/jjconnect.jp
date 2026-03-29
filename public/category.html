@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-jjc-skip-public-config>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +12,7 @@
   
   <!-- Supabase Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js"></script>
+  <script src="jjc-default-config.js"></script>
   
   <style>
     :root {
@@ -121,7 +121,7 @@
     // ========================================================================
     const SUPABASE_URL = window.JJCONNECT_CONFIG.supabaseUrl;
     const SUPABASE_ANON_KEY = window.JJCONNECT_CONFIG.supabaseAnonKey;
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Get slug from URL parameter
     const urlParams = new URLSearchParams(window.location.search);
@@ -133,7 +133,7 @@
     
     async function getCategoryBySlug(slug) {
       try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
           .from('categories')
           .select('*')
           .eq('slug', slug)
@@ -149,7 +149,7 @@
 
     async function getPostsByCategory(categoryId) {
       try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
           .from('posts')
           .select(`
             *,
@@ -169,7 +169,7 @@
 
     async function getRelatedCategories(currentSlug) {
       try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
           .from('categories')
           .select('*')
           .neq('slug', currentSlug)

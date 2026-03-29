@@ -72,9 +72,6 @@ for (const [from, to] of pairs) {
   copyFile(from, to);
 }
 
-const cfg = resolve(root, 'public/config.js');
-if (existsSync(cfg)) {
-  copyFile('public/config.js', 'config.js');
-}
+copyFile('public/jjc-default-config.js', 'jjc-default-config.js');
 
 console.log('[sync-static-root] done. (index.html is root-only — not in public/ for Next "/" )');

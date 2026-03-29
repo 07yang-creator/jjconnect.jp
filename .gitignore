@@ -13,7 +13,7 @@ wrangler.toml.backup
 .env.local
 .env.development
 .env.production
-# Generated Supabase client config (run npm run generate:public-config locally or in CI)
+# Legacy generated path (replaced by committed public/jjc-default-config.js; run npm run generate:public-config to fill from .env)
 /config.js
 public/config.js
 scripts/backup.env

@@ -81,10 +81,13 @@
 
     recreateSupabaseClient();
 
-    /** Align with Next `/api/public-config` (JJC_AUTH_PROVIDER precedence) so Sign in uses Auth0 without editing config.js. */
+    /** Align with Next `/api/public-config` (JJC_AUTH_PROVIDER precedence) so Sign in uses Auth0 without editing jjc-default-config.js. */
     async function mergeRemotePublicConfig() {
         const origin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : '';
         if (!origin || origin === 'null') return;
+        if (typeof document !== 'undefined' && document.documentElement && document.documentElement.hasAttribute('data-jjc-skip-public-config')) return;
+        const cfg0 = window.JJCONNECT_CONFIG || {};
+        if (cfg0.supabaseUrl && cfg0.supabaseAnonKey) return;
         try {
             const res = await fetch(origin + '/api/public-config', { credentials: 'include' });
             if (!res.ok) return;
@@ -105,7 +108,7 @@
             runtimeAuthProvider = ((window.JJCONNECT_CONFIG || {}).authProvider || 'supabase').toLowerCase();
             recreateSupabaseClient();
         } catch (_) {
-            /* keep config.js defaults */
+            /* keep JJCONNECT_CONFIG defaults */
         }
     }
     
@@ -159,7 +162,7 @@
                 <!-- 导航链接（桌面端） -->
                 <div class="jjc-navbar-nav">
                     <a href="gettingready.html" class="jjc-nav-link">Home</a>
-                    <a href="/home.html" class="jjc-nav-link">Articles</a>
+                    ${isLoggedIn ? '<a href="/" class="jjc-nav-link">Articles</a>' : ''}
                     <!-- Services dropdown -->
                     <div class="jjc-nav-dropdown" id="jjc-services-dropdown">
                         <a href="services.html" class="jjc-nav-link jjc-nav-dropdown-toggle">Services</a>
@@ -214,7 +217,7 @@
             <!-- 移动端菜单 -->
             <div class="jjc-mobile-menu" id="jjc-mobile-menu">
                 <a href="gettingready.html" class="jjc-mobile-link">Home</a>
-                <a href="/home.html" class="jjc-mobile-link">Articles</a>
+                ${isLoggedIn ? '<a href="/" class="jjc-mobile-link">Articles</a>' : ''}
                 
                 <div class="jjc-mobile-divider"></div>
                 <a href="services.html" class="jjc-mobile-link" style="font-weight: 600;">Services</a>

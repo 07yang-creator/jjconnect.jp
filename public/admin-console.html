@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-jjc-skip-public-config>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Console | JJConnect</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js"></script>
+  <script src="jjc-default-config.js"></script>
   <style>
     :root {
       --bg: #f4f7fb;
@@ -142,7 +142,7 @@
     const supabaseCfg = window.JJCONNECT_CONFIG || {};
     const SUPABASE_URL = supabaseCfg.supabaseUrl;
     const SUPABASE_ANON_KEY = supabaseCfg.supabaseAnonKey;
-    const supabase = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
+    const supabaseClient = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
       ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
       : null;
 
@@ -151,8 +151,8 @@
     }
 
     async function getAccessToken() {
-      if (!supabase) return '';
-      const { data } = await supabase.auth.getSession();
+      if (!supabaseClient) return '';
+      const { data } = await supabaseClient.auth.getSession();
       return data?.session?.access_token || '';
     }
 

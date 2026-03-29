@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en-US" class="no-js" itemtype="https://schema.org/WebPage" itemscope>
+<html lang="en-US" class="no-js" itemtype="https://schema.org/WebPage" itemscope data-jjc-skip-public-config>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
@@ -522,7 +522,7 @@ tr:hover {
 </head>
 <body class="admin-page">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
+<script src="jjc-default-config.js"></script>
 <script src="navbar.js"></script>
 <style>
 /* Hide any existing headers */
@@ -1033,16 +1033,16 @@ function getApiBase() {
 const supabaseCfg = window.JJCONNECT_CONFIG || {};
 const SUPABASE_URL = supabaseCfg.supabaseUrl;
 const SUPABASE_ANON_KEY = supabaseCfg.supabaseAnonKey;
-const supabase = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
+const supabaseClient = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
     : null;
 const ROLE_MATRIX_SYNC_SESSION_DONE_KEY = 'jjc_role_matrix_sync_done';
 const ROLE_MATRIX_SYNC_LAST_TS_KEY = 'jjc_role_matrix_sync_last_ts';
 
 async function getAccessToken() {
-    if (!supabase) return '';
+    if (!supabaseClient) return '';
     try {
-        const { data } = await supabase.auth.getSession();
+        const { data } = await supabaseClient.auth.getSession();
         return data?.session?.access_token || '';
     } catch (error) {
         console.error('Failed to get Supabase session:', error);
@@ -1148,14 +1148,14 @@ async function syncRoleMatrixSilentlyOncePerSession() {
  */
 async function checkAuth() {
     try {
-        if (!supabase) {
+        if (!supabaseClient) {
             return { authenticated: false, reason: 'supabase_not_configured' };
         }
-        if (supabase) {
-            const { data: sessionData } = await supabase.auth.getSession();
+        if (supabaseClient) {
+            const { data: sessionData } = await supabaseClient.auth.getSession();
             const session = sessionData?.session;
             if (session) {
-                const { data: userResp } = await supabase.auth.getUser();
+                const { data: userResp } = await supabaseClient.auth.getUser();
                 const user = userResp?.user;
                 userRole = Number(user?.user_metadata?.role ?? userRole);
                 currentRoleLevel = user?.user_metadata?.role_level || currentRoleLevel;

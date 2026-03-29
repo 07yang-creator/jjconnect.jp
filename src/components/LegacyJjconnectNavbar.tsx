@@ -55,7 +55,7 @@ export default function LegacyJjconnectNavbar() {
 
         await loadScriptOnce('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2', 'jjc-site-script-supabase');
         if (cancelled) return;
-        await loadScriptOnce('/config.js', 'jjc-site-script-config');
+        await loadScriptOnce('/jjc-default-config.js', 'jjc-site-script-config');
         if (cancelled) return;
         await loadScriptOnce('/navbar.js', 'jjc-site-script-navbar');
       } catch (e) {

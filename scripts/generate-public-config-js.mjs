@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Writes public/config.js for static HTML (login.html, navbar.js, etc.).
+ * Writes public/jjc-default-config.js for static HTML (login.html, navbar.js, product pages, etc.).
  * Values mirror config.example.js + lib/auth/provider precedence.
  *
  * Run automatically via `npm run build`. Requires .env / .env.local at build time.
@@ -32,7 +32,7 @@ const authProvider = getAuthProvider();
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn(
-    '[generate-public-config-js] Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY — wrote placeholder config.js (static login may not work until env is set at build).'
+    '[generate-public-config-js] Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY — wrote placeholder jjc-default-config.js (static login may not work until env is set at build).'
   );
 }
 
@@ -48,6 +48,6 @@ window.JJCONNECT_CONFIG = {
 };
 `;
 
-const outPath = resolve(outDir, 'config.js');
+const outPath = resolve(outDir, 'jjc-default-config.js');
 writeFileSync(outPath, body, 'utf8');
 console.log('[generate-public-config-js] Wrote', outPath);
