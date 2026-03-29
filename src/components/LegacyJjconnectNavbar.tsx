@@ -7,6 +7,10 @@ const NAVBAR_CSS_HREF = '/navbar.css';
 declare global {
   interface Window {
     JJCNavbar?: { refresh: () => Promise<void> };
+    /** Set in `app/layout.tsx` from server `getCurrentUser()` so Articles matches real session. */
+    __JJC_SHOW_ARTICLES_LINK__?: boolean;
+    /** When true, `navbar.js` does not fetch `/api/public-config` (layout already inlined public config). */
+    __JJC_SKIP_REMOTE_PUBLIC_CONFIG__?: boolean;
   }
 }
 

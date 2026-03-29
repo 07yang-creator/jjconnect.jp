@@ -90,6 +90,28 @@ function LoginPageContent() {
   }, [postAuthNext, router]);
 
   useEffect(() => {
+    type WinCfg = Window & {
+      __JJC_SKIP_REMOTE_PUBLIC_CONFIG__?: boolean;
+      JJCONNECT_CONFIG?: {
+        authProvider?: string;
+        auth0Connections?: ConnectionMap;
+      };
+    };
+    const w = window as WinCfg;
+    if (w.__JJC_SKIP_REMOTE_PUBLIC_CONFIG__ === true && typeof w.JJCONNECT_CONFIG?.authProvider === 'string') {
+      const isA = w.JJCONNECT_CONFIG.authProvider === 'auth0';
+      setAuthMode(isA ? 'auth0' : 'supabase');
+      if (isA) {
+        const c = w.JJCONNECT_CONFIG.auth0Connections;
+        if (c && typeof c === 'object') {
+          setConnections(c);
+        } else {
+          setConnections(FALLBACK_CONNECTIONS);
+        }
+      }
+      return;
+    }
+
     fetch('/api/public-config', { credentials: 'include' })
       .then((res) => (res.ok ? res.json() : null))
       .then((json) => {

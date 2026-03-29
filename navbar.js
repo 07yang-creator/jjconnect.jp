@@ -85,6 +85,7 @@
     async function mergeRemotePublicConfig() {
         const origin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : '';
         if (!origin || origin === 'null') return;
+        if (typeof window !== 'undefined' && window.__JJC_SKIP_REMOTE_PUBLIC_CONFIG__ === true) return;
         if (typeof document !== 'undefined' && document.documentElement && document.documentElement.hasAttribute('data-jjc-skip-public-config')) return;
         const cfg0 = window.JJCONNECT_CONFIG || {};
         if (cfg0.supabaseUrl && cfg0.supabaseAnonKey) return;
@@ -132,6 +133,11 @@
      * 生成导航栏 HTML
      */
     function createNavbarHTML(isLoggedIn, userData) {
+        /** App Router layout sets this from server session; static HTML pages leave it undefined (use isLoggedIn). */
+        const showArticlesLink =
+            typeof window !== 'undefined' && typeof window.__JJC_SHOW_ARTICLES_LINK__ === 'boolean'
+                ? window.__JJC_SHOW_ARTICLES_LINK__
+                : isLoggedIn;
         const signInHref = signInHrefForCurrentPage();
         const currentRole = userData?.role || 'T';
         const isAdmin = currentRole === 'A';
@@ -162,7 +168,7 @@
                 <!-- 导航链接（桌面端） -->
                 <div class="jjc-navbar-nav">
                     <a href="gettingready.html" class="jjc-nav-link">Home</a>
-                    ${isLoggedIn ? '<a href="/" class="jjc-nav-link">Articles</a>' : ''}
+                    ${showArticlesLink ? '<a href="/" class="jjc-nav-link">Articles</a>' : ''}
                     <!-- Services dropdown -->
                     <div class="jjc-nav-dropdown" id="jjc-services-dropdown">
                         <a href="services.html" class="jjc-nav-link jjc-nav-dropdown-toggle">Services</a>
@@ -217,7 +223,7 @@
             <!-- 移动端菜单 -->
             <div class="jjc-mobile-menu" id="jjc-mobile-menu">
                 <a href="gettingready.html" class="jjc-mobile-link">Home</a>
-                ${isLoggedIn ? '<a href="/" class="jjc-mobile-link">Articles</a>' : ''}
+                ${showArticlesLink ? '<a href="/" class="jjc-mobile-link">Articles</a>' : ''}
                 
                 <div class="jjc-mobile-divider"></div>
                 <a href="services.html" class="jjc-mobile-link" style="font-weight: 600;">Services</a>
@@ -308,31 +314,46 @@
         }
     }
     
+    /** Clear Next/Supabase SSR auth cookies (no-op if not on app origin). */
+    async function clearServerSupabaseSession() {
+        const origin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : '';
+        if (!origin || origin === 'null') return;
+        try {
+            await fetch(origin + '/api/auth/sign-out', { method: 'POST', credentials: 'include' });
+        } catch (_) {
+            /* static hosting / offline */
+        }
+    }
+
     /**
      * 退出登录
      */
-    function handleLogout() {
-        if (isAuth0()) {
+    async function handleLogout() {
+        const clearLocalChrome = () => {
             localStorage.removeItem('user_info');
             localStorage.removeItem('jjc_avatar_url');
             document.cookie = 'jjc_sb_access_token=; Path=/; Max-Age=0; SameSite=Lax';
+        };
+
+        if (isAuth0()) {
+            clearLocalChrome();
+            await clearServerSupabaseSession();
             window.location.href = `/auth/logout?returnTo=${encodeURIComponent(window.location.origin)}`;
             return;
         }
 
         const finalize = () => {
-            localStorage.removeItem('user_info');
-            localStorage.removeItem('jjc_avatar_url');
-            document.cookie = 'jjc_sb_access_token=; Path=/; Max-Age=0; SameSite=Lax';
+            clearLocalChrome();
             window.location.reload();
         };
-        if (!supabase) {
-            finalize();
-            return;
+
+        try {
+            if (supabase) await supabase.auth.signOut();
+        } catch (error) {
+            console.error('Logout failed:', error);
         }
-        supabase.auth.signOut()
-            .catch((error) => console.error('Logout failed:', error))
-            .finally(finalize);
+        await clearServerSupabaseSession();
+        finalize();
     }
     
     /**
@@ -469,14 +490,14 @@
         if (logoutBtn) {
             logoutBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                handleLogout();
+                void handleLogout();
             });
         }
         
         if (mobileLogoutBtn) {
             mobileLogoutBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                handleLogout();
+                void handleLogout();
             });
         }
         
