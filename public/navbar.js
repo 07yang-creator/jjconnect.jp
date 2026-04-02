@@ -87,8 +87,6 @@
         if (!origin || origin === 'null') return;
         if (typeof window !== 'undefined' && window.__JJC_SKIP_REMOTE_PUBLIC_CONFIG__ === true) return;
         if (typeof document !== 'undefined' && document.documentElement && document.documentElement.hasAttribute('data-jjc-skip-public-config')) return;
-        const cfg0 = window.JJCONNECT_CONFIG || {};
-        if (cfg0.supabaseUrl && cfg0.supabaseAnonKey) return;
         try {
             const res = await fetch(origin + '/api/public-config', { credentials: 'include' });
             if (!res.ok) return;

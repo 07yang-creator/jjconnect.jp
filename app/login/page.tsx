@@ -66,6 +66,14 @@ function LoginPageContent() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [connections, setConnections] = useState<ConnectionMap | null>(null);
 
+  const loginHintFromUrl = searchParams.get('login_hint')?.trim() ?? '';
+  useEffect(() => {
+    if (!loginHintFromUrl) return;
+    queueMicrotask(() => {
+      setEmail((prev) => prev || loginHintFromUrl);
+    });
+  }, [loginHintFromUrl]);
+
   useEffect(() => {
     let cancelled = false;
     fetch('/api/me', { credentials: 'include' })

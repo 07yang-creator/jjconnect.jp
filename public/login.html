@@ -616,7 +616,8 @@
 </div>
 
 <script>
-const API_ENDPOINT = (window.location.protocol === 'file:' || (window.location.hostname === 'localhost' && window.location.port && window.location.port !== '8787')) ? 'http://localhost:8787' : '';
+// Same-origin `/api/*` for http(s) (e.g. `next dev`). `file://` opens use Wrangler on :8787.
+const API_ENDPOINT = window.location.protocol === 'file:' ? 'http://localhost:8787' : '';
 const supabaseCfg = window.JJCONNECT_CONFIG || {};
 const SUPABASE_URL = supabaseCfg.supabaseUrl;
 const SUPABASE_ANON_KEY = supabaseCfg.supabaseAnonKey;
@@ -629,14 +630,31 @@ const DEFAULT_AUTH0_CONNECTIONS = {
 };
 let auth0ConnectionMap = { ...DEFAULT_AUTH0_CONNECTIONS };
 
-function auth0Enabled() {
-    return ((window.JJCONNECT_CONFIG || {}).authProvider || 'supabase').toLowerCase() === 'auth0';
+function auth0UrlIndicatesAuth0() {
+    try {
+        const p = window.location.pathname || '';
+        if (p !== '/auth/login' && !p.endsWith('/auth/login')) return false;
+        const q = new URLSearchParams(window.location.search);
+        return q.has('returnTo') || q.has('login_hint') || q.has('connection');
+    } catch (_) {
+        return false;
+    }
 }
 
-(function mergeRemotePublicConfig() {
+function auth0Enabled() {
+    if (((window.JJCONNECT_CONFIG || {}).authProvider || 'supabase').toLowerCase() === 'auth0') return true;
+    return auth0UrlIndicatesAuth0();
+}
+
+let publicConfigPromise = null;
+function fetchAndMergePublicConfig() {
+    if (publicConfigPromise) return publicConfigPromise;
     const origin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : '';
-    if (!origin || origin === 'null') return;
-    fetch(origin + '/api/public-config', { credentials: 'include' })
+    if (!origin || origin === 'null') {
+        publicConfigPromise = Promise.resolve();
+        return publicConfigPromise;
+    }
+    publicConfigPromise = fetch(origin + '/api/public-config', { credentials: 'include' })
         .then(function(res) { return res.ok ? res.json() : null; })
         .then(function(j) {
             if (!j) return;
@@ -650,7 +668,10 @@ function auth0Enabled() {
             }
         })
         .catch(function() { /* keep defaults */ });
-})();
+    return publicConfigPromise;
+}
+
+fetchAndMergePublicConfig();
 
 const sbClient = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
@@ -800,20 +821,46 @@ document.getElementById('identifier-form').addEventListener('submit', async func
     const identifier = document.getElementById('identifier').value.trim();
     if (!identifier) return;
 
-    if (auth0Enabled()) {
-        window.location.href = `/auth/login?returnTo=${encodeURIComponent('/profile.html?view=own')}&login_hint=${encodeURIComponent(identifier)}`;
-        return;
-    }
-    
     const btn = document.getElementById('next-btn');
     btn.disabled = true;
     btn.textContent = 'Checking...';
-    
+
+    await fetchAndMergePublicConfig();
+
+    if (auth0Enabled()) {
+        const dest = getPostAuthDestination();
+        window.location.href = `/auth/login?returnTo=${encodeURIComponent(dest)}&login_hint=${encodeURIComponent(identifier)}`;
+        return;
+    }
+
     try {
         const res = await fetch(`${API_ENDPOINT}/api/account/check?identifier=${encodeURIComponent(identifier)}`);
-        const data = await res.json();
+        const ct = (res.headers.get('content-type') || '').toLowerCase();
+        let data = null;
+        if (ct.indexOf('application/json') !== -1) {
+            data = await res.json();
+        } else {
+            const text = await res.text();
+            try {
+                data = text ? JSON.parse(text) : null;
+            } catch (_) {
+                showMessage(
+                    'Sign-in API is not available on this host. Serve the site with Next.js or proxy /api to the Node server.',
+                    'error'
+                );
+                btn.disabled = false;
+                btn.textContent = 'Next';
+                return;
+            }
+        }
+        if (!res.ok) {
+            showMessage((data && data.error) || 'Could not verify this account. Check Supabase env or try again.', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Next';
+            return;
+        }
         currentIdentifier = identifier;
-        
+
         if (data.exists) {
             document.getElementById('identifier-display').innerHTML = `<strong>${identifier}</strong>`;
             showStep('step-login');

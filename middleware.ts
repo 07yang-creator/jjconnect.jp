@@ -75,6 +75,19 @@ export async function middleware(request: NextRequest) {
   const { pathname, hostname } = request.nextUrl;
 
   if (!isAuth0Enabled()) {
+    // `/auth/*` is handled by Auth0 SDK only when JJC_AUTH_PROVIDER=auth0. Otherwise these URLs 404.
+    if (pathname === '/auth/login' || pathname === '/auth/login/') {
+      const dest = new URL('/login', request.url);
+      const sp = request.nextUrl.searchParams;
+      const returnTo = sp.get('returnTo') ?? sp.get('next');
+      if (returnTo) dest.searchParams.set('next', returnTo);
+      const loginHint = sp.get('login_hint');
+      if (loginHint) dest.searchParams.set('login_hint', loginHint);
+      const connection = sp.get('connection');
+      if (connection) dest.searchParams.set('connection', connection);
+      return NextResponse.redirect(dest);
+    }
+
     if (!ADMIN_PATHS.has(pathname)) {
       return NextResponse.next();
     }

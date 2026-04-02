@@ -18,21 +18,34 @@ export interface ProfileGateStatus {
   upgrade_complete: boolean;
 }
 
+function createCookieBoundAnonClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url?.trim() || !anon?.trim()) {
+    throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY');
+  }
+  return { url, anon };
+}
+
 /**
  * Create a Supabase client for Server Components
  * Automatically handles cookie-based authentication
  */
 export async function createServerSupabaseClient() {
   if (isAuth0Enabled()) {
-    return createSupabaseAdminClient();
-  }
-
-  const cookieStore = await cookies();
-
-  return createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+    const hasServiceRole = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY?.trim());
+    if (url && hasServiceRole) {
+      return createSupabaseAdminClient();
+    }
+    if (url && hasServiceRole === false && process.env.NODE_ENV === 'production') {
+      console.warn(
+        '[jjconnect] Auth0 mode without SUPABASE_SERVICE_ROLE_KEY: using anon Supabase client for server reads. Add SUPABASE_SERVICE_ROLE_KEY in Vercel for login and profile mapping.'
+      );
+    }
+    const { url: u, anon } = createCookieBoundAnonClient();
+    const cookieStore = await cookies();
+    return createClient<Database>(u, anon, {
       cookies: {
         getAll() {
           return cookieStore.getAll();
@@ -43,14 +56,34 @@ export async function createServerSupabaseClient() {
               cookieStore.set(name, value, options)
             );
           } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
+            // Server Component: session refresh may be handled in middleware.
           }
         },
       },
-    }
-  );
+    });
+  }
+
+  const cookieStore = await cookies();
+  const { url, anon } = createCookieBoundAnonClient();
+
+  return createClient<Database>(url, anon, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      setAll(cookiesToSet) {
+        try {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options)
+          );
+        } catch {
+          // The `setAll` method was called from a Server Component.
+          // This can be ignored if you have middleware refreshing
+          // user sessions.
+        }
+      },
+    },
+  });
 }
 
 /**
