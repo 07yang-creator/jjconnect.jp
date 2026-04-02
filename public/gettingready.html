@@ -111,11 +111,28 @@
       z-index: 2;
     }
     
+    /* Invisible hit target above title → /publish (article writing) */
+    .gettingready-title-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .gettingready-secret-publish {
+      width: min(320px, 85vw);
+      height: 2.75rem;
+      margin: 0;
+      padding: 0;
+      border: none;
+      opacity: 0;
+      flex-shrink: 0;
+      cursor: pointer;
+      z-index: 3;
+    }
     .gettingready-title {
       font-size: clamp(1.75rem, 4vw, 2.5rem);
       font-weight: 700;
       color: white;
-      margin-bottom: 2rem;
+      margin: 0 0 2rem;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     
@@ -283,7 +300,10 @@
   <div class="meteors" id="meteors"></div>
 
   <div class="gettingready-main">
-    <h1 class="gettingready-title">We're Getting Ready</h1>
+    <div class="gettingready-title-block">
+      <a href="/publish" class="gettingready-secret-publish" tabindex="-1" aria-hidden="true"></a>
+      <h1 class="gettingready-title">We're Getting Ready</h1>
+    </div>
     
     <div class="countdown-box">
       <div class="countdown-unit">
@@ -327,8 +347,8 @@
   </div>
 
   <script>
-    // 2026年3月31日24:00 JST = 2026-04-01 00:00 JST
-    const endDate = new Date('2026-04-01T00:00:00+09:00');
+    // 7 days from midnight JST 2026-03-29 → 2026-04-05 00:00 JST
+    const endDate = new Date('2026-04-05T00:00:00+09:00');
     
     function updateCountdown() {
       const now = new Date();
