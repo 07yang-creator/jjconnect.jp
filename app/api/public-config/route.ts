@@ -14,11 +14,14 @@ export async function GET() {
     process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '';
   const authProvider = getAuthProvider();
 
+  const nextPublishUrl = (process.env.NEXT_PUBLIC_NEXT_PUBLISH_URL || '').trim();
+
   const payload: Record<string, unknown> = {
     supabaseUrl,
     supabaseAnonKey,
     recaptchaSiteKey,
     authProvider,
+    nextPublishUrl,
   };
 
   if (authProvider === 'auth0') {

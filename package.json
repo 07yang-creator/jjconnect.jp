@@ -7,6 +7,7 @@
     "inject-env": "node scripts/inject-env-into-html.js",
     "generate:public-config": "node scripts/generate-public-config-js.mjs",
     "sync:static-root": "node scripts/sync-static-to-github-pages-root.mjs",
+    "prepare:pages-static": "npm run generate:public-config && npm run inject-env && npm run sync:static-root",
     "dev": "next dev",
     "predev": "node scripts/generate-public-config-js.mjs",
     "build": "node scripts/generate-public-config-js.mjs && node scripts/sync-static-to-github-pages-root.mjs && next build",

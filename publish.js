@@ -10,23 +10,28 @@
 let supabase = null;
 
 async function loadConfig() {
-  // Fallback: window.JJCONNECT_CONFIG (inject via script tag in HTML for static deploy)
-  const fallback = typeof window !== 'undefined' && window.JJCONNECT_CONFIG;
+  const w = typeof window !== 'undefined' ? window : {};
+  const fb = w.JJCONNECT_CONFIG || {};
+  const url = String(fb.supabaseUrl || '').trim();
+  const key = String(fb.supabaseAnonKey || '').trim();
+  // Static publish.html: jjc-default-config.js + optional inline JSON patch (see inject-env-into-html.js)
+  if (url && key && w.supabase) {
+    supabase = w.supabase.createClient(url, key);
+    return supabase;
+  }
   try {
     const res = await fetch('/api/public-config');
     const cfg = await res.json();
-    if (cfg.supabaseUrl && cfg.supabaseAnonKey) {
-      supabase = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    const u = String(cfg.supabaseUrl || '').trim();
+    const k = String(cfg.supabaseAnonKey || '').trim();
+    if (u && k && w.supabase) {
+      supabase = w.supabase.createClient(u, k);
       return supabase;
     }
   } catch (e) {
-    console.warn('API config fetch failed, using fallback if available:', e.message);
+    console.warn('API config fetch failed:', e.message);
   }
-  if (fallback?.supabaseUrl && fallback?.supabaseAnonKey) {
-    supabase = window.supabase.createClient(fallback.supabaseUrl, fallback.supabaseAnonKey);
-    return supabase;
-  }
-  throw new Error('Missing Supabase config. Set NEXT_PUBLIC_* in .env or inject window.JJCONNECT_CONFIG.');
+  throw new Error('Missing Supabase config. Run npm run generate:public-config and/or node scripts/inject-env-into-html.js, or set NEXT_PUBLIC_* for deploy.');
 }
 
 // ========================================================================

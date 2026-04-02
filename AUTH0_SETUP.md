@@ -120,6 +120,26 @@ When omitted, the app keeps using Supabase auth paths.
 
 ## 6) Troubleshooting (social login + dashboard “Failed Checks”)
 
+### “The state parameter is invalid.” on `/auth/callback` (you still entered the right password)
+
+This message is **not** from Auth0 rejecting your email or password. It means `@auth0/nextjs-auth0` could not read the encrypted **transaction** cookie (`__txn_<state>`) that was set when you opened `/auth/login` — so the `state` query parameter no longer matches anything in your browser.
+
+Typical causes:
+
+1. **`APP_BASE_URL` does not match how you open the app.**  
+   If `APP_BASE_URL` is your **production** `https://…` URL while you develop on **`http://localhost:3000`**, the SDK turns on **`Secure` cookies** for the transaction. Over plain HTTP on localhost, those cookies are often **not stored or not sent**, and you get this error after Auth0 redirects back with `code` and `state`.  
+   **Fix:** In `.env.local` for machine-only dev, set:
+   `APP_BASE_URL=http://localhost:3000`  
+   (and keep production `APP_BASE_URL` on the deployed host only).
+
+2. **Mixed hosts:** always use **`http://localhost:3000`** or always **`http://127.0.0.1:3000`**, not both. Cookies are per-host; switching breaks the flow.
+
+3. **Stale or bookmarked callback URL:** start sign-in from **`/login`** or **`/auth/login`** again. Do not refresh `/auth/callback?code=…` without a matching cookie.
+
+4. **`AUTH0_SECRET` changed** between starting login and finishing (or multiple secrets across processes): decryption fails and the cookie is treated as missing. Keep one stable secret per environment.
+
+After fixing env, clear cookies for `localhost`, restart `next dev`, and sign in again from **`/login`**.
+
 ### Facebook (and other social providers) fail with a similar error
 
 Auth0 often shows **“Use custom development keys for all Social Connections”** as critical. With **Auth0’s shared dev keys**, Facebook and other providers are **unreliable or blocked** (especially outside simple test flows). Fix:

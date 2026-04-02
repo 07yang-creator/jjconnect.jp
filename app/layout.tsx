@@ -25,6 +25,7 @@ export default async function RootLayout({
     supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
     supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
     authProvider,
+    nextPublishUrl: (process.env.NEXT_PUBLIC_NEXT_PUBLISH_URL || '').trim(),
   };
   if (authProvider === 'auth0') {
     publicCfg.auth0Connections = getAuth0ConnectionMap();

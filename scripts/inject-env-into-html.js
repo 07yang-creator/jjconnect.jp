@@ -1,21 +1,16 @@
 #!/usr/bin/env node
 /**
- * Injects env values into static HTML files (reCAPTCHA key, etc.)
+ * Injects env values into static HTML files (reCAPTCHA key, publish inline Supabase JSON, etc.)
  * Run before deploy: node scripts/inject-env-into-html.js
  *
- * Requires dotenv: npm install dotenv
- * Loads .env from project root.
+ * Loads .env then .env.local from project root (.env.local overrides).
  */
 const fs = require('fs');
 const path = require('path');
 
-function loadEnv() {
-  const envPath = path.resolve(process.cwd(), '.env');
-  if (!fs.existsSync(envPath)) {
-    console.warn('.env not found, using process.env');
-    return process.env;
-  }
-  const content = fs.readFileSync(envPath, 'utf8');
+function parseEnvFile(filePath) {
+  if (!fs.existsSync(filePath)) return {};
+  const content = fs.readFileSync(filePath, 'utf8');
   const env = {};
   for (const line of content.split('\n')) {
     const m = line.match(/^([^#=]+)=(.*)$/);
@@ -23,7 +18,17 @@ function loadEnv() {
       env[m[1].trim()] = m[2].trim().replace(/^["']|["']$/g, '');
     }
   }
-  return { ...process.env, ...env };
+  return env;
+}
+
+function loadEnv() {
+  const root = process.cwd();
+  const fromEnv = parseEnvFile(path.resolve(root, '.env'));
+  const fromLocal = parseEnvFile(path.resolve(root, '.env.local'));
+  if (!fs.existsSync(path.resolve(root, '.env')) && !fs.existsSync(path.resolve(root, '.env.local'))) {
+    console.warn('.env / .env.local not found, using process.env only');
+  }
+  return { ...process.env, ...fromEnv, ...fromLocal };
 }
 
 const env = loadEnv();
@@ -31,7 +36,6 @@ const recaptchaKey = env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || env.RECAPTCHA_SITE_KE
 const placeholder = env.RECAPTCHA_PLACEHOLDER || '__RECAPTCHA_SITE_KEY__';
 const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL || env.SUPABASE_URL || '';
 const supabaseAnonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY || env.SUPABASE_ANON_KEY || '';
-const configPlaceholder = '__JJCONNECT_CONFIG__';
 
 const root = path.resolve(process.cwd());
 let replaced = 0;
@@ -55,23 +59,39 @@ if (recaptchaKey) {
   console.warn('No NEXT_PUBLIC_RECAPTCHA_SITE_KEY in .env, skipping recaptcha injection');
 }
 
-// 2. Inject Supabase config into publish.html (for static deploy / Live Server)
-if (supabaseUrl && supabaseAnonKey) {
-  const publishPath = path.join(root, 'publish.html');
-  if (fs.existsSync(publishPath)) {
-    const configObj = JSON.stringify({ supabaseUrl, supabaseAnonKey });
-    let content = fs.readFileSync(publishPath, 'utf8');
-    if (content.includes(configPlaceholder)) {
-      content = content.split(configPlaceholder).join(configObj);
-      fs.writeFileSync(publishPath, content);
-      replaced++;
-      console.log('Injected Supabase config into publish.html');
-    }
+// 2. Inject Supabase into publish.html (<script id="jjc-publish-inline-config" type="application/json">)
+function injectPublishInlineConfig(relativePath) {
+  const fp = path.join(root, relativePath);
+  if (!fs.existsSync(fp)) {
+    console.warn(`[inject] skip (missing): ${relativePath}`);
+    return false;
   }
+  let content = fs.readFileSync(fp, 'utf8');
+  const re =
+    /(<script[^>]*\bid="jjc-publish-inline-config"[^>]*\btype="application\/json"[^>]*>)([\s\S]*?)(<\/script>)/i;
+  if (!re.test(content)) {
+    console.warn(`[inject] no jjc-publish-inline-config block in ${relativePath}`);
+    return false;
+  }
+  const patch =
+    supabaseUrl && supabaseAnonKey
+      ? JSON.stringify({ supabaseUrl, supabaseAnonKey })
+      : '{}';
+  content = content.replace(re, `$1${patch}$3`);
+  fs.writeFileSync(fp, content);
+  console.log(`Injected Supabase inline config into ${relativePath}`);
+  return true;
+}
+
+if (supabaseUrl && supabaseAnonKey) {
+  if (injectPublishInlineConfig('public/publish.html')) replaced++;
+  if (injectPublishInlineConfig('publish.html')) replaced++;
 } else {
-  console.warn('No NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY in .env, skipping publish.html config injection');
+  console.warn(
+    'No NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY in .env(.local), skipping publish.html inline injection (use npm run generate:public-config for jjc-default-config.js)'
+  );
 }
 
 if (replaced === 0) {
-  console.log('No replacements needed');
+  console.log('No replacements made (or no matching placeholders)');
 }

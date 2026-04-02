@@ -29,6 +29,8 @@ function getAuthProvider() {
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const authProvider = getAuthProvider();
+/** Full URL to the Next.js /publish route when the main domain serves static HTML (e.g. https://your-next.vercel.app/publish). */
+const nextPublishUrl = (process.env.NEXT_PUBLIC_NEXT_PUBLISH_URL || '').trim();
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn(
@@ -48,6 +50,7 @@ window.JJCONNECT_CONFIG = Object.assign(
     supabaseUrl: ${JSON.stringify(supabaseUrl)},
     supabaseAnonKey: ${JSON.stringify(supabaseAnonKey)},
     authProvider: ${JSON.stringify(authProvider)},
+    nextPublishUrl: ${JSON.stringify(nextPublishUrl)},
   },
   window.JJCONNECT_CONFIG || {}
 );
