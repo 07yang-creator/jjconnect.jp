@@ -160,7 +160,7 @@
                 
                 <!-- 导航链接（桌面端） -->
                 <div class="jjc-navbar-nav">
-                    <a href="/" class="jjc-nav-link">Home</a>
+                    <a href="/gettingready.html" class="jjc-nav-link">Home</a>
                     <a href="home.html" class="jjc-nav-link">Articles</a>
                     <!-- Services dropdown -->
                     <div class="jjc-nav-dropdown" id="jjc-services-dropdown">
@@ -215,7 +215,7 @@
             
             <!-- 移动端菜单 -->
             <div class="jjc-mobile-menu" id="jjc-mobile-menu">
-                <a href="/" class="jjc-mobile-link">Home</a>
+                <a href="/gettingready.html" class="jjc-mobile-link">Home</a>
                 <a href="home.html" class="jjc-mobile-link">Articles</a>
                 
                 <div class="jjc-mobile-divider"></div>
