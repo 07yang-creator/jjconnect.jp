@@ -5,7 +5,7 @@
  *
  * - Canonical source: public/ (including index.html).
  * - Next.js rewrites `/` → `/index.html` (marketing home); article feed is `/feed`.
- * - `public/wp-content` and `public/wp-includes` are symlinks to repo-root WordPress trees so `/wp-content/…` and `/wp-includes/…` work on Vercel (static hosting only serves under `public/`).
+ * - `public/wp-content` and `public/wp-includes` are populated by `scripts/copy-wordpress-into-public.mjs` (build/predev) so Vercel gets real directories, not symlinks.
  */
 import { copyFileSync, mkdirSync, cpSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
