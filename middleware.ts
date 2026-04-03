@@ -11,6 +11,8 @@ const ADMIN_PATHS = new Set([
 
 const PROFILE_GATE_EXEMPT_PREFIXES = ['/auth/', '/api/', '/_next/'];
 const PROFILE_GATE_EXEMPT_PATHS = new Set([
+  '/',
+  '/feed',
   '/login',
   '/login.html',
   '/onboarding',

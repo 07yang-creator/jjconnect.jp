@@ -1,5 +1,6 @@
 /**
- * Homepage — article listing with optional category filter.
+ * Article feed — latest posts with optional category filter (`/feed`).
+ * Marketing home is static `public/index.html` served at `/`.
  */
 
 import Link from 'next/link';
@@ -184,7 +185,7 @@ export default async function HomePage({ searchParams }: PageProps) {
             </span>
           </span>
           <Link
-            href="/"
+            href="/feed"
             className="ml-auto text-sm text-blue-600 hover:text-blue-700 font-medium"
           >
             Clear filter ×

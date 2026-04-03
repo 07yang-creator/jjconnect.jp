@@ -126,7 +126,7 @@ export default async function CategoryPage({
         
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-gray-600 mb-6">
-          <Link href="/" className="hover:text-blue-600">
+          <Link href="/feed" className="hover:text-blue-600">
             首页
           </Link>
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

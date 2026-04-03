@@ -3,8 +3,8 @@
  * GitHub Pages often publishes the repository root; Next.js serves from public/.
  * After editing files under public/, run: npm run sync:static-root (or npm run build).
  *
- * - Canonical source: public/ (except index.html — see below).
- * - index.html stays at repo root only so Next app/page.tsx keeps serving "/".
+ * - Canonical source: public/ (including index.html).
+ * - Next.js rewrites `/` → `/index.html` (marketing home); article feed is `/feed`.
  */
 import { copyFileSync, mkdirSync, cpSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
@@ -41,6 +41,8 @@ copyFile('public/navbar.css', 'navbar.css');
 copyDir('public/brand', 'brand');
 
 const pairs = [
+  ['public/index.html', 'index.html'],
+  ['public/milky-way-bg.png', 'milky-way-bg.png'],
   ['public/cloudflare-image-url.js', 'cloudflare-image-url.js'],
   ['public/home.html', 'home.html'],
   ['public/services.html', 'services.html'],
@@ -74,4 +76,4 @@ for (const [from, to] of pairs) {
 
 copyFile('public/jjc-default-config.js', 'jjc-default-config.js');
 
-console.log('[sync-static-root] done. (index.html is root-only — not in public/ for Next "/" )');
+console.log('[sync-static-root] done.');

@@ -40,7 +40,6 @@ export default async function RootLayout({
             __html: `
 window.JJCONNECT_CONFIG = Object.assign({}, window.JJCONNECT_CONFIG || {}, ${JSON.stringify(publicCfg)});
 window.__JJC_SKIP_REMOTE_PUBLIC_CONFIG__ = true;
-window.__JJC_SHOW_ARTICLES_LINK__=${user ? 'true' : 'false'};
 `.trim(),
           }}
         />

@@ -94,7 +94,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 : `未找到与 "${query}" 相关的文章`}
             </h2>
             {results.length > 0 && (
-              <Link href="/" className="text-sm text-blue-600 hover:underline">
+              <Link href="/feed" className="text-sm text-blue-600 hover:underline">
                 返回首页
               </Link>
             )}

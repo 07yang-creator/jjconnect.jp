@@ -6,6 +6,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   outputFileTracingRoot: __dirname,
+  async rewrites() {
+    return [{ source: '/', destination: '/index.html' }];
+  },
   async headers() {
     return [
       {
