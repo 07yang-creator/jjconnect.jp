@@ -296,22 +296,29 @@
                 return { isLoggedIn: false, userData: null };
             }
 
-            const { data: userDataResp } = await supabase.auth.getUser();
-            const user = userDataResp?.user;
+            const user = session.user;
             const { data: profileData, error: profileError } = await supabase
                 .from('profiles')
-                .select('role')
+                .select('role, avatar_url, display_name')
                 .eq('id', user.id)
                 .single();
             if (profileError) {
                 console.warn('Failed to load profile role, fallback to T:', profileError);
             }
+            const meta = user?.user_metadata || {};
+            const avatarFromMeta =
+                meta.avatar_url || meta.picture || meta.profile_image_url || meta.photo_url || null;
             return {
                 isLoggedIn: true,
                 userData: {
-                    username: user?.user_metadata?.username || user?.email || 'User',
+                    username:
+                        profileData?.display_name ||
+                        meta.username ||
+                        meta.name ||
+                        user?.email ||
+                        'User',
                     email: user?.email || '',
-                    avatar_url: user?.user_metadata?.avatar_url || null,
+                    avatar_url: profileData?.avatar_url || avatarFromMeta || null,
                     role: profileData?.role || 'T'
                 }
             };

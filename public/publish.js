@@ -11,25 +11,33 @@ let supabase = null;
 
 async function loadConfig() {
   const w = typeof window !== 'undefined' ? window : {};
-  const fb = w.JJCONNECT_CONFIG || {};
-  const url = String(fb.supabaseUrl || '').trim();
-  const key = String(fb.supabaseAnonKey || '').trim();
-  // Static publish.html: jjc-default-config.js + optional inline JSON patch (see inject-env-into-html.js)
-  if (url && key && w.supabase) {
-    supabase = w.supabase.createClient(url, key);
-    return supabase;
-  }
   try {
     const res = await fetch('/api/public-config');
-    const cfg = await res.json();
-    const u = String(cfg.supabaseUrl || '').trim();
-    const k = String(cfg.supabaseAnonKey || '').trim();
-    if (u && k && w.supabase) {
-      supabase = w.supabase.createClient(u, k);
-      return supabase;
+    if (res.ok) {
+      const cfg = await res.json();
+      const u = String(cfg.supabaseUrl || '').trim();
+      const k = String(cfg.supabaseAnonKey || '').trim();
+      if (u && k) {
+        w.JJCONNECT_CONFIG = Object.assign({}, w.JJCONNECT_CONFIG || {}, {
+          supabaseUrl: u,
+          supabaseAnonKey: k
+        });
+      }
     }
   } catch (e) {
     console.warn('API config fetch failed:', e.message);
+  }
+  // Reuse navbar.js client (same auth storage as login.html) — avoids a second GoTrueClient and "not logged in" on publish.
+  if (typeof w.__jjc_getSupabaseBrowserClient === 'function') {
+    supabase = w.__jjc_getSupabaseBrowserClient();
+    if (supabase) return supabase;
+  }
+  const fb = w.JJCONNECT_CONFIG || {};
+  const url = String(fb.supabaseUrl || '').trim();
+  const key = String(fb.supabaseAnonKey || '').trim();
+  if (url && key && w.supabase) {
+    supabase = w.supabase.createClient(url, key);
+    return supabase;
   }
   throw new Error('Missing Supabase config. Run npm run generate:public-config and/or node scripts/inject-env-into-html.js, or set NEXT_PUBLIC_* for deploy.');
 }
@@ -50,13 +58,16 @@ let currentUser = null;
 async function init() {
   try {
     await loadConfig();
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      alert('请先登录');
-      window.location.href = 'login.html';
-      return;
+    const { data: { session } } = await supabase.auth.getSession();
+    let user = session?.user;
+    if (!user) {
+      const { data: refreshed, error: authError } = await supabase.auth.getUser();
+      user = refreshed?.user;
+      if (authError || !user) {
+        alert('请先登录');
+        window.location.href = 'login.html';
+        return;
+      }
     }
 
     currentUser = user;
