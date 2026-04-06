@@ -629,6 +629,8 @@ const DEFAULT_AUTH0_CONNECTIONS = {
     yahoo: 'yahoo'
 };
 let auth0ConnectionMap = { ...DEFAULT_AUTH0_CONNECTIONS };
+/** Database connection for Universal Login (must match Auth0 + `/api/public-config`). */
+let auth0DatabaseConnection = 'Username-Password-Authentication';
 
 function auth0UrlIndicatesAuth0() {
     try {
@@ -665,6 +667,9 @@ function fetchAndMergePublicConfig() {
             });
             if (j.auth0Connections && typeof j.auth0Connections === 'object') {
                 auth0ConnectionMap = Object.assign({}, DEFAULT_AUTH0_CONNECTIONS, j.auth0Connections);
+            }
+            if (typeof j.auth0DatabaseConnection === 'string' && j.auth0DatabaseConnection.trim()) {
+                auth0DatabaseConnection = j.auth0DatabaseConnection.trim();
             }
         })
         .catch(function() { /* keep defaults */ });
@@ -719,7 +724,8 @@ function getPostAuthDestination() {
 function getSocialRedirectUrl() {
     const dest = getPostAuthDestination();
     if (auth0Enabled()) {
-        return window.location.origin + dest;
+        /* Path-only returnTo — matches Next `/login` and @auth0/nextjs-auth0 `toSafeRedirect` (www vs apex). */
+        return dest;
     }
     const callbackUrl = new URL('/auth/supabase-callback', window.location.origin);
     callbackUrl.searchParams.set('next', dest);
@@ -829,7 +835,7 @@ document.getElementById('identifier-form').addEventListener('submit', async func
 
     if (auth0Enabled()) {
         const dest = getPostAuthDestination();
-        window.location.href = `/auth/login?returnTo=${encodeURIComponent(dest)}&login_hint=${encodeURIComponent(identifier)}`;
+        window.location.href = `/auth/login?returnTo=${encodeURIComponent(dest)}&login_hint=${encodeURIComponent(identifier)}&connection=${encodeURIComponent(auth0DatabaseConnection)}`;
         return;
     }
 

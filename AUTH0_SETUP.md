@@ -158,6 +158,18 @@ On the Auth0 error page, click **“See details for this error”** and match **
 
 If details mention **connection**, enable that connection for the application or set **`AUTH0_CONNECTION_DATABASE`** to the correct name.
 
+### `/auth/callback?error=…&error_description=The%20provided%20client%20secret%20is%20invalid`
+
+This text appears when **something in the OAuth chain rejects a client secret**. Do not assume it is only Vercel’s **`AUTH0_CLIENT_SECRET`**.
+
+1. **Regular Web Application secret (Vercel)** — Must match **Auth0 → Applications → your app → Client Secret** for the same **Client ID**. If **database / email** login completes but **Google** does not, still re-verify this pair after a **redeploy**; also clear site data and try again in a private window (stale `/auth` state is confusing).
+
+2. **Google social connection secret (Auth0 only)** — If you use **your own** Google OAuth client (**Authentication → Social → Google**, not Auth0 developer keys), the **Client Secret** there must match **Google Cloud Console** for that OAuth client. A wrong or rotated **Google** secret can surface as a callback error while **Username-Password-Authentication** still works. Regenerate the secret in Google, paste it into the Auth0 Google connection, save, and retry.
+
+3. **Static `login.html`** — For Auth0, `returnTo` should be a **path** (e.g. `/feed`), not `https://www…/feed`, so it matches the Next.js `/login` behavior and avoids host quirks. This repo’s `public/login.html` uses path-only `returnTo` for social links and sends **`connection=`** on the identifier step the same way as `/login`.
+
+Use **Auth0 → Monitoring → Logs** on a failed Google attempt: the log type (e.g. **Failed Exchange** vs **Failed Login**) shows whether the failure is the application’s token exchange or the Google connection.
+
 ### Broken layout or navbar after login (no avatar, 500 on `navbar.css`, `Unexpected token '<'` in JS)
 
 The Auth0 **profile gate** in [`middleware.ts`](middleware.ts) must not run for **static assets**. If requests like `/navbar.css`, `/wp-includes/...`, or `/wp-content/...` were redirected to `/onboarding`, the browser loads HTML instead of CSS/ JS, **`navbar.js`** never runs correctly, and the **avatar** (from `/api/me`) can disappear. This repo exempts those URLs and common static **file extensions** from the gate.
