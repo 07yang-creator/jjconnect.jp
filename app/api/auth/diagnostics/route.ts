@@ -48,6 +48,55 @@ function auth0LocalHttpDevHint(): string | null {
   return null;
 }
 
+/** Same issuer rule as @auth0/nextjs-auth0 (domain or full https URL). */
+function auth0IssuerFromDomain(domain: string): string {
+  const d = domain.trim();
+  if (d.startsWith('http://') || d.startsWith('https://')) return d.replace(/\/$/, '');
+  return `https://${d.replace(/\/$/, '')}`;
+}
+
+/**
+ * Live check: can this deployment reach Auth0 OIDC discovery? Failures cause 500
+ * "An error occurred while trying to initiate the login request." on GET /auth/login.
+ */
+async function auth0DiscoveryProbe(domain: string | undefined): Promise<{
+  ok: boolean;
+  wellKnownUrl: string | null;
+  httpStatus: number | null;
+  error: string | null;
+}> {
+  if (!domain) {
+    return { ok: false, wellKnownUrl: null, httpStatus: null, error: 'AUTH0_DOMAIN is missing' };
+  }
+  try {
+    const issuer = auth0IssuerFromDomain(domain);
+    const wellKnownUrl = `${issuer}/.well-known/openid-configuration`;
+    const res = await fetch(wellKnownUrl, {
+      method: 'GET',
+      redirect: 'follow',
+      cache: 'no-store',
+      headers: { Accept: 'application/json' },
+    });
+    if (!res.ok) {
+      return {
+        ok: false,
+        wellKnownUrl,
+        httpStatus: res.status,
+        error: `Discovery HTTP ${res.status}`,
+      };
+    }
+    return { ok: true, wellKnownUrl, httpStatus: res.status, error: null };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return {
+      ok: false,
+      wellKnownUrl: null,
+      httpStatus: null,
+      error: msg,
+    };
+  }
+}
+
 /**
  * Sanity check for Auth0 + Supabase mapping env (no secret values returned).
  * Production: set AUTH_DIAGNOSTICS_SECRET and send header x-auth-diagnostics: <secret>
@@ -69,6 +118,8 @@ export async function GET(request: Request) {
   const auth0 = getAuthProvider() === 'auth0';
   const clientId = auth0CredentialFromEnv('AUTH0_CLIENT_ID');
   const clientSecret = auth0CredentialFromEnv('AUTH0_CLIENT_SECRET');
+  const auth0Domain = auth0CredentialFromEnv('AUTH0_DOMAIN');
+  const discovery = auth0 ? await auth0DiscoveryProbe(auth0Domain) : null;
 
   return NextResponse.json({
     nodeEnv: process.env.NODE_ENV,
@@ -92,6 +143,8 @@ export async function GET(request: Request) {
       /** Safe sanity check (values, not secrets). Auth0 Client ID is public in the browser. */
       clientIdPrefix: clientId && clientId.length >= 8 ? `${clientId.slice(0, 8)}…` : null,
       clientSecretCharLength: clientSecret?.length ?? 0,
+      /** When false, /auth/login returns 500 "initiate the login request" — fix AUTH0_DOMAIN / outbound network. */
+      discovery: discovery,
     },
     auth0Connections: getAuth0ConnectionMap(),
     auth0DatabaseConnection: auth0 ? getAuth0DatabaseConnection() : null,
