@@ -61,3 +61,4 @@ priv_key.pem
 # WordPress static trees copied into public/ at build/dev time (see scripts/copy-wordpress-into-public.mjs)
 public/wp-content/
 public/wp-includes/
+.vercel
