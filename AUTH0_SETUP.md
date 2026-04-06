@@ -77,6 +77,31 @@ Example tenant (replace with yours if different):
 
 Click **Save Changes**. Until these are set, login will fail with a callback mismatch.
 
+### Production verification (Vercel + jjconnect.jp)
+
+Use this checklist when testing login on the **live** site (not localhost).
+
+1. **Vercel → Project → Settings → Environment Variables (Production)**  
+   - Set **`APP_BASE_URL`** to the **exact** origin shown in the browser address bar: `https://www.jjconnect.jp` **or** `https://jjconnect.jp` (no trailing slash, no path).  
+   - Mismatch between this value and the URL users open is the most common cause of production failures (`redirect_uri_mismatch` or generic errors on Auth0).  
+   - After changes, **redeploy** the production deployment.
+
+2. **Auth0 → Applications → (your app) → Settings**  
+   - **Allowed Callback URLs** — include **every** production origin you use, one per line (SDK uses `{origin}/auth/callback`):  
+     - `https://www.jjconnect.jp/auth/callback`  
+     - `https://jjconnect.jp/auth/callback`  
+     - Keep `http://localhost:3000/auth/callback` for local dev in the same app if you use one application for both.  
+   - **Allowed Logout URLs** — same origins, e.g. `https://www.jjconnect.jp`, `https://jjconnect.jp`, `http://localhost:3000`.  
+   - **Allowed Web Origins** — same origins as above.
+
+3. **Auth0 → Applications → Connections**  
+   - Enable **Username-Password-Authentication** (or your renamed database connection) for this application.  
+   - The Next.js `/login` page sends **`connection=`** on **Continue** (email) so Auth0 routes to the database connection; if it is disabled for the app, authorize can fail before the password step.
+
+4. **Optional: confirm what the server expects**  
+   - Set **`AUTH_DIAGNOSTICS_SECRET`** in Vercel (Production).  
+   - `GET /api/auth/diagnostics` with header **`x-auth-diagnostics: <your secret>`** returns **`auth0SuggestedCallbackUrls`** and **`auth0SuggestedLogoutOrigins`** derived from **`APP_BASE_URL`** (no secrets in the body). Add any **missing** URLs to Auth0 if you use multiple hosts.
+
 ## 3) Enable provider connections
 
 Enable these connections in Auth0 and link them to the application:
@@ -89,6 +114,8 @@ Enable these connections in Auth0 and link them to the application:
 (Apple Sign-In is not offered in this app’s UI; it requires a paid Apple Developer Program account. You can disable the **apple** connection in Auth0 or leave it unused.)
 
 Connection names vary by strategy/region. Use the Auth0 connection name value in URLs where needed (for example `google-oauth2`).
+
+**Database (email / password on Universal Login):** Ensure **Username-Password-Authentication** is enabled for the application. If you renamed it in Auth0, set **`AUTH0_CONNECTION_DATABASE`** (or **`NEXT_PUBLIC_AUTH0_CONNECTION_DATABASE`**) to that connection name and redeploy.
 
 The app uses Auth0 middleware routes:
 
@@ -119,6 +146,27 @@ JJC_AUTH_PROVIDER=auth0
 When omitted, the app keeps using Supabase auth paths.
 
 ## 6) Troubleshooting (social login + dashboard “Failed Checks”)
+
+### Generic error on Auth0’s site (“Oops!, something went wrong”) before password
+
+On the Auth0 error page, click **“See details for this error”** and match **`error`** / **`error_description`**:
+
+| `error` (typical) | What to fix |
+|-------------------|-------------|
+| `redirect_uri_mismatch` | **Allowed Callback URLs** must include exactly `{APP_BASE_URL}/auth/callback` for the origin users use; align **Vercel `APP_BASE_URL`** with that origin (www vs apex). |
+| `unauthorized_client` | Wrong application type, client disabled, or client does not belong to this tenant; check **AUTH0_CLIENT_ID** / secret in Vercel. |
+| `invalid_request` (Unknown client) | **`AUTH0_CLIENT_ID` does not exist** on the tenant in **`AUTH0_DOMAIN`**. In **Auth0 → Applications**, open your **Regular Web Application**, copy **Client ID** and **Client Secret** into Vercel Production (and local env), then **redeploy**. |
+| other `invalid_request` | Malformed authorize request; check Auth0 Monitoring → Logs; ensure required connections are enabled for the app. |
+
+If details mention **connection**, enable that connection for the application or set **`AUTH0_CONNECTION_DATABASE`** to the correct name.
+
+### Broken layout or navbar after login (no avatar, 500 on `navbar.css`, `Unexpected token '<'` in JS)
+
+The Auth0 **profile gate** in [`middleware.ts`](middleware.ts) must not run for **static assets**. If requests like `/navbar.css`, `/wp-includes/...`, or `/wp-content/...` were redirected to `/onboarding`, the browser loads HTML instead of CSS/ JS, **`navbar.js`** never runs correctly, and the **avatar** (from `/api/me`) can disappear. This repo exempts those URLs and common static **file extensions** from the gate.
+
+### Google “authorization flow” error and CSP lines mentioning `content.bundle.js`
+
+Console errors that block **blob:** workers on `accounts.google.com` / `login.yahoo.com` while citing **`content.bundle.js`** are often from a **browser extension**, not JJConnect. Try again in a **private window with extensions off**. If the failure is on Auth0 or `/auth/callback`, configure **your own Google OAuth client** on Auth0’s Google connection (see Facebook / social keys below) and confirm **Allowed Callback URLs** include your production **`{APP_BASE_URL}/auth/callback`**.
 
 ### “The state parameter is invalid.” on `/auth/callback` (you still entered the right password)
 

@@ -76,7 +76,9 @@ export async function resolveOrCreateSupabaseIdentityFromAuth0User(
 
   const profileUpdates: Record<string, string> = {};
   if (auth0User.name && !profile?.display_name) profileUpdates.display_name = auth0User.name;
-  if (auth0User.picture && !profile?.avatar_url) profileUpdates.avatar_url = auth0User.picture;
+  if (auth0User.picture && !(profile?.avatar_url || '').trim()) {
+    profileUpdates.avatar_url = auth0User.picture;
+  }
   if (Object.keys(profileUpdates).length > 0) {
     await admin.from('profiles').update(profileUpdates).eq('id', supabaseUserId);
   }

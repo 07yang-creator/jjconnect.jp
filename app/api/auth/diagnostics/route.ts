@@ -3,7 +3,30 @@ import {
   authProviderEnvMismatch,
   getAuthProvider,
 } from '@/lib/auth/provider';
-import { getAuth0ConnectionMap } from '@/lib/auth0/connections';
+import { getAuth0ConnectionMap, getAuth0DatabaseConnection } from '@/lib/auth0/connections';
+
+function auth0SuggestedUrlsFromEnv(): {
+  suggestedCallbackUrls: string[];
+  suggestedLogoutOrigins: string[];
+} {
+  const suggestedCallbackUrls: string[] = [];
+  const logoutSet = new Set<string>();
+  const raw = process.env.APP_BASE_URL?.trim();
+  if (!raw) {
+    return { suggestedCallbackUrls, suggestedLogoutOrigins: [] };
+  }
+  const parts = raw.includes(',') ? raw.split(',').map((s) => s.trim()).filter(Boolean) : [raw];
+  for (const p of parts) {
+    try {
+      const u = new URL(p);
+      suggestedCallbackUrls.push(`${u.origin}/auth/callback`);
+      logoutSet.add(u.origin);
+    } catch {
+      /* skip invalid APP_BASE_URL entry */
+    }
+  }
+  return { suggestedCallbackUrls, suggestedLogoutOrigins: [...logoutSet] };
+}
 
 /** When APP_BASE_URL is all-https, @auth0/nextjs-auth0 uses Secure transaction cookies — often breaks http://localhost dev. */
 function auth0LocalHttpDevHint(): string | null {
@@ -41,6 +64,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  const { suggestedCallbackUrls, suggestedLogoutOrigins } = auth0SuggestedUrlsFromEnv();
+  const auth0 = getAuthProvider() === 'auth0';
+
   return NextResponse.json({
     nodeEnv: process.env.NODE_ENV,
     jjcAuthProvider: process.env.JJC_AUTH_PROVIDER || null,
@@ -58,6 +84,10 @@ export async function GET(request: Request) {
       secret: Boolean(process.env.AUTH0_SECRET),
     },
     auth0Connections: getAuth0ConnectionMap(),
+    auth0DatabaseConnection: auth0 ? getAuth0DatabaseConnection() : null,
+    /** Paste these into Auth0 Allowed Callback URLs (add www/non-www variants if you serve both). */
+    auth0SuggestedCallbackUrls: auth0 ? suggestedCallbackUrls : [],
+    auth0SuggestedLogoutOrigins: auth0 ? suggestedLogoutOrigins : [],
     auth0LocalHttpDevHint: auth0LocalHttpDevHint(),
   });
 }

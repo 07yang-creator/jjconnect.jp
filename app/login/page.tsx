@@ -65,6 +65,8 @@ function LoginPageContent() {
   const [isOAuthSubmitting, setIsOAuthSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [connections, setConnections] = useState<ConnectionMap | null>(null);
+  /** Auth0 Database connection name (public config); required so “Continue” uses the same path as social `connection=` links. */
+  const [auth0DatabaseConnection, setAuth0DatabaseConnection] = useState('Username-Password-Authentication');
 
   const loginHintFromUrl = searchParams.get('login_hint')?.trim() ?? '';
   useEffect(() => {
@@ -103,6 +105,7 @@ function LoginPageContent() {
       JJCONNECT_CONFIG?: {
         authProvider?: string;
         auth0Connections?: ConnectionMap;
+        auth0DatabaseConnection?: string;
       };
     };
     const w = window as WinCfg;
@@ -114,6 +117,10 @@ function LoginPageContent() {
         if (isA) {
           const c = cfg.auth0Connections;
           setConnections(c && typeof c === 'object' ? c : FALLBACK_CONNECTIONS);
+          if (typeof cfg.auth0DatabaseConnection === 'string') {
+            const t = cfg.auth0DatabaseConnection.trim();
+            if (t) setAuth0DatabaseConnection(t);
+          }
         }
       });
       return;
@@ -135,6 +142,10 @@ function LoginPageContent() {
             setConnections(json.auth0Connections as ConnectionMap);
           } else {
             setConnections(FALLBACK_CONNECTIONS);
+          }
+          const dbConn = json.auth0DatabaseConnection;
+          if (typeof dbConn === 'string' && dbConn.trim()) {
+            setAuth0DatabaseConnection(dbConn.trim());
           }
         }
       })
@@ -167,6 +178,7 @@ function LoginPageContent() {
       const loginHint = email.trim();
       window.location.href = authLoginUrl({
         returnTo: postAuthNext,
+        connection: auth0DatabaseConnection,
         ...(loginHint ? { login_hint: loginHint } : {}),
       });
       return;

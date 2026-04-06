@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient, getCurrentUser } from '@/lib/supabase/server';
+import { isAuth0Enabled } from '@/lib/auth/provider';
+import { getAuth0SessionUser } from '@/lib/auth0/server';
 
 export async function GET() {
   try {
@@ -17,15 +19,23 @@ export async function GET() {
       .eq('id', user.id)
       .single();
 
+    const auth0Session = isAuth0Enabled() ? await getAuth0SessionUser() : null;
+    const avatarFromProfile = profile?.avatar_url?.trim() || null;
+    const avatarUrl = avatarFromProfile || auth0Session?.picture?.trim() || null;
+
     const emailConfirmedAt =
       'email_confirmed_at' in user ? (user as { email_confirmed_at?: string | null }).email_confirmed_at ?? null : null;
 
     const userData = {
       id: user.id,
-      username: profile?.display_name || user.email || 'User',
+      username:
+        profile?.display_name?.trim() ||
+        auth0Session?.name?.trim() ||
+        user.email ||
+        'User',
       email: user.email || '',
       email_confirmed_at: emailConfirmedAt,
-      avatar_url: profile?.avatar_url || null,
+      avatar_url: avatarUrl,
       role: profile?.role || 'T',
       is_authorized: profile?.is_authorized === true,
       country_region: profile?.country_region ?? null,

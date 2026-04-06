@@ -9,7 +9,15 @@ const ADMIN_PATHS = new Set([
   '/admin.html',
 ]);
 
-const PROFILE_GATE_EXEMPT_PREFIXES = ['/auth/', '/api/', '/_next/'];
+const PROFILE_GATE_EXEMPT_PREFIXES = [
+  '/auth/',
+  '/api/',
+  '/_next/',
+  '/wp-content/',
+  '/wp-includes/',
+  '/brand/',
+  '/icons/',
+];
 const PROFILE_GATE_EXEMPT_PATHS = new Set([
   '/',
   '/feed',
@@ -21,6 +29,27 @@ const PROFILE_GATE_EXEMPT_PATHS = new Set([
   '/robots.txt',
   '/sitemap.xml',
 ]);
+
+/** Static files must bypass the onboarding/profile gate — otherwise `/navbar.css` etc. redirect to HTML and break Chrome + avatar load. */
+const STATIC_ASSET_EXACT = new Set([
+  '/navbar.css',
+  '/navbar.js',
+  '/jjc-default-config.js',
+  '/config.js',
+]);
+
+function isStaticAssetPath(pathname: string): boolean {
+  if (pathname.startsWith('/api/')) return false;
+  if (STATIC_ASSET_EXACT.has(pathname)) return true;
+  if (
+    ['/wp-content/', '/wp-includes/', '/brand/', '/icons/'].some((p) => pathname.startsWith(p))
+  ) {
+    return true;
+  }
+  return /\.(css|js|mjs|map|ico|svg|png|jpe?g|gif|webp|avif|woff2?|ttf|eot|txt|xml)$/i.test(
+    pathname
+  );
+}
 
 function isProfileGateExemptPath(pathname: string): boolean {
   if (PROFILE_GATE_EXEMPT_PATHS.has(pathname)) return true;
@@ -141,7 +170,7 @@ export async function middleware(request: NextRequest) {
     return auth0Response;
   }
 
-  if (!isProfileGateExemptPath(pathname)) {
+  if (!isProfileGateExemptPath(pathname) && !isStaticAssetPath(pathname)) {
     const session = await auth0.getSession(request);
     if (session?.user?.sub) {
       const profile = await readAuth0MappedProfile(session.user.sub);
