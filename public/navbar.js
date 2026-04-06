@@ -62,24 +62,38 @@
     }
 
     let supabase = null;
+    /** Avoid multiple GoTrueClient instances for the same project (same browser storage key). */
+    let supabaseCacheKey = '';
 
     function recreateSupabaseClient() {
         const cfg = window.JJCONNECT_CONFIG || {};
         const url = cfg.supabaseUrl;
         const key = cfg.supabaseAnonKey;
-        if (window.supabase && url && key) {
-            supabase = window.supabase.createClient(url, key, {
-                auth: {
-                    storage: createSafeStorage(),
-                    detectSessionInUrl: true
-                }
-            });
-        } else {
+        if (!window.supabase || !url || !key) {
             supabase = null;
+            supabaseCacheKey = '';
+            return;
         }
+        const nextKey = String(url) + '\0' + String(key);
+        if (supabase && supabaseCacheKey === nextKey) {
+            return;
+        }
+        supabaseCacheKey = nextKey;
+        supabase = window.supabase.createClient(url, key, {
+            auth: {
+                storage: createSafeStorage(),
+                detectSessionInUrl: true
+            }
+        });
     }
 
     recreateSupabaseClient();
+
+    /** Shared browser Supabase client for static pages (e.g. login.html). */
+    window.__jjc_getSupabaseBrowserClient = function() {
+        recreateSupabaseClient();
+        return supabase;
+    };
 
     /** Align with Next `/api/public-config` (JJC_AUTH_PROVIDER precedence) so Sign in uses Auth0 without editing jjc-default-config.js. */
     async function mergeRemotePublicConfig() {

@@ -618,10 +618,6 @@
 <script>
 // Same-origin `/api/*` for http(s) (e.g. `next dev`). `file://` opens use Wrangler on :8787.
 const API_ENDPOINT = window.location.protocol === 'file:' ? 'http://localhost:8787' : '';
-const supabaseCfg = window.JJCONNECT_CONFIG || {};
-const SUPABASE_URL = supabaseCfg.supabaseUrl;
-const SUPABASE_ANON_KEY = supabaseCfg.supabaseAnonKey;
-
 const DEFAULT_AUTH0_CONNECTIONS = {
     google: 'google-oauth2',
     facebook: 'facebook',
@@ -678,9 +674,16 @@ function fetchAndMergePublicConfig() {
 
 fetchAndMergePublicConfig();
 
-const sbClient = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
-    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-    : null;
+/** One shared client with navbar.js (avoids multiple GoTrueClient warnings). */
+function getSbClient() {
+    if (typeof window.__jjc_getSupabaseBrowserClient === 'function') {
+        return window.__jjc_getSupabaseBrowserClient();
+    }
+    const cfg = window.JJCONNECT_CONFIG || {};
+    const url = cfg.supabaseUrl;
+    const key = cfg.supabaseAnonKey;
+    return window.supabase && url && key ? window.supabase.createClient(url, key) : null;
+}
 
 const DICEBEAR_BASE = 'https://api.dicebear.com/9.x/initials/svg';
 const AVATAR_PRESETS = ['smile', 'happy', 'alice', 'bob', 'carlos', 'denise'];
@@ -743,13 +746,13 @@ function getOAuthDisplayName(user) {
 }
 
 async function applySocialProfileDefaults(user) {
-    if (!sbClient || !user?.id) return;
+    if (!getSbClient() || !user?.id) return;
     const avatarUrl = getOAuthAvatar(user);
     const displayName = getOAuthDisplayName(user);
     if (!avatarUrl && !displayName) return;
 
     try {
-        const { data: profile, error: profileError } = await sbClient
+        const { data: profile, error: profileError } = await getSbClient()
             .from('profiles')
             .select('avatar_url, display_name')
             .eq('id', user.id)
@@ -761,7 +764,7 @@ async function applySocialProfileDefaults(user) {
         if (displayName && !profile.display_name) updates.display_name = displayName;
         if (!Object.keys(updates).length) return;
 
-        const { error: updateError } = await sbClient
+        const { error: updateError } = await getSbClient()
             .from('profiles')
             .update(updates)
             .eq('id', user.id);
@@ -785,13 +788,13 @@ async function startSocialSignIn(provider) {
         return;
     }
 
-    if (!sbClient) {
+    if (!getSbClient()) {
         showMessage('Social sign-in is unavailable right now.', 'error');
         return;
     }
     try {
         localStorage.setItem('jjc_pending_social_provider', provider);
-        const { error } = await sbClient.auth.signInWithOAuth({
+        const { error } = await getSbClient().auth.signInWithOAuth({
             provider,
             options: {
                 redirectTo: getSocialRedirectUrl()
@@ -1169,12 +1172,12 @@ async function routeAfterAuth(user) {
     const rawDest = getPostAuthDestination();
     const safeDest = isAuthUiPath(rawDest) ? '/' : rawDest;
 
-    if (!user?.id || !sbClient) {
+    if (!user?.id || !getSbClient()) {
         window.location.href = safeDest;
         return;
     }
     try {
-        const { data: profile } = await sbClient
+        const { data: profile } = await getSbClient()
             .from('profiles')
             .select('role, country_region, preferred_language, call_name, upgrade_profile_completed_at')
             .eq('id', user.id)
@@ -1213,7 +1216,7 @@ document.getElementById('login-form').addEventListener('submit', async function(
     btn.textContent = 'Signing in...';
     
     try {
-        const { data, error } = await sbClient.auth.signInWithPassword({
+        const { data, error } = await getSbClient().auth.signInWithPassword({
             email: currentIdentifier,
             password
         });
@@ -1270,7 +1273,7 @@ document.getElementById('register-form').addEventListener('submit', async functi
     btn.textContent = 'Creating account...';
     
     try {
-        const { data, error } = await sbClient.auth.signUp({
+        const { data, error } = await getSbClient().auth.signUp({
             email,
             password,
             options: {
@@ -1328,9 +1331,11 @@ document.querySelector('.forgot-password').addEventListener('click', function(e)
 // On load: show register if ?create=1, or redirect if already logged in
 window.addEventListener('load', function() {
     const params = new URLSearchParams(window.location.search);
-    const sessionPromise = (sbClient && sbClient.auth && typeof sbClient.auth.getSession === 'function')
-        ? sbClient.auth.getSession()
-        : Promise.resolve({ data: { session: null } });
+    const sb = getSbClient();
+    const sessionPromise =
+        sb && sb.auth && typeof sb.auth.getSession === 'function'
+            ? sb.auth.getSession()
+            : Promise.resolve({ data: { session: null } });
 
     sessionPromise
         .then(async ({ data }) => {
