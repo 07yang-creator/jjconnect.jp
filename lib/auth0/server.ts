@@ -8,6 +8,25 @@ export interface Auth0SessionUser {
   email_verified: boolean;
 }
 
+function coercePictureUrl(raw: unknown): string | null {
+  if (typeof raw !== 'string') return null;
+  const t = raw.trim();
+  return t.length ? t : null;
+}
+
+/** OIDC uses `picture`; some IdPs / claim layouts use alternates. */
+export function pictureFromAuth0SessionUser(user: {
+  picture?: string;
+  [key: string]: unknown;
+}): string | null {
+  const keys = ['picture', 'picture_url', 'avatar', 'photo', 'image'] as const;
+  for (const k of keys) {
+    const v = coercePictureUrl(user[k]);
+    if (v) return v;
+  }
+  return null;
+}
+
 export async function getAuth0SessionUser(): Promise<Auth0SessionUser | null> {
   if (!isAuth0Enabled()) return null;
 
@@ -20,7 +39,7 @@ export async function getAuth0SessionUser(): Promise<Auth0SessionUser | null> {
     sub: user.sub,
     email: user.email ?? null,
     name: user.name ?? null,
-    picture: user.picture ?? null,
+    picture: pictureFromAuth0SessionUser(user),
     email_verified: user.email_verified === true,
   };
 }

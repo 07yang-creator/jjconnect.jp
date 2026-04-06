@@ -189,7 +189,7 @@
                     ${isLoggedIn ? `
                         <div class="jjc-user-menu">
                             <button type="button" class="jjc-user-button" id="jjc-user-menu-btn" aria-label="Account menu" aria-haspopup="true">
-                                ${avatarSrc ? '<img class="jjc-user-avatar" src="' + avatarSrc + '" alt="">' : USER_PLACEHOLDER_SVG}
+                                ${avatarSrc ? '<img class="jjc-user-avatar" src="' + avatarSrc + '" alt="" referrerpolicy="no-referrer">' : USER_PLACEHOLDER_SVG}
                             </button>
                             <div class="jjc-user-dropdown" id="jjc-user-dropdown">
                                 <a href="profile.html?view=own" class="jjc-user-dropdown-item">My Profile</a>
@@ -240,7 +240,7 @@
                 <div class="jjc-mobile-divider"></div>
                 ${isLoggedIn ? `
                     <a href="profile.html?view=own" class="jjc-mobile-link">My Profile</a>
-                    <div class="jjc-mobile-user" aria-hidden="true">${avatarSrc ? '<img class="jjc-mobile-avatar" src="' + avatarSrc + '" alt="">' : '<span class="jjc-mobile-user-fallback">👤</span>'}</div>
+                    <div class="jjc-mobile-user" aria-hidden="true">${avatarSrc ? '<img class="jjc-mobile-avatar" src="' + avatarSrc + '" alt="" referrerpolicy="no-referrer">' : '<span class="jjc-mobile-user-fallback">👤</span>'}</div>
                     ${isAdmin ? '<a href="admin-console.html" class="jjc-mobile-link">Admin Console</a>' : ''}
                     ${monoPageLinkMobile}
                     <button id="jjc-mobile-logout" class="jjc-mobile-link">Logout</button>
