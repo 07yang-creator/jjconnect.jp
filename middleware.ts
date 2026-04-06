@@ -60,6 +60,19 @@ function trimmed(v: string | null | undefined): string {
   return (v ?? '').trim();
 }
 
+/** Production apex must not serve the app — only 308 to canonical `www` (also avoids Auth0 inferring the wrong `redirect_uri`). */
+const JJCONNECT_APEX_HOST = 'jjconnect.jp';
+const JJCONNECT_CANONICAL_HOST = 'www.jjconnect.jp';
+
+function redirectJjconnectApexToWww(request: NextRequest): NextResponse | null {
+  const reqHost = request.headers.get('host')?.split(':')[0]?.toLowerCase();
+  if (reqHost !== JJCONNECT_APEX_HOST) return null;
+  const url = request.nextUrl.clone();
+  url.hostname = JJCONNECT_CANONICAL_HOST;
+  url.protocol = 'https:';
+  return NextResponse.redirect(url, 308);
+}
+
 async function readAuth0MappedProfile(auth0Sub: string) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -103,6 +116,9 @@ function redirectToLogin(request: NextRequest) {
 }
 
 export async function middleware(request: NextRequest) {
+  const apexRedirect = redirectJjconnectApexToWww(request);
+  if (apexRedirect) return apexRedirect;
+
   const { pathname, hostname } = request.nextUrl;
 
   if (!isAuth0Enabled()) {
@@ -211,7 +227,15 @@ export async function middleware(request: NextRequest) {
   return auth0Response;
 }
 
-/** Auth0 quickstart-style matcher (Next.js 15: `middleware.ts`). Supabase-only requests exit early inside the handler. */
+/**
+ * - Apex host: every path (including `/_next/static`, `favicon.ico`) must hit middleware so
+ *   `jjconnect.jp` is never served as a 200 — only 308 to `www`.
+ * - Canonical host: skip static assets to limit work (same as Auth0 quickstart-style matcher).
+ */
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)'],
+  matcher: [
+    // Must be a string literal (Next parses `config` statically); keep in sync with JJCONNECT_APEX_HOST.
+    { source: '/:path*', has: [{ type: 'host', value: 'jjconnect.jp' }] },
+    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
+  ],
 };

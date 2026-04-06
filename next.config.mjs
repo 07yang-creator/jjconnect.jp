@@ -6,7 +6,10 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   outputFileTracingRoot: __dirname,
-  /** Backup if a request reaches the app on apex; Vercel Domains should also 308 jjconnect.jp → www. */
+  /**
+   * Backup apex → www (middleware does this first for all paths on `jjconnect.jp`, including `/_next/static`).
+   * Keep Vercel Domains apex configured to redirect as well.
+   */
   async redirects() {
     return [
       {
