@@ -60,6 +60,7 @@ const pairs = [
   ['public/about.html', 'about.html'],
   ['public/gettingready.html', 'gettingready.html'],
   ['public/publish.html', 'publish.html'],
+  ['public/publish.js', 'publish.js'],
   ['public/category.html', 'category.html'],
   ['public/profile.html', 'profile.html'],
   ['public/raft_home.html', 'raft_home.html'],
