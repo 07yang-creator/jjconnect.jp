@@ -9,7 +9,7 @@ const REVIEW_ADMIN_EMAIL = process.env.REVIEW_ADMIN_EMAIL || 'review@jjconnect.j
 
 // Worker proxy config — MailChannels only works in CF Workers runtime,
 // so Next.js delegates email sending to the deployed Worker.
-const WORKER_BASE_URL = (process.env.WORKER_BASE_URL || 'https://jjconnect.jp').replace(/\/$/, '');
+const WORKER_BASE_URL = (process.env.WORKER_BASE_URL || 'https://www.jjconnect.jp').replace(/\/$/, '');
 const INTERNAL_API_SECRET = process.env.INTERNAL_API_SECRET || '';
 
 export interface SendEmailParams {
@@ -137,7 +137,7 @@ export async function sendPostSubmittedNotificationToAdmin(params: {
   const baseUrl =
     typeof process.env.NEXT_PUBLIC_APP_URL === 'string' && process.env.NEXT_PUBLIC_APP_URL
       ? process.env.NEXT_PUBLIC_APP_URL
-      : 'https://jjconnect.jp';
+      : 'https://www.jjconnect.jp';
   const reviewUrl = `${baseUrl}/admin/review`;
 
   const html = `

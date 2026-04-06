@@ -3,7 +3,7 @@
  * Use getCoverImageUrl(rawUrl, 'card'|'detail') when building img src.
  */
 (function (global) {
-  var CF_IMAGE_BASE = 'https://jjconnect.jp/cdn-cgi/image';
+  var CF_IMAGE_BASE = 'https://www.jjconnect.jp/cdn-cgi/image';
 
   function getCoverImageUrl(rawUrl, variant) {
     if (!rawUrl || typeof rawUrl !== 'string' || rawUrl.indexOf('http') !== 0) {

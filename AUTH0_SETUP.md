@@ -81,24 +81,22 @@ Click **Save Changes**. Until these are set, login will fail with a callback mis
 
 Use this checklist when testing login on the **live** site (not localhost).
 
-1. **Vercel → Project → Settings → Environment Variables (Production)**  
-   - Set **`APP_BASE_URL`** to the **exact** origin shown in the browser address bar: `https://www.jjconnect.jp` **or** `https://jjconnect.jp` (no trailing slash, no path).  
-   - Mismatch between this value and the URL users open is the most common cause of production failures (`redirect_uri_mismatch` or generic errors on Auth0).  
-   - After changes, **redeploy** the production deployment.
+1. **Vercel → Project → Settings → Domains**  
+   - Prefer **`www.jjconnect.jp`** as production; configure **apex** `jjconnect.jp` to **308 redirect** to `https://www.jjconnect.jp` so cookies and Auth0 always see one host.
 
-2. **Auth0 → Applications → (your app) → Settings**  
-   - **Allowed Callback URLs** — include **every** production origin you use, one per line (SDK uses `{origin}/auth/callback`):  
-     - `https://www.jjconnect.jp/auth/callback`  
-     - `https://jjconnect.jp/auth/callback`  
-     - Keep `http://localhost:3000/auth/callback` for local dev in the same app if you use one application for both.  
-   - **Allowed Logout URLs** — same origins, e.g. `https://www.jjconnect.jp`, `https://jjconnect.jp`, `http://localhost:3000`.  
-   - **Allowed Web Origins** — same origins as above.
+2. **Vercel → Project → Settings → Environment Variables (Production)**  
+   - Set **`APP_BASE_URL`** to `https://www.jjconnect.jp` (no trailing slash, no path) so it matches the URL after redirect.  
+   - After changes, **redeploy**.
 
-3. **Auth0 → Applications → Connections**  
+3. **Auth0 → Applications → (your app) → Settings**  
+   - **Allowed Callback URLs** — at minimum: `https://www.jjconnect.jp/auth/callback`. Add `https://jjconnect.jp/auth/callback` only if apex still serves the app without redirect.  
+   - **Allowed Logout URLs** / **Allowed Web Origins** — at minimum `https://www.jjconnect.jp`; add `http://localhost:3000` for local dev if you use one Auth0 app.
+
+4. **Auth0 → Applications → Connections**  
    - Enable **Username-Password-Authentication** (or your renamed database connection) for this application.  
    - The Next.js `/login` page sends **`connection=`** on **Continue** (email) so Auth0 routes to the database connection; if it is disabled for the app, authorize can fail before the password step.
 
-4. **Optional: confirm what the server expects**  
+5. **Optional: confirm what the server expects**  
    - Set **`AUTH_DIAGNOSTICS_SECRET`** in Vercel (Production).  
    - `GET /api/auth/diagnostics` with header **`x-auth-diagnostics: <your secret>`** returns **`auth0SuggestedCallbackUrls`** and **`auth0SuggestedLogoutOrigins`** derived from **`APP_BASE_URL`** (no secrets in the body). Add any **missing** URLs to Auth0 if you use multiple hosts.
 

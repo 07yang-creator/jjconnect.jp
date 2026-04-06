@@ -4,7 +4,7 @@
  * See plan: 方案B — Cloudflare Image Resizing.
  */
 
-const CF_IMAGE_BASE = 'https://jjconnect.jp/cdn-cgi/image';
+const CF_IMAGE_BASE = 'https://www.jjconnect.jp/cdn-cgi/image';
 
 export type CoverVariant = 'card' | 'detail';
 

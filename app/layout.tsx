@@ -7,11 +7,20 @@ import { getAuthProvider } from '@/lib/auth/provider';
 import { getAuth0ConnectionMap, getAuth0DatabaseConnection } from '@/lib/auth0/connections';
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  // Avoid preload hints for a font that often sits unused on the static marketing home (rewritten `/` → index.html).
+  preload: false,
+});
 
 export const metadata: Metadata = {
   title: 'JJConnect — community & stories',
   description: 'Share knowledge, connect with others, and publish your story.',
+  icons: {
+    icon: [{ url: '/brand/jjconnect-navbar-logo.svg', type: 'image/svg+xml' }],
+    shortcut: '/brand/jjconnect-navbar-logo.svg',
+  },
 };
 
 export default async function RootLayout({
