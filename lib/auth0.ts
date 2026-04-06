@@ -9,6 +9,7 @@
  * @see https://auth0.com/docs/quickstart/webapp/nextjs
  */
 import { Auth0Client } from '@auth0/nextjs-auth0/server';
+import { auth0CredentialFromEnv } from '@/lib/auth0/env-credentials';
 
 function normalizeAuth0AppBaseEntry(entry: string): string {
   try {
@@ -40,4 +41,8 @@ function resolvedAuth0AppBaseUrl(): string | string[] | undefined {
 
 export const auth0 = new Auth0Client({
   appBaseUrl: resolvedAuth0AppBaseUrl(),
+  domain: auth0CredentialFromEnv('AUTH0_DOMAIN'),
+  clientId: auth0CredentialFromEnv('AUTH0_CLIENT_ID'),
+  clientSecret: auth0CredentialFromEnv('AUTH0_CLIENT_SECRET'),
+  secret: auth0CredentialFromEnv('AUTH0_SECRET'),
 });

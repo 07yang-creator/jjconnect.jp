@@ -4,6 +4,7 @@ import {
   getAuthProvider,
 } from '@/lib/auth/provider';
 import { getAuth0ConnectionMap, getAuth0DatabaseConnection } from '@/lib/auth0/connections';
+import { auth0CredentialFromEnv } from '@/lib/auth0/env-credentials';
 
 function auth0SuggestedUrlsFromEnv(): {
   suggestedCallbackUrls: string[];
@@ -66,6 +67,8 @@ export async function GET(request: Request) {
 
   const { suggestedCallbackUrls, suggestedLogoutOrigins } = auth0SuggestedUrlsFromEnv();
   const auth0 = getAuthProvider() === 'auth0';
+  const clientId = auth0CredentialFromEnv('AUTH0_CLIENT_ID');
+  const clientSecret = auth0CredentialFromEnv('AUTH0_CLIENT_SECRET');
 
   return NextResponse.json({
     nodeEnv: process.env.NODE_ENV,
@@ -78,10 +81,17 @@ export async function GET(request: Request) {
     supabaseAnonKey: Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
     supabaseServiceRoleKey: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
     auth0: {
-      domain: Boolean(process.env.AUTH0_DOMAIN),
-      clientId: Boolean(process.env.AUTH0_CLIENT_ID),
-      clientSecret: Boolean(process.env.AUTH0_CLIENT_SECRET),
-      secret: Boolean(process.env.AUTH0_SECRET),
+      domain: Boolean(auth0CredentialFromEnv('AUTH0_DOMAIN')),
+      clientId: Boolean(clientId),
+      clientSecret: Boolean(clientSecret),
+      secret: Boolean(auth0CredentialFromEnv('AUTH0_SECRET')),
+      /** If set, @auth0/nextjs-auth0 uses private_key_jwt at the token endpoint instead of client_secret — mismatch can look like “invalid secret”. */
+      clientAssertionSigningKeyConfigured: Boolean(
+        auth0CredentialFromEnv('AUTH0_CLIENT_ASSERTION_SIGNING_KEY'),
+      ),
+      /** Safe sanity check (values, not secrets). Auth0 Client ID is public in the browser. */
+      clientIdPrefix: clientId && clientId.length >= 8 ? `${clientId.slice(0, 8)}…` : null,
+      clientSecretCharLength: clientSecret?.length ?? 0,
     },
     auth0Connections: getAuth0ConnectionMap(),
     auth0DatabaseConnection: auth0 ? getAuth0DatabaseConnection() : null,
