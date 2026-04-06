@@ -1206,6 +1206,26 @@ async function routeAfterAuth(user) {
     }
 }
 
+/** Auth0 (and similar): session is cookie-based; /api/me is the source of truth — not Supabase localStorage. */
+function redirectIfLoggedInViaApiMe(userData) {
+    const rawDest = getPostAuthDestination();
+    const safeDest = isAuthUiPath(rawDest) ? '/' : rawDest;
+    if (!userData?.id) {
+        window.location.href = safeDest;
+        return;
+    }
+    if (!userData.basic_complete) {
+        window.location.href = '/onboarding?next=' + encodeURIComponent(safeDest);
+        return;
+    }
+    const upgradedRole = Boolean(userData.role && userData.role !== 'T');
+    if (upgradedRole && (!userData.upgrade_complete || !userData.email_verified)) {
+        window.location.href = '/upgrade/complete-profile?next=' + encodeURIComponent(safeDest);
+        return;
+    }
+    window.location.href = safeDest;
+}
+
 // Step 2a: Login
 document.getElementById('login-form').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -1328,19 +1348,27 @@ document.querySelector('.forgot-password').addEventListener('click', function(e)
     showMessage('Please contact admin to reset your password.', 'info');
 });
 
-// On load: show register if ?create=1, or redirect if already logged in
-window.addEventListener('load', function() {
+// Already signed in: Auth0 uses /api/me; Supabase password uses local session. Run on DOMContentLoaded (before paint flicker vs load).
+async function runLoginPageEntry() {
+    await fetchAndMergePublicConfig();
     const params = new URLSearchParams(window.location.search);
-    const sb = getSbClient();
-    const sessionPromise =
-        sb && sb.auth && typeof sb.auth.getSession === 'function'
-            ? sb.auth.getSession()
-            : Promise.resolve({ data: { session: null } });
 
-    sessionPromise
-        .then(async ({ data }) => {
-            if (data?.session) {
-                const shouldApplySocialDefaults = params.get('oauth') === '1' || !!localStorage.getItem('jjc_pending_social_provider');
+    if (auth0Enabled()) {
+        try {
+            const res = await fetch('/api/me', { credentials: 'include' });
+            const payload = await res.json();
+            if (payload && payload.isLoggedIn && payload.userData) {
+                redirectIfLoggedInViaApiMe(payload.userData);
+                return;
+            }
+        } catch (_) { /* stay on login */ }
+    } else {
+        const sb = getSbClient();
+        if (sb && sb.auth && typeof sb.auth.getSession === 'function') {
+            const { data } = await sb.auth.getSession();
+            if (data && data.session) {
+                const shouldApplySocialDefaults =
+                    params.get('oauth') === '1' || !!localStorage.getItem('jjc_pending_social_provider');
                 if (shouldApplySocialDefaults) {
                     await applySocialProfileDefaults(data.session.user);
                     localStorage.removeItem('jjc_pending_social_provider');
@@ -1349,26 +1377,34 @@ window.addEventListener('load', function() {
                 await routeAfterAuth(data.session.user);
                 return;
             }
-            if (params.get('create') === '1') {
-                const registerIdentifierBar = document.getElementById('register-identifier-bar');
-                const registerSignInInstead = document.getElementById('register-sign-in-instead');
-                if (registerIdentifierBar) registerIdentifierBar.style.display = 'none';
-                if (registerSignInInstead) registerSignInInstead.style.display = 'block';
-                enableManualRegisterIdentityFields();
-                openCreateAccountView();
-            }
-        })
-        .catch(() => {
-            if (params.get('create') === '1') {
-                const registerIdentifierBar = document.getElementById('register-identifier-bar');
-                const registerSignInInstead = document.getElementById('register-sign-in-instead');
-                if (registerIdentifierBar) registerIdentifierBar.style.display = 'none';
-                if (registerSignInInstead) registerSignInInstead.style.display = 'block';
-                enableManualRegisterIdentityFields();
-                openCreateAccountView();
-            }
-        });
+        }
+    }
+
+    if (params.get('create') === '1') {
+        const registerIdentifierBar = document.getElementById('register-identifier-bar');
+        const registerSignInInstead = document.getElementById('register-sign-in-instead');
+        if (registerIdentifierBar) registerIdentifierBar.style.display = 'none';
+        if (registerSignInInstead) registerSignInInstead.style.display = 'block';
+        enableManualRegisterIdentityFields();
+        openCreateAccountView();
+    }
     updateCreateAccountButtonState();
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    runLoginPageEntry().catch(function (err) {
+        console.warn('Login page entry failed:', err);
+        var params = new URLSearchParams(window.location.search);
+        if (params.get('create') === '1') {
+            var registerIdentifierBar = document.getElementById('register-identifier-bar');
+            var registerSignInInstead = document.getElementById('register-sign-in-instead');
+            if (registerIdentifierBar) registerIdentifierBar.style.display = 'none';
+            if (registerSignInInstead) registerSignInInstead.style.display = 'block';
+            enableManualRegisterIdentityFields();
+            openCreateAccountView();
+        }
+        updateCreateAccountButtonState();
+    });
 });
 </script>
 </body>

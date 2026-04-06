@@ -17,11 +17,16 @@ async function loadConfig() {
       const cfg = await res.json();
       const u = String(cfg.supabaseUrl || '').trim();
       const k = String(cfg.supabaseAnonKey || '').trim();
+      const patch = {};
       if (u && k) {
-        w.JJCONNECT_CONFIG = Object.assign({}, w.JJCONNECT_CONFIG || {}, {
-          supabaseUrl: u,
-          supabaseAnonKey: k
-        });
+        patch.supabaseUrl = u;
+        patch.supabaseAnonKey = k;
+      }
+      if (cfg.authProvider) {
+        patch.authProvider = cfg.authProvider;
+      }
+      if (Object.keys(patch).length) {
+        w.JJCONNECT_CONFIG = Object.assign({}, w.JJCONNECT_CONFIG || {}, patch);
       }
     }
   } catch (e) {
@@ -64,6 +69,18 @@ async function init() {
       const { data: refreshed, error: authError } = await supabase.auth.getUser();
       user = refreshed?.user;
       if (authError || !user) {
+        const ap = String((window.JJCONNECT_CONFIG || {}).authProvider || 'supabase').toLowerCase();
+        if (ap === 'auth0') {
+          try {
+            const me = await fetch('/api/me', { credentials: 'include' });
+            const j = await me.json();
+            if (j && j.isLoggedIn && j.userData && j.userData.id) {
+              const q = typeof window !== 'undefined' && window.location.search ? window.location.search : '';
+              window.location.replace('/publish' + q);
+              return;
+            }
+          } catch (_) { /* fall through */ }
+        }
         alert('请先登录');
         window.location.href = 'login.html';
         return;
