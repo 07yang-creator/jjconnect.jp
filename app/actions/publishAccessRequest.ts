@@ -27,6 +27,25 @@ export type SubmitPublishAccessResult =
   | { ok: true }
   | { ok: false; error: string };
 
+/** Map PostgREST / Postgres errors to something actionable (see supabase/migrations/018_publish_access_requests.sql). */
+function publishAccessInsertErrorMessage(err: { code?: string; message?: string } | null): string {
+  const code = err?.code ?? '';
+  const msg = (err?.message ?? '').toLowerCase();
+  if (code === '42P01' || msg.includes('does not exist') || msg.includes('schema cache')) {
+    return 'Publishing requests are not enabled in the database yet. In Supabase → SQL Editor, run the migration file supabase/migrations/018_publish_access_requests.sql, then try again.';
+  }
+  if (code === '23503') {
+    return 'Your sign-in account is out of sync with the database. Sign out, sign in again, or contact support.';
+  }
+  if (code === '23505') {
+    return 'You already have a request in progress. We will notify you when it has been reviewed.';
+  }
+  if (code === '42501' || msg.includes('permission denied')) {
+    return 'The server cannot write publishing requests (check SUPABASE_SERVICE_ROLE_KEY in production).';
+  }
+  return 'Could not save your request. Please try again later.';
+}
+
 export async function submitPublishAccessRequestAction(formData: FormData): Promise<SubmitPublishAccessResult> {
   const user = await assertCanSubmitPublishAccessRequest();
   const email = user.email?.trim();
@@ -94,8 +113,8 @@ export async function submitPublishAccessRequestAction(formData: FormData): Prom
     .single();
 
   if (error || !row) {
-    console.error('[publish-access] insert failed', error);
-    return { ok: false, error: 'Could not save your request. Please try again later.' };
+    console.error('[publish-access] insert failed', error?.code, error?.message, error?.details, error?.hint);
+    return { ok: false, error: publishAccessInsertErrorMessage(error) };
   }
 
   void notifyAdminsPublishAccessRequest(row as unknown as PublishAccessRequest).catch((e) =>
