@@ -27,7 +27,8 @@
     "verify:auth": "node scripts/verify-auth-diagnostics.mjs",
     "audit:test-users": "node scripts/audit-supabase-test-users.mjs",
     "cleanup:vv-test-users": "node scripts/delete-vv-test-users.mjs",
-    "seed:vv-test-users": "node scripts/seed-vv-test-users.mjs"
+    "seed:vv-test-users": "node scripts/seed-vv-test-users.mjs",
+    "grant:full-access": "node scripts/grant-full-access-by-email.mjs"
   },
   "keywords": [
     "cloudflare",
