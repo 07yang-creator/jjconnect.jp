@@ -175,7 +175,6 @@
                 <!-- 导航链接（桌面端） -->
                 <div class="jjc-navbar-nav">
                     <a href="/gettingready.html" class="jjc-nav-link">Home</a>
-                    <a href="home.html" class="jjc-nav-link">Articles</a>
                     <!-- Services dropdown -->
                     <div class="jjc-nav-dropdown" id="jjc-services-dropdown">
                         <a href="services.html" class="jjc-nav-link jjc-nav-dropdown-toggle">Services</a>
@@ -205,6 +204,10 @@
                             <a href="/publish" class="jjc-nav-dropdown-item">
                                 <span class="jjc-nav-dropdown-icon">✍️</span>
                                 <span>Writing Articles</span>
+                            </a>
+                            <a href="home.html" class="jjc-nav-dropdown-item">
+                                <span class="jjc-nav-dropdown-icon">📄</span>
+                                <span>Articles</span>
                             </a>
                         </div>
                     </div>
@@ -244,7 +247,6 @@
             <!-- 移动端菜单 -->
             <div class="jjc-mobile-menu" id="jjc-mobile-menu">
                 <a href="/gettingready.html" class="jjc-mobile-link">Home</a>
-                <a href="home.html" class="jjc-mobile-link">Articles</a>
                 
                 <div class="jjc-mobile-divider"></div>
                 <a href="services.html" class="jjc-mobile-link" style="font-weight: 600;">Services</a>
@@ -273,6 +275,10 @@
                     <a href="/publish" class="jjc-mobile-service-link">
                         <span>✍️</span>
                         <span>Writing Articles</span>
+                    </a>
+                    <a href="home.html" class="jjc-mobile-service-link">
+                        <span>📄</span>
+                        <span>Articles</span>
                     </a>
                 </div>
                 ${canUseAiTool ? '<a href="ai.html" class="jjc-mobile-link">✨AI empowered</a>' : ''}
