@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import sanitizeHtml from 'sanitize-html';
@@ -218,13 +218,11 @@ export default function PublishForm({
   const [hasLocalDraft, setHasLocalDraft] = useState(false);
   const [editor, setEditor] = useState<Editor | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [actionsOpen, setActionsOpen] = useState(false);
   const [dbPostId, setDbPostId] = useState<string | null>(initialPost?.id ?? null);
   const [reviewState, setReviewState] = useState<AuthorEditablePost['review_state']>(
     initialPost?.review_state ?? null
   );
   const [reviewReason, setReviewReason] = useState<string | null>(initialPost?.review_reason ?? null);
-  const [showPreview, setShowPreview] = useState(false);
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
   const [theme, setTheme] = useState('light');
   const [showBanner, setShowBanner] = useState(true);
@@ -296,7 +294,7 @@ export default function PublishForm({
   }, [editor]);
 
   let previewHtml = '';
-  if (editor && showPreview) {
+  if (editor && viewMode === 'preview') {
     void previewRev;
     previewHtml = sanitizeHtml(editor.getHTML(), {
       allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'h1', 'h2', 'h3']),
@@ -308,11 +306,7 @@ export default function PublishForm({
     });
   }
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  async function loadData() {
+  const loadData = useCallback(async () => {
     const supabase = createBrowserClient();
     try {
       const { data: categoriesData } = await supabase
@@ -371,7 +365,11 @@ export default function PublishForm({
     } catch (error) {
       console.error('Failed to load data:', error);
     }
-  }
+  }, [useAuth0Identity]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   useEffect(() => {
     if (!editor || !userId || reviewPending) return;
@@ -700,7 +698,7 @@ export default function PublishForm({
                       <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     </div>
                     <div>
-                      <h4 className="text-sm font-extrabold text-blue-900 uppercase tracking-wider mb-1">Writer's Tip</h4>
+                      <h4 className="text-sm font-extrabold text-blue-900 uppercase tracking-wider mb-1">Writer&apos;s Tip</h4>
                       <p className="text-sm text-blue-800 leading-relaxed opacity-90">
                         This page is for quick writing and sharing. For professional features or a more polished final presentation, feel free to submit your articles in any format—even handwritten—and our team will ensure it is perfectly displayed on the site.
                       </p>
