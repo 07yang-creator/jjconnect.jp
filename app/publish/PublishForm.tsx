@@ -906,6 +906,36 @@ function EditorToolbar({ editor, disabled = false }: { editor: Editor | null; di
         </button>
       </div>
 
+      <div className="w-px h-6 bg-gray-300 mx-1" aria-hidden />
+
+      {/* Advanced Tools */}
+      <div className="flex items-center gap-1">
+        <button 
+          type="button" 
+          onClick={() => editor.chain().focus().setFontFamily('serif').run()} 
+          className={`px-2 py-1.5 rounded hover:bg-gray-100 font-serif text-sm ${editor.isActive('textStyle', { fontFamily: 'serif' }) ? 'bg-gray-200 text-blue-600' : ''}`} 
+          title="Classic Serif Font"
+        >
+          Aa
+        </button>
+        <button 
+          type="button" 
+          onClick={() => editor.chain().focus().unsetFontFamily().run()} 
+          className={`px-2 py-1.5 rounded hover:bg-gray-100 font-sans text-sm ${!editor.isActive('textStyle', { fontFamily: 'serif' }) ? 'bg-gray-200 text-blue-600' : ''}`} 
+          title="Modern Sans Font"
+        >
+          Aa
+        </button>
+        <button 
+          type="button" 
+          onClick={() => editor.chain().focus().insertContent({ type: 'paywall' }).run()} 
+          className="p-1.5 rounded hover:bg-amber-100 text-amber-600 font-bold text-[10px] border border-amber-200 ml-1" 
+          title="Insert Paywall Divider"
+        >
+          PAYWALL
+        </button>
+      </div>
+
       <div className="flex-1" />
 
       {/* History */}

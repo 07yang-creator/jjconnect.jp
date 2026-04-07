@@ -1054,3 +1054,46 @@ export async function submitPostForReview(input: SubmitPostForReviewInput): Prom
   revalidatePath('/admin/review');
   return { success: true, data: { post_id: postId, cover_url: coverUrl || undefined } };
 }
+
+async function getUserRole(userId: string): Promise<number> {
+  const supabase = await createServerSupabaseClient();
+  const { data } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', userId)
+    .single();
+  // Role mapping if needed, e.g., 'admin' -> 100
+  if (data?.role === 'admin') return 100;
+  return 0;
+}
+
+/**
+ * Admin action to update a post (content, title, status)
+ */
+export async function adminUpdatePost(postId: string, data: PostUpdate): Promise<CreatePostResult> {
+  const user = await getCurrentUser();
+  if (!user) return { success: false, error: { code: 'UNAUTHORIZED', message: 'Not logged in' } };
+
+  // Permission check
+  const isAuthorized = await isAuthorizedUser(user.id);
+  const roleLevel = await getUserRole(user.id);
+  if (!isAuthorized && roleLevel < 80) { // Assuming 80+ is admin
+    return { success: false, error: { code: 'FORBIDDEN', message: 'Admin access required' } };
+  }
+
+  const supabase = await createServerSupabaseClient();
+  const { error } = await supabase
+    .from('posts')
+    .update(data)
+    .eq('id', postId);
+
+  if (error) {
+    console.error('Admin update error:', error);
+    return { success: false, error: { code: 'DB_ERROR', message: error.message } };
+  }
+
+  revalidatePath('/admin/review');
+  revalidatePath(`/posts/${postId}`);
+  revalidatePath('/');
+  return { success: true, data: { post_id: postId } };
+}

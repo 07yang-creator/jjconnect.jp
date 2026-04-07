@@ -129,8 +129,10 @@ async function getProfilesForUserIds(
 
 /** Render post body: prefer stored HTML, else TipTap JSON → HTML, else fallback.
  *  All HTML paths are sanitized before rendering to prevent XSS. */
-function renderPostContent(content: Post['content']): string {
-  if (!content) return '';
+/** Render post body: prefer stored HTML, else TipTap JSON → HTML, else fallback.
+ *  All HTML paths are sanitized before rendering to prevent XSS. */
+function renderPostContent(content: Post['content'], showFullContent: boolean): { html: string; isTruncated: boolean } {
+  if (!content) return { html: '', isTruncated: false };
 
   let raw = '';
   if (typeof content === 'string') {
@@ -140,12 +142,29 @@ function renderPostContent(content: Post['content']): string {
     if (c.html && typeof c.html === 'string') {
       raw = c.html;
     } else if (c.type === 'doc' && Array.isArray(c.content)) {
-      // tiptapJsonToHtml already escapes text nodes — sanitize for defence-in-depth
       raw = tiptapJsonToHtml(content);
     }
   }
 
-  return raw ? sanitizeHtml(raw, ALLOWED_HTML_OPTIONS) : '';
+  if (!raw) return { html: '', isTruncated: false };
+
+  // Paywall truncation logic: Find the marker
+  // The marker is rendered as <hr data-role="paywall" class="paywall-divider">
+  const paywallMarker = 'data-role="paywall"';
+  let isTruncated = false;
+
+  if (!showFullContent && raw.includes(paywallMarker)) {
+    const parts = raw.split(new RegExp(`<hr[^>]*${paywallMarker}[^>]*>`, 'i'));
+    if (parts.length > 1) {
+      raw = parts[0];
+      isTruncated = true;
+    }
+  }
+
+  return {
+    html: sanitizeHtml(raw, ALLOWED_HTML_OPTIONS),
+    isTruncated
+  };
 }
 
 async function createComment(formData: FormData) {
@@ -235,7 +254,11 @@ export default async function PostPage({ params }: PostPageProps) {
   const commentTree = buildCommentTree(comments);
   const authorIds = [...new Set(comments.map((c) => c.user_id))];
   const profilesMap = await getProfilesForUserIds(authorIds);
-  const bodyHtml = renderPostContent(post.content);
+  
+  // For now, only show full content if the post is NOT paid.
+  // In a real app, check if the currentUser has purchased this post.
+  const hasAccess = !post.is_paid || (currentUser?.id === post.author_id);
+  const { html: bodyHtml, isTruncated } = renderPostContent(post.content, hasAccess);
 
   const createdAt = new Date(post.created_at);
 
@@ -269,14 +292,32 @@ export default async function PostPage({ params }: PostPageProps) {
           <div
             className="prose prose-sm sm:prose lg:prose-lg max-w-none text-gray-800 tiptap-content overflow-x-auto"
             dangerouslySetInnerHTML={{
-              __html: bodyHtml || '<p class="text-gray-500">本文内容暂时无法展示。</p>',
+              __html: bodyHtml || '<p class="text-gray-500">Content temporarily unavailable.</p>',
             }}
           />
+
+          {isTruncated && (
+            <div className="mt-8 p-8 rounded-xl bg-gradient-to-b from-gray-50 to-white border border-gray-200 text-center relative overflow-hidden">
+              <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px] pointer-events-none" />
+              <div className="relative z-10">
+                <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Premium Content</h3>
+                <p className="text-gray-600 mb-6 text-sm max-w-xs mx-auto text-center">
+                  This article is part of our premium collection. Unlock the full story to continue reading.
+                </p>
+                <button className="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
+                  Unlock for ¥{post.price || 500}
+                </button>
+              </div>
+            </div>
+          )}
         </article>
 
         {/* Comments section */}
-        <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 overflow-hidden">
-          <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">评论</h2>
+        <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 overflow-hidden text-center">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Comments</h2>
 
           {/* New comment form */}
           {currentUser ? (
@@ -285,7 +326,7 @@ export default async function PostPage({ params }: PostPageProps) {
               <textarea
                 name="content"
                 rows={3}
-                placeholder="发表你的看法……"
+                placeholder="Share your thoughts..."
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
               />
@@ -294,26 +335,26 @@ export default async function PostPage({ params }: PostPageProps) {
                   type="submit"
                   className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
                 >
-                  发表评论
+                  Post Comment
                 </button>
               </div>
             </form>
           ) : (
             <p className="mb-6 text-sm text-gray-500">
-              请先
+              Please 
               <a
                 href="/login"
                 className="text-blue-600 hover:underline mx-1"
               >
-                登录
+                Log In
               </a>
-              后再发表评论。
+              to post a comment.
             </p>
           )}
 
           {/* Comment list */}
           {commentTree.length === 0 ? (
-            <p className="text-sm text-gray-500">还没有评论，快来抢沙发～</p>
+            <p className="text-sm text-gray-500 text-center">No comments yet. Be the first to join the conversation!</p>
           ) : (
             <div className="space-y-4">
               {commentTree.map((node) => (

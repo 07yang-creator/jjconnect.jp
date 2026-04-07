@@ -23,6 +23,23 @@ import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import Placeholder from '@tiptap/extension-placeholder';
 import FileHandler from '@tiptap/extension-file-handler';
+import { TextStyle } from '@tiptap/extension-text-style';
+import { FontFamily } from '@tiptap/extension-font-family';
+import { Node, mergeAttributes } from '@tiptap/core';
+
+/** Custom Paywall Marker Node */
+const PaywallMarker = Node.create({
+  name: 'paywall',
+  group: 'block',
+  selectable: true,
+  draggable: true,
+  parseHTML() {
+    return [{ tag: 'hr[data-role="paywall"]' }];
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['hr', mergeAttributes(HTMLAttributes, { 'data-role': 'paywall', class: 'paywall-divider' })];
+  },
+});
 
 /** 将 File 转为 base64 data URL */
 function fileToDataUrl(file: File): Promise<string> {
@@ -106,6 +123,8 @@ export default function TipTapBasicEditor({
         horizontalRule: false,
       }),
       Underline,
+      TextStyle,
+      FontFamily,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
@@ -120,6 +139,7 @@ export default function TipTapBasicEditor({
       }),
       Link.configure({ openOnClick: false }),
       Placeholder.configure({ placeholder }),
+      PaywallMarker,
       FileHandler.configure({
         allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
         onPaste: (editorInstance: Editor, files: File[]) => {
@@ -155,6 +175,31 @@ export default function TipTapBasicEditor({
         </div>
       )}
       <div className={`${minHeight} [&_.ProseMirror]:min-h-full [&_.ProseMirror]:p-3 sm:[&_.ProseMirror]:p-4`}>
+        <style dangerouslySetInnerHTML={{ __html: `
+          .ProseMirror .paywall-divider {
+            border: none;
+            border-top: 2px dashed #f59e0b;
+            margin: 3rem 0;
+            position: relative;
+            overflow: visible;
+          }
+          .ProseMirror .paywall-divider::after {
+            content: 'PAYWALL';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: inherit;
+            padding: 0 1rem;
+            color: #f59e0b;
+            font-size: 0.7rem;
+            font-weight: 900;
+            letter-spacing: 0.2em;
+          }
+          .ProseMirror span[style*="font-family: serif"] {
+            font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+          }
+        `}} />
         <EditorContent editor={editor} />
       </div>
     </div>

@@ -170,3 +170,32 @@ img.float-right {
   clear: both;
 }
 
+/* Paywall Divider Styles */
+.tiptap-content .paywall-divider {
+  border: none;
+  border-top: 2px dashed #f59e0b;
+  margin: 4rem 0;
+  position: relative;
+  overflow: visible;
+}
+
+.tiptap-content .paywall-divider::after {
+  content: 'PREMIUM CONTENT BELOW';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 0 1.5rem;
+  color: #f59e0b;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.25em;
+  white-space: nowrap;
+}
+
+/* Specific font family support */
+.tiptap-content .font-serif,
+.tiptap-content span[style*="font-family: serif"] {
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+}
