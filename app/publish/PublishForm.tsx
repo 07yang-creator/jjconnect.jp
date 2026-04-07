@@ -44,6 +44,10 @@ interface SettingsPanelProps {
   setIsPaid: (v: boolean) => void;
   price: string;
   setPrice: (v: string) => void;
+  theme: string;
+  setTheme: (v: string) => void;
+  viewMode: 'edit' | 'preview';
+  setViewMode: (v: 'edit' | 'preview') => void;
   readOnly?: boolean;
 }
 
@@ -64,37 +68,90 @@ function SettingsPanel({
   setIsPaid,
   price,
   setPrice,
+  theme,
+  setTheme,
+  viewMode,
+  setViewMode,
   readOnly = false,
 }: SettingsPanelProps) {
   return (
-    <div className={`space-y-4 ${readOnly ? 'opacity-70 pointer-events-none' : ''}`}>
+    <div className={`space-y-6 ${readOnly ? 'opacity-70 pointer-events-none' : ''}`}>
+      {/* View Mode Toggle */}
       <div>
-        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">封面图片</label>
+        <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-3">View Mode</label>
+        <div className="flex p-1 bg-[var(--hover)] rounded-lg">
+          <button
+            type="button"
+            onClick={() => setViewMode('edit')}
+            className={`flex-1 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'edit' ? 'bg-white shadow-sm text-blue-600' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('preview')}
+            className={`flex-1 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'preview' ? 'bg-white shadow-sm text-blue-600' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+          >
+            Preview
+          </button>
+        </div>
+      </div>
+
+      {/* Editor Theme */}
+      <div>
+        <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-3">Editor Theme</label>
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { id: 'light', label: 'Day', color: 'bg-white border-gray-200' },
+            { id: 'night', label: 'Night', color: 'bg-gray-900 border-gray-700' },
+            { id: 'emerald', label: 'Green', color: 'bg-emerald-900 border-emerald-800' }
+          ].map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setTheme(t.id)}
+              className={`flex flex-col items-center gap-2 p-2 rounded-lg border-2 transition-all ${theme === t.id ? 'border-blue-500 bg-blue-50/10' : 'border-transparent hover:bg-[var(--hover)]'}`}
+            >
+              <div className={`w-8 h-8 rounded-full border ${t.color}`} />
+              <span className="text-[10px] font-medium uppercase">{t.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="h-px bg-[var(--border)] opacity-50" />
+
+      <div>
+        <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-3">Cover Image</label>
         {coverPreview ? (
-          <div className="relative">
-            <img src={coverPreview} alt="Cover preview" className="w-full h-40 object-cover rounded-[var(--radius)]" />
-            <button type="button" onClick={onCoverRemove} className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">移除</button>
+          <div className="relative group">
+            <img src={coverPreview} alt="Cover preview" className="w-full h-40 object-cover rounded-[var(--radius)] shadow-sm" />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-[var(--radius)]">
+              <button type="button" onClick={onCoverRemove} className="bg-red-500 text-white px-3 py-1.5 rounded-md text-xs font-bold shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform">Remove</button>
+            </div>
           </div>
         ) : (
-          <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[var(--border)] rounded-[var(--radius)] cursor-pointer hover:border-blue-400 transition-colors">
+          <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[var(--border)] rounded-[var(--radius)] cursor-pointer hover:border-blue-400 hover:bg-blue-50/5 transition-all">
             <svg className="w-8 h-8 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-            <span className="text-xs text-[var(--text-secondary)]">点击上传</span>
+            <span className="text-xs font-medium text-[var(--text-secondary)]">Click to upload</span>
             <input type="file" accept="image/*" onChange={onCoverChange} className="hidden" disabled={readOnly} />
           </label>
         )}
       </div>
+
       <div>
-        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">摘要</label>
-        <textarea value={summary} onChange={(e) => setSummary(e.target.value)} placeholder="简要描述..." rows={2} readOnly={readOnly} className="w-full border border-[var(--border)] rounded-[var(--radius)] px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 resize-none" />
+        <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-3">Short Summary</label>
+        <textarea value={summary} onChange={(e) => setSummary(e.target.value)} placeholder="A brief description of your story..." rows={3} readOnly={readOnly} className="w-full border border-[var(--border)] bg-[var(--bg-page)] rounded-[var(--radius)] px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none resize-none" />
       </div>
+
       <div>
-        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">分类</label>
-        <div className="flex gap-2 mb-2">
-          <button type="button" onClick={() => { setCategoryType('official'); setSelectedCategory(''); }} className={`flex-1 py-1.5 px-3 rounded-[var(--radius)] text-sm font-medium ${categoryType === 'official' ? 'bg-blue-600 text-white' : 'bg-[var(--hover)] text-[var(--text-primary)]'}`}>官方</button>
-          {isAuthorized && <button type="button" onClick={() => { setCategoryType('personal'); setSelectedCategory(''); }} className={`flex-1 py-1.5 px-3 rounded-[var(--radius)] text-sm font-medium ${categoryType === 'personal' ? 'bg-blue-600 text-white' : 'bg-[var(--hover)] text-[var(--text-primary)]'}`}>个人</button>}
+        <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-3">Category</label>
+        <div className="flex gap-2 mb-3">
+          <button type="button" onClick={() => { setCategoryType('official'); setSelectedCategory(''); }} className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold uppercase tracking-tighter transition-all ${categoryType === 'official' ? 'bg-blue-600 text-white shadow-md' : 'bg-[var(--hover)] text-[var(--text-secondary)]'}`}>Official</button>
+          {isAuthorized && <button type="button" onClick={() => { setCategoryType('personal'); setSelectedCategory(''); }} className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold uppercase tracking-tighter transition-all ${categoryType === 'personal' ? 'bg-blue-600 text-white shadow-md' : 'bg-[var(--hover)] text-[var(--text-secondary)]'}`}>Personal</button>}
         </div>
-        <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} disabled={readOnly} className="w-full border border-[var(--border)] rounded-[var(--radius)] px-3 py-2 text-sm">
-          <option value="">请选择...</option>
+        <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} disabled={readOnly} className="w-full border border-[var(--border)] bg-[var(--bg-page)] rounded-[var(--radius)] px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400">
+          <option value="">Choose category...</option>
           {categoryType === 'official'
             ? categories.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -108,17 +165,18 @@ function SettingsPanel({
               ))}
         </select>
       </div>
+
       <div>
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-[var(--text-primary)]">付费内容</span>
-          <button type="button" onClick={() => setIsPaid(!isPaid)} disabled={readOnly} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${isPaid ? 'bg-blue-600' : 'bg-gray-200'}`}>
-            <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${isPaid ? 'translate-x-5' : 'translate-x-1'}`} />
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">Paid Content</span>
+          <button type="button" onClick={() => setIsPaid(!isPaid)} disabled={readOnly} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isPaid ? 'bg-blue-600' : 'bg-gray-200'}`}>
+            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isPaid ? 'translate-x-6' : 'translate-x-1'}`} />
           </button>
         </div>
         {isPaid && (
-          <div className="relative">
-            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500 text-sm">¥</span>
-            <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} min="0" step="0.01" required={isPaid} readOnly={readOnly} className="w-full pl-6 pr-2 py-1.5 border border-[var(--border)] rounded-[var(--radius)] text-sm" />
+          <div className="relative animate-in slide-in-from-top-2 duration-200">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] font-bold">¥</span>
+            <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} min="0" step="0.01" required={isPaid} readOnly={readOnly} className="w-full pl-7 pr-3 py-2 border border-[var(--border)] bg-[var(--bg-page)] rounded-[var(--radius)] text-sm outline-none focus:ring-2 focus:ring-blue-400" />
           </div>
         )}
       </div>
@@ -167,6 +225,8 @@ export default function PublishForm({
   );
   const [reviewReason, setReviewReason] = useState<string | null>(initialPost?.review_reason ?? null);
   const [showPreview, setShowPreview] = useState(false);
+  const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
+  const [theme, setTheme] = useState('light');
   const [previewRev, setPreviewRev] = useState(0);
   const serverHydratedRef = useRef(false);
 
@@ -326,7 +386,7 @@ export default function PublishForm({
   function formatLastSaved() {
     if (!lastSavedAt) return '';
     try {
-      return new Date(lastSavedAt).toLocaleString('zh-CN', { hour12: false });
+      return new Date(lastSavedAt).toLocaleString('en-US', { hour12: false });
     } catch {
       return '';
     }
@@ -348,7 +408,7 @@ export default function PublishForm({
     try {
       const raw = window.localStorage.getItem(getDraftKey(userId));
       if (!raw) {
-        alert('当前没有可恢复的草稿。');
+        alert('No local draft found to restore.');
         return;
       }
       const draft = JSON.parse(raw) as {
@@ -377,10 +437,10 @@ export default function PublishForm({
         editor.commands.setContent(draft.content, { emitUpdate: false });
       }
       if (draft.updatedAt) setLastSavedAt(draft.updatedAt);
-      alert('本地草稿已恢复。');
+      alert('Local draft restored.');
     } catch (err) {
       console.error('Failed to restore draft', err);
-      alert('恢复草稿失败，请稍后重试。');
+      alert('Failed to restore draft. Please try again.');
     }
   }
 
@@ -431,11 +491,11 @@ export default function PublishForm({
           router.replace(`/publish?edit=${encodeURIComponent(pid)}`);
         }
       } else {
-        alert(result.error?.message || '保存失败');
+        alert(result.error?.message || 'Save failed');
       }
     } catch (error) {
       console.error('Save draft error:', error);
-      alert(error instanceof Error ? error.message : '发生错误');
+      alert(error instanceof Error ? error.message : 'An error occurred');
     } finally {
       setLoading(false);
     }
@@ -444,11 +504,11 @@ export default function PublishForm({
   async function handlePublishNow(e: React.SyntheticEvent) {
     e.preventDefault();
     if (!canPublishDirectly) {
-      alert('无直接发布权限，请使用「提交审核」。');
+      alert('You do not have permission to publish directly. Please use "Submit for Review".');
       return;
     }
     if (!title.trim()) {
-      alert('请输入文章标题');
+      alert('Please enter a story title');
       return;
     }
     setLoading(true);
@@ -478,11 +538,11 @@ export default function PublishForm({
         const pid = result.data?.post_id ?? dbPostId;
         if (pid) router.push(`/posts/${pid}`);
       } else {
-        alert(result.error?.message || '发布失败');
+        alert(result.error?.message || 'Publish failed');
       }
     } catch (error) {
       console.error('Publish error:', error);
-      alert(error instanceof Error ? error.message : '发生错误');
+      alert(error instanceof Error ? error.message : 'An error occurred');
     } finally {
       setLoading(false);
     }
@@ -491,11 +551,11 @@ export default function PublishForm({
   async function handleSubmitForReview(e: React.SyntheticEvent) {
     e.preventDefault();
     if (reviewPending) {
-      alert('此文已在审核中，请等待管理员处理。');
+      alert('This story is already under review.');
       return;
     }
     if (!title.trim()) {
-      alert('请输入文章标题');
+      alert('Please enter a story title');
       return;
     }
     setLoading(true);
@@ -523,14 +583,14 @@ export default function PublishForm({
         if (result.data?.post_id) setDbPostId(result.data.post_id);
         setReviewState('pending');
         setReviewReason(null);
-        alert('已提交审核，管理员通过后将自动公开。');
+        alert('Story submitted for review. It will be public once approved by an admin.');
         router.push('/profile/drafts');
       } else {
-        alert(result.error?.message || '提交审核失败');
+        alert(result.error?.message || 'Failed to submit for review');
       }
     } catch (error) {
       console.error('Submit for review error:', error);
-      alert(error instanceof Error ? error.message : '发生错误');
+      alert(error instanceof Error ? error.message : 'An error occurred');
     } finally {
       setLoading(false);
     }
@@ -540,104 +600,141 @@ export default function PublishForm({
     <div className="min-h-screen bg-[var(--bg-page)] overflow-x-hidden">
       <form onSubmit={(e) => e.preventDefault()}>
         {/* Notion-style top bar */}
-        <header className="sticky top-0 z-20 flex items-center justify-between gap-3 px-3 sm:px-6 py-3 bg-[var(--bg-sidebar)] border-b border-[var(--border)]">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <button type="button" onClick={() => router.back()} className="p-1.5 rounded-[var(--radius)] hover:bg-[var(--hover)] text-[var(--text-secondary)] shrink-0" title="返回">
+        <header className="sticky top-0 z-[30] flex flex-wrap items-center justify-between gap-4 px-4 sm:px-8 py-3 bg-[var(--bg-sidebar)] border-b border-[var(--border)] shadow-sm">
+          <div className="flex items-center gap-4 min-w-0">
+            <button type="button" onClick={() => router.back()} className="p-2 rounded-full hover:bg-[var(--hover)] text-[var(--text-secondary)] transition-colors" title="Go Back">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
-            <span className="text-xs text-[var(--text-secondary)] truncate">
-              {reviewPending
-                ? '审核中，正文已锁定'
-                : lastSavedAt
-                  ? `已保存 ${formatLastSaved()}`
-                  : '未保存'}
-            </span>
-            {reviewReason ? (
-              <span className="text-xs text-red-600 truncate max-w-[10rem] sm:max-w-xs" title={reviewReason}>
-                驳回：{reviewReason.slice(0, 24)}
-                {reviewReason.length > 24 ? '…' : ''}
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">Status</span>
+              <span className="text-xs font-medium text-[var(--text-primary)] truncate">
+                {reviewPending
+                  ? 'Under Review (Locked)'
+                  : lastSavedAt
+                    ? `Saved at ${formatLastSaved()}`
+                    : 'Unsaved Draft'}
               </span>
+            </div>
+            {reviewReason ? (
+              <div className="flex flex-col border-l border-red-200 pl-4 ml-2">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-red-500">Rejected</span>
+                <span className="text-xs text-red-600 truncate max-w-[12rem]" title={reviewReason}>
+                  {reviewReason}
+                </span>
+              </div>
             ) : null}
+          </div>
+
+          <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => setShowPreview((v) => !v)}
-              className="text-xs text-blue-600 hover:underline shrink-0"
+              onClick={(e) => void handleSaveDraftServer(e)}
+              disabled={loading || reviewPending}
+              className="px-4 py-1.5 rounded-lg border border-[var(--border)] text-sm font-bold hover:bg-[var(--hover)] transition-all disabled:opacity-50"
             >
-              {showPreview ? '关闭预览' : '预览'}
+              Save Draft
             </button>
-            <button type="button" onClick={handleRestoreDraft} disabled={!hasLocalDraft || !editor || reviewPending} className="text-xs text-blue-600 hover:underline disabled:opacity-40 disabled:no-underline shrink-0">从草稿恢复</button>
-            <div className="relative ml-auto sm:ml-2">
-              <button type="button" onClick={() => setActionsOpen(!actionsOpen)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius)] hover:bg-[var(--hover)] text-sm text-[var(--text-primary)]">
-                分享 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+
+            {canPublishDirectly ? (
+              <button
+                type="button"
+                onClick={(e) => void handlePublishNow(e)}
+                disabled={loading}
+                className="px-4 py-1.5 rounded-lg bg-blue-600 text-white text-sm font-bold shadow-md hover:bg-blue-700 transition-all disabled:opacity-50"
+              >
+                Publish Now
               </button>
-              {actionsOpen && (
-                <>
-                  <div className="fixed inset-0 z-10" onClick={() => setActionsOpen(false)} aria-hidden />
-                  <div className="absolute left-0 sm:left-auto sm:right-0 top-full mt-1 z-20 w-48 py-1 bg-white rounded-[var(--radius)] shadow-lg border border-[var(--border)]">
-                    <button type="button" onClick={(e) => { setActionsOpen(false); if (!loading) void handleSubmitForReview(e); }} disabled={loading || reviewPending} className="w-full px-4 py-2 text-left text-sm text-amber-800 hover:bg-amber-50 disabled:opacity-40">提交审核</button>
-                    <button type="button" onClick={(e) => { setActionsOpen(false); if (!loading) void handleSaveDraftServer(e); }} disabled={loading || reviewPending} className="w-full px-4 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--hover)] disabled:opacity-40">保存草稿</button>
-                    {canPublishDirectly ? (
-                      <button type="button" onClick={(e) => { setActionsOpen(false); if (!loading) void handlePublishNow(e); }} disabled={loading} className="w-full px-4 py-2 text-left text-sm text-blue-600 hover:bg-blue-50 font-medium">立即发布</button>
-                    ) : null}
-                  </div>
-                </>
-              )}
-            </div>
-            <button type="button" onClick={() => setSettingsOpen(!settingsOpen)} className="md:hidden p-2 rounded-[var(--radius)] hover:bg-[var(--hover)] text-[var(--text-secondary)] shrink-0" title="设置">
+            ) : (
+              <button
+                type="button"
+                onClick={(e) => void handleSubmitForReview(e)}
+                disabled={loading || reviewPending}
+                className="px-4 py-1.5 rounded-lg bg-amber-600 text-white text-sm font-bold shadow-md hover:bg-amber-700 transition-all disabled:opacity-50"
+              >
+                Submit for Review
+              </button>
+            )}
+
+            <div className="w-px h-6 bg-[var(--border)] mx-1" />
+
+            <button type="button" onClick={() => setSettingsOpen(!settingsOpen)} className="lg:hidden p-2 rounded-lg hover:bg-[var(--hover)] text-[var(--text-secondary)]" title="Settings">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
             </button>
           </div>
-          <div className="flex items-center shrink-0 gap-2">
-            <Link
-              href="/profile/drafts"
-              className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-2 py-1.5 whitespace-nowrap"
-            >
-              我的草稿
-            </Link>
-            <Link
-              href={SUPPORT_PAGE_PATH}
-              className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline px-2 py-1.5 whitespace-nowrap"
-            >
-              Help &amp; support
-            </Link>
-          </div>
         </header>
 
-        <div className="flex flex-col lg:flex-row">
+        <div className="flex flex-col lg:flex-row h-[calc(100vh-64px)] overflow-hidden">
           {/* Main editor area */}
-          <div className="flex-1 min-w-0 px-3 sm:px-6 lg:pr-6 py-6">
-            <div className="max-w-3xl mx-auto">
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Untitled"
-                readOnly={reviewPending}
-                className="w-full text-3xl sm:text-4xl font-bold border-none bg-transparent focus:outline-none placeholder-[var(--text-secondary)] text-[var(--text-primary)] mb-4 read-only:opacity-70"
-              />
-              <div className={`grid gap-4 ${showPreview ? 'lg:grid-cols-2' : ''}`}>
-                <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--bg-sidebar)] overflow-hidden min-w-0">
-                  <TipTapBasicEditor
-                    placeholder="开始写作，支持粘贴或拖拽图片…"
-                    minHeight="min-h-[400px]"
-                    editable={editorEditable}
-                    onEditorReady={setEditor}
-                    renderToolbar={(ed) => <EditorToolbar editor={ed} disabled={reviewPending} />}
+          <div className="flex-1 min-w-0 overflow-y-auto px-4 sm:px-8 py-8 lg:py-12 bg-[var(--bg-page)] custom-scrollbar">
+            <div className={`max-w-4xl mx-auto transition-all duration-300 ${viewMode === 'preview' ? 'translate-y-4' : ''}`}>
+              {viewMode === 'edit' ? (
+                <>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Enter your title here..."
+                    readOnly={reviewPending}
+                    className="w-full text-4xl sm:text-5xl font-extrabold border-none bg-transparent focus:outline-none placeholder-gray-300 text-[var(--text-primary)] mb-8 read-only:opacity-70 tracking-tight"
                   />
-                </div>
-                {showPreview ? (
+                  <div className="rounded-xl border border-[var(--border)] shadow-xl overflow-hidden min-w-0">
+                    <TipTapBasicEditor
+                      placeholder="Start sharing your thoughts..."
+                      minHeight="min-h-[500px]"
+                      editable={editorEditable}
+                      onEditorReady={setEditor}
+                      themeClass={
+                        theme === 'night' 
+                          ? 'bg-gray-900 text-gray-100 selection:bg-blue-500/30' 
+                          : theme === 'emerald' 
+                            ? 'bg-[#064e3b] text-emerald-50 selection:bg-emerald-400/30' 
+                            : 'bg-white text-gray-900'
+                      }
+                      renderToolbar={(ed) => (
+                        <div className="bg-[var(--bg-sidebar)] px-2 py-1.5 border-b border-[var(--border)]">
+                          <EditorToolbar editor={ed} disabled={reviewPending} />
+                        </div>
+                      )}
+                    />
+                  </div>
+                  <div className="mt-4 flex items-center justify-between">
+                    <button type="button" onClick={handleRestoreDraft} disabled={!hasLocalDraft || !editor || reviewPending} className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-600 hover:text-blue-700 disabled:opacity-40 transition-colors">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                      Restore from Local Draft
+                    </button>
+                    <div className="flex items-center gap-4">
+                      <Link href="/profile/drafts" className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">My Drafts</Link>
+                      <Link href={SUPPORT_PAGE_PATH} className="text-xs font-bold uppercase tracking-wider text-blue-600 hover:text-blue-700 transition-colors">Help</Link>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="animate-in fade-in zoom-in-95 duration-300">
+                  <h1 className="text-4xl sm:text-5xl font-extrabold text-[var(--text-primary)] mb-8 tracking-tight">{title || 'Untitled'}</h1>
+                  {coverPreview && (
+                    <img src={coverPreview} alt="Cover" className="w-full h-[400px] object-cover rounded-2xl mb-12 shadow-2xl" />
+                  )}
                   <div
-                    className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-4 overflow-auto max-h-[min(70vh,560px)] prose prose-sm max-w-none text-[var(--text-primary)]"
-                    dangerouslySetInnerHTML={{ __html: previewHtml || '<p class="text-gray-400">（暂无内容）</p>' }}
+                    className="prose prose-lg sm:prose-xl max-w-none text-[var(--text-primary)] font-serif leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: previewHtml || '<p class="text-gray-400 font-sans italic text-center py-20 border-2 border-dashed border-[var(--border)] rounded-2xl">Start writing to see the magic happen here...</p>' }}
                   />
-                ) : null}
-              </div>
+                  <div className="mt-20 pt-12 border-t border-[var(--border)] flex justify-center">
+                    <button 
+                      type="button" 
+                      onClick={() => setViewMode('edit')}
+                      className="px-8 py-3 bg-[var(--hover)] text-[var(--text-primary)] rounded-full font-bold hover:shadow-lg transition-all"
+                    >
+                      Return to Editor
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Right sidebar - desktop */}
-          <aside className="hidden lg:block w-[var(--sidebar-width)] shrink-0 border-l border-[var(--border)] bg-[var(--bg-sidebar)] p-4 overflow-y-auto">
-            <h3 className="text-sm font-medium text-[var(--text-primary)] mb-4">设置</h3>
+          <aside className="hidden lg:block w-[320px] shrink-0 border-l border-[var(--border)] bg-[var(--bg-sidebar)] p-6 overflow-y-auto custom-scrollbar z-20">
+            <h3 className="text-xs font-extrabold uppercase tracking-[0.2em] text-[var(--text-secondary)] mb-8">Article Settings</h3>
             <SettingsPanel
               coverPreview={coverPreview}
               onCoverChange={handleCoverChange}
@@ -655,6 +752,10 @@ export default function PublishForm({
               setIsPaid={setIsPaid}
               price={price}
               setPrice={setPrice}
+              theme={theme}
+              setTheme={setTheme}
+              viewMode={viewMode}
+              setViewMode={setViewMode}
               readOnly={reviewPending}
             />
           </aside>
@@ -662,11 +763,11 @@ export default function PublishForm({
           {/* Mobile settings drawer */}
           {settingsOpen && (
             <>
-              <div className="fixed inset-0 bg-black/40 z-30 lg:hidden" onClick={() => setSettingsOpen(false)} aria-hidden />
-              <aside className="fixed right-0 top-0 bottom-0 w-[min(320px,90vw)] bg-[var(--bg-sidebar)] border-l border-[var(--border)] p-4 overflow-y-auto z-40 lg:hidden">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-medium text-[var(--text-primary)]">设置</h3>
-                  <button type="button" onClick={() => setSettingsOpen(false)} className="p-1 rounded-[var(--radius)] hover:bg-[var(--hover)]">×</button>
+              <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[40] lg:hidden" onClick={() => setSettingsOpen(false)} aria-hidden />
+              <aside className="fixed right-0 top-0 bottom-0 w-[min(340px,90vw)] bg-[var(--bg-sidebar)] border-l border-[var(--border)] p-6 overflow-y-auto z-[50] lg:hidden animate-in slide-in-from-right duration-300">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-xs font-extrabold uppercase tracking-[0.2em] text-[var(--text-primary)]">Settings</h3>
+                  <button type="button" onClick={() => setSettingsOpen(false)} className="p-2 rounded-full hover:bg-[var(--hover)] text-xl transition-colors">×</button>
                 </div>
                 <SettingsPanel
                   coverPreview={coverPreview}
@@ -685,6 +786,10 @@ export default function PublishForm({
                   setIsPaid={setIsPaid}
                   price={price}
                   setPrice={setPrice}
+                  theme={theme}
+                  setTheme={setTheme}
+                  viewMode={viewMode}
+                  setViewMode={setViewMode}
                   readOnly={reviewPending}
                 />
               </aside>
@@ -700,33 +805,78 @@ function EditorToolbar({ editor, disabled = false }: { editor: Editor | null; di
   if (!editor) return null;
 
   return (
-    <div className={`flex flex-wrap gap-1.5 sm:gap-2 ${disabled ? 'pointer-events-none opacity-50' : ''}`}>
-      <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={`p-1.5 sm:p-2 rounded hover:bg-gray-100 ${editor.isActive('bold') ? 'bg-gray-200' : ''}`} title="粗体">
-        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 4h8a4 4 0 014 4 4 4 0 01-4 4H6z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 12h9a4 4 0 014 4 4 4 0 01-4 4H6z" /></svg>
-      </button>
-      <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={`p-1.5 sm:p-2 rounded hover:bg-gray-100 ${editor.isActive('italic') ? 'bg-gray-200' : ''}`} title="斜体">
-        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
-      </button>
-      <div className="w-px h-6 sm:h-8 bg-gray-300 self-stretch hidden sm:block" aria-hidden />
-      <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded hover:bg-gray-100 font-semibold text-xs sm:text-base ${editor.isActive('heading', { level: 2 }) ? 'bg-gray-200' : ''}`} title="标题">H2</button>
-      <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded hover:bg-gray-100 font-semibold text-xs sm:text-base ${editor.isActive('heading', { level: 3 }) ? 'bg-gray-200' : ''}`} title="副标题">H3</button>
-      <div className="w-px h-6 sm:h-8 bg-gray-300 self-stretch hidden sm:block" aria-hidden />
-      <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} className={`p-1.5 sm:p-2 rounded hover:bg-gray-100 ${editor.isActive('bulletList') ? 'bg-gray-200' : ''}`} title="无序列表">
-        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-      </button>
-      <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={`p-1.5 sm:p-2 rounded hover:bg-gray-100 ${editor.isActive('orderedList') ? 'bg-gray-200' : ''}`} title="有序列表">
-        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-      </button>
-      <button type="button" onClick={() => editor.chain().focus().toggleBlockquote().run()} className={`p-1.5 sm:p-2 rounded hover:bg-gray-100 ${editor.isActive('blockquote') ? 'bg-gray-200' : ''}`} title="引用">
-        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
-      </button>
-      <div className="w-px h-6 sm:h-8 bg-gray-300 self-stretch hidden sm:block" aria-hidden />
-      <button type="button" onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()} className="p-1.5 sm:p-2 rounded hover:bg-gray-100 disabled:opacity-30" title="撤销">
-        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
-      </button>
-      <button type="button" onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()} className="p-1.5 sm:p-2 rounded hover:bg-gray-100 disabled:opacity-30" title="重做">
-        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10h-10a8 8 0 00-8 8v2m18-10l-6 6m6-6l-6-6" /></svg>
-      </button>
+    <div className={`flex flex-wrap items-center gap-1 sm:gap-1.5 ${disabled ? 'pointer-events-none opacity-50' : ''}`}>
+      {/* Basic Styles */}
+      <div className="flex items-center bg-black/5 rounded-md p-0.5">
+        <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={`p-1.5 rounded hover:bg-white hover:shadow-sm transition-all ${editor.isActive('bold') ? 'bg-white shadow-sm text-blue-600' : ''}`} title="Bold">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2/0.8} d="M6 4h8a4 4 0 014 4 4 4 0 01-4 4H6z M6 12h9a4 4 0 014 4 4 4 0 01-4 4H6z" /></svg>
+        </button>
+        <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={`p-1.5 rounded hover:bg-white hover:shadow-sm transition-all ${editor.isActive('italic') ? 'bg-white shadow-sm text-blue-600' : ''}`} title="Italic">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+        </button>
+        <button type="button" onClick={() => editor.chain().focus().toggleUnderline().run()} className={`p-1.5 rounded hover:bg-white hover:shadow-sm transition-all ${editor.isActive('underline') ? 'bg-white shadow-sm text-blue-600' : ''}`} title="Underline">
+          <span className="font-serif font-bold underline leading-none">U</span>
+        </button>
+        <button type="button" onClick={() => editor.chain().focus().toggleStrike().run()} className={`p-1.5 rounded hover:bg-white hover:shadow-sm transition-all ${editor.isActive('strike') ? 'bg-white shadow-sm text-blue-600' : ''}`} title="Strike">
+          <span className="font-serif font-bold line-through leading-none">S</span>
+        </button>
+      </div>
+
+      <div className="w-px h-6 bg-gray-300 mx-1" aria-hidden />
+
+      {/* Alignment */}
+      <div className="flex items-center bg-black/5 rounded-md p-0.5">
+        <button type="button" onClick={() => editor.chain().focus().setTextAlign('left').run()} className={`p-1.5 rounded hover:bg-white hover:shadow-sm transition-all ${editor.isActive({ textAlign: 'left' }) ? 'bg-white shadow-sm text-blue-600' : ''}`} title="Align Left">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h10M4 18h16" /></svg>
+        </button>
+        <button type="button" onClick={() => editor.chain().focus().setTextAlign('center').run()} className={`p-1.5 rounded hover:bg-white hover:shadow-sm transition-all ${editor.isActive({ textAlign: 'center' }) ? 'bg-white shadow-sm text-blue-600' : ''}`} title="Align Center">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M7 12h10M4 18h16" /></svg>
+        </button>
+        <button type="button" onClick={() => editor.chain().focus().setTextAlign('right').run()} className={`p-1.5 rounded hover:bg-white hover:shadow-sm transition-all ${editor.isActive({ textAlign: 'right' }) ? 'bg-white shadow-sm text-blue-600' : ''}`} title="Align Right">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M10 12h10M4 18h16" /></svg>
+        </button>
+      </div>
+
+      <div className="w-px h-6 bg-gray-300 mx-1" aria-hidden />
+
+      {/* Headings & Blocks */}
+      <div className="flex items-center gap-1">
+        <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={`px-2 py-1.5 rounded hover:bg-gray-100 font-bold text-xs ${editor.isActive('heading', { level: 2 }) ? 'bg-gray-200 text-blue-600' : ''}`} title="Heading 2">H2</button>
+        <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} className={`px-2 py-1.5 rounded hover:bg-gray-100 font-bold text-xs ${editor.isActive('heading', { level: 3 }) ? 'bg-gray-200 text-blue-600' : ''}`} title="Heading 3">H3</button>
+        <button type="button" onClick={() => editor.chain().focus().toggleBlockquote().run()} className={`p-1.5 rounded hover:bg-gray-100 ${editor.isActive('blockquote') ? 'bg-gray-200 text-blue-600' : ''}`} title="Blockquote">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+        </button>
+        <button type="button" onClick={() => editor.chain().focus().toggleHighlight().run()} className={`p-1.5 rounded hover:bg-gray-100 ${editor.isActive('highlight') ? 'bg-yellow-200' : ''}`} title="Highlight">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+        </button>
+      </div>
+
+      <div className="w-px h-6 bg-gray-300 mx-1" aria-hidden />
+
+      {/* Lists */}
+      <div className="flex items-center gap-1">
+        <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} className={`p-1.5 rounded hover:bg-gray-100 ${editor.isActive('bulletList') ? 'bg-gray-200' : ''}`} title="Bullet List">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+        </button>
+        <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={`p-1.5 rounded hover:bg-gray-100 ${editor.isActive('orderedList') ? 'bg-gray-200' : ''}`} title="Ordered List">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+        </button>
+        <button type="button" onClick={() => editor.chain().focus().toggleTaskList().run()} className={`p-1.5 rounded hover:bg-gray-100 ${editor.isActive('taskList') ? 'bg-gray-200' : ''}`} title="Task List">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+        </button>
+      </div>
+
+      <div className="flex-1" />
+
+      {/* History */}
+      <div className="flex items-center gap-1">
+        <button type="button" onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-30" title="Undo">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
+        </button>
+        <button type="button" onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-30" title="Redo">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10h-10a8 8 0 00-8 8v2m18-10l-6 6m6-6l-6-6" /></svg>
+        </button>
+      </div>
     </div>
   );
 }

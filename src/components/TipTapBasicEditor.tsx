@@ -16,6 +16,11 @@ import type { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
+import Underline from '@tiptap/extension-underline';
+import TextAlign from '@tiptap/extension-text-align';
+import Highlight from '@tiptap/extension-highlight';
+import TaskList from '@tiptap/extension-task-list';
+import TaskItem from '@tiptap/extension-task-item';
 import Placeholder from '@tiptap/extension-placeholder';
 import FileHandler from '@tiptap/extension-file-handler';
 
@@ -46,17 +51,20 @@ interface TipTapBasicEditorProps {
   renderToolbar?: (editor: Editor | null) => React.ReactNode;
   /** 自定义图片上传：返回图片 URL。不传则使用 base64 */
   onUploadImage?: (file: File) => Promise<string>;
+  /** Theme classes for the editor wrapper */
+  themeClass?: string;
 }
 
 export default function TipTapBasicEditor({
   content = '',
   editable = true,
-  placeholder = '开始写作，支持粘贴或拖拽图片…',
+  placeholder = 'Start writing, paste or drag and drop images...',
   className = '',
   minHeight = 'min-h-[200px]',
   onEditorReady,
   renderToolbar,
   onUploadImage,
+  themeClass = 'bg-white text-[var(--text-primary)]',
 }: TipTapBasicEditorProps) {
   const insertImageFiles = useCallback(
     async (editor: Editor, files: File[], pos?: number) => {
@@ -95,6 +103,16 @@ export default function TipTapBasicEditor({
     extensions: [
       StarterKit.configure({
         heading: { levels: [1, 2, 3] },
+        horizontalRule: false,
+      }),
+      Underline,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
+      Highlight.configure({ multicolor: true }),
+      TaskList,
+      TaskItem.configure({
+        nested: true,
       }),
       Image.configure({
         allowBase64: true,
@@ -104,18 +122,18 @@ export default function TipTapBasicEditor({
       Placeholder.configure({ placeholder }),
       FileHandler.configure({
         allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
-        onPaste: (editor, files) => {
-          void insertImageFiles(editor, files);
+        onPaste: (editorInstance: Editor, files: File[]) => {
+          void insertImageFiles(editorInstance, files);
         },
-        onDrop: (editor, files, pos) => {
-          void insertImageFiles(editor, files, pos);
+        onDrop: (editorInstance: Editor, files: File[], pos: number) => {
+          void insertImageFiles(editorInstance, files, pos);
         },
       }),
     ],
     content,
     editorProps: {
       attributes: {
-        class: `prose prose-sm sm:prose lg:prose-lg xl:prose-xl focus:outline-none ${minHeight} p-4`,
+        class: `prose prose-sm sm:prose lg:prose-lg xl:prose-xl focus:outline-none ${minHeight} p-4 prose-invert-inherit overflow-y-auto`,
       },
     },
   });
@@ -130,13 +148,13 @@ export default function TipTapBasicEditor({
   }, [editor, editable]);
 
   return (
-    <div className={`tiptap-basic-editor border border-gray-200 rounded-lg bg-white overflow-hidden ${className}`}>
+    <div className={`tiptap-basic-editor border border-[var(--border)] rounded-[var(--radius)] overflow-hidden ${themeClass} ${className}`}>
       {renderToolbar && (
-        <div className="border-b border-gray-200 p-2 sm:p-4 overflow-x-auto">
+        <div className="border-b border-[var(--border)] p-2 sm:p-4 overflow-x-auto bg-[var(--bg-sidebar)]">
           {renderToolbar(editor)}
         </div>
       )}
-      <div className={`min-h-[280px] sm:min-h-[400px] [&_.ProseMirror]:min-h-[260px] sm:[&_.ProseMirror]:min-h-[380px] [&_.ProseMirror]:overflow-x-auto [&_.ProseMirror]:p-3 sm:[&_.ProseMirror]:p-4`}>
+      <div className={`${minHeight} [&_.ProseMirror]:min-h-full [&_.ProseMirror]:p-3 sm:[&_.ProseMirror]:p-4`}>
         <EditorContent editor={editor} />
       </div>
     </div>
