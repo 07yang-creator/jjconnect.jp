@@ -44,6 +44,7 @@ import {
   handleMetricsHealth,
   handleMetricsTraffic,
   handleMetricsErrors,
+  handleUpdateUserRole,
 } from './handlers/roleMatrix.js';
 import { 
   handleSendEmail, 
@@ -98,6 +99,7 @@ export async function route(request, env) {
     if (path === '/api/admin/stats/roles' && method === 'GET') return await handleRoleStats(request, env);
     if (path === '/api/admin/pending-users' && method === 'GET') return await handlePendingUsers(request, env);
     if (path === '/api/admin/new-articles' && method === 'GET') return await handleNewArticles(request, env);
+    if (path === '/api/admin/update-user-role' && method === 'POST') return await handleUpdateUserRole(request, env);
     if (path === '/api/admin/metrics/health' && method === 'GET') return await handleMetricsHealth(request, env);
     if (path === '/api/admin/metrics/traffic' && method === 'GET') return await handleMetricsTraffic(request, env);
     if (path === '/api/admin/metrics/errors' && method === 'GET') return await handleMetricsErrors(request, env);

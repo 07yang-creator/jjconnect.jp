@@ -73,7 +73,7 @@ function redirectJjconnectApexToWww(request: NextRequest): NextResponse | null {
   return NextResponse.redirect(url, 308);
 }
 
-async function readAuth0MappedProfile(auth0Sub: string) {
+async function readAuth0MappedProfile(auth0Sub: string, sessionUserEmail?: string | null) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !serviceRoleKey) return null;
@@ -91,6 +91,20 @@ async function readAuth0MappedProfile(auth0Sub: string) {
 
   const supabaseUserId = identity?.supabase_user_id;
   if (!supabaseUserId) return null;
+
+  if (sessionUserEmail) {
+    try {
+      const { data: userData } = await admin.auth.admin.getUserById(supabaseUserId);
+      if (userData?.user && userData.user.user_metadata?.jjc_email !== sessionUserEmail) {
+        await admin.auth.admin.updateUserById(supabaseUserId, {
+          user_metadata: { ...userData.user.user_metadata, jjc_email: sessionUserEmail }
+        });
+      }
+    } catch (e) {
+      // Avoid breaking auth if email sync fails
+      console.error('Failed to sync auth0 email to Supabase metadata', e);
+    }
+  }
 
   const { data: profile } = await admin
     .from('profiles')
@@ -190,7 +204,7 @@ export async function middleware(request: NextRequest) {
   if (!isProfileGateExemptPath(pathname) && !isStaticAssetPath(pathname)) {
     const session = await auth0.getSession(request);
     if (session?.user?.sub) {
-      const profile = await readAuth0MappedProfile(session.user.sub);
+      const profile = await readAuth0MappedProfile(session.user.sub, session.user.email);
       if (!profile) {
         const onboardingUrl = new URL('/onboarding', request.url);
         onboardingUrl.searchParams.set('next', `${pathname}${request.nextUrl.search}`);

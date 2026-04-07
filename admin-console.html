@@ -6,136 +6,155 @@
   <title>Admin Console | JJConnect</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="jjc-default-config.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #f4f7fb;
-      --card: #fff;
-      --text: #1a202c;
-      --muted: #64748b;
-      --primary: #2b6cb0;
-      --border: #e2e8f0;
-      --ok: #16a34a;
-      --warn: #f59e0b;
-      --bad: #dc2626;
+      --bg: #f8f9fa;
+      --card: #ffffff;
+      --text: #202124;
+      --muted: #5f6368;
+      --primary: #1a73e8;
+      --primary-hover: #1765cc;
+      --border: #dadce0;
+      --ok: #1e8e3e;
+      --warn: #f9ab00;
+      --bad: #d93025;
+      --font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
-    .wrap { max-width: 1280px; margin: 0 auto; padding: 24px; }
-    .header { margin-bottom: 20px; }
-    .header h1 { font-size: 28px; margin-bottom: 8px; }
-    .header p { color: var(--muted); }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 16px; }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; min-height: 180px; }
-    .card h2 { font-size: 18px; margin-bottom: 10px; }
-    .muted { color: var(--muted); font-size: 13px; }
-    .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-    .btn { border: 0; border-radius: 8px; padding: 8px 12px; cursor: pointer; background: var(--primary); color: #fff; font-size: 13px; }
-    .btn.secondary { background: #334155; }
-    .btn.ghost { background: #e2e8f0; color: #111827; }
-    .status { margin-top: 10px; font-size: 13px; color: var(--muted); }
-    .mono { font-family: ui-monospace, Menlo, Monaco, monospace; }
-    .table-wrap { overflow: auto; max-height: 260px; border: 1px solid var(--border); border-radius: 8px; margin-top: 10px; }
-    table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    th, td { border-bottom: 1px solid var(--border); padding: 6px 8px; text-align: left; }
-    th { background: #f8fafc; position: sticky; top: 0; }
-    .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; }
-    .pill.ok { background: #dcfce7; color: #166534; }
-    .pill.warn { background: #fef3c7; color: #92400e; }
-    .pill.bad { background: #fee2e2; color: #991b1b; }
-    .links a { color: var(--primary); text-decoration: none; margin-right: 10px; }
+    body { font-family: var(--font-family); background: var(--bg); color: var(--text); padding-bottom: 60px; }
+    
+    .navbar { 
+      background: var(--card); border-bottom: 1px solid var(--border); padding: 16px 24px; position: sticky; top: 0; z-index: 10;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .navbar h1 { font-size: 20px; font-weight: 500; color: var(--text); }
+    .navbar-links a { color: var(--primary); text-decoration: none; font-size: 14px; margin-left: 16px; font-weight: 500;}
+    .navbar-links a:hover { text-decoration: underline; }
+
+    .wrap { max-width: 1280px; margin: 32px auto; padding: 0 24px; }
+    
+    .section-title { font-size: 18px; font-weight: 500; margin: 32px 0 16px; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 8px;}
+    
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 24px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15); }
+    .card h2 { font-size: 16px; font-weight: 500; margin-bottom: 8px; color: var(--text); }
+    .card p.muted { color: var(--muted); font-size: 13px; margin-bottom: 16px; line-height: 1.5; }
+    
+    .row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+    
+    .btn { border: 1px solid transparent; border-radius: 4px; padding: 8px 16px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s; font-family: var(--font-family); }
+    .btn.primary { background: var(--primary); color: #fff; }
+    .btn.primary:hover { background: var(--primary-hover); box-shadow: 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15); }
+    .btn.secondary { background: #fff; color: var(--primary); border-color: var(--border); }
+    .btn.secondary:hover { background: #f1f3f4; }
+    
+    .status { margin-top: 12px; font-size: 13px; color: var(--muted); }
+    
+    .table-wrap { overflow: auto; max-height: 400px; border: 1px solid var(--border); border-radius: 8px; margin-top: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { border-bottom: 1px solid var(--border); padding: 12px 16px; text-align: left; vertical-align: middle; }
+    th { background: #f8f9fa; position: sticky; top: 0; font-weight: 500; color: var(--muted); border-bottom: 2px solid var(--border); z-index: 1; }
+    tr:hover { background: #f1f3f4; }
+    
+    .pill { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+    .pill.ok { background: #e6f4ea; color: #137333; }
+    .pill.warn { background: #fef7e0; color: #b06000; }
+    .pill.bad { background: #fce8e6; color: #c5221f; }
+    
+    /* Toggle Switch */
+    .switch { position: relative; display: inline-block; width: 34px; height: 20px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+    .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--primary); }
+    input:checked + .slider:before { transform: translateX(14px); }
+    
+    /* Material Select */
+    .mat-select { padding: 8px 12px; border: 1px solid var(--border); border-radius: 4px; font-size: 13px; color: var(--text); background: #fff; font-family: var(--font-family); outline: none; }
+    .mat-select:focus { border-color: var(--primary); }
+    
+    .loading-overlay { display: none; margin-left: 8px; font-size: 12px; color: var(--primary); }
   </style>
 </head>
 <body>
+
+  <div class="navbar">
+    <h1>JJConnect Admin Console</h1>
+    <div class="navbar-links">
+      <span style="color: var(--muted); margin-right: 16px; font-size: 13px;">Logged as: <span id="role-level" style="font-weight: 700; color: var(--text);">-</span></span>
+      <a href="admin_dashboard.html">Dashboard</a>
+      <a href="home.html">Homepage</a>
+    </div>
+  </div>
+
   <div class="wrap">
-    <div class="header">
-      <h1>Admin Console</h1>
-      <p>Homepage for role matrix operations, exports, monitoring, and admin quick actions.</p>
-      <p class="muted">Logged role: <span id="role-level" class="mono">-</span></p>
+    
+    <h2 class="section-title">User Authorization Management</h2>
+    
+    <div class="card" style="margin-bottom: 32px;">
+      <h2>All Users & Permissions</h2>
+      <p class="muted">Manage user role levels and direct publishing authorizations. Changes made here apply instantly to the Supabase database. Wait for users to re-login if changes don't take effect immediately.</p>
+      
+      <div class="row" style="margin-bottom: 16px; align-items: center;">
+        <button class="btn secondary" onclick="loadUserManagement()">Refresh Users</button>
+        <span id="user-sync-status" class="status" style="margin-top: 0; margin-left: 12px;"></span>
+      </div>
+      
+      <div class="table-wrap" style="max-height: 600px;">
+        <table id="users-table">
+          <thead>
+            <tr>
+              <th>Real Email</th>
+              <th>Created At</th>
+              <th title="Role limits broad feature access according to the Role Matrix.">Role Level</th>
+              <th title="Toggles direct write/publish access irrespective of their low-level role.">Publish Auth</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody">
+            <tr><td colspan="5" style="text-align: center; color: var(--muted);">Loading users...</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
+    <h2 class="section-title">Role Matrix & Configuration</h2>
     <div class="grid">
       <section class="card">
         <h2>Role Matrix Sync</h2>
-        <p class="muted">Sync permissions and assignments from Google Sheets.</p>
+        <p class="muted">Synchronize permission rules and bulk assignments directly from configured Google Sheets.</p>
         <div class="row">
-          <button class="btn" onclick="syncEndpoint('/api/admin/sync-role-matrix')">Sync Permissions</button>
+          <button class="btn primary" onclick="syncEndpoint('/api/admin/sync-role-matrix')">Sync Rules</button>
           <button class="btn secondary" onclick="syncEndpoint('/api/admin/sync-role-assignments')">Sync Assignments</button>
-          <button class="btn ghost" onclick="syncEndpoint('/api/admin/sync-auth-all')">Sync All</button>
         </div>
         <div class="row">
           <button class="btn secondary" onclick="previewMatrixSync()">Preview Diff</button>
-          <button class="btn ghost" onclick="rollbackRoleMatrix()">Rollback Snapshot</button>
+          <button class="btn secondary" onclick="rollbackRoleMatrix()">Rollback</button>
         </div>
-        <div id="sync-status" class="status">No sync executed in this session.</div>
-      </section>
-
-      <section class="card">
-        <h2>Live Permission Matrix</h2>
-        <p class="muted">Current matrix from Supabase role_permissions.</p>
-        <div class="row">
-          <button class="btn" onclick="loadRoleMatrix()">Refresh Matrix</button>
-        </div>
-        <div id="matrix-wrap" class="table-wrap"></div>
+        <div id="sync-status" class="status">No sync executed.</div>
       </section>
 
       <section class="card">
         <h2>Export Tools</h2>
-        <p class="muted">Download matrix and assignments snapshots.</p>
+        <p class="muted">Download local backups of the matrix and assigned user states.</p>
         <div class="row">
-          <button class="btn" onclick="download('/api/admin/export-role-matrix?format=csv')">Matrix CSV</button>
+          <button class="btn secondary" onclick="download('/api/admin/export-role-matrix?format=csv')">Matrix CSV</button>
           <button class="btn secondary" onclick="download('/api/admin/export-role-matrix?format=json')">Matrix JSON</button>
-          <button class="btn ghost" onclick="download('/api/admin/export-role-assignments?format=csv')">Assignments CSV</button>
+          <button class="btn secondary" onclick="download('/api/admin/export-role-assignments?format=csv')">Assignments CSV</button>
         </div>
       </section>
 
       <section class="card">
-        <h2>User Stats by Role</h2>
-        <p class="muted">User count distribution by role level.</p>
+        <h2>System Health</h2>
+        <p class="muted">Diagnostic status for Edge Workers and Supabase connections.</p>
         <div class="row">
-          <button class="btn" onclick="loadRoleStats()">Refresh Stats</button>
+          <button class="btn secondary" onclick="loadHealth()">Check Health</button>
         </div>
-        <div id="role-stats" class="status"></div>
-      </section>
-
-      <section class="card">
-        <h2>Quick Navigation</h2>
-        <div class="links">
-          <a href="admin_dashboard.html">Admin Dashboard</a>
-          <a href="login.html">Login</a>
-          <a href="home.html">Homepage</a>
-        </div>
-      </section>
-
-      <section class="card">
-        <h2>System Status</h2>
-        <p class="muted">Health from worker and supabase checks.</p>
-        <div class="row">
-          <button class="btn" onclick="loadHealth()">Refresh Health</button>
-          <button class="btn secondary" onclick="loadOpsTraffic()">Ops Traffic</button>
-          <button class="btn ghost" onclick="loadOpsErrors()">Recent Errors</button>
-        </div>
-        <div id="health-status" class="status">No data</div>
-        <div id="ops-status" class="status"></div>
-      </section>
-
-      <section class="card">
-        <h2>Pending New Users</h2>
-        <p class="muted">Users currently in default traveller role.</p>
-        <div class="row">
-          <button class="btn" onclick="loadPendingUsers()">Refresh Pending</button>
-        </div>
-        <div id="pending-wrap" class="table-wrap"></div>
-      </section>
-
-      <section class="card">
-        <h2>New Articles</h2>
-        <p class="muted">Recent posts from Supabase.</p>
-        <div class="row">
-          <button class="btn" onclick="loadNewArticles()">Refresh Articles</button>
-        </div>
-        <div id="articles-wrap" class="table-wrap"></div>
+        <div id="health-status" class="status" style="margin-top: 16px; line-height: 2;">No data</div>
       </section>
     </div>
+
   </div>
 
   <script>
@@ -158,21 +177,11 @@
 
     async function authedFetch(path, init = {}) {
       const token = await getAccessToken();
-      const headers = Object.assign({}, init.headers || {}, token ? { Authorization: `Bearer ${token}` } : {});
+      const headers = Object.assign({ 'Content-Type': 'application/json' }, init.headers || {}, token ? { Authorization: `Bearer ${token}` } : {});
       return fetch(`${getApiBase()}${path}`, Object.assign({}, init, { headers }));
     }
 
-    function renderSimpleTable(targetId, rows, columns) {
-      const root = document.getElementById(targetId);
-      if (!rows || rows.length === 0) {
-        root.innerHTML = '<div class="status">No data.</div>';
-        return;
-      }
-      const head = columns.map((c) => `<th>${c}</th>`).join('');
-      const body = rows.map((r) => `<tr>${columns.map((c) => `<td>${r[c] ?? ''}</td>`).join('')}</tr>`).join('');
-      root.innerHTML = `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
-    }
-
+    // Role Matrix & General Helpers
     async function syncEndpoint(path) {
       const status = document.getElementById('sync-status');
       status.textContent = 'Sync running...';
@@ -180,8 +189,7 @@
         const res = await authedFetch(path, { method: 'POST' });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || data.message || 'Sync failed');
-        const extra = data.newSnapshotId ? ` | snapshot=${data.newSnapshotId}` : '';
-        status.textContent = `OK: ${data.message || 'done'} @ ${new Date().toLocaleString()}${extra}`;
+        status.textContent = `OK: ${data.message || 'done'} @ ${new Date().toLocaleTimeString()}`;
       } catch (e) {
         status.textContent = `Error: ${e.message}`;
       }
@@ -195,7 +203,7 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Preview failed');
         const d = data.diff || {};
-        status.textContent = `Preview -> added:${d.addedCount || 0}, removed:${d.removedCount || 0}, changed:${d.changedCount || 0}`;
+        status.textContent = `Added: ${d.addedCount || 0}, Removed: ${d.removedCount || 0}, Changed: ${d.changedCount || 0}`;
       } catch (e) {
         status.textContent = `Preview error: ${e.message}`;
       }
@@ -207,94 +215,13 @@
       const status = document.getElementById('sync-status');
       status.textContent = `Rolling back to snapshot ${id}...`;
       try {
-        const res = await authedFetch('/api/admin/rollback-role-matrix', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ snapshot_id: id })
-        });
+        const res = await authedFetch('/api/admin/rollback-role-matrix', { method: 'POST', body: JSON.stringify({ snapshot_id: id }) });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Rollback failed');
-        status.textContent = `Rollback OK: rows=${data.rowsUpdated || 0}, new snapshot=${data.newSnapshotId || '-'}`;
+        status.textContent = `Rollback OK`;
       } catch (e) {
         status.textContent = `Rollback error: ${e.message}`;
       }
-    }
-
-    async function loadRoleMatrix() {
-      const res = await authedFetch('/api/admin/export-role-matrix?format=json');
-      const data = await res.json();
-      renderSimpleTable('matrix-wrap', data.rows || [], ['role_level', 'resource', 'permission']);
-    }
-
-    async function loadRoleStats() {
-      const root = document.getElementById('role-stats');
-      const res = await authedFetch('/api/admin/stats/roles');
-      const data = await res.json();
-      if (!res.ok) {
-        root.textContent = data.error || 'Failed';
-        return;
-      }
-      const parts = Object.entries(data.counts || {})
-        .sort(([a], [b]) => a.localeCompare(b))
-        .map(([role, count]) => `${role}: ${count}`);
-      root.textContent = parts.length ? parts.join(' | ') : 'No users found.';
-    }
-
-    async function loadHealth() {
-      const root = document.getElementById('health-status');
-      const res = await authedFetch('/api/admin/metrics/health');
-      const data = await res.json();
-      if (!res.ok) {
-        root.textContent = data.error || 'Failed';
-        return;
-      }
-      root.innerHTML = [
-        `<span class="pill ok">web:${data.web?.status || '-'}</span>`,
-        `<span class="pill ok">worker:${data.worker?.status || '-'}</span>`,
-        `<span class="pill ${data.supabase?.status === 'ok' ? 'ok' : 'bad'}">supabase:${data.supabase?.status || '-'}</span>`,
-        `<span class="pill warn">latency:${data.supabase?.latencyMs ?? '-'}ms</span>`,
-      ].join(' ');
-    }
-
-    async function loadOpsTraffic() {
-      const root = document.getElementById('ops-status');
-      try {
-        const res = await authedFetch('/api/admin/metrics/traffic');
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed');
-        root.textContent = `24h runs: total=${data.runs?.total || 0}, ok=${data.runs?.ok || 0}, error=${data.runs?.error || 0}`;
-      } catch (e) {
-        root.textContent = `Ops traffic error: ${e.message}`;
-      }
-    }
-
-    async function loadOpsErrors() {
-      const root = document.getElementById('ops-status');
-      try {
-        const res = await authedFetch('/api/admin/metrics/errors');
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed');
-        const first = (data.rows || [])[0];
-        if (!first) {
-          root.textContent = 'No recent sync errors.';
-          return;
-        }
-        root.textContent = `Latest error: ${first.run_type} @ ${first.created_at} -> ${first.error_message || 'unknown'}`;
-      } catch (e) {
-        root.textContent = `Ops errors load failed: ${e.message}`;
-      }
-    }
-
-    async function loadPendingUsers() {
-      const res = await authedFetch('/api/admin/pending-users');
-      const data = await res.json();
-      renderSimpleTable('pending-wrap', data.rows || [], ['email', 'role_level', 'created_at']);
-    }
-
-    async function loadNewArticles() {
-      const res = await authedFetch('/api/admin/new-articles?limit=10');
-      const data = await res.json();
-      renderSimpleTable('articles-wrap', data.rows || [], ['id', 'title', 'status', 'created_at']);
     }
 
     async function download(path) {
@@ -306,32 +233,136 @@
       a.href = url;
       const suggested = res.headers.get('Content-Disposition');
       const m = suggested && suggested.match(/filename="([^"]+)"/);
-      a.download = m ? m[1] : 'download.dat';
+      a.download = m ? m[1] : 'download.csv';
       document.body.appendChild(a);
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
     }
 
+    async function loadHealth() {
+      const root = document.getElementById('health-status');
+      const res = await authedFetch('/api/admin/metrics/health', {method: 'GET'});
+      const data = await res.json();
+      if (!res.ok) { root.textContent = data.error || 'Failed'; return; }
+      root.innerHTML = [
+        `<span class="pill ok">Web: ${data.web?.status || '-'}</span>`,
+        `<span class="pill ok">Worker: ${data.worker?.status || '-'}</span>`,
+        `<span class="pill ${data.supabase?.status === 'ok' ? 'ok' : 'bad'}">Supabase DB: ${data.supabase?.status || '-'}</span>`,
+        `<span class="pill warn">Latency: ${(data.supabase?.latencyMs || 0).toFixed(0)} ms</span>`,
+      ].join(' ');
+    }
+
+    // New Google-style User Management UI Engine
+    const AVAILABLE_ROLES = ['A', 'T', 'S', 'CB', 'VB', 'W1', 'W2', 'W3', 'WN', 'S-writer'];
+
+    async function loadUserManagement() {
+      const tbody = document.getElementById('users-tbody');
+      const status = document.getElementById('user-sync-status');
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--muted);">Loading latest users...</td></tr>';
+      try {
+        status.textContent = 'Loading...';
+        const res = await authedFetch('/api/admin/export-role-assignments?format=json', {method: 'GET'});
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to load users');
+        
+        let html = '';
+        for (const user of data.rows || []) {
+          const emailDisplay = user.email ? user.email : `<span style="color:#999; font-style:italic;">Missing Email (Auth0 Proxy: ${user.user_id.split('-').shift()}...)</span>`;
+          
+          let roleOptions = AVAILABLE_ROLES.map(r => `<option value="${r}" ${user.role_level === r ? 'selected' : ''}>${r}</option>`).join('');
+          // If they have some weird role not in list, add it dynamically
+          if (!AVAILABLE_ROLES.includes(user.role_level)) {
+              roleOptions += `<option value="${user.role_level}" selected>${user.role_level} (Legacy)</option>`;
+          }
+
+          html += `
+            <tr id="row-${user.user_id}">
+              <td style="font-weight: 500;">${emailDisplay}</td>
+              <td style="color: var(--muted);">${new Date(user.created_at).toLocaleDateString()}</td>
+              <td>
+                <select id="role-${user.user_id}" class="mat-select" onchange="markDirty('${user.user_id}')">
+                  ${roleOptions}
+                </select>
+              </td>
+              <td>
+                <label class="switch">
+                  <input type="checkbox" id="auth-${user.user_id}" ${user.is_authorized ? 'checked' : ''} onchange="markDirty('${user.user_id}')">
+                  <span class="slider"></span>
+                </label>
+              </td>
+              <td>
+                <button id="save-${user.user_id}" class="btn primary" style="padding: 6px 12px; display: none;" onclick="saveUser('${user.user_id}')">Save Changes</button>
+                <span id="loader-${user.user_id}" class="loading-overlay">Saving...</span>
+              </td>
+            </tr>
+          `;
+        }
+        tbody.innerHTML = html;
+        status.textContent = `${data.rows.length} users mapped.`;
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="5" style="color: var(--bad); text-align: center;">Error: ${err.message}</td></tr>`;
+        status.textContent = '';
+      }
+    }
+
+    function markDirty(uid) {
+       document.getElementById(`save-${uid}`).style.display = 'inline-block';
+    }
+
+    async function saveUser(uid) {
+       const roleSelect = document.getElementById(`role-${uid}`);
+       const authToggle = document.getElementById(`auth-${uid}`);
+       const saveBtn = document.getElementById(`save-${uid}`);
+       const loader = document.getElementById(`loader-${uid}`);
+       
+       saveBtn.style.display = 'none';
+       loader.style.display = 'inline-block';
+       
+       try {
+          const res = await authedFetch('/api/admin/update-user-role', {
+              method: 'POST',
+              body: JSON.stringify({
+                  user_id: uid,
+                  role_level: roleSelect.value,
+                  is_authorized: authToggle.checked
+              })
+          });
+          const result = await res.json();
+          if(!res.ok) throw new Error(result.error || 'Failed');
+          
+          loader.style.color = 'var(--ok)';
+          loader.textContent = 'Saved!';
+          setTimeout(() => {
+              loader.style.display = 'none';
+              loader.style.color = 'var(--primary)';
+              loader.textContent = 'Saving...';
+          }, 2000);
+       } catch (err) {
+          alert('Failed to save user: ' + err.message);
+          saveBtn.style.display = 'inline-block';
+          loader.style.display = 'none';
+       }
+    }
+
     async function init() {
       document.body.style.visibility = 'hidden';
       try {
-        const res = await authedFetch('/api/my-permissions');
+        const res = await authedFetch('/api/my-permissions', {method: 'GET'});
         const data = await res.json();
         const isAdmin = res.ok && data?.success && (data?.role_level === 'A' || data?.ui?.canAccessSystemSettings === true);
         if (!isAdmin) {
-          window.location.href = 'login.html?redirect=admin-console.html';
+          window.location.href = 'unauthorized.html';
           return;
         }
-        document.getElementById('role-level').textContent = data?.role_level || 'unknown';
+        document.getElementById('role-level').textContent = data?.role_level || 'A';
       } catch (_) {
-        window.location.href = 'login.html?redirect=admin-console.html';
+        window.location.href = 'login.html?next=admin-console.html';
         return;
       }
-      loadRoleStats();
+      
       loadHealth();
-      loadPendingUsers();
-      loadNewArticles();
+      loadUserManagement();
       document.body.style.visibility = 'visible';
     }
 

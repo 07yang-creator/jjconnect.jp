@@ -651,7 +651,7 @@ export async function handleExportRoleAssignments(request, env) {
     const serviceConfig = auth.serviceConfig || getSupabaseServiceConfig(env);
 
     const profiles = await querySupabase(serviceConfig, 'profiles', {
-      select: 'id,role,role_level,created_at',
+      select: 'id,role,role_level,is_authorized,created_at',
       order: 'created_at.desc',
       limit: '1000',
     });
@@ -663,16 +663,17 @@ export async function handleExportRoleAssignments(request, env) {
       const user = usersById.get(p.id);
       return {
         user_id: p.id,
-        email: user?.email || '',
+        email: user?.user_metadata?.jjc_email || user?.email || '',
         role: p.role || p.role_level || 'T',
         role_level: p.role_level || p.role || 'T',
+        is_authorized: p.is_authorized || false,
         created_at: p.created_at || '',
       };
     });
 
     const format = new URL(request.url).searchParams.get('format') || 'json';
     if (format === 'csv') {
-      const header = ['user_id', 'email', 'role', 'role_level', 'created_at'];
+      const header = ['user_id', 'email', 'role', 'role_level', 'is_authorized', 'created_at'];
       const csvLines = [header.map(escapeCsvCell).join(',')];
       for (const row of rows) {
         csvLines.push(header.map((k) => escapeCsvCell(row[k])).join(','));
@@ -723,7 +724,7 @@ export async function handlePendingUsers(request, env) {
     for (const [, user] of usersByEmail) usersById.set(user.id, user);
     const rows = (profiles || []).map((p) => ({
       user_id: p.id,
-      email: usersById.get(p.id)?.email || '',
+      email: usersById.get(p.id)?.user_metadata?.jjc_email || usersById.get(p.id)?.email || '',
       role: p.role || 'T',
       role_level: p.role_level || p.role || 'T',
       created_at: p.created_at || '',
@@ -802,7 +803,43 @@ export async function handleMetricsTraffic(request, env) {
       message: 'Operational traffic (sync runs) metrics. External web analytics can be added next.',
     });
   } catch (error) {
-    return errorResponse(`流量统计失败: ${error.message}`, 500);
+    return errorResponse(`获取统计失败: ${error.message}`, 500);
+  }
+}
+
+export async function handleUpdateUserRole(request, env) {
+  try {
+    const auth = await resolveAdminContext(request, env);
+    if (auth.error) return auth.error;
+    
+    let body;
+    try { body = await request.json(); } catch(e) { return errorResponse('无效的请求体', 400); }
+    
+    const { user_id, role_level, is_authorized } = body;
+    if (!user_id || !role_level) return errorResponse('缺少必填字段', 400);
+    
+    const serviceConfig = auth.serviceConfig || getSupabaseServiceConfig(env);
+    
+    // Update Supabase profiles
+    try {
+      const res = await fetch(`${serviceConfig.url}/rest/v1/profiles?id=eq.${user_id}`, {
+        method: 'PATCH',
+        headers: {
+          ...serviceConfig.headers,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify({ role_level, is_authorized: !!is_authorized })
+      });
+      if (!res.ok) throw new Error(await res.text());
+    } catch (e) {
+      return errorResponse(`更新 Supabase 操作失败: ${e.message}`, 500);
+    }
+    
+    return jsonResponse({ success: true, message: '更新成功' });
+  } catch (error) {
+    console.error('Update user role error:', error);
+    return errorResponse(`系统错误: ${error.message}`, 500);
   }
 }
 
