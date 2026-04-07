@@ -52,8 +52,9 @@ function fileToDataUrl(file: File): Promise<string> {
 }
 
 interface TipTapBasicEditorProps {
-  /** 初始内容（HTML 或 JSON） */
-  content?: string;
+  /** 初始内容（HTML 或 JSON 对象） */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  content?: string | any;
   /** 是否可编辑（例如审核中只读） */
   editable?: boolean;
   /** 占位符文本 */

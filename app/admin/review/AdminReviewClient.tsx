@@ -66,8 +66,7 @@ export default function AdminReviewClient({ initialPosts }: AdminReviewClientPro
       } else {
         alert('Failed: ' + res.error?.message);
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
       alert('Error saving.');
     } finally {
       setIsSaving(false);
@@ -131,7 +130,7 @@ export default function AdminReviewClient({ initialPosts }: AdminReviewClientPro
             >
               <div className="w-12 h-12 bg-gray-100 rounded flex-shrink-0 overflow-hidden">
                 {post.cover_image && (
-                  <img src={getCoverImageUrl(post.cover_image, 'card')} alt="" className="w-full h-full object-cover" />
+                  <img src={getCoverImageUrl(post.cover_image, 'card')} alt={post.title} className="w-full h-full object-cover" />
                 )}
               </div>
               <div className="min-w-0">
@@ -225,20 +224,19 @@ export default function AdminReviewClient({ initialPosts }: AdminReviewClientPro
                           try {
                             const newContent = JSON.parse(e.target.value);
                             setPosts(prev => prev.map(p => p.id === selectedPost.id ? { ...p, content: newContent } : p));
-                          } catch (err) {
+                          } catch {
                             // Silently fail on invalid JSON during typing
                           }
                         }}
                       />
                     ) : (
                       <TipTapBasicEditor 
-                        content={selectedPost.content as any}
+                        content={selectedPost.content as PostContent}
                         onEditorReady={handleEditorReady}
                         minHeight="min-h-[600px]"
                         className="shadow-sm bg-white"
-                        renderToolbar={(editor) => (
+                        renderToolbar={(editor: Editor | null) => (
                           <div className="flex flex-wrap items-center gap-2 text-gray-400">
-                             {/* Re-using some buttons but in a unified way if needed */}
                              <button type="button" onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()} className="p-1 hover:text-gray-900">H1</button>
                              <button type="button" onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()} className="p-1 hover:text-gray-900">H2</button>
                              <button type="button" onClick={() => editor?.chain().focus().setFontFamily('serif').run()} className="p-1 hover:text-gray-900 font-serif font-bold">Aa</button>
@@ -253,14 +251,14 @@ export default function AdminReviewClient({ initialPosts }: AdminReviewClientPro
                   <div className="flex justify-center items-center h-full">
                     <div className="w-[400px] bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
                       <div className="h-48 bg-gray-100">
-                        {selectedPost.cover_image && <img src={getCoverImageUrl(selectedPost.cover_image, 'card')} className="w-full h-full object-cover" alt="" />}
+                        {selectedPost.cover_image && <img src={getCoverImageUrl(selectedPost.cover_image, 'card')} className="w-full h-full object-cover" alt={selectedPost.title} />}
                       </div>
                       <div className="p-6">
                         <div className="text-[10px] text-blue-600 font-bold uppercase tracking-widest mb-2">{selectedPost.category?.name || 'Article'}</div>
                         <h2 className="text-xl font-bold text-gray-900 leading-tight mb-3 line-clamp-2">{selectedPost.title}</h2>
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 rounded-full bg-gray-200 overflow-hidden">
-                             {selectedPost.author?.avatar_url && <img src={selectedPost.author.avatar_url} className="w-full h-full object-cover" />}
+                             {selectedPost.author?.avatar_url && <img src={selectedPost.author.avatar_url} className="w-full h-full object-cover" alt={selectedPost.author.display_name || 'Author'} />}
                           </div>
                           <span className="text-xs text-gray-500 font-medium">{selectedPost.author?.display_name}</span>
                         </div>
