@@ -227,6 +227,7 @@ export default function PublishForm({
   const [showPreview, setShowPreview] = useState(false);
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
   const [theme, setTheme] = useState('light');
+  const [showBanner, setShowBanner] = useState(true);
   const [previewRev, setPreviewRev] = useState(0);
   const serverHydratedRef = useRef(false);
 
@@ -242,6 +243,23 @@ export default function PublishForm({
     setReviewReason(initialPost?.review_reason ?? null);
     serverHydratedRef.current = false;
   }, [initialPost?.id, initialPost?.review_state, initialPost?.review_reason]);
+
+  useEffect(() => {
+    // Look for banner dismissal in localStorage
+    if (typeof window !== 'undefined') {
+      const isDismissed = localStorage.getItem('jjconnect-writer-banner-dismissed');
+      if (isDismissed === 'true') {
+        setShowBanner(false);
+      }
+    }
+  }, []);
+
+  function handleDismissBanner() {
+    setShowBanner(false);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('jjconnect-writer-banner-dismissed', 'true');
+    }
+  }
 
   useEffect(() => {
     if (!editor || !initialPost || serverHydratedRef.current) return;
@@ -667,6 +685,30 @@ export default function PublishForm({
           {/* Main editor area */}
           <div className="flex-1 min-w-0 overflow-y-auto px-4 sm:px-8 py-8 lg:py-12 bg-[var(--bg-page)] custom-scrollbar">
             <div className={`max-w-4xl mx-auto transition-all duration-300 ${viewMode === 'preview' ? 'translate-y-4' : ''}`}>
+              {showBanner && viewMode === 'edit' && (
+                <div className="mb-8 relative p-6 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 shadow-sm animate-in fade-in slide-in-from-top-4 duration-500">
+                  <button
+                    type="button"
+                    onClick={handleDismissBanner}
+                    className="absolute top-4 right-4 text-blue-400 hover:text-blue-600 transition-colors p-1"
+                    title="Dismiss"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                  <div className="flex items-start gap-4 pr-8">
+                    <div className="bg-blue-600 rounded-full p-2 mt-1 shrink-0 shadow-lg shadow-blue-200">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-extrabold text-blue-900 uppercase tracking-wider mb-1">Writer's Tip</h4>
+                      <p className="text-sm text-blue-800 leading-relaxed opacity-90">
+                        This page is for quick writing and sharing. For professional features or a more polished final presentation, feel free to submit your articles in any format—even handwritten—and our team will ensure it is perfectly displayed on the site.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {viewMode === 'edit' ? (
                 <>
                   <input
