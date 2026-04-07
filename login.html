@@ -711,7 +711,7 @@ function isAuthUiPath(pathWithQuery) {
 function getPostAuthDestination() {
     try {
         const params = new URLSearchParams(window.location.search);
-        const explicit = safeInternalPath(params.get('next')) || safeInternalPath(params.get('returnTo')) || safeInternalPath(params.get('redirect'));
+        const explicit = safeInternalPath(params.get('next')) || safeInternalPath(params.get('returnTo'));
         if (explicit && !isAuthUiPath(explicit)) return explicit;
         if (document.referrer) {
             const u = new URL(document.referrer);

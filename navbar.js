@@ -6,7 +6,7 @@
 (function() {
     'use strict';
     
-    const API_ENDPOINT = (typeof window !== 'undefined' && (window.location.protocol === 'file:' || (window.location.hostname === 'localhost' && window.location.port && window.location.port !== '8787'))) ? 'http://localhost:8787' : '';
+    const API_ENDPOINT = (typeof window !== 'undefined' && (window.location.protocol === 'file:' || (window.location.hostname === 'localhost' && window.location.port && window.location.port !== '8787'))) ? 'http://localhost:8787' : 'https://jjconnect-auth-worker.07-yang.workers.dev';
     const supabaseCfg = window.JJCONNECT_CONFIG || {};
     let runtimeAuthProvider = (supabaseCfg.authProvider || 'supabase').toLowerCase();
 

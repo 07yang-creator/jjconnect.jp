@@ -166,7 +166,7 @@
       : null;
 
     function getApiBase() {
-      return (typeof window !== 'undefined' && (window.location.protocol === 'file:' || (window.location.hostname === 'localhost' && window.location.port && window.location.port !== '8787'))) ? 'http://localhost:8787' : '';
+      return (typeof window !== 'undefined' && (window.location.protocol === 'file:' || (window.location.hostname === 'localhost' && window.location.port && window.location.port !== '8787'))) ? 'http://localhost:8787' : 'https://jjconnect-auth-worker.07-yang.workers.dev';
     }
 
     async function getAccessToken() {
