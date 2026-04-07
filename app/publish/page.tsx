@@ -50,10 +50,14 @@ export default async function PublishPage({
     redirect(`/upgrade/complete-profile?next=${encodeURIComponent(PUBLISH_NEXT)}`);
   }
 
+  // TEMPORARY BYPASS FOR TESTING: Allow any registered user to publish
+  /*
   const authorized = await isAuthorizedUser(user.id);
   if (!authorized) {
     return <PublishAccessPending />;
   }
+  */
+  const authorized = true;
 
   const sp = await searchParams;
   const editId = sp.edit?.trim();

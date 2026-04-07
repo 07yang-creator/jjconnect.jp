@@ -194,6 +194,20 @@
                             </a>
                         </div>
                     </div>
+                    <!-- Arena dropdown -->
+                    <div class="jjc-nav-dropdown" id="jjc-arena-dropdown">
+                        <a href="#" class="jjc-nav-link jjc-nav-dropdown-toggle">Arena</a>
+                        <div class="jjc-nav-dropdown-menu">
+                            <a href="admin-console.html" class="jjc-nav-dropdown-item">
+                                <span class="jjc-nav-dropdown-icon">🛠️</span>
+                                <span>Admin Console</span>
+                            </a>
+                            <a href="/publish" class="jjc-nav-dropdown-item">
+                                <span class="jjc-nav-dropdown-icon">✍️</span>
+                                <span>Writing Articles</span>
+                            </a>
+                        </div>
+                    </div>
                     ${canUseAiTool ? '<a href="ai.html" class="jjc-nav-link">✨AI empowered</a>' : ''}
                     <a href="about.html" class="jjc-nav-link">About Us</a>
                 </div>
@@ -246,6 +260,19 @@
                     <a href="/property_report_info.html" class="jjc-mobile-service-link">
                         <span>📊</span>
                         <span>Property Report</span>
+                    </a>
+                </div>
+                
+                <div class="jjc-mobile-divider"></div>
+                <a href="#" class="jjc-mobile-link" style="font-weight: 600;" onclick="event.preventDefault();">Arena</a>
+                <div class="jjc-mobile-services">
+                    <a href="admin-console.html" class="jjc-mobile-service-link">
+                        <span>🛠️</span>
+                        <span>Admin Console</span>
+                    </a>
+                    <a href="/publish" class="jjc-mobile-service-link">
+                        <span>✍️</span>
+                        <span>Writing Articles</span>
                     </a>
                 </div>
                 ${canUseAiTool ? '<a href="ai.html" class="jjc-mobile-link">✨AI empowered</a>' : ''}
@@ -457,6 +484,27 @@
      * 设置事件监听
      */
     function setupEventListeners(isLoggedIn) {
+        // Arena dropdown
+        const arenaDropdown = document.getElementById('jjc-arena-dropdown');
+        if (arenaDropdown) {
+            const toggle = arenaDropdown.querySelector('.jjc-nav-dropdown-toggle');
+            toggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                arenaDropdown.classList.toggle('active');
+            });
+            document.addEventListener('click', (e) => {
+                if (!arenaDropdown.contains(e.target)) {
+                    arenaDropdown.classList.remove('active');
+                }
+            });
+            arenaDropdown.querySelectorAll('.jjc-nav-dropdown-item').forEach((item) => {
+                item.addEventListener('click', () => {
+                    arenaDropdown.classList.remove('active');
+                });
+            });
+        }
+
         // Services dropdown
         const servicesDropdown = document.getElementById('jjc-services-dropdown');
         if (servicesDropdown) {
