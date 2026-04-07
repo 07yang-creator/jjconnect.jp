@@ -1,0 +1,4 @@
+# PaddleOCR stack (use Python 3.10–3.12; PaddlePaddle has no wheels for 3.14 yet)
+# Create env: python3.12 -m venv .venv && .venv/bin/pip install -r requirements-ocr.txt
+paddlepaddle==3.3.1
+paddleocr==3.4.0

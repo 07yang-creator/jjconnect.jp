@@ -32,6 +32,8 @@ function fileToDataUrl(file: File): Promise<string> {
 interface TipTapBasicEditorProps {
   /** 初始内容（HTML 或 JSON） */
   content?: string;
+  /** 是否可编辑（例如审核中只读） */
+  editable?: boolean;
   /** 占位符文本 */
   placeholder?: string;
   /** 编辑器容器 class */
@@ -48,6 +50,7 @@ interface TipTapBasicEditorProps {
 
 export default function TipTapBasicEditor({
   content = '',
+  editable = true,
   placeholder = '开始写作，支持粘贴或拖拽图片…',
   className = '',
   minHeight = 'min-h-[200px]',
@@ -88,6 +91,7 @@ export default function TipTapBasicEditor({
   );
 
   const editor = useEditor({
+    editable,
     extensions: [
       StarterKit.configure({
         heading: { levels: [1, 2, 3] },
@@ -120,6 +124,10 @@ export default function TipTapBasicEditor({
     onEditorReady?.(editor);
     return () => onEditorReady?.(null);
   }, [editor, onEditorReady]);
+
+  useEffect(() => {
+    if (editor) editor.setEditable(editable);
+  }, [editor, editable]);
 
   return (
     <div className={`tiptap-basic-editor border border-gray-200 rounded-lg bg-white overflow-hidden ${className}`}>

@@ -4,7 +4,9 @@
 
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { getPostForAuthorEdit, type AuthorEditablePost } from '@/app/actions/posts';
 import { getAuthProvider } from '@/lib/auth/provider';
+import { canPublishDirectly } from '@/lib/publish/canPublishDirectly';
 import { getCurrentUser, getProfileGateStatus, isAuthorizedUser, isUpgradedRole } from '@/lib/supabase/server';
 import PublishForm from './PublishForm';
 
@@ -29,7 +31,11 @@ function PublishAccessPending() {
   );
 }
 
-export default async function PublishPage() {
+export default async function PublishPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ edit?: string }>;
+}) {
   const user = await getCurrentUser();
   if (!user) {
     redirect(`/login?next=${encodeURIComponent(PUBLISH_NEXT)}`);
@@ -49,5 +55,24 @@ export default async function PublishPage() {
     return <PublishAccessPending />;
   }
 
-  return <PublishForm useAuth0Identity={getAuthProvider() === 'auth0'} />;
+  const sp = await searchParams;
+  const editId = sp.edit?.trim();
+  let initialPost: AuthorEditablePost | null = null;
+  if (editId) {
+    const loaded = await getPostForAuthorEdit(editId);
+    if (!loaded.ok) {
+      redirect('/publish');
+    }
+    initialPost = loaded.post;
+  }
+
+  const canDirect = await canPublishDirectly(user.id);
+
+  return (
+    <PublishForm
+      useAuth0Identity={getAuthProvider() === 'auth0'}
+      canPublishDirectly={canDirect}
+      initialPost={initialPost}
+    />
+  );
 }

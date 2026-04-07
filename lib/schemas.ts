@@ -207,29 +207,36 @@ const contentNodeSchema: z.ZodType<{
   })
 );
 
+/** Post content fields shared by strict + draft schemas */
+const postContentFields = {
+  type: z.enum(['doc', 'text', 'html']).optional(),
+  content: z.array(contentNodeSchema).max(500).optional(),
+  html: z
+    .string()
+    .max(500000)
+    .refine((s) => safeString(s, NO_SCRIPT_PATTERN), 'Invalid content')
+    .optional(),
+  markdown: z.string().max(500000).optional(),
+  blocks: z
+    .array(
+      z.object({
+        id: z.string().max(50),
+        type: z.string().max(50),
+        data: z.record(z.unknown()),
+      })
+    )
+    .max(200)
+    .optional(),
+  review_state: z.enum(['pending', 'approved', 'rejected']).optional(),
+  review_reason: z.string().max(2000).optional().nullable(),
+};
+
+/** Draft saves: allow empty body (e.g. new article not yet written). */
+export const draftPostContentSchema = z.object(postContentFields);
+
 /** Post content (TipTap JSON, html, markdown, blocks) */
 export const postContentSchema = z
-  .object({
-    type: z.enum(['doc', 'text', 'html']).optional(),
-    content: z.array(contentNodeSchema).max(500).optional(),
-    html: z
-      .string()
-      .max(500000)
-      .refine((s) => safeString(s, NO_SCRIPT_PATTERN), 'Invalid content')
-      .optional(),
-    markdown: z.string().max(500000).optional(),
-    blocks: z
-      .array(
-        z.object({
-          id: z.string().max(50),
-          type: z.string().max(50),
-          data: z.record(z.unknown()),
-        })
-      )
-      .max(200)
-      .optional(),
-    review_state: z.enum(['pending', 'approved', 'rejected']).optional(),
-  })
+  .object(postContentFields)
   .refine((o) => (o.content && o.content.length > 0) || o.html || o.markdown || (o.blocks && o.blocks.length > 0), 'Content required');
 
 export const createPostSchema = z.object({
@@ -254,6 +261,31 @@ export const createPostSchema = z.object({
     ])
     .optional(),
   status: z.enum(['draft', 'published']).default('draft'),
+});
+
+/** Server draft save (title may be empty; content may be empty). */
+export const saveDraftSchema = z.object({
+  title: z
+    .string()
+    .max(200)
+    .refine((s) => safeString(s, NO_SCRIPT_PATTERN), 'Invalid title')
+    .optional()
+    .default(''),
+  content: draftPostContentSchema,
+  summary: optionalSafeTextSchema(500),
+  category_id: uuidSchema.optional().nullable(),
+  user_category_id: uuidSchema.optional().nullable(),
+  is_paid: z.boolean().default(false),
+  price: z.number().min(0).max(999999.99).default(0),
+  cover_image: z
+    .union([
+      z.instanceof(File),
+      z
+        .string()
+        .max(2048)
+        .refine((s) => safeString(s, NO_SCRIPT_PATTERN) && safeString(s, NO_PATH_TRAVERSAL)),
+    ])
+    .optional(),
 });
 
 export const updatePostSchema = createPostSchema.partial();

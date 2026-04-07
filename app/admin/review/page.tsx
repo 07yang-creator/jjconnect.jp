@@ -7,9 +7,11 @@
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { createServerSupabaseClient, getCurrentUser, isAuthorizedUser, getUserRole } from '@/lib/supabase/server';
+import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { getAllPermissionsForRole, canAccessAdmin } from '@/lib/supabase/roleMatrix';
 import { getCoverImageUrl } from '@/lib/cloudflare-image-url';
 import { categoryDisplayName } from '@/lib/categories/displayName';
+import { sendPostRejectedToAuthor } from '@/lib/email';
 import type { PostContent, PostUpdate } from '@/types/database';
 
 async function isAdminUser(userId: string): Promise<boolean> {
@@ -84,10 +86,9 @@ async function updateReviewStatus(postId: string, action: 'approve' | 'reject', 
 
   const supabase = await createServerSupabaseClient();
 
-  // 读取当前内容以更新 review_state
   const { data: existing, error } = await supabase
     .from('posts')
-    .select('content')
+    .select('content, author_id, title')
     .eq('id', postId)
     .single();
 
@@ -96,7 +97,8 @@ async function updateReviewStatus(postId: string, action: 'approve' | 'reject', 
     return;
   }
 
-  const currentContent = (existing.content || {}) as PostContent;
+  const row = existing as { content: unknown; author_id: string; title: string };
+  const currentContent = (row.content || {}) as PostContent;
   const updatedContent: PostContent = {
     ...currentContent,
     review_state: action === 'approve' ? 'approved' : 'rejected',
@@ -123,9 +125,30 @@ async function updateReviewStatus(postId: string, action: 'approve' | 'reject', 
     return;
   }
 
+  if (action === 'reject' && row.author_id) {
+    try {
+      const admin = createSupabaseAdminClient();
+      const { data: authData } = await admin.auth.admin.getUserById(row.author_id);
+      const email = authData.user?.email?.trim();
+      if (email) {
+        void sendPostRejectedToAuthor({
+          to: email,
+          postTitle: row.title || '（无标题）',
+          postId,
+          reason: reason || null,
+        }).then((r) => {
+          if (!r.success) console.error('Rejection email failed:', r.error);
+        });
+      }
+    } catch (e) {
+      console.error('Failed to send rejection email:', e);
+    }
+  }
+
   revalidatePath('/admin/review');
   revalidatePath('/');
   revalidatePath('/posts');
+  revalidatePath('/profile/drafts');
 }
 
 export default async function AdminReviewPage({

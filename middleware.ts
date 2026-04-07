@@ -111,7 +111,7 @@ function redirectToLogin(request: NextRequest) {
 
   const loginUrl = new URL('/login.html', request.url);
   const target = request.nextUrl.pathname.replace(/^\//, '') || 'admin-console.html';
-  loginUrl.searchParams.set('redirect', target);
+  loginUrl.searchParams.set('next', target);
   return NextResponse.redirect(loginUrl);
 }
 
@@ -169,7 +169,8 @@ export async function middleware(request: NextRequest) {
         (data?.role_level === 'A' || data?.ui?.canAccessSystemSettings === true);
 
       if (!isAdmin) {
-        return redirectToLogin(request);
+        const unauthUrl = new URL('/unauthorized.html', request.url);
+        return NextResponse.redirect(unauthUrl);
       }
 
       return NextResponse.next();

@@ -207,3 +207,76 @@ export async function sendPostSubmittedNotificationToAdmin(params: {
     text,
   });
 }
+
+/**
+ * Notify author that their submission was rejected (with optional reason and edit link).
+ */
+export async function sendPostRejectedToAuthor(params: {
+  to: string;
+  postTitle: string;
+  postId: string;
+  reason?: string | null;
+}): Promise<SendEmailResult> {
+  const baseUrl =
+    typeof process.env.NEXT_PUBLIC_APP_URL === 'string' && process.env.NEXT_PUBLIC_APP_URL
+      ? process.env.NEXT_PUBLIC_APP_URL
+      : 'https://www.jjconnect.jp';
+  const editUrl = `${baseUrl}/publish?edit=${encodeURIComponent(params.postId)}`;
+  const reasonBlock =
+    params.reason && params.reason.trim()
+      ? `<p><strong>管理员说明：</strong></p><p>${escapeHtml(params.reason.trim())}</p>`
+      : '<p>本次未通过审核，您可根据站点规范修改后再次提交。</p>';
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #2D3748; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: #C53030; color: white; padding: 24px 20px; text-align: center; border-radius: 8px 8px 0 0; }
+    .content { background: white; padding: 30px 20px; border: 1px solid #EDF2F7; border-top: none; border-radius: 0 0 8px 8px; }
+    .button { display: inline-block; background: #2B6CB0; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 16px; }
+    .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #718096; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>文章未通过审核</h1>
+    </div>
+    <div class="content">
+      <p>您好，</p>
+      <p>您提交的文章「${escapeHtml(params.postTitle)}」未通过本次审核。</p>
+      ${reasonBlock}
+      <p>您可以修改内容后重新提交审核，或从草稿列表中撤回稿件。</p>
+      <a href="${escapeHtml(editUrl)}" class="button">打开编辑页面</a>
+    </div>
+    <div class="footer">
+      <p>此邮件由系统自动发送，请勿直接回复。</p>
+    </div>
+  </div>
+</body>
+</html>
+  `.trim();
+
+  const text = `
+文章未通过审核
+
+您提交的文章「${params.postTitle}」未通过本次审核。
+${params.reason && params.reason.trim() ? `说明：${params.reason.trim()}\n` : ''}
+您可以修改后重新提交，或从草稿列表撤回。
+
+编辑链接: ${editUrl}
+
+此邮件由系统自动发送，请勿直接回复。
+  `.trim();
+
+  return sendEmail({
+    to: params.to,
+    subject: `【JJConnect】文章未通过审核：${params.postTitle.slice(0, 40)}${params.postTitle.length > 40 ? '…' : ''}`,
+    html,
+    text,
+  });
+}

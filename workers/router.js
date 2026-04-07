@@ -45,7 +45,11 @@ import {
   handleMetricsTraffic,
   handleMetricsErrors,
 } from './handlers/roleMatrix.js';
-import { handleSendEmail, handleNewsletterInterest } from './handlers/email.js';
+import { 
+  handleSendEmail, 
+  handleNewsletterInterest,
+  handleRequestPublishAuth 
+} from './handlers/email.js';
 import { validate } from './lib/validate.js';
 import {
   accountCheckSchema,
@@ -106,6 +110,7 @@ export async function route(request, env) {
     if (path.startsWith('/api/files/') && method === 'GET') return await handleGetFile(request, env);
     if (path === '/api/internal/send-email' && method === 'POST') return await handleSendEmail(request, env);
     if (path === '/api/newsletter-interest' && method === 'POST') return await handleNewsletterInterest(request, env);
+    if (path === '/api/request-publish-auth' && method === 'POST') return await handleRequestPublishAuth(request, env);
 
     return errorResponse('API 端点不存在', 404);
   } catch (error) {

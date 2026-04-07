@@ -6,9 +6,10 @@
  */
 
 import { revalidatePath } from 'next/cache';
+import type { z } from 'zod';
 import { createServerSupabaseClient, getCurrentUser, getProfileGateStatus, isAuthorizedUser, isUpgradedRole } from '@/lib/supabase/server';
 import type { PostInsert, PostUpdate, PostContent } from '@/types/database';
-import { createPostSchema, parseSafe, type CreatePostInput as SchemaCreatePostInput } from '@/lib/schemas';
+import { createPostSchema, parseSafe, saveDraftSchema, type CreatePostInput as SchemaCreatePostInput } from '@/lib/schemas';
 import {
   sendPostSubmittedConfirmationToAuthor,
   sendPostSubmittedNotificationToAdmin,
@@ -28,6 +29,24 @@ export interface CreatePostInput {
   price?: number;
   cover_image?: File | string; // File for upload or URL string
   status?: 'draft' | 'published';
+}
+
+/** Save draft to DB (create or update). Title may be empty → stored as "Untitled". */
+export interface SavePublishDraftInput {
+  post_id?: string | null;
+  title?: string;
+  content: PostContent;
+  summary?: string;
+  category_id?: string;
+  user_category_id?: string;
+  is_paid?: boolean;
+  price?: number;
+  cover_image?: File | string;
+}
+
+export interface SubmitPostForReviewInput extends CreatePostInput {
+  /** When set, updates this draft instead of inserting a new row. */
+  post_id?: string | null;
 }
 
 export interface CreatePostResult {
@@ -114,6 +133,45 @@ function validatePostInput(input: unknown): { valid: true; data: SchemaCreatePos
   return { valid: false, error: msg };
 }
 
+function validateSaveDraftInput(input: unknown): { valid: true; data: z.infer<typeof saveDraftSchema> } | { valid: false; error: string } {
+  const parsed = parseSafe(saveDraftSchema, input);
+  if (parsed.success) return { valid: true, data: parsed.data as z.infer<typeof saveDraftSchema> };
+  const firstIssue = parsed.error.issues[0];
+  return { valid: false, error: firstIssue?.message || 'Invalid draft input' };
+}
+
+async function queueReviewSubmissionEmails(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  userId: string,
+  authorEmail: string | null | undefined,
+  postTitle: string,
+  postId: string
+): Promise<void> {
+  if (!authorEmail?.trim()) return;
+  let authorDisplayName: string | null = null;
+  try {
+    const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', userId).single();
+    authorDisplayName = (profile as { display_name?: string } | null)?.display_name ?? null;
+  } catch {
+    /* ignore */
+  }
+  const reviewPayload = {
+    postTitle: postTitle.trim(),
+    authorEmail,
+    postId,
+    authorDisplayName,
+  };
+  Promise.all([
+    sendPostSubmittedConfirmationToAuthor(authorEmail),
+    sendPostSubmittedNotificationToAdmin(reviewPayload),
+  ])
+    .then(([userResult, adminResult]) => {
+      if (!userResult.success) console.error('Review confirmation email failed:', userResult.error);
+      if (!adminResult.success) console.error('Review notification to admin failed:', adminResult.error);
+    })
+    .catch((err) => console.error('Review emails error:', err));
+}
+
 // ============================================================================
 // SERVER ACTIONS
 // ============================================================================
@@ -149,7 +207,7 @@ export async function createPost(input: CreatePostInput): Promise<CreatePostResu
       };
     }
     const validatedInput = validation.data;
-    
+
     // 2. Check authentication
     const user = await getCurrentUser();
     if (!user) {
@@ -192,7 +250,21 @@ export async function createPost(input: CreatePostInput): Promise<CreatePostResu
         },
       };
     }
-    
+
+    if (validatedInput.status === 'published') {
+      const { canPublishDirectly } = await import('@/lib/publish/canPublishDirectly');
+      if (!(await canPublishDirectly(user.id))) {
+        return {
+          success: false,
+          error: {
+            code: 'FORBIDDEN',
+            message:
+              'Direct publishing is limited to administrators. Save a draft and use Submit for review instead.',
+          },
+        };
+      }
+    }
+
     // 3. Check if user_category_id is provided (indicates posting to user homepage)
     if (validatedInput.user_category_id) {
       const isAuthorized = await isAuthorizedUser(user.id);
@@ -249,18 +321,19 @@ export async function createPost(input: CreatePostInput): Promise<CreatePostResu
     
     // 5. Create post data
     const supabase = await createServerSupabaseClient();
-    const postData: PostInsert = {
+    const postData = {
       title: validatedInput.title.trim(),
       content: validatedInput.content,
       summary: validatedInput.summary?.trim() || null,
       cover_image: coverUrl,
       category_id: validatedInput.category_id || null,
+      user_category_id: validatedInput.user_category_id || null,
       author_id: user.id,
       is_paid: validatedInput.is_paid || false,
       price: validatedInput.price || 0,
       status: validatedInput.status || 'draft',
-    };
-    
+    } as PostInsert & { user_category_id?: string | null };
+
     // 6. Insert post
     const { data: post, error: insertError } = await supabase
       .from('posts')
@@ -282,40 +355,17 @@ export async function createPost(input: CreatePostInput): Promise<CreatePostResu
 
     const postId = (post as { id: string }).id;
 
-    // 6b. If submitted for review (review_state === 'pending'), send emails
+    // 6b. Submitted for review → notify author + admins
     const contentWithReview = validatedInput.content as Record<string, unknown> | undefined;
-    if (contentWithReview?.review_state === 'pending' && user.email) {
-      const authorEmail = user.email;
-      let authorDisplayName: string | null = null;
-      try {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('display_name')
-          .eq('id', user.id)
-          .single();
-        authorDisplayName = (profile as { display_name?: string } | null)?.display_name ?? null;
-      } catch {
-        // ignore
-      }
-      const reviewPayload = {
-        postTitle: validatedInput.title.trim(),
-        authorEmail,
-        postId,
-        authorDisplayName,
-      };
-      Promise.all([
-        sendPostSubmittedConfirmationToAuthor(authorEmail),
-        sendPostSubmittedNotificationToAdmin(reviewPayload),
-      ]).then(([userResult, adminResult]) => {
-        if (!userResult.success) console.error('Review confirmation email failed:', userResult.error);
-        if (!adminResult.success) console.error('Review notification to admin failed:', adminResult.error);
-      }).catch((err) => console.error('Review emails error:', err));
+    if (contentWithReview?.review_state === 'pending') {
+      void queueReviewSubmissionEmails(supabase, user.id, user.email, validatedInput.title.trim(), postId);
     }
 
     // 7. Revalidate relevant paths
     revalidatePath('/posts');
     revalidatePath('/');
     revalidatePath(`/profile/${user.id}`);
+    revalidatePath('/profile/drafts');
     if (validatedInput.category_id) {
       const { data: catData } = await supabase
         .from('categories')
@@ -402,7 +452,21 @@ export async function updatePost(
         },
       };
     }
-    
+
+    if (input.status === 'published') {
+      const { canPublishDirectly } = await import('@/lib/publish/canPublishDirectly');
+      if (!(await canPublishDirectly(user.id))) {
+        return {
+          success: false,
+          error: {
+            code: 'FORBIDDEN',
+            message:
+              'Direct publishing is limited to administrators. Use Submit for review or ask an administrator.',
+          },
+        };
+      }
+    }
+
     // 3. Handle cover image update
     let coverUrl = existingPost.cover_image;
     if (input.cover_image && input.cover_image instanceof File) {
@@ -427,6 +491,9 @@ export async function updatePost(
     if (input.content) updateData.content = input.content;
     if (input.summary !== undefined) updateData.summary = input.summary?.trim() || null;
     if (input.category_id !== undefined) updateData.category_id = input.category_id;
+    if (input.user_category_id !== undefined) {
+      (updateData as Record<string, unknown>).user_category_id = input.user_category_id;
+    }
     if (input.is_paid !== undefined) updateData.is_paid = input.is_paid;
     if (input.price !== undefined) updateData.price = input.price;
     if (input.status) updateData.status = input.status;
@@ -455,6 +522,8 @@ export async function updatePost(
     revalidatePath('/');
     revalidatePath(`/posts/${postId}`);
     revalidatePath(`/profile/${user.id}`);
+    revalidatePath('/profile/drafts');
+    revalidatePath('/admin/review');
     if (input.category_id) {
       const { data: catData } = await supabase
         .from('categories')
@@ -465,7 +534,7 @@ export async function updatePost(
         revalidatePath(`/category/${catData.slug}`);
       }
     }
-    
+
     return {
       success: true,
       data: {
@@ -473,7 +542,6 @@ export async function updatePost(
         cover_url: coverUrl || undefined,
       },
     };
-    
   } catch (error) {
     console.error('Update post error:', error);
     return {
@@ -581,14 +649,15 @@ export async function deletePost(postId: string): Promise<CreatePostResult> {
     // 5. Revalidate paths
     revalidatePath('/posts');
     revalidatePath(`/profile/${user.id}`);
-    
+    revalidatePath('/profile/drafts');
+    revalidatePath('/admin/review');
+
     return {
       success: true,
       data: {
         post_id: postId,
       },
     };
-    
   } catch (error) {
     console.error('Delete post error:', error);
     return {
@@ -620,4 +689,368 @@ export async function publishPost(postId: string): Promise<CreatePostResult> {
  */
 export async function unpublishPost(postId: string): Promise<CreatePostResult> {
   return updatePost(postId, { status: 'draft' });
+}
+
+// ---------------------------------------------------------------------------
+// Draft save / submit for review / load for edit
+// ---------------------------------------------------------------------------
+
+type CurrentUser = NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>;
+
+async function assertWriterGates(
+  user: CurrentUser,
+  opts: { isPaid: boolean; userCategoryId?: string | null }
+): Promise<CreatePostResult | null> {
+  const gateStatus = await getProfileGateStatus(user.id);
+  if (!gateStatus.basic_complete) {
+    return {
+      success: false,
+      error: {
+        code: 'PROFILE_INCOMPLETE',
+        message: 'Please complete the 3-question onboarding profile first.',
+      },
+    };
+  }
+  if (isUpgradedRole(gateStatus.role) && (!gateStatus.upgrade_complete || !user.email_confirmed_at)) {
+    return {
+      success: false,
+      error: {
+        code: 'UPGRADE_PROFILE_INCOMPLETE',
+        message: 'Please verify email and complete upgrade profile before using upgraded features.',
+      },
+    };
+  }
+  if (opts.isPaid && (!gateStatus.upgrade_complete || !user.email_confirmed_at)) {
+    return {
+      success: false,
+      error: {
+        code: 'PAID_PROFILE_REQUIRED',
+        message: 'Paid content requires verified email and completed upgrade profile.',
+      },
+    };
+  }
+  if (opts.userCategoryId) {
+    const isAuthorized = await isAuthorizedUser(user.id);
+    if (!isAuthorized) {
+      return {
+        success: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'Only authorized users can post to custom categories',
+        },
+      };
+    }
+    const supabase = await createServerSupabaseClient();
+    const { data: userCategory } = await supabase
+      .from('user_categories')
+      .select('user_id')
+      .eq('id', opts.userCategoryId)
+      .single();
+    const uc = userCategory as { user_id: string } | null;
+    if (!uc || uc.user_id !== user.id) {
+      return {
+        success: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'This category does not belong to you',
+        },
+      };
+    }
+  }
+  return null;
+}
+
+export type AuthorEditablePost = {
+  id: string;
+  title: string;
+  summary: string | null;
+  content: PostContent;
+  category_id: string | null;
+  user_category_id: string | null;
+  cover_image: string | null;
+  is_paid: boolean;
+  price: number;
+  status: string;
+  review_state: PostContent['review_state'] | null;
+  review_reason: string | null;
+};
+
+export async function getPostForAuthorEdit(
+  postId: string
+): Promise<{ ok: true; post: AuthorEditablePost } | { ok: false; error: string }> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, error: 'You must be signed in.' };
+
+  const supabase = await createServerSupabaseClient();
+  const { data, error } = await supabase
+    .from('posts')
+    .select('id, title, summary, content, category_id, user_category_id, cover_image, is_paid, price, author_id, status')
+    .eq('id', postId)
+    .single();
+
+  if (error || !data) return { ok: false, error: 'Article not found.' };
+  const row = data as Record<string, unknown>;
+  if (row.author_id !== user.id) return { ok: false, error: 'You cannot edit this article.' };
+  if (row.status === 'published') {
+    return { ok: false, error: 'Published articles are edited elsewhere.' };
+  }
+
+  const pc = ((row.content as PostContent) || {}) as PostContent;
+
+  return {
+    ok: true,
+    post: {
+      id: row.id as string,
+      title: row.title as string,
+      summary: (row.summary as string | null) ?? null,
+      content: pc,
+      category_id: (row.category_id as string | null) ?? null,
+      user_category_id: (row.user_category_id as string | null) ?? null,
+      cover_image: (row.cover_image as string | null) ?? null,
+      is_paid: Boolean(row.is_paid),
+      price: Number(row.price ?? 0),
+      status: String(row.status),
+      review_state: pc.review_state ?? null,
+      review_reason: pc.review_reason ?? null,
+    },
+  };
+}
+
+export async function savePublishDraft(input: SavePublishDraftInput): Promise<CreatePostResult> {
+  try {
+    const validation = validateSaveDraftInput(input);
+    if (!validation.valid) {
+      return {
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: validation.error },
+      };
+    }
+    const d = validation.data;
+    const user = await getCurrentUser();
+    if (!user) {
+      return {
+        success: false,
+        error: { code: 'UNAUTHORIZED', message: 'You must be logged in to save drafts.' },
+      };
+    }
+
+    const gate = await assertWriterGates(user, {
+      isPaid: d.is_paid || false,
+      userCategoryId: d.user_category_id || null,
+    });
+    if (gate) return gate;
+
+    const titleForDb = d.title.trim() || 'Untitled';
+    const supabase = await createServerSupabaseClient();
+    let coverUrl: string | null = null;
+    if (d.cover_image instanceof File) {
+      const uploadResult = await uploadCoverImage(d.cover_image, user.id);
+      if (uploadResult.error) {
+        return {
+          success: false,
+          error: { code: 'UPLOAD_ERROR', message: `Failed to upload cover image: ${uploadResult.error}` },
+        };
+      }
+      coverUrl = uploadResult.url;
+    } else if (typeof d.cover_image === 'string') {
+      coverUrl = d.cover_image;
+    }
+
+    const postId = input.post_id?.trim() || null;
+
+    if (postId) {
+      const { data: existing, error: fetchErr } = await supabase
+        .from('posts')
+        .select('author_id, content, cover_image')
+        .eq('id', postId)
+        .single();
+
+      if (fetchErr || !existing) {
+        return { success: false, error: { code: 'NOT_FOUND', message: 'Draft not found.' } };
+      }
+      const ex = existing as { author_id: string; content: unknown; cover_image: string | null };
+      if (ex.author_id !== user.id) {
+        return { success: false, error: { code: 'FORBIDDEN', message: 'You cannot update this draft.' } };
+      }
+
+      const prev = (ex.content || {}) as PostContent;
+      if (prev.review_state === 'pending') {
+        return {
+          success: false,
+          error: {
+            code: 'INVALID_STATE',
+            message: 'This article is awaiting review and cannot be edited until the review finishes.',
+          },
+        };
+      }
+      const nextContent: PostContent = { ...prev, ...d.content };
+      let nextCover = ex.cover_image;
+      if (coverUrl !== null) nextCover = coverUrl;
+
+      const { error: updateError } = await supabase
+        .from('posts')
+        .update({
+          title: titleForDb,
+          content: nextContent,
+          summary: d.summary?.trim() || null,
+          category_id: d.category_id || null,
+          user_category_id: d.user_category_id || null,
+          is_paid: d.is_paid || false,
+          price: d.price || 0,
+          status: 'draft',
+          cover_image: nextCover,
+        } as PostUpdate & { user_category_id?: string | null })
+        .eq('id', postId);
+
+      if (updateError) {
+        console.error('savePublishDraft update', updateError);
+        return {
+          success: false,
+          error: { code: 'DATABASE_ERROR', message: 'Failed to save draft.', details: updateError.message },
+        };
+      }
+
+      revalidatePath('/profile/drafts');
+      revalidatePath('/admin/review');
+      return { success: true, data: { post_id: postId, cover_url: coverUrl || undefined } };
+    }
+
+    const postData = {
+      title: titleForDb,
+      content: d.content as PostContent,
+      summary: d.summary?.trim() || null,
+      cover_image: coverUrl,
+      category_id: d.category_id || null,
+      user_category_id: d.user_category_id || null,
+      author_id: user.id,
+      is_paid: d.is_paid || false,
+      price: d.price || 0,
+      status: 'draft' as const,
+    } as PostInsert & { user_category_id?: string | null };
+
+    const { data: post, error: insertError } = await supabase.from('posts').insert(postData).select('id').single();
+
+    if (insertError || !post) {
+      console.error('savePublishDraft insert', insertError);
+      return {
+        success: false,
+        error: { code: 'DATABASE_ERROR', message: 'Failed to create draft.', details: insertError?.message },
+      };
+    }
+
+    const newId = (post as { id: string }).id;
+    revalidatePath('/profile/drafts');
+    return { success: true, data: { post_id: newId, cover_url: coverUrl || undefined } };
+  } catch (e) {
+    console.error('savePublishDraft', e);
+    return {
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: e instanceof Error ? e.message : 'Unexpected error',
+      },
+    };
+  }
+}
+
+export async function submitPostForReview(input: SubmitPostForReviewInput): Promise<CreatePostResult> {
+  const postId = input.post_id?.trim() || null;
+
+  if (!postId) {
+    const content = { ...input.content, review_state: 'pending' as const, review_reason: null };
+    return createPost({
+      ...input,
+      status: 'draft',
+      content,
+    });
+  }
+
+  const validation = validatePostInput({ ...input, status: 'draft' });
+  if (!validation.valid) {
+    return { success: false, error: { code: 'VALIDATION_ERROR', message: validation.error } };
+  }
+  const v = validation.data;
+
+  const user = await getCurrentUser();
+  if (!user) {
+    return { success: false, error: { code: 'UNAUTHORIZED', message: 'You must be logged in.' } };
+  }
+
+  const gate = await assertWriterGates(user, {
+    isPaid: v.is_paid || false,
+    userCategoryId: v.user_category_id || null,
+  });
+  if (gate) return gate;
+
+  const supabase = await createServerSupabaseClient();
+  const { data: row, error: fetchErr } = await supabase
+    .from('posts')
+    .select('author_id, content, cover_image')
+    .eq('id', postId)
+    .single();
+
+  if (fetchErr || !row) {
+    return { success: false, error: { code: 'NOT_FOUND', message: 'Draft not found.' } };
+  }
+  const existing = row as { author_id: string; content: unknown; cover_image: string | null };
+  if (existing.author_id !== user.id) {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'You cannot submit this article.' } };
+  }
+
+  const prev = (existing.content || {}) as PostContent;
+  if (prev.review_state === 'pending') {
+    return {
+      success: false,
+      error: { code: 'INVALID_STATE', message: 'This article is already waiting for review.' },
+    };
+  }
+
+  let coverUrl: string | null = existing.cover_image;
+  if (v.cover_image instanceof File) {
+    const uploadResult = await uploadCoverImage(v.cover_image, user.id);
+    if (uploadResult.error) {
+      return {
+        success: false,
+        error: { code: 'UPLOAD_ERROR', message: `Failed to upload cover image: ${uploadResult.error}` },
+      };
+    }
+    coverUrl = uploadResult.url;
+  } else if (typeof v.cover_image === 'string') {
+    coverUrl = v.cover_image;
+  }
+
+  const mergedContent: PostContent = {
+    ...prev,
+    ...v.content,
+    review_state: 'pending',
+    review_reason: null,
+  };
+
+  const { error: updateError } = await supabase
+    .from('posts')
+    .update({
+      title: v.title.trim(),
+      content: mergedContent,
+      summary: v.summary?.trim() || null,
+      category_id: v.category_id || null,
+      user_category_id: v.user_category_id || null,
+      is_paid: v.is_paid || false,
+      price: v.price || 0,
+      status: 'draft',
+      cover_image: coverUrl,
+    } as PostUpdate & { user_category_id?: string | null })
+    .eq('id', postId);
+
+  if (updateError) {
+    console.error('submitPostForReview', updateError);
+    return {
+      success: false,
+      error: { code: 'DATABASE_ERROR', message: 'Failed to submit for review.', details: updateError.message },
+    };
+  }
+
+  void queueReviewSubmissionEmails(supabase, user.id, user.email, v.title.trim(), postId);
+  revalidatePath('/profile/drafts');
+  revalidatePath('/admin/review');
+  return { success: true, data: { post_id: postId, cover_url: coverUrl || undefined } };
 }

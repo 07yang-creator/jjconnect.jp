@@ -119,6 +119,17 @@ async function init() {
         .order('name');
 
       userCategories = userCategoriesData || [];
+    } else {
+      // User is not authorized, trigger modal
+      const modal = document.getElementById('auth-request-modal');
+      if (modal) modal.classList.remove('hidden');
+
+      const publishBtnElem = document.getElementById('publish-btn');
+      if (publishBtnElem) {
+        publishBtnElem.disabled = true;
+        publishBtnElem.classList.add('opacity-50', 'cursor-not-allowed');
+        publishBtnElem.title = '需要申请发布权限才能使用此功能';
+      }
     }
 
     // Populate category select
@@ -310,7 +321,51 @@ function bindEvents() {
   if (saveDraftBtn) saveDraftBtn.addEventListener('click', () => handleSubmit('draft'));
 
   const publishBtn = document.getElementById('publish-btn');
-  if (publishBtn) publishBtn.addEventListener('click', () => handleSubmit('published'));
+  if (publishBtn) publishBtn.addEventListener('click', () => {
+    if (!isAuthorized) {
+      alert('您没有发布权限，请先保存草稿并申请授权！');
+      return;
+    }
+    handleSubmit('published');
+  });
+
+  const applyAuthBtn = document.getElementById('apply-auth-btn');
+  if (applyAuthBtn) {
+    applyAuthBtn.addEventListener('click', async () => {
+      applyAuthBtn.disabled = true;
+      const originalText = applyAuthBtn.textContent;
+      applyAuthBtn.textContent = '申请中...';
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const res = await fetch('/api/request-publish-auth', {
+            method: 'POST',
+            headers: {
+               'Content-Type': 'application/json',
+               'Authorization': `Bearer ${session.access_token}`
+            }
+        });
+        const result = await res.json();
+        if (res.ok && result.success) {
+            alert('申请已发送！管理团队审查并分配权限后，您即可发布内容。');
+            document.getElementById('auth-request-modal').classList.add('hidden');
+        } else {
+            throw new Error(result.error || '请求失败，请稍后重试');
+        }
+      } catch (e) {
+        alert('申请失败: ' + e.message);
+      } finally {
+        applyAuthBtn.disabled = false;
+        applyAuthBtn.textContent = originalText;
+      }
+    });
+  }
+
+  const closeAuthModalBtn = document.getElementById('close-auth-modal-btn');
+  if (closeAuthModalBtn) {
+    closeAuthModalBtn.addEventListener('click', () => {
+      document.getElementById('auth-request-modal').classList.add('hidden');
+    });
+  }
 }
 
 // ========================================================================
