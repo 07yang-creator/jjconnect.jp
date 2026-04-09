@@ -165,17 +165,33 @@ async function fetchAuthUsersByEmail(config) {
   return map;
 }
 
+/**
+ * Trust requests forwarded by the Next.js BFF proxy (lib/email.ts pattern).
+ * The proxy verifies the admin Auth0 session server-side and adds these headers.
+ * X-Internal-Secret is NOT in Access-Control-Allow-Headers so browsers cannot
+ * send it through CORS.
+ */
+function resolveInternalProxyContext(request, env) {
+  const secret = request.headers.get('X-Internal-Secret');
+  if (!secret || !env.INTERNAL_API_SECRET || secret !== env.INTERNAL_API_SECRET) return null;
+  const userId = request.headers.get('X-JJC-User-Id') || 'proxy-admin';
+  return { userId, role: 2, role_level: 'A' };
+}
+
 async function resolveAdminContext(request, env) {
-  const token = extractToken(request);
-  if (!token) {
-    // TEMPORARY BYPASS FOR TESTING: Return a guest-admin payload if no token provided
+  // Fast-path: trusted Next.js BFF proxy
+  const internal = resolveInternalProxyContext(request, env);
+  if (internal) {
     return {
-      payload: { userId: 'guest-test', email: 'guest@test.com', role: 2, role_level: 'A' },
+      payload: { userId: internal.userId, email: '', role_level: 'A', role: 2 },
       roleLevel: 'A',
       role: 2,
-      source: 'bypass'
+      source: 'internal',
     };
   }
+
+  const token = extractToken(request);
+  if (!token) return { error: errorResponse('需要登录', 401) };
 
   // Backward compatibility with custom worker JWT
   const legacyPayload = verifyToken(token, env);
@@ -204,26 +220,35 @@ async function resolveAdminContext(request, env) {
   });
   const profile = Array.isArray(profileRows) ? profileRows[0] : profileRows;
   const roleLevel = profile?.role_level || profile?.role || 'T';
-  // TEMPORARY BYPASS FOR TESTING: Allow any registered user
-  // const isAdmin = roleLevel === 'A' || profile?.is_authorized === true;
-  // if (!isAdmin) return { error: errorResponse('仅管理员可执行此操作', 403) };
-  const isAdmin = true;
+  const isAdmin = roleLevel === 'A' || profile?.is_authorized === true;
+  if (!isAdmin) return { error: errorResponse('仅管理员可执行此操作', 403) };
 
   return {
     payload: {
       userId: supabaseUser.id,
       email: supabaseUser.email,
       role_level: roleLevel,
-      role: isAdmin ? 2 : 0,
+      role: 2,
     },
     roleLevel,
-    role: isAdmin ? 2 : 0,
+    role: 2,
     serviceConfig,
     source: 'supabase',
   };
 }
 
 async function resolveUserContext(request, env) {
+  // Fast-path: trusted Next.js BFF proxy
+  const internal = resolveInternalProxyContext(request, env);
+  if (internal) {
+    return {
+      payload: { userId: internal.userId, email: '', role_level: 'A', role: 2 },
+      roleLevel: 'A',
+      role: 2,
+      source: 'internal',
+    };
+  }
+
   const token = extractToken(request);
   if (!token) return { error: errorResponse('需要登录', 401) };
   const legacyPayload = verifyToken(token, env);

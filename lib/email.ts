@@ -5,7 +5,7 @@
 
 import { escapeHtml } from './escape-html';
 
-const REVIEW_ADMIN_EMAIL = process.env.REVIEW_ADMIN_EMAIL || 'review@jjconnect.jp';
+const REVIEW_ADMIN_EMAIL = process.env.REVIEW_ADMIN_EMAIL || 'yanogin@icloud.com';
 
 // Worker proxy config — MailChannels only works in CF Workers runtime,
 // so Next.js delegates email sending to the deployed Worker.

@@ -166,19 +166,42 @@
       : null;
 
     function getApiBase() {
-      return (typeof window !== 'undefined' && (window.location.protocol === 'file:' || (window.location.hostname === 'localhost' && window.location.port && window.location.port !== '8787'))) ? 'http://localhost:8787' : 'https://jjconnect-auth-worker.07-yang.workers.dev';
+      if (typeof window === 'undefined') return '';
+      const { protocol, hostname, port } = window.location;
+      // Direct wrangler dev server
+      if (protocol === 'file:') return 'http://localhost:8787';
+      if (hostname === 'localhost' && port === '8787') return 'http://localhost:8787';
+      // Next.js (dev :3000 or production https) → route through BFF proxy so
+      // the Auth0 session is verified server-side (no JWT secret needed)
+      return '/api/jjc/worker';
     }
 
     async function getAccessToken() {
-      if (!supabaseClient) return '';
-      const { data } = await supabaseClient.auth.getSession();
-      return data?.session?.access_token || '';
+      // 1. Native Supabase browser session (supabase login.html path)
+      if (supabaseClient) {
+        const { data } = await supabaseClient.auth.getSession();
+        if (data?.session?.access_token) return data.session.access_token;
+      }
+      // 2. Cookie set by login.html after Supabase sign-in
+      const cookieMatch = document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('jjc_sb_access_token='));
+      if (cookieMatch) {
+        const raw = cookieMatch.substring('jjc_sb_access_token='.length);
+        try { return decodeURIComponent(raw); } catch { return raw; }
+      }
+      return '';
     }
 
     async function authedFetch(path, init = {}) {
-      const token = await getAccessToken();
-      const headers = Object.assign({ 'Content-Type': 'application/json' }, init.headers || {}, token ? { Authorization: `Bearer ${token}` } : {});
-      return fetch(`${getApiBase()}${path}`, Object.assign({}, init, { headers }));
+      const base = getApiBase();
+      const isProxy = base.startsWith('/');
+      const headers = Object.assign({ 'Content-Type': 'application/json' }, init.headers || {});
+      if (!isProxy) {
+        // Direct worker call: attach Bearer token
+        const token = await getAccessToken();
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+      }
+      // credentials: 'include' ensures Auth0 session cookie reaches the BFF proxy
+      return fetch(`${base}${path}`, Object.assign({}, init, { headers, credentials: 'include' }));
     }
 
     // Role Matrix & General Helpers
