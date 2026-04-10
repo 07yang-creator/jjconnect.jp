@@ -407,13 +407,27 @@
     </div>
     
     <script>
-        const API_ENDPOINT = (window.location.protocol === 'file:' || (window.location.hostname === 'localhost' && window.location.port && window.location.port !== '8787')) ? 'http://localhost:8787' : 'https://jjconnect-auth-worker.07-yang.workers.dev';
+        const LEGACY_API_ENDPOINT = (window.location.protocol === 'file:' || (window.location.hostname === 'localhost' && window.location.port && window.location.port !== '8787')) ? 'http://localhost:8787' : 'https://jjconnect-auth-worker.07-yang.workers.dev';
         const supabaseCfg = window.JJCONNECT_CONFIG || {};
+        const runtimeAuthProvider = (supabaseCfg.authProvider || 'supabase').toLowerCase();
+        const isAuth0 = () => runtimeAuthProvider === 'auth0';
+        const useSessionProfileApi = () =>
+            isAuth0() &&
+            window.location.protocol !== 'file:' &&
+            window.location.origin &&
+            window.location.origin !== 'null';
+        const API_ENDPOINT = useSessionProfileApi() ? '' : LEGACY_API_ENDPOINT;
         const SUPABASE_URL = supabaseCfg.supabaseUrl;
         const SUPABASE_ANON_KEY = supabaseCfg.supabaseAnonKey;
-        const supabaseClient = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
-            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-            : null;
+        const supabaseClient = (() => {
+            if (!window.supabase || !SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
+            if (typeof window.__jjc_getSupabaseBrowserClient === 'function') {
+                return window.__jjc_getSupabaseBrowserClient();
+            }
+            if (window.__jjc_profile_supabase_client__) return window.__jjc_profile_supabase_client__;
+            window.__jjc_profile_supabase_client__ = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            return window.__jjc_profile_supabase_client__;
+        })();
         
         const DICEBEAR_BASE = 'https://api.dicebear.com/9.x/initials/svg';
         const AVATAR_PRESETS = ['smile', 'happy', 'alice', 'bob', 'carlos', 'denise', 'eva', 'frank', 'grace', 'henry'];
@@ -441,6 +455,37 @@
             const h = { 'Content-Type': 'application/json' };
             if (token) h['Authorization'] = 'Bearer ' + token;
             return h;
+        }
+
+        function apiUrl(path) {
+            return API_ENDPOINT ? API_ENDPOINT + path : path;
+        }
+
+        async function hasActiveSession() {
+            if (!isAuth0()) return Boolean(await getAccessToken());
+            if (window.JJCNavbar?.checkAuth) {
+                try {
+                    const state = await window.JJCNavbar.checkAuth();
+                    if (state?.isLoggedIn) return true;
+                } catch (_) {}
+            }
+            try {
+                const res = await fetch('/api/me', { credentials: 'include' });
+                if (!res.ok) return false;
+                const data = await res.json();
+                return data?.isLoggedIn === true;
+            } catch (_) {
+                return false;
+            }
+        }
+
+        async function authedFetch(path, init = {}) {
+            const headers = Object.assign({}, init.headers || {});
+            const token = await getAccessToken();
+            if (token) headers.Authorization = 'Bearer ' + token;
+            const options = Object.assign({}, init, { headers });
+            if (useSessionProfileApi()) options.credentials = 'include';
+            return fetch(apiUrl(path), options);
         }
         
         function showError(msg) {
@@ -526,10 +571,10 @@
         
         async function saveAvatar(avatarUrl) {
             try {
-                const res = await fetch(API_ENDPOINT + '/api/profile', {
+                const res = await authedFetch('/api/profile', {
                     method: 'PUT',
                     headers: await getAuthHeaders(),
-                    body: JSON.stringify({ avatar_url: avatarUrl })
+                    body: JSON.stringify({ avatar_url: avatarUrl }),
                 });
                 const data = await res.json();
                 if (data.success) {
@@ -581,7 +626,7 @@
                     const token = await getAccessToken();
                     const uploadHeaders = {};
                     if (token) uploadHeaders.Authorization = 'Bearer ' + token;
-                    const res = await fetch(API_ENDPOINT + '/api/avatar/upload', {
+                    const res = await fetch(LEGACY_API_ENDPOINT + '/api/avatar/upload', {
                         method: 'POST',
                         headers: uploadHeaders,
                         body: fd
@@ -636,7 +681,7 @@
                 personal_remarks: document.getElementById('input-remarks').value
             };
             try {
-                const res = await fetch(API_ENDPOINT + '/api/profile', {
+                const res = await authedFetch('/api/profile', {
                     method: 'PUT',
                     headers: await getAuthHeaders(),
                     body: JSON.stringify(payload)
@@ -664,22 +709,23 @@
             const targetUser = params.get('user');
             
             const isPublicView = viewMode === 'public' || targetUser;
-            const token = await getAccessToken();
             
-            if (!token && !targetUser) {
-                showError('Please sign in to view your profile.');
-                document.getElementById('loading-state').innerHTML = '<p><a href="login.html?redirect=' + encodeURIComponent(window.location.href) + '">Sign in</a></p>';
-                document.getElementById('loading-state').style.display = 'block';
-                return;
-            }
-            
-            let url = API_ENDPOINT + '/api/profile';
-            if (targetUser) url += '/' + targetUser;
+            let path = '/api/profile';
+            if (targetUser) path += '/' + targetUser;
             
             try {
-                const res = await fetch(url, {
-                    headers: targetUser ? {} : await getAuthHeaders()
+                const res = await authedFetch(path, {
+                    headers: targetUser ? {} : await getAuthHeaders(),
                 });
+                if (!targetUser && res.status === 401) {
+                    showError('Please sign in to view your profile.');
+                    const href = isAuth0()
+                        ? '/auth/login?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search)
+                        : 'login.html?redirect=' + encodeURIComponent(window.location.href);
+                    document.getElementById('loading-state').innerHTML = '<p><a href="' + href + '">Sign in</a></p>';
+                    document.getElementById('loading-state').style.display = 'block';
+                    return;
+                }
                 const data = await res.json();
                 
                 document.getElementById('loading-state').style.display = 'none';
