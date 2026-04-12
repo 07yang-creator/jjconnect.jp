@@ -53,7 +53,12 @@ export default function LegacyJjconnectNavbar() {
           await window.JJCNavbar.refresh();
           return;
         }
-        if (document.querySelector('.jjc-navbar')) return;
+        
+        // Remove existing elements even if refresh isn't available yet (to clean up manual injections)
+        if (typeof document !== 'undefined') {
+          document.querySelector('.jjc-navbar')?.remove();
+          document.querySelector('.jjc-footer')?.remove();
+        }
 
         await loadScriptOnce('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2', 'jjc-site-script-supabase');
         if (cancelled) return;

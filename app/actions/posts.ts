@@ -128,6 +128,14 @@ async function uploadCoverImage(
 function validatePostInput(input: unknown): { valid: true; data: SchemaCreatePostInput } | { valid: false; error: string } {
   const parsed = parseSafe(createPostSchema, input);
   if (parsed.success) return { valid: true, data: parsed.data as SchemaCreatePostInput };
+  
+  // Diagnostic logging for the "Expected object, received function" error
+  console.error('[validatePostInput] Validation failed:', JSON.stringify(parsed.error.format(), null, 2));
+  console.error('[validatePostInput] Input keys:', Object.keys(input && typeof input === 'object' ? input : {}));
+  if (input && typeof input === 'object' && 'cover_image' in input) {
+    console.error('[validatePostInput] cover_image type:', typeof input.cover_image);
+  }
+
   const firstIssue = parsed.error.issues[0];
   const msg = firstIssue?.message || 'Invalid post input';
   return { valid: false, error: msg };
@@ -136,6 +144,10 @@ function validatePostInput(input: unknown): { valid: true; data: SchemaCreatePos
 function validateSaveDraftInput(input: unknown): { valid: true; data: z.infer<typeof saveDraftSchema> } | { valid: false; error: string } {
   const parsed = parseSafe(saveDraftSchema, input);
   if (parsed.success) return { valid: true, data: parsed.data as z.infer<typeof saveDraftSchema> };
+  
+  // Diagnostic logging
+  console.error('[validateSaveDraftInput] Validation failed:', JSON.stringify(parsed.error.format(), null, 2));
+  
   const firstIssue = parsed.error.issues[0];
   return { valid: false, error: firstIssue?.message || 'Invalid draft input' };
 }

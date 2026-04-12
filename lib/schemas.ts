@@ -253,7 +253,18 @@ export const createPostSchema = z.object({
   price: z.number().min(0).max(999999.99).default(0),
   cover_image: z
     .union([
-      z.instanceof(File),
+      // More resilient check for File-like objects in Server Actions
+      z.custom<any>((val) => {
+        if (!val) return false;
+        if (typeof File !== 'undefined' && val instanceof File) return true;
+        return (
+          typeof val === 'object' &&
+          val !== null &&
+          typeof val.name === 'string' &&
+          typeof val.size === 'number' &&
+          typeof val.type === 'string'
+        );
+      }, 'Invalid file object'),
       z
         .string()
         .max(2048)
@@ -279,7 +290,18 @@ export const saveDraftSchema = z.object({
   price: z.number().min(0).max(999999.99).default(0),
   cover_image: z
     .union([
-      z.instanceof(File),
+      // More resilient check for File-like objects in Server Actions
+      z.custom<any>((val) => {
+        if (!val) return false;
+        if (typeof File !== 'undefined' && val instanceof File) return true;
+        return (
+          typeof val === 'object' &&
+          val !== null &&
+          typeof val.name === 'string' &&
+          typeof val.size === 'number' &&
+          typeof val.type === 'string'
+        );
+      }, 'Invalid file object'),
       z
         .string()
         .max(2048)

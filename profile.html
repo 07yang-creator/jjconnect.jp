@@ -514,11 +514,15 @@
             const cvEl = document.getElementById('contribution-value');
             if (cvEl) cvEl.textContent = profile.contribution_value || '0';
             
-            const initials = username.split(/\s+/).map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?';
+            const initials = username.trim().split(/\s+/).map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?';
             const ph = document.getElementById('avatar-placeholder');
             const img = document.getElementById('avatar-img');
-            if (profile.avatar_url) {
-                img.src = (profile.avatar_url.startsWith('http') ? profile.avatar_url : (API_ENDPOINT + profile.avatar_url));
+            
+            // Check API avatar first, then fallback to localStorage avatar
+            const avatarUrl = profile.avatar_url || (isPublic ? null : localStorage.getItem('jjc_avatar_url'));
+            
+            if (avatarUrl) {
+                img.src = (avatarUrl.startsWith('http') ? avatarUrl : (API_ENDPOINT + avatarUrl));
                 img.alt = username;
                 img.style.display = 'block';
                 ph.style.display = 'none';

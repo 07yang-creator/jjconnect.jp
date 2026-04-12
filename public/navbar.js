@@ -446,26 +446,41 @@
      * 初始化导航栏
      */
     async function initNavbar() {
+        if (window.__JJC_NAVBAR_INIT_DONE__) {
+            return;
+        }
         await mergeRemotePublicConfig();
 
-        // 检查是否已存在导航栏
-        if (document.getElementById('jjconnect-navbar')) {
+        // 检查是否已存在导航栏 (id check or class check)
+        if (document.getElementById('jjconnect-navbar') || document.querySelector('.jjc-navbar')) {
+            window.__JJC_NAVBAR_INIT_DONE__ = true;
             return;
         }
         
         // 检查登录状态
         const { isLoggedIn, userData } = await checkAuthStatus();
         
-        // 创建导航栏容器
-        const navContainer = document.createElement('div');
-        navContainer.id = 'jjconnect-navbar';
-        navContainer.innerHTML = createNavbarHTML(isLoggedIn, userData);
+        // 创建临时容器以解析 HTML
+        const temp = document.createElement('div');
+        temp.innerHTML = createNavbarHTML(isLoggedIn, userData);
+        const navElement = temp.firstElementChild;
         
-        // 插入到 body 开头
-        document.body.insertBefore(navContainer.firstElementChild, document.body.firstChild);
-        
-        // 绑定事件
-        setupEventListeners(isLoggedIn);
+        if (navElement) {
+            navElement.id = 'jjconnect-navbar';
+            // 插入到 body 开头
+            document.body.insertBefore(navElement, document.body.firstChild);
+            // 绑定事件
+            setupEventListeners(isLoggedIn);
+            window.__JJC_NAVBAR_INIT_DONE__ = true;
+        }
+    }
+
+    /** Ensure refresh can bypass the flag to actually update the UI */
+    async function refreshNavbar() {
+        window.__JJC_NAVBAR_INIT_DONE__ = false;
+        document.getElementById('jjconnect-navbar')?.remove();
+        document.querySelector('.jjc-navbar')?.remove();
+        return initNavbar();
     }
     
     /**
@@ -473,17 +488,20 @@
      */
     function initFooter() {
         // 检查是否已存在 footer
-        if (document.getElementById('jjconnect-footer')) {
+        if (document.getElementById('jjconnect-footer') || document.querySelector('.jjc-footer')) {
             return;
         }
         
-        // 创建 footer 容器
-        const footerContainer = document.createElement('div');
-        footerContainer.id = 'jjconnect-footer';
-        footerContainer.innerHTML = createFooterHTML();
+        // 创建临时容器以解析 HTML
+        const temp = document.createElement('div');
+        temp.innerHTML = createFooterHTML();
+        const footerElement = temp.firstElementChild;
         
-        // 插入到 body 末尾
-        document.body.appendChild(footerContainer.firstElementChild);
+        if (footerElement) {
+            footerElement.id = 'jjconnect-footer';
+            // 插入到 body 末尾
+            document.body.appendChild(footerElement);
+        }
     }
     
     /**
@@ -595,7 +613,7 @@
     
     // 暴露到全局，以便其他脚本调用
     window.JJCNavbar = {
-        refresh: initNavbar,
+        refresh: refreshNavbar,
         refreshFooter: initFooter,
         logout: handleLogout,
         checkAuth: checkAuthStatus
