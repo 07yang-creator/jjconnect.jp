@@ -9,8 +9,8 @@ import { getSupabase, getSupabaseWithAuth, extractTokenFromRequest, Env } from '
 /**
  * Worker 入口点 - 基本使用示例
  */
-export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+const worker = {
+  async fetch(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url)
     const path = url.pathname
 
@@ -47,6 +47,8 @@ export default {
     }
   }
 }
+
+export default worker;
 
 /**
  * 示例 1: 基本的数据库查询

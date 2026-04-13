@@ -254,7 +254,7 @@ export const createPostSchema = z.object({
   cover_image: z
     .union([
       // More resilient check for File-like objects in Server Actions
-      z.custom<any>((val) => {
+      z.custom<unknown>((val) => {
         if (!val) return false;
         if (typeof File !== 'undefined' && val instanceof File) return true;
         return (
@@ -291,7 +291,7 @@ export const saveDraftSchema = z.object({
   cover_image: z
     .union([
       // More resilient check for File-like objects in Server Actions
-      z.custom<any>((val) => {
+      z.custom<unknown>((val) => {
         if (!val) return false;
         if (typeof File !== 'undefined' && val instanceof File) return true;
         return (
