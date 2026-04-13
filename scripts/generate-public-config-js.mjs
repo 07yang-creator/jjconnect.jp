@@ -31,6 +31,8 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const authProvider = getAuthProvider();
 /** Full URL to the Next.js /publish route when the main domain serves static HTML (e.g. https://your-next.vercel.app/publish). */
 const nextPublishUrl = (process.env.NEXT_PUBLIC_NEXT_PUBLISH_URL || '').trim();
+/** Production Worker URL. */
+const workerUrl = (process.env.NEXT_PUBLIC_WORKER_URL || 'https://jjconnect-auth-worker.07-yang.workers.dev').trim();
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn(
@@ -51,6 +53,7 @@ window.JJCONNECT_CONFIG = Object.assign(
     supabaseAnonKey: ${JSON.stringify(supabaseAnonKey)},
     authProvider: ${JSON.stringify(authProvider)},
     nextPublishUrl: ${JSON.stringify(nextPublishUrl)},
+    workerUrl: ${JSON.stringify(workerUrl)},
   },
   window.JJCONNECT_CONFIG || {}
 );

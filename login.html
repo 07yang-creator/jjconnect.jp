@@ -617,7 +617,7 @@
 
 <script>
 // Same-origin `/api/*` for http(s) (e.g. `next dev`). `file://` opens use Wrangler on :8787.
-const API_ENDPOINT = window.location.protocol === 'file:' ? 'http://localhost:8787' : '';
+const API_ENDPOINT = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:8787' : (window.JJCONNECT_CONFIG?.workerUrl || 'https://jjconnect-auth-worker.07-yang.workers.dev');
 const DEFAULT_AUTH0_CONNECTIONS = {
     google: 'google-oauth2',
     facebook: 'facebook',

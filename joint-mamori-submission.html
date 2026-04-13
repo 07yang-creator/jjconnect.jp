@@ -360,7 +360,7 @@
     
     <script>
         // API endpoint (update with your Cloudflare Worker URL)
-        const API_ENDPOINT = 'http://localhost:8787'; // Change to your worker URL in production
+        const API_ENDPOINT = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:8787' : (window.JJCONNECT_CONFIG?.workerUrl || 'https://jjconnect-auth-worker.07-yang.workers.dev'); // Change to your worker URL in production
         
         // File upload handling
         const fileInput = document.getElementById('media');

@@ -241,7 +241,7 @@
     </div>
 
     <script>
-        const API_ENDPOINT = '/api/backend/status';
+        const API_ENDPOINT = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:8787' : (window.JJCONNECT_CONFIG?.workerUrl || 'https://jjconnect-auth-worker.07-yang.workers.dev');
         
         function addConsoleLog(message, type = 'info') {
             const console = document.getElementById('consoleOutput');

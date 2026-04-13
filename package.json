@@ -28,7 +28,12 @@
     "audit:test-users": "node scripts/audit-supabase-test-users.mjs",
     "cleanup:vv-test-users": "node scripts/delete-vv-test-users.mjs",
     "seed:vv-test-users": "node scripts/seed-vv-test-users.mjs",
-    "grant:full-access": "node scripts/grant-full-access-by-email.mjs"
+    "grant:full-access": "node scripts/grant-full-access-by-email.mjs",
+    "e2e": "playwright test",
+    "e2e:headed": "playwright test --headed",
+    "e2e:manual": "playwright test e2e/manual-email-approval.spec.ts --headed",
+    "e2e:install": "playwright install chromium",
+    "e2e:report": "playwright show-report"
   },
   "keywords": [
     "cloudflare",
@@ -40,6 +45,7 @@
   "license": "MIT",
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",
+    "@playwright/test": "^1.59.1",
     "@types/node": "^22.0.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",

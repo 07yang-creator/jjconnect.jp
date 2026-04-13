@@ -63,3 +63,5 @@ priv_key.pem
 public/wp-content/
 public/wp-includes/
 .vercel
+playwright-report/
+test-results/

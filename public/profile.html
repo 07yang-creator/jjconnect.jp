@@ -407,7 +407,7 @@
     </div>
     
     <script>
-        const LEGACY_API_ENDPOINT = (window.location.protocol === 'file:' || (window.location.hostname === 'localhost' && window.location.port && window.location.port !== '8787')) ? 'http://localhost:8787' : 'https://jjconnect-auth-worker.07-yang.workers.dev';
+        const LEGACY_API_ENDPOINT = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:8787' : (window.JJCONNECT_CONFIG?.workerUrl || 'https://jjconnect-auth-worker.07-yang.workers.dev');
         const supabaseCfg = window.JJCONNECT_CONFIG || {};
         const runtimeAuthProvider = (supabaseCfg.authProvider || 'supabase').toLowerCase();
         const isAuth0 = () => runtimeAuthProvider === 'auth0';
@@ -416,7 +416,7 @@
             window.location.protocol !== 'file:' &&
             window.location.origin &&
             window.location.origin !== 'null';
-        const API_ENDPOINT = useSessionProfileApi() ? '' : LEGACY_API_ENDPOINT;
+        const API_ENDPOINT = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:8787' : (window.JJCONNECT_CONFIG?.workerUrl || 'https://jjconnect-auth-worker.07-yang.workers.dev');
         const SUPABASE_URL = supabaseCfg.supabaseUrl;
         const SUPABASE_ANON_KEY = supabaseCfg.supabaseAnonKey;
         const supabaseClient = (() => {

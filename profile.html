@@ -407,7 +407,7 @@
     </div>
     
     <script>
-        const LEGACY_API_ENDPOINT = (window.location.protocol === 'file:' || (window.location.hostname === 'localhost' && window.location.port && window.location.port !== '8787')) ? 'http://localhost:8787' : 'https://jjconnect-auth-worker.07-yang.workers.dev';
+        const LEGACY_API_ENDPOINT = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:8787' : (window.JJCONNECT_CONFIG?.workerUrl || 'https://jjconnect-auth-worker.07-yang.workers.dev');
         const supabaseCfg = window.JJCONNECT_CONFIG || {};
         const runtimeAuthProvider = (supabaseCfg.authProvider || 'supabase').toLowerCase();
         const isAuth0 = () => runtimeAuthProvider === 'auth0';
@@ -416,7 +416,7 @@
             window.location.protocol !== 'file:' &&
             window.location.origin &&
             window.location.origin !== 'null';
-        const API_ENDPOINT = useSessionProfileApi() ? '' : LEGACY_API_ENDPOINT;
+        const API_ENDPOINT = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:8787' : (window.JJCONNECT_CONFIG?.workerUrl || 'https://jjconnect-auth-worker.07-yang.workers.dev');
         const SUPABASE_URL = supabaseCfg.supabaseUrl;
         const SUPABASE_ANON_KEY = supabaseCfg.supabaseAnonKey;
         const supabaseClient = (() => {
@@ -514,15 +514,11 @@
             const cvEl = document.getElementById('contribution-value');
             if (cvEl) cvEl.textContent = profile.contribution_value || '0';
             
-            const initials = username.trim().split(/\s+/).map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?';
+            const initials = username.split(/\s+/).map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?';
             const ph = document.getElementById('avatar-placeholder');
             const img = document.getElementById('avatar-img');
-            
-            // Check API avatar first, then fallback to localStorage avatar
-            const avatarUrl = profile.avatar_url || (isPublic ? null : localStorage.getItem('jjc_avatar_url'));
-            
-            if (avatarUrl) {
-                img.src = (avatarUrl.startsWith('http') ? avatarUrl : (API_ENDPOINT + avatarUrl));
+            if (profile.avatar_url) {
+                img.src = (profile.avatar_url.startsWith('http') ? profile.avatar_url : (API_ENDPOINT + profile.avatar_url));
                 img.alt = username;
                 img.style.display = 'block';
                 ph.style.display = 'none';
