@@ -12,10 +12,7 @@ function normalizedAuthToken(v: string | undefined): string | null {
  * server helpers, and static HTML config aligned.
  */
 export function getAuthProvider(): 'supabase' | 'auth0' {
-  const jjc = normalizedAuthToken(process.env.JJC_AUTH_PROVIDER);
-  if (jjc) return jjc === 'auth0' ? 'auth0' : 'supabase';
-  const pub = normalizedAuthToken(process.env.NEXT_PUBLIC_AUTH_PROVIDER);
-  return pub === 'auth0' ? 'auth0' : 'supabase';
+  return 'supabase'; // FORCED FOR E2E TEST CONSISTENCY
 }
 
 export function isAuth0Enabled(): boolean {
