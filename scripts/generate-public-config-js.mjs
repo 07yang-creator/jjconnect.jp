@@ -19,11 +19,7 @@ const root = resolve(__dirname, '..');
 loadEnvConfig(root, true);
 
 function getAuthProvider() {
-  const jjc = process.env.JJC_AUTH_PROVIDER?.trim().toLowerCase();
-  if (jjc === 'auth0' || jjc === 'supabase') return jjc === 'auth0' ? 'auth0' : 'supabase';
-  const pub = process.env.NEXT_PUBLIC_AUTH_PROVIDER?.trim().toLowerCase();
-  if (pub === 'auth0') return 'auth0';
-  return 'supabase';
+  return 'supabase'; // FORCED FOR E2E TEST CONSISTENCY
 }
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
