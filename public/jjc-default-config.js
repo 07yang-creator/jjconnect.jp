@@ -6,8 +6,9 @@ window.JJCONNECT_CONFIG = Object.assign(
   {
     supabaseUrl: "https://iagbrhyqatsccwdlxoww.supabase.co",
     supabaseAnonKey: "sb_publishable_WYITJIrPsX6ILRbgfKo6_Q_q_h9ZohC",
-    authProvider: "auth0",
+    authProvider: "supabase",
     nextPublishUrl: "",
+    workerUrl: "https://jjconnect-auth-worker.07-yang.workers.dev",
   },
   window.JJCONNECT_CONFIG || {}
 );
