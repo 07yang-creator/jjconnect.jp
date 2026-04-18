@@ -23,8 +23,6 @@ const nextConfig = {
   async rewrites() {
     return [
       { source: '/', destination: '/index.html' },
-      // Browsers request /favicon.ico by default; serve the same mark as the navbar SVG.
-      { source: '/favicon.ico', destination: '/brand/jjconnect-navbar-logo.svg' },
     ];
   },
   async headers() {

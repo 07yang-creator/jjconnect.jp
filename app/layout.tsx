@@ -18,8 +18,8 @@ export const metadata: Metadata = {
   title: 'JJConnect — community & stories',
   description: 'Share knowledge, connect with others, and publish your story.',
   icons: {
-    icon: [{ url: '/brand/jjconnect-navbar-logo.svg', type: 'image/svg+xml' }],
-    shortcut: '/brand/jjconnect-navbar-logo.svg',
+    icon: [{ url: '/brand/jjconnect-logo.png?v=2', type: 'image/png' }],
+    shortcut: '/brand/jjconnect-logo.png?v=2',
   },
 };
 
