@@ -15,7 +15,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'JJConnect — community & stories',
+  title: 'JJConnect — つなぐ',
   description: 'Share knowledge, connect with others, and publish your story.',
   icons: {
     icon: [{ url: '/brand/jjconnect-logo.png?v=2', type: 'image/png' }],
