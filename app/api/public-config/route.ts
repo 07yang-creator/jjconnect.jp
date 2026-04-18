@@ -14,7 +14,7 @@ export async function GET() {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
   const recaptchaSiteKey =
     process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '';
-  const authProvider = 'supabase'; // FORCED FOR E2E TEST CONSISTENCY
+  const authProvider = getAuthProvider(); // was hardcoded 'supabase' for E2E; restored to fix TS build
 
   const nextPublishUrl = (process.env.NEXT_PUBLIC_NEXT_PUBLISH_URL || '').trim();
 
