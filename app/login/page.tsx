@@ -67,6 +67,11 @@ function LoginPageContent() {
   const [connections, setConnections] = useState<ConnectionMap | null>(null);
   /** Auth0 Database connection name (public config); required so “Continue” uses the same path as social `connection=` links. */
   const [auth0DatabaseConnection, setAuth0DatabaseConnection] = useState('Username-Password-Authentication');
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotSubmitting, setForgotSubmitting] = useState(false);
+  const [forgotSuccess, setForgotSuccess] = useState(false);
+  const [forgotError, setForgotError] = useState<string | null>(null);
 
   const loginHintFromUrl = searchParams.get('login_hint')?.trim() ?? '';
   useEffect(() => {
@@ -267,6 +272,27 @@ function LoginPageContent() {
     });
   }
 
+  async function handleForgotPassword(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const emailToReset = forgotEmail.trim();
+    if (!emailToReset) return;
+    setForgotSubmitting(true);
+    setForgotError(null);
+    try {
+      const redirectTo = `${window.location.origin}/auth/reset-password`;
+      const { error } = await supabase.auth.resetPasswordForEmail(emailToReset, { redirectTo });
+      if (error) {
+        setForgotError(error.message || 'Failed to send reset email.');
+      } else {
+        setForgotSuccess(true);
+      }
+    } catch {
+      setForgotError('Network error. Please try again.');
+    } finally {
+      setForgotSubmitting(false);
+    }
+  }
+
   if (authMode === 'loading') {
     return (
       <main className="mx-auto max-w-md px-4 py-12">
@@ -321,6 +347,15 @@ function LoginPageContent() {
               autoComplete="current-password"
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
             />
+            <div className="mt-1 text-right">
+              <button
+                type="button"
+                onClick={() => { setShowForgotPassword(true); setForgotEmail(email); setForgotError(null); setForgotSuccess(false); }}
+                className="text-xs text-blue-600 hover:underline"
+              >
+                Forgot password?
+              </button>
+            </div>
           </div>
         )}
 
@@ -395,6 +430,87 @@ function LoginPageContent() {
           </p>
         </div>
       </form>
+
+      {/* Forgot Password Overlay */}
+      {showForgotPassword && (
+        <div className="mt-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          {!forgotSuccess ? (
+            <>
+              <h2 className="mb-2 text-lg font-semibold text-gray-900">Reset your password</h2>
+              <p className="mb-4 text-sm text-gray-600">
+                Enter your email address and we&apos;ll send you a link to reset your password.
+              </p>
+              <form onSubmit={handleForgotPassword} className="space-y-3">
+                <div>
+                  <label htmlFor="forgot-email" className="mb-1 block text-sm font-medium text-gray-700">
+                    Email
+                  </label>
+                  <input
+                    id="forgot-email"
+                    type="email"
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    required
+                    autoComplete="email"
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    placeholder="your.email@example.com"
+                  />
+                </div>
+                {forgotError && (
+                  <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+                    {forgotError}
+                  </div>
+                )}
+                <div className="flex items-center justify-between gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotPassword(false)}
+                    className="rounded-md px-3 py-2 text-sm text-gray-600 hover:text-gray-900"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={forgotSubmitting}
+                    className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {forgotSubmitting ? 'Sending...' : 'Send reset link'}
+                  </button>
+                </div>
+              </form>
+            </>
+          ) : (
+            <div className="text-center">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-2xl text-green-600">
+                ✓
+              </div>
+              <h2 className="mb-1 text-lg font-semibold text-gray-900">Check your email</h2>
+              <p className="mb-2 text-sm text-gray-600">
+                We&apos;ve sent a password reset link to <strong>{forgotEmail}</strong>.
+              </p>
+              <p className="mb-4 text-xs text-gray-500">
+                Didn&apos;t receive it? Check your spam folder.
+              </p>
+              <div className="flex items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => { setShowForgotPassword(false); setForgotSuccess(false); }}
+                  className="rounded-md px-3 py-2 text-sm text-gray-600 hover:text-gray-900"
+                >
+                  Back to sign in
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setForgotSuccess(false); }}
+                  className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                >
+                  Resend email
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </main>
   );
 }

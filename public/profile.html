@@ -6,7 +6,7 @@
     <title>User Profile | JJConnect</title>
     <meta name="description" content="View and edit your JJConnect profile information.">
     <link rel="stylesheet" href="navbar.css">
-    <link rel="icon" href="/brand/jjconnect-logo.png?v=2" type="image/png">
+    <link rel="icon" href="wp-content/uploads/2025/08/cropped-cropped-logo-icon-1.png">
     <style>
         :root {
             --jjc-primary: #2B6CB0;
@@ -272,6 +272,158 @@
             .profile-header { flex-direction: column; text-align: center; }
             .profile-page { padding: 1rem 1rem 3rem; }
         }
+
+        /* Danger Zone Styles */
+        .profile-card.danger-zone {
+            border: 1px solid #FC8181;
+        }
+
+        .profile-card.danger-zone .profile-card-header {
+            background: linear-gradient(135deg, #FFF5F5, #FED7D7);
+            border-bottom-color: #FC8181;
+        }
+
+        .profile-card.danger-zone .profile-card-header h2 {
+            color: #C53030;
+        }
+
+        .danger-description {
+            font-size: 0.875rem;
+            color: var(--jjc-text-muted);
+            line-height: 1.6;
+            margin-bottom: 1.25rem;
+        }
+
+        .danger-description strong {
+            color: #C53030;
+        }
+
+        .btn-danger {
+            padding: 10px 24px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: white;
+            background: #E53E3E;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-danger:hover {
+            background: #C53030;
+            box-shadow: 0 2px 8px rgba(229, 62, 62, 0.3);
+        }
+
+        .btn-danger:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .withdraw-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            padding: 1rem;
+            animation: fadeIn 0.2s;
+        }
+
+        .withdraw-modal {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        .withdraw-modal h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #C53030;
+            margin: 0 0 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .withdraw-modal p {
+            font-size: 0.875rem;
+            color: var(--jjc-text-muted);
+            line-height: 1.6;
+            margin: 0 0 1rem;
+        }
+
+        .withdraw-modal .warning-list {
+            background: #FFF5F5;
+            border: 1px solid #FED7D7;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-size: 0.8125rem;
+            color: #9B2C2C;
+            line-height: 1.6;
+        }
+
+        .withdraw-modal .warning-list li {
+            margin-bottom: 0.25rem;
+        }
+
+        .withdraw-confirm-field {
+            margin: 1rem 0;
+        }
+
+        .withdraw-confirm-field label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--jjc-text-muted);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .withdraw-confirm-field input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px 12px;
+            border: 1px solid var(--jjc-border);
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-family: inherit;
+        }
+
+        .withdraw-confirm-field input:focus {
+            outline: none;
+            border-color: #E53E3E;
+            box-shadow: 0 0 0 2px rgba(229, 62, 62, 0.2);
+        }
+
+        .withdraw-modal-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .btn-cancel {
+            padding: 10px 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--jjc-text-muted);
+            background: transparent;
+            border: 1px solid var(--jjc-border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel:hover {
+            background: var(--jjc-bg);
+            color: var(--jjc-text);
+        }
     </style>
 </head>
 <body>
@@ -401,6 +553,23 @@
                         <div class="value-display" id="display-remarks"></div>
                         <textarea id="input-remarks" style="display:none;" placeholder="Add personal notes"></textarea>
                     </div>
+                </div>
+            </div>
+
+            <!-- Danger Zone: Withdraw Registration -->
+            <div class="profile-card danger-zone profile-private" id="danger-zone-card">
+                <div class="profile-card-header">
+                    <h2>⚠ Danger Zone</h2>
+                </div>
+                <div class="profile-card-body">
+                    <p class="danger-description">
+                        <strong>Withdraw your registration</strong> — permanently delete your JJConnect account, 
+                        including all your profile data, saved preferences, and contribution history. 
+                        This action <strong>cannot be undone</strong>.
+                    </p>
+                    <button type="button" class="btn-danger" id="btn-withdraw-account">
+                        Withdraw Registration
+                    </button>
                 </div>
             </div>
         </div>
@@ -769,6 +938,123 @@
         } else {
             loadProfile();
         }
+
+        // ── Withdraw Registration Logic ──
+        function setupWithdrawRegistration() {
+            const withdrawBtn = document.getElementById('btn-withdraw-account');
+            if (!withdrawBtn) return;
+
+            withdrawBtn.addEventListener('click', function() {
+                // Create confirmation modal
+                const overlay = document.createElement('div');
+                overlay.className = 'withdraw-modal-overlay';
+                overlay.id = 'withdraw-modal-overlay';
+                overlay.innerHTML = `
+                    <div class="withdraw-modal">
+                        <h3>⚠ Delete Your Account</h3>
+                        <p>You are about to permanently delete your JJConnect account. Please read carefully:</p>
+                        <ul class="warning-list">
+                            <li>✕ Your profile and personal data will be erased</li>
+                            <li>✕ All contribution history will be lost</li>
+                            <li>✕ Published articles may become orphaned</li>
+                            <li>✕ This action is <strong>irreversible</strong></li>
+                        </ul>
+                        <div class="withdraw-confirm-field">
+                            <label for="withdraw-confirm-text">Type <strong>DELETE MY ACCOUNT</strong> to confirm:</label>
+                            <input type="text" id="withdraw-confirm-text" placeholder="DELETE MY ACCOUNT" autocomplete="off">
+                        </div>
+                        <div class="withdraw-modal-actions">
+                            <button type="button" class="btn-cancel" id="withdraw-cancel">Cancel</button>
+                            <button type="button" class="btn-danger" id="withdraw-confirm" disabled>Delete Account Permanently</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+
+                // Close on background click
+                overlay.addEventListener('click', function(e) {
+                    if (e.target === overlay) {
+                        overlay.remove();
+                    }
+                });
+
+                // Cancel button
+                document.getElementById('withdraw-cancel').addEventListener('click', function() {
+                    overlay.remove();
+                });
+
+                // Confirmation text validation
+                const confirmInput = document.getElementById('withdraw-confirm-text');
+                const confirmBtn = document.getElementById('withdraw-confirm');
+                confirmInput.addEventListener('input', function() {
+                    confirmBtn.disabled = confirmInput.value.trim() !== 'DELETE MY ACCOUNT';
+                });
+
+                // Execute deletion
+                confirmBtn.addEventListener('click', async function() {
+                    confirmBtn.disabled = true;
+                    confirmBtn.textContent = 'Deleting...';
+
+                    try {
+                        const token = await getAccessToken();
+                        const headers = { 'Content-Type': 'application/json' };
+                        if (token) headers['Authorization'] = 'Bearer ' + token;
+
+                        // Try Next.js API first, fall back to worker
+                        let deleteUrl = '/api/account/delete';
+                        let res;
+                        try {
+                            res = await fetch(deleteUrl, {
+                                method: 'DELETE',
+                                headers: headers,
+                                credentials: 'include'
+                            });
+                        } catch (_) {
+                            // Fallback to worker endpoint
+                            deleteUrl = API_ENDPOINT + '/api/account/delete';
+                            res = await fetch(deleteUrl, {
+                                method: 'DELETE',
+                                headers: headers
+                            });
+                        }
+
+                        const data = await res.json();
+
+                        if (data.success) {
+                            overlay.remove();
+                            // Sign out locally
+                            if (supabaseClient) {
+                                try { await supabaseClient.auth.signOut(); } catch (_) {}
+                            }
+                            localStorage.removeItem('user_info');
+                            localStorage.removeItem('jjc_avatar_url');
+                            document.cookie = 'jjc_sb_access_token=; Path=/; Max-Age=0';
+
+                            // Show success message and redirect
+                            showToast('Your account has been deleted. Goodbye!');
+                            setTimeout(function() {
+                                window.location.href = '/';
+                            }, 2000);
+                        } else {
+                            showError(data.error || 'Failed to delete account. Please contact support.');
+                            confirmBtn.disabled = false;
+                            confirmBtn.textContent = 'Delete Account Permanently';
+                        }
+                    } catch (err) {
+                        showError('Network error: ' + err.message);
+                        confirmBtn.disabled = false;
+                        confirmBtn.textContent = 'Delete Account Permanently';
+                    }
+                });
+            });
+        }
+
+        // Initialize withdraw button after profile loads
+        const origLoadProfile = loadProfile;
+        loadProfile = async function() {
+            await origLoadProfile();
+            setupWithdrawRegistration();
+        };
     </script>
 </body>
 </html>

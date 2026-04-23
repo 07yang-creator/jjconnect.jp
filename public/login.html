@@ -8,7 +8,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <title>Sign in | JJConnect</title>
 <meta name="description" content="Sign in to your JJConnect account.">
-<link rel="icon" href="/brand/jjconnect-logo.png?v=2" type="image/png">
 <link rel="stylesheet" href="navbar.css">
 <link rel='stylesheet' id='kadence-global-css' href='wp-content/themes/kadence/assets/css/global.min.css?ver=1.3.2.css' media='all'/>
 <style id='kadence-global-inline-css'>
@@ -432,6 +431,48 @@
 
 .register-header .account-identifier { flex-wrap: wrap; justify-content: center; }
 
+.forgot-success-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    background: #e8f5e9;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: #2e7d32;
+}
+
+.forgot-success-message {
+    text-align: center;
+    padding: 16px 0;
+}
+
+.forgot-success-message h2 {
+    font-size: 18px;
+    font-weight: 500;
+    color: #202124;
+    margin: 0 0 8px;
+}
+
+.forgot-success-message p {
+    font-size: 14px;
+    color: #5f6368;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.forgot-info-note {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: #e8f0fe;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #1967d2;
+    line-height: 1.5;
+}
+
 @media (max-width: 767px) {
     .login-box { padding: 32px 24px; }
     .form-row { grid-template-columns: 1fr; }
@@ -465,6 +506,9 @@
                 </div>
                 <p class="create-account-prompt">
                     Don't have an account? <a href="#" id="go-create-account">Create one</a>
+                </p>
+                <p class="create-account-prompt" style="margin-top: 0.35rem;">
+                    <a href="#" id="go-forgot-password-step1">Forgot password?</a>
                 </p>
                 <p class="create-account-prompt" style="margin-top: 0.35rem;">
                     <a href="/support">Help &amp; support</a>
@@ -502,6 +546,42 @@
                     <a href="/support">Help &amp; support</a>
                 </div>
             </form>
+        </div>
+
+        <!-- Step 3: Forgot password -->
+        <div id="step-forgot" class="auth-step">
+            <div class="login-header">
+                <h1>Reset your password</h1>
+                <p>Enter the email address associated with your account</p>
+            </div>
+            <div id="forgot-form-wrap">
+                <form id="forgot-form">
+                    <div class="form-group">
+                        <label for="forgot-email">Email address</label>
+                        <input type="email" id="forgot-email" name="forgot_email"
+                            placeholder="your.email@example.com" required autocomplete="email">
+                    </div>
+                    <div class="auth-actions">
+                        <button type="button" class="auth-button auth-button-secondary" id="forgot-back">Back to sign in</button>
+                        <button type="submit" class="auth-button auth-button-primary" id="forgot-submit-btn">Send reset link</button>
+                    </div>
+                </form>
+            </div>
+            <div id="forgot-success-wrap" style="display:none;">
+                <div class="forgot-success-icon">✓</div>
+                <div class="forgot-success-message">
+                    <h2>Check your email</h2>
+                    <p>We've sent a password reset link to <strong id="forgot-sent-email"></strong>.</p>
+                    <p style="margin-top:8px;">Follow the link in the email to set a new password.</p>
+                </div>
+                <div class="forgot-info-note">
+                    Didn't receive the email? Check your spam folder, or make sure you entered the correct email address.
+                </div>
+                <div class="auth-actions" style="margin-top:24px;">
+                    <button type="button" class="auth-button auth-button-secondary" id="forgot-back-success">Back to sign in</button>
+                    <button type="button" class="auth-button auth-button-primary" id="forgot-resend-btn">Resend email</button>
+                </div>
+            </div>
         </div>
 
         <!-- Step 2b: Register (no account) - Google Create Account style -->
@@ -1343,10 +1423,103 @@ document.getElementById('register-form').addEventListener('submit', async functi
     }
 });
 
-// Forgot password (placeholder)
+// Forgot password: navigate to step-forgot
 document.querySelector('.forgot-password').addEventListener('click', function(e) {
     e.preventDefault();
-    showMessage('Please contact admin to reset your password.', 'info');
+    if (currentIdentifier) {
+        document.getElementById('forgot-email').value = currentIdentifier;
+    }
+    showStep('step-forgot');
+});
+
+// "Forgot password?" link on step-identifier (before account lookup)
+var goForgotStep1 = document.getElementById('go-forgot-password-step1');
+if (goForgotStep1) {
+    goForgotStep1.addEventListener('click', function(e) {
+        e.preventDefault();
+        var identifierVal = (document.getElementById('identifier').value || '').trim();
+        if (identifierVal && identifierVal.includes('@')) {
+            document.getElementById('forgot-email').value = identifierVal;
+        }
+        showStep('step-forgot');
+    });
+}
+
+// Forgot password - form submit
+document.getElementById('forgot-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var email = document.getElementById('forgot-email').value.trim();
+    if (!email) return;
+    var btn = document.getElementById('forgot-submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    try {
+        var sb = getSbClient();
+        if (!sb) {
+            showMessage('Password reset is not available right now. Please contact support.', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Send reset link';
+            return;
+        }
+        var redirectUrl = window.location.origin + '/auth/reset-password';
+        var result = await sb.auth.resetPasswordForEmail(email, { redirectTo: redirectUrl });
+        if (result.error) {
+            showMessage(result.error.message || 'Failed to send reset email.', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Send reset link';
+        } else {
+            document.getElementById('forgot-form-wrap').style.display = 'none';
+            document.getElementById('forgot-success-wrap').style.display = 'block';
+            document.getElementById('forgot-sent-email').textContent = email;
+            btn.disabled = false;
+            btn.textContent = 'Send reset link';
+        }
+    } catch (err) {
+        showMessage('Network error. Please try again.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Send reset link';
+    }
+});
+
+// Forgot password - back buttons
+['forgot-back', 'forgot-back-success'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) {
+        el.addEventListener('click', function() {
+            document.getElementById('forgot-form-wrap').style.display = 'block';
+            document.getElementById('forgot-success-wrap').style.display = 'none';
+            showStep('step-identifier');
+        });
+    }
+});
+
+// Forgot password - resend
+document.getElementById('forgot-resend-btn')?.addEventListener('click', async function() {
+    var email = document.getElementById('forgot-sent-email').textContent.trim();
+    if (!email) return;
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = 'Resending...';
+    try {
+        var sb = getSbClient();
+        if (!sb) {
+            showMessage('Resend is not available right now.', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Resend email';
+            return;
+        }
+        var redirectUrl = window.location.origin + '/auth/reset-password';
+        var result = await sb.auth.resetPasswordForEmail(email, { redirectTo: redirectUrl });
+        if (result.error) {
+            showMessage(result.error.message || 'Failed to resend.', 'error');
+        } else {
+            showMessage('Reset email resent to ' + email + '.', 'success');
+        }
+    } catch (err) {
+        showMessage('Network error. Please try again.', 'error');
+    }
+    btn.disabled = false;
+    btn.textContent = 'Resend email';
 });
 
 // Already signed in: Auth0 uses /api/me; Supabase password uses local session. Run on DOMContentLoaded (before paint flicker vs load).
