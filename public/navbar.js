@@ -200,10 +200,6 @@
                                 <span class="jjc-nav-dropdown-icon">🛠️</span>
                                 <span>Admin Console</span>
                             </a>
-                            <a href="/publish" class="jjc-nav-dropdown-item">
-                                <span class="jjc-nav-dropdown-icon">✍️</span>
-                                <span>Writing Articles</span>
-                            </a>
                             <a href="home.html" class="jjc-nav-dropdown-item">
                                 <span class="jjc-nav-dropdown-icon">📄</span>
                                 <span>Articles</span>
@@ -268,10 +264,6 @@
                     <a href="admin-console.html" class="jjc-mobile-service-link">
                         <span>🛠️</span>
                         <span>Admin Console</span>
-                    </a>
-                    <a href="/publish" class="jjc-mobile-service-link">
-                        <span>✍️</span>
-                        <span>Writing Articles</span>
                     </a>
                     <a href="home.html" class="jjc-mobile-service-link">
                         <span>📄</span>
