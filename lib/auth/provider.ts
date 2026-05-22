@@ -1,4 +1,4 @@
-function normalizedAuthToken(v: string | undefined): string | null {
+function normalizedAuthToken(v: string | undefined): 'auth0' | 'supabase' | null {
   const t = v?.trim().toLowerCase();
   if (t === 'auth0' || t === 'supabase') return t;
   return null;

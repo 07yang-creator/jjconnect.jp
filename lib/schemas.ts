@@ -178,139 +178,8 @@ export const getSubmissionsQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(50),
 });
 
-// ============================================================================
-// POSTS (Next.js / Supabase)
-// ============================================================================
-
-/** TipTap/ProseMirror content node - recursive but bounded */
-const contentNodeSchema: z.ZodType<{
-  type: string;
-  attrs?: Record<string, unknown>;
-  content?: unknown[];
-  text?: string;
-  marks?: Array<{ type: string; attrs?: Record<string, unknown> }>;
-}> = z.lazy(() =>
-  z.object({
-    type: z.string().max(50).refine((s) => safeString(s, NO_SCRIPT_PATTERN)),
-    attrs: z.record(z.unknown()).optional(),
-    content: z.array(contentNodeSchema).max(500).optional(),
-    text: z.string().max(10000).refine((s) => safeString(s, NO_SCRIPT_PATTERN)).optional(),
-    marks: z
-      .array(
-        z.object({
-          type: z.string().max(20),
-          attrs: z.record(z.unknown()).optional(),
-        })
-      )
-      .max(10)
-      .optional(),
-  })
-);
-
-/** Post content fields shared by strict + draft schemas */
-const postContentFields = {
-  type: z.enum(['doc', 'text', 'html']).optional(),
-  content: z.array(contentNodeSchema).max(500).optional(),
-  html: z
-    .string()
-    .max(500000)
-    .refine((s) => safeString(s, NO_SCRIPT_PATTERN), 'Invalid content')
-    .optional(),
-  markdown: z.string().max(500000).optional(),
-  blocks: z
-    .array(
-      z.object({
-        id: z.string().max(50),
-        type: z.string().max(50),
-        data: z.record(z.unknown()),
-      })
-    )
-    .max(200)
-    .optional(),
-  review_state: z.enum(['pending', 'approved', 'rejected']).optional(),
-  review_reason: z.string().max(2000).optional().nullable(),
-};
-
-/** Draft saves: allow empty body (e.g. new article not yet written). */
-export const draftPostContentSchema = z.object(postContentFields);
-
-/** Post content (TipTap JSON, html, markdown, blocks) */
-export const postContentSchema = z
-  .object(postContentFields)
-  .refine((o) => (o.content && o.content.length > 0) || o.html || o.markdown || (o.blocks && o.blocks.length > 0), 'Content required');
-
-export const createPostSchema = z.object({
-  title: z
-    .string()
-    .min(1, 'Title required')
-    .max(200)
-    .refine((s) => safeString(s, NO_SCRIPT_PATTERN), 'Invalid title'),
-  content: postContentSchema,
-  summary: optionalSafeTextSchema(500),
-  category_id: uuidSchema.optional().nullable(),
-  user_category_id: uuidSchema.optional().nullable(),
-  is_paid: z.boolean().default(false),
-  price: z.number().min(0).max(999999.99).default(0),
-  cover_image: z
-    .union([
-      // More resilient check for File-like objects in Server Actions
-      z.custom<unknown>((val) => {
-        if (!val) return false;
-        if (typeof File !== 'undefined' && val instanceof File) return true;
-        return (
-          typeof val === 'object' &&
-          val !== null &&
-          typeof val.name === 'string' &&
-          typeof val.size === 'number' &&
-          typeof val.type === 'string'
-        );
-      }, 'Invalid file object'),
-      z
-        .string()
-        .max(2048)
-        .refine((s) => safeString(s, NO_SCRIPT_PATTERN) && safeString(s, NO_PATH_TRAVERSAL)),
-    ])
-    .optional(),
-  status: z.enum(['draft', 'published']).default('draft'),
-});
-
-/** Server draft save (title may be empty; content may be empty). */
-export const saveDraftSchema = z.object({
-  title: z
-    .string()
-    .max(200)
-    .refine((s) => safeString(s, NO_SCRIPT_PATTERN), 'Invalid title')
-    .optional()
-    .default(''),
-  content: draftPostContentSchema,
-  summary: optionalSafeTextSchema(500),
-  category_id: uuidSchema.optional().nullable(),
-  user_category_id: uuidSchema.optional().nullable(),
-  is_paid: z.boolean().default(false),
-  price: z.number().min(0).max(999999.99).default(0),
-  cover_image: z
-    .union([
-      // More resilient check for File-like objects in Server Actions
-      z.custom<unknown>((val) => {
-        if (!val) return false;
-        if (typeof File !== 'undefined' && val instanceof File) return true;
-        return (
-          typeof val === 'object' &&
-          val !== null &&
-          typeof val.name === 'string' &&
-          typeof val.size === 'number' &&
-          typeof val.type === 'string'
-        );
-      }, 'Invalid file object'),
-      z
-        .string()
-        .max(2048)
-        .refine((s) => safeString(s, NO_SCRIPT_PATTERN) && safeString(s, NO_PATH_TRAVERSAL)),
-    ])
-    .optional(),
-});
-
-export const updatePostSchema = createPostSchema.partial();
+// (POSTS schemas removed in Movement A — article publishing dropped. The new
+// content system's schema is defined fresh in Movement C.)
 
 // ============================================================================
 // QUERY / PATH PARAMS
@@ -336,8 +205,6 @@ export type ProfilePatchInput = z.infer<typeof profilePatchSchema>;
 export type SubmitFormInput = z.infer<typeof submitFormSchema>;
 export type UpdateSubmissionInput = z.infer<typeof updateSubmissionSchema>;
 export type GetSubmissionsQueryInput = z.infer<typeof getSubmissionsQuerySchema>;
-export type CreatePostInput = z.infer<typeof createPostSchema>;
-export type UpdatePostInput = z.infer<typeof updatePostSchema>;
 
 /** Parse and return { success, data, error } */
 export function parseSafe<T>(

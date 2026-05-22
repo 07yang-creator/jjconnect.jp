@@ -1,12 +1,11 @@
 'use client';
 
 /**
- * Right sidebar: search, categories, admin shortcuts (authorized users), mobile nav.
+ * Right sidebar: categories, admin shortcuts (authorized users), mobile nav.
  */
 
 import { Suspense, useEffect, useState } from 'react';
-import Link from 'next/link';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { createBrowserClient } from '@/lib/supabase/client';
 import { categoryDisplayName } from '@/lib/categories/displayName';
 import type { Category } from '@/types/database';
@@ -56,10 +55,8 @@ function SidebarLoginLink({
 // ============================================================================
 
 export default function RightSidebar({ user }: RightSidebarProps) {
-  const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
 
@@ -102,13 +99,6 @@ export default function RightSidebar({ user }: RightSidebarProps) {
     fetchData();
   }, [user]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
-    }
-  };
-
   return (
     <>
       <aside
@@ -119,30 +109,6 @@ export default function RightSidebar({ user }: RightSidebarProps) {
         }}
       >
         <div className="p-5 space-y-6">
-
-          <section className="space-y-3">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              Search
-            </h3>
-            <form onSubmit={handleSearch} className="relative">
-              <input
-                type="search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search posts…"
-                className="w-full px-4 py-2.5 pl-10 text-sm bg-white/90 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder-gray-400"
-              />
-              <button
-                type="submit"
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-colors"
-                aria-label="Search"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </button>
-            </form>
-          </section>
 
           {!isLoading && categories.length > 0 && (
             <section className="space-y-3">
@@ -195,17 +161,6 @@ export default function RightSidebar({ user }: RightSidebarProps) {
                   </svg>
                   <span className="text-sm font-medium">Admin console</span>
                 </a>
-
-                <a
-                  href="/publish"
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-green-50/80 text-gray-700 hover:text-green-600 transition-all duration-200 group"
-                  title="Write a post"
-                >
-                  <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  <span className="text-sm font-medium">New post</span>
-                </a>
               </nav>
             </section>
           )}
@@ -215,7 +170,7 @@ export default function RightSidebar({ user }: RightSidebarProps) {
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 shadow-sm border border-blue-100">
                 <h4 className="text-sm font-semibold text-gray-900 mb-2">Join JJConnect</h4>
                 <p className="text-xs text-gray-600 mb-3 leading-relaxed">
-                  Sign in to publish stories, follow authors, and join the conversation.
+                  Sign in to access member content and tools.
                 </p>
                 <Suspense
                   fallback={
@@ -247,13 +202,6 @@ export default function RightSidebar({ user }: RightSidebarProps) {
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-lg z-50 pb-safe">
         <div className="flex items-center justify-around px-2 py-3">
 
-          <Link href="/feed" className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
-            <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            <span className="text-xs text-gray-600">Articles</span>
-          </Link>
-
           <button
             onClick={() => setIsCategoriesModalOpen(true)}
             className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
@@ -263,13 +211,6 @@ export default function RightSidebar({ user }: RightSidebarProps) {
             </svg>
             <span className="text-xs text-gray-600">Topics</span>
           </button>
-
-          <a href="/search" className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
-            <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <span className="text-xs text-gray-600">Search</span>
-          </a>
 
           {user ? (
             userProfile?.is_authorized ? (
