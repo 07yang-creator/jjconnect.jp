@@ -1,15 +1,16 @@
 /**
- * Supabase Server Utilities
- * Helper functions for server-side Supabase operations
+ * Supabase Server Utilities — Supabase-only (Auth0 removed in Movement B).
+ *
+ * jjconnect.jp profiles live in the `jjc` schema of the SHARED Supabase project
+ * (shared auth.users = SSO with jjconnect.online). Profile helpers below read
+ * `jjc.profiles` via `.schema('jjc')`. jjconnect.jp is all-public for now, so the
+ * onboarding/upgrade gate helpers return permissive ("complete") status.
  */
 
 import { cookies } from 'next/headers';
 import { createServerClient as createClient } from '@supabase/ssr';
 import type { Database } from '@/types/database';
-import { isAuth0Enabled } from '@/lib/auth/provider';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
-import { getAuth0SessionUser } from '@/lib/auth0/server';
-import { resolveOrCreateSupabaseIdentityFromAuth0User } from '@/lib/auth/identity';
 
 export interface ProfileGateStatus {
   role: string;
@@ -18,7 +19,7 @@ export interface ProfileGateStatus {
   upgrade_complete: boolean;
 }
 
-function createCookieBoundAnonClient() {
+function requireSupabaseEnv() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url?.trim() || !anon?.trim()) {
@@ -28,44 +29,11 @@ function createCookieBoundAnonClient() {
 }
 
 /**
- * Create a Supabase client for Server Components
- * Automatically handles cookie-based authentication
+ * Supabase client for Server Components / route handlers (cookie-based session).
  */
 export async function createServerSupabaseClient() {
-  if (isAuth0Enabled()) {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-    const hasServiceRole = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY?.trim());
-    if (url && hasServiceRole) {
-      return createSupabaseAdminClient();
-    }
-    if (url && hasServiceRole === false && process.env.NODE_ENV === 'production') {
-      console.warn(
-        '[jjconnect] Auth0 mode without SUPABASE_SERVICE_ROLE_KEY: using anon Supabase client for server reads. Add SUPABASE_SERVICE_ROLE_KEY in Vercel for login and profile mapping.'
-      );
-    }
-    const { url: u, anon } = createCookieBoundAnonClient();
-    const cookieStore = await cookies();
-    return createClient<Database>(u, anon, {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
-          } catch {
-            // Server Component: session refresh may be handled in middleware.
-          }
-        },
-      },
-    });
-  }
-
+  const { url, anon } = requireSupabaseEnv();
   const cookieStore = await cookies();
-  const { url, anon } = createCookieBoundAnonClient();
-
   return createClient<Database>(url, anon, {
     cookies: {
       getAll() {
@@ -77,9 +45,7 @@ export async function createServerSupabaseClient() {
             cookieStore.set(name, value, options)
           );
         } catch {
-          // The `setAll` method was called from a Server Component.
-          // This can be ignored if you have middleware refreshing
-          // user sessions.
+          // Called from a Server Component; the session is refreshed in middleware.
         }
       },
     },
@@ -87,158 +53,102 @@ export async function createServerSupabaseClient() {
 }
 
 /**
- * Get the current authenticated user
- * Returns null if not authenticated
+ * The current authenticated user, or null.
  */
 export async function getCurrentUser() {
-  if (isAuth0Enabled()) {
-    const auth0User = await getAuth0SessionUser();
-    if (auth0User) {
-      return resolveOrCreateSupabaseIdentityFromAuth0User(auth0User);
-    }
-
-    // Hybrid mode fallback: allow native Supabase session users to work
-    // even when auth provider is configured as Auth0.
-    const cookieStore = await cookies();
-    const supabase = createClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll();
-          },
-          setAll(cookiesToSet) {
-            try {
-              cookiesToSet.forEach(({ name, value, options }) =>
-                cookieStore.set(name, value, options)
-              );
-            } catch {
-              // Ignore in Server Components.
-            }
-          },
-        },
-      }
-    );
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
-    if (!error && user) return user;
-    return null;
-  }
-
   const supabase = await createServerSupabaseClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  
-  if (error || !user) {
-    return null;
-  }
-  
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+  if (error || !user) return null;
   return user;
 }
 
 /**
- * Check if the current user is authorized (admin)
- * 兼容 is_authorized 与 role === 'A'
- */
-export async function isAuthorizedUser(userId: string) {
-  const supabase = await createServerSupabaseClient();
-  
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('is_authorized, role')
-    .eq('id', userId)
-    .single();
-  
-  if (error || !data) {
-    return false;
-  }
-  
-  return data.is_authorized === true || data.role === 'A';
-}
-
-/**
- * Get role for a user (for Role Matrix permission checks)
- * Returns 'T' if not found or null
+ * Read a user's role_level from jjc.profiles (default 'T'). Uses the session
+ * client — RLS returns the row only for the caller's own id, which is what every
+ * call site needs (gating the logged-in user).
  */
 export async function getUserRole(userId: string): Promise<string> {
   const supabase = await createServerSupabaseClient();
-  
-  const { data, error } = await supabase
+  const { data } = await supabase
+    .schema('jjc')
     .from('profiles')
-    .select('role')
+    .select('role_level')
     .eq('id', userId)
-    .single();
-  
-  if (error || !data?.role) {
-    return 'T';
-  }
-  
-  return data.role;
+    .maybeSingle();
+  return data?.role_level ?? 'T';
 }
 
-/**
- * Fetch is_authorized and role in a single query.
- * Use this when both values are needed to avoid two round-trips.
- */
+/** jjconnect.jp admin == role_level 'A'. */
+export async function isAuthorizedUser(userId: string): Promise<boolean> {
+  return (await getUserRole(userId)) === 'A';
+}
+
+/** is_authorized + role in one call (kept for existing callers). */
 export async function getUserProfileInfo(userId: string): Promise<{
   is_authorized: boolean;
   role: string;
 }> {
-  const supabase = await createServerSupabaseClient();
-
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('is_authorized, role')
-    .eq('id', userId)
-    .single();
-
-  if (error || !data) {
-    return { is_authorized: false, role: 'T' };
-  }
-
-  return {
-    is_authorized: data.is_authorized === true,
-    role: data.role ?? 'T',
-  };
+  const role = await getUserRole(userId);
+  return { is_authorized: role === 'A', role };
 }
 
 /**
- * Check completion state used by onboarding and upgrade gates.
+ * Onboarding / upgrade gate status. jjconnect.jp is all-public for now, so there
+ * are no gates — report everything complete (kept for callers; revisit when the
+ * gating matrix + paid tiers come online).
  */
 export async function getProfileGateStatus(userId: string): Promise<ProfileGateStatus> {
-  const supabase = await createServerSupabaseClient();
-
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('is_authorized, role, country_region, preferred_language, call_name, upgrade_profile_completed_at')
-    .eq('id', userId)
-    .single();
-
-  if (error || !data) {
-    return {
-      role: 'T',
-      is_authorized: false,
-      basic_complete: false,
-      upgrade_complete: false,
-    };
-  }
-
-  const basicComplete = Boolean(
-    data.country_region?.trim() &&
-    data.preferred_language?.trim() &&
-    data.call_name?.trim()
-  );
-
+  const role = await getUserRole(userId);
   return {
-    role: data.role ?? 'T',
-    is_authorized: data.is_authorized === true,
-    basic_complete: basicComplete,
-    upgrade_complete: Boolean(data.upgrade_profile_completed_at),
+    role,
+    is_authorized: role === 'A',
+    basic_complete: true,
+    upgrade_complete: true,
   };
 }
 
 export function isUpgradedRole(role: string | null | undefined): boolean {
   return Boolean(role && role !== 'T');
+}
+
+/**
+ * Provision a jjc.profiles row on first login (service role; bypasses RLS).
+ * Auto-promotes the configured ADMIN_EMAIL to role_level 'A'.
+ */
+export async function provisionJjcProfile(user: {
+  id: string;
+  email?: string | null;
+  user_metadata?: Record<string, unknown> | null;
+}): Promise<void> {
+  const admin = createSupabaseAdminClient();
+  const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  const email = user.email?.trim() || null;
+  const isAdminEmail = Boolean(adminEmail && email && email.toLowerCase() === adminEmail);
+  const meta = user.user_metadata ?? {};
+  const displayName =
+    (typeof meta.name === 'string' && meta.name) ||
+    (typeof meta.full_name === 'string' && meta.full_name) ||
+    null;
+
+  const { data: existing } = await admin
+    .schema('jjc')
+    .from('profiles')
+    .select('id, role_level')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (!existing) {
+    await admin.schema('jjc').from('profiles').insert({
+      id: user.id,
+      email,
+      display_name: displayName,
+      role_level: isAdminEmail ? 'A' : 'T',
+      onboarded_at: new Date().toISOString(),
+    });
+  } else if (isAdminEmail && existing.role_level !== 'A') {
+    await admin.schema('jjc').from('profiles').update({ role_level: 'A' }).eq('id', user.id);
+  }
 }

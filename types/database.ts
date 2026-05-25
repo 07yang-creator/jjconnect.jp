@@ -116,6 +116,34 @@ export interface Profile {
 }
 
 /**
+ * jjconnect.jp profile — lives in the `jjc` schema of the SHARED Supabase project
+ * (shared auth.users with jjconnect.online = SSO). role_level vocabulary from the
+ * JJCONNECT.jp matrix: A/B/CB/VB/T/S/W/WN/W1/W2/W3/S-writer (T = default).
+ */
+export interface JjcProfile {
+  [key: string]: unknown;
+  id: string; // References auth.users.id
+  email: string | null;
+  display_name: string | null;
+  role_level: string;
+  country_region: string | null;
+  preferred_language: string | null;
+  onboarded_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+export type JjcProfileInsert = {
+  id: string;
+  email?: string | null;
+  display_name?: string | null;
+  role_level?: string;
+  country_region?: string | null;
+  preferred_language?: string | null;
+  onboarded_at?: string | null;
+};
+export type JjcProfileUpdate = Partial<Omit<JjcProfile, 'id' | 'created_at'>>;
+
+/**
  * Posts Table
  * Core article/content table with paid content support
  */
@@ -466,6 +494,32 @@ export interface Database {
     };
     Enums: {
       post_status: PostStatus;
+    };
+  };
+  jjc: {
+    Tables: {
+      profiles: {
+        Row: JjcProfile;
+        Insert: JjcProfileInsert;
+        Update: JjcProfileUpdate;
+        Relationships: [];
+      };
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      is_admin: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      role_level: {
+        Args: Record<string, never>;
+        Returns: string;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
     };
   };
 }

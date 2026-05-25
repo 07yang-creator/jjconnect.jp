@@ -1,31 +1,18 @@
-function normalizedAuthToken(v: string | undefined): 'auth0' | 'supabase' | null {
-  const t = v?.trim().toLowerCase();
-  if (t === 'auth0' || t === 'supabase') return t;
-  return null;
-}
-
 /**
- * Effective auth provider for server-side code and `/api/public-config`.
+ * Auth provider — **Supabase only** (Auth0 was removed in Movement B).
  *
- * Precedence: explicit `JJC_AUTH_PROVIDER` (`auth0` | `supabase`) wins; if unset or
- * unrecognized, falls back to `NEXT_PUBLIC_AUTH_PROVIDER`. Keeps middleware, Supabase
- * server helpers, and static HTML config aligned.
+ * These helpers are kept (returning constants) so existing imports keep resolving
+ * while the dead Auth0 branches are cleaned up incrementally. The return type stays
+ * a union so `=== 'auth0'` comparisons elsewhere remain type-valid (just always false).
  */
 export function getAuthProvider(): 'supabase' | 'auth0' {
-  const jjc = normalizedAuthToken(process.env.JJC_AUTH_PROVIDER);
-  if (jjc) return jjc;
-  const pub = normalizedAuthToken(process.env.NEXT_PUBLIC_AUTH_PROVIDER);
-  if (pub) return pub;
   return 'supabase';
 }
 
 export function isAuth0Enabled(): boolean {
-  return getAuthProvider() === 'auth0';
+  return false;
 }
 
-/** True when both env vars are set to conflicting explicit providers. */
 export function authProviderEnvMismatch(): boolean {
-  const jjc = normalizedAuthToken(process.env.JJC_AUTH_PROVIDER);
-  const pub = normalizedAuthToken(process.env.NEXT_PUBLIC_AUTH_PROVIDER);
-  return jjc !== null && pub !== null && jjc !== pub;
+  return false;
 }
