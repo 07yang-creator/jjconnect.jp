@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { User } from '@supabase/supabase-js';
-import { getAuthProvider } from '@/lib/auth/provider';
 import { accountCheckSchema } from '@/lib/schemas';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
@@ -38,15 +37,10 @@ async function existsInAuthUsers(
 }
 
 /**
- * Static login.html uses this to decide “sign in” vs “create account”.
- * Previously it called the Cloudflare Worker; when using `next dev` the worker is often
- * not running. Same-origin + Supabase matches password sign-up (auth.users / profiles).
+ * Static login.html uses this to decide "sign in" vs "create account".
+ * Same-origin + Supabase: checks jjc.profiles (by email) then auth.users.
  */
 export async function GET(request: NextRequest) {
-  if (getAuthProvider() === 'auth0') {
-    return NextResponse.json({ error: 'Use /auth/login for Auth0' }, { status: 404 });
-  }
-
   const parsed = accountCheckSchema.safeParse({
     identifier: request.nextUrl.searchParams.get('identifier') ?? '',
   });
@@ -68,7 +62,12 @@ export async function GET(request: NextRequest) {
   try {
     if (identifier.includes('@')) {
       const email = normalizeEmail(identifier);
-      const { data, error } = await admin.from('profiles').select('id').eq('email', email).maybeSingle();
+      const { data, error } = await admin
+        .schema('jjc')
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle();
       if (!error && data?.id) {
         return NextResponse.json({ exists: true });
       }

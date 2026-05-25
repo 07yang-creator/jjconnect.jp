@@ -4,7 +4,6 @@ import RightSidebar from '@/src/components/RightSidebar';
 import LegacyJjconnectNavbar from '@/src/components/LegacyJjconnectNavbar';
 import { getCurrentUser } from '@/lib/auth';
 import { getAuthProvider } from '@/lib/auth/provider';
-import { getAuth0ConnectionMap, getAuth0DatabaseConnection } from '@/lib/auth0/connections';
 import './globals.css';
 
 const inter = Inter({
@@ -29,17 +28,12 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const user = await getCurrentUser();
-  const authProvider = getAuthProvider();
   const publicCfg: Record<string, unknown> = {
     supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
     supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
-    authProvider,
+    authProvider: getAuthProvider(),
     nextPublishUrl: (process.env.NEXT_PUBLIC_NEXT_PUBLISH_URL || '').trim(),
   };
-  if (authProvider === 'auth0') {
-    publicCfg.auth0Connections = getAuth0ConnectionMap();
-    publicCfg.auth0DatabaseConnection = getAuth0DatabaseConnection();
-  }
 
   return (
     <html lang="en">
