@@ -1,0 +1,16 @@
+{
+  "nav": {
+    "home": "Home",
+    "services": "Services",
+    "about": "About",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "myProfile": "My profile",
+    "admin": "Admin console",
+    "language": "Language",
+    "menu": "Menu"
+  },
+  "common": {
+    "loading": "Loading…"
+  }
+}

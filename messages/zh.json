@@ -1,0 +1,16 @@
+{
+  "nav": {
+    "home": "首页",
+    "services": "服务",
+    "about": "关于我们",
+    "signIn": "登录",
+    "signOut": "退出登录",
+    "myProfile": "我的资料",
+    "admin": "管理后台",
+    "language": "语言",
+    "menu": "菜单"
+  },
+  "common": {
+    "loading": "加载中…"
+  }
+}
