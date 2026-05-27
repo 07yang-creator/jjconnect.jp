@@ -1,12 +1,11 @@
 /**
- * Admin Layout - Notion-style sidebar + top bar
- * Sidebar: ~224px, collapse to 48px on mobile (drawer)
- * 权限：is_authorized / role_level=A 或 矩阵中对 admin_content/blog_full_* 有 R/W
+ * Admin Layout — Notion-style sidebar shell.
+ * Gate: signed-in jjconnect.jp admin (jjc.profiles.role_level === 'A').
+ * jjconnect.jp is all-public for now, so there is no profile-completion gate.
  */
 
 import { redirect } from 'next/navigation';
-import { getCurrentUser, getProfileGateStatus, getUserProfileInfo, isUpgradedRole } from '@/lib/supabase/server';
-import { getAllPermissionsForRole, canAccessAdmin } from '@/lib/supabase/roleMatrix';
+import { getCurrentUser, isAuthorizedUser } from '@/lib/supabase/server';
 import AdminSidebar from './AdminSidebar';
 
 export default async function AdminLayout({
@@ -16,24 +15,10 @@ export default async function AdminLayout({
 }) {
   const user = await getCurrentUser();
   if (!user) {
-    redirect('/login');
+    redirect('/login?next=%2Fadmin');
   }
-
-  // Single profiles query for both flag and role
-  const { is_authorized: byFlag, role: roleLevel } = await getUserProfileInfo(user.id);
-  const permissions = await getAllPermissionsForRole(roleLevel);
-  const byMatrix = canAccessAdmin(permissions);
-
-  if (!byFlag && !byMatrix) {
+  if (!(await isAuthorizedUser(user.id))) {
     redirect('/');
-  }
-
-  const gateStatus = await getProfileGateStatus(user.id);
-  if (!gateStatus.basic_complete) {
-    redirect('/onboarding?next=%2Fadmin');
-  }
-  if (isUpgradedRole(gateStatus.role) && (!gateStatus.upgrade_complete || !user.email_confirmed_at)) {
-    redirect('/upgrade/complete-profile?next=%2Fadmin');
   }
 
   return (
