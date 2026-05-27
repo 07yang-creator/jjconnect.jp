@@ -36,7 +36,7 @@ function LoginPageContent() {
   const supabase = useMemo(() => createBrowserClient(), []);
 
   const [mode, setMode] = useState<'signin' | 'signup'>(searchParams.get('create') ? 'signup' : 'signin');
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(() => searchParams.get('login_hint')?.trim() ?? '');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOAuthSubmitting, setIsOAuthSubmitting] = useState(false);
@@ -47,11 +47,6 @@ function LoginPageContent() {
   const [forgotSubmitting, setForgotSubmitting] = useState(false);
   const [forgotSuccess, setForgotSuccess] = useState(false);
   const [forgotError, setForgotError] = useState<string | null>(null);
-
-  const loginHint = searchParams.get('login_hint')?.trim() ?? '';
-  useEffect(() => {
-    if (loginHint) setEmail((prev) => prev || loginHint);
-  }, [loginHint]);
 
   // Already signed in → go straight to the destination (all-public; no gates).
   useEffect(() => {
