@@ -78,15 +78,20 @@ export default function RightSidebar({ user }: RightSidebarProps) {
 
         if (user?.id) {
           const { data: profileData, error: profileError } = await supabase
+            .schema('jjc')
             .from('profiles')
-            .select('id, display_name, is_authorized')
+            .select('id, display_name, role_level')
             .eq('id', user.id)
-            .single();
+            .maybeSingle();
 
           if (profileError) {
             console.error('Failed to fetch user profile:', profileError);
-          } else {
-            setUserProfile(profileData);
+          } else if (profileData) {
+            setUserProfile({
+              id: profileData.id,
+              display_name: profileData.display_name,
+              is_authorized: profileData.role_level === 'A',
+            });
           }
         }
       } catch (error) {

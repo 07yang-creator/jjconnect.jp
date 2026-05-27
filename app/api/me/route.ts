@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createServerSupabaseClient, getCurrentUser } from '@/lib/supabase/server';
+import { createServerSupabaseClient, getCurrentUser, provisionJjcProfile } from '@/lib/supabase/server';
 
 /**
  * Current-user endpoint for the shared navbar / client chrome.
@@ -11,6 +11,14 @@ export async function GET() {
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ isLoggedIn: false, userData: null });
+    }
+
+    // Ensure the jjconnect.jp profile exists (covers password signup + any auth path,
+    // and auto-promotes ADMIN_EMAIL). Non-fatal if the service role isn't configured.
+    try {
+      await provisionJjcProfile(user);
+    } catch (e) {
+      console.error('[jjc] profile provisioning (me) failed', e);
     }
 
     const supabase = await createServerSupabaseClient();
