@@ -23,7 +23,7 @@ function NavIcon({ d }: { d: string }) {
 function SidebarContent({ pathname, onClose }: { pathname: string; onClose: () => void }) {
   return (
     <div className="flex flex-col h-full">
-      <div className="p-4 border-b border-[var(--border)]">
+      <div className="p-4 border-b border-border">
         <h2 className="text-sm font-semibold text-[var(--text-primary)]">管理后台</h2>
       </div>
       <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
@@ -58,7 +58,7 @@ export default function AdminSidebar() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-[var(--radius)] bg-[var(--bg-sidebar)] border border-[var(--border)] shadow-sm hover:bg-[var(--hover)]"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-[var(--radius)] bg-[var(--bg-sidebar)] border border-border shadow-sm hover:bg-[var(--hover)]"
         aria-label="打开菜单"
       >
         <svg className="w-5 h-5 text-[var(--text-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,7 +67,7 @@ export default function AdminSidebar() {
       </button>
 
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-[var(--sidebar-width)] shrink-0 flex-col fixed left-0 top-0 bottom-0 bg-[var(--bg-sidebar)] border-r border-[var(--border)]">
+      <aside className="hidden lg:flex w-[var(--sidebar-width)] shrink-0 flex-col fixed left-0 top-0 bottom-0 bg-[var(--bg-sidebar)] border-r border-border">
         <SidebarContent pathname={pathname} onClose={() => setOpen(false)} />
       </aside>
 
@@ -75,8 +75,8 @@ export default function AdminSidebar() {
       {open && (
         <>
           <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={() => setOpen(false)} aria-hidden />
-          <aside className="fixed left-0 top-0 bottom-0 w-[min(280px,85vw)] bg-[var(--bg-sidebar)] border-r border-[var(--border)] z-50 lg:hidden shadow-xl">
-            <div className="flex items-center justify-between p-4 border-b border-[var(--border)]">
+          <aside className="fixed left-0 top-0 bottom-0 w-[min(280px,85vw)] bg-[var(--bg-sidebar)] border-r border-border z-50 lg:hidden shadow-xl">
+            <div className="flex items-center justify-between p-4 border-b border-border">
               <h2 className="text-sm font-semibold text-[var(--text-primary)]">管理后台</h2>
               <button type="button" onClick={() => setOpen(false)} className="p-1.5 rounded-[var(--radius)] hover:bg-[var(--hover)] text-[var(--text-secondary)]">×</button>
             </div>
