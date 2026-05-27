@@ -17,5 +17,41 @@
   },
   "common": {
     "loading": "Loading…"
+  },
+  "about": {
+    "hero": {
+      "title": "Earn this Connection.",
+      "lead": "Confused by endless technology, or more inspired than ever? As big companies seize more opportunities, the path for smaller players grows uncertain — stay put, or take a leap?",
+      "creed": "We believe what matters most is always knowing ourselves. As long as we stay connected, we're glad to share everything we've learned — and more than happy to hear your story."
+    },
+    "who": {
+      "title": "Who we are",
+      "body": "We're experienced consultants offering IT products in Fintech and practical, hands-on business-development advice. We focus on small but crucial process improvements and decisions — grounded in close observation of our clients' daily work and long-term mission. Through real dialogue and tailor-made tools (plugins, dashboards, visualizations), we help clients grow stronger every day. We opened our Tokyo office in 2021 to stand closer to the clients we serve. A business thrives not only on sound revenue, but on deep trust between worthy partners — every deal carries meaning beyond money.",
+      "company": "株式会社JJCONNECT · A journey that set sail from Tokyo, 2021."
+    },
+    "deliver": {
+      "title": "What we deliver",
+      "raft": {
+        "name": "RAFT 2.03",
+        "desc": "A data-harvesting robot for Fintech pros — running quietly in the background of everyday routines. Highly customizable, it works on any platform."
+      },
+      "taptap": {
+        "name": "TapTap Conn",
+        "desc": "Close-range SNS solutions built on the latest NFC technology — social-anxiety-free connection between people with a shared focus, like shop owners and customers, or hosts and audiences. Flexible, effective, secure, and low-cost."
+      },
+      "advice": {
+        "name": "Business Gadgets & Advice",
+        "desc": "Practical business insight and ideas — essential models, decision-making tools, and valuable consultation when it truly matters."
+      }
+    },
+    "team": {
+      "title": "The people",
+      "judy": { "name": "Judy Chiu", "role": "Champion" },
+      "yano": { "name": "Yano Gin", "role": "Duty Executive" }
+    },
+    "cta": {
+      "title": "Let's find out how we connect.",
+      "button": "Get in touch"
+    }
   }
 }

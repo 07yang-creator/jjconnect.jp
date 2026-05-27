@@ -7,7 +7,7 @@ export default async function SiteFooter() {
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 py-8 text-sm text-muted-foreground sm:flex-row sm:px-6 lg:px-8">
         <p>© {new Date().getFullYear()} JJConnect — {t('footer.rights')}</p>
         <nav className="flex items-center gap-4">
-          <a href="/about.html" className="transition-colors hover:text-foreground">
+          <a href="/about" className="transition-colors hover:text-foreground">
             {t('nav.about')}
           </a>
           <a href="/terms.html" className="transition-colors hover:text-foreground">
