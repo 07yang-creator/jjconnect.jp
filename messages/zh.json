@@ -10,6 +10,11 @@
     "language": "语言",
     "menu": "菜单"
   },
+  "footer": {
+    "rights": "保留所有权利。",
+    "terms": "服务条款",
+    "support": "支持"
+  },
   "common": {
     "loading": "加载中…"
   }

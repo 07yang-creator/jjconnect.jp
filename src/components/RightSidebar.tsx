@@ -107,7 +107,7 @@ export default function RightSidebar({ user }: RightSidebarProps) {
   return (
     <>
       <aside
-        className="hidden md:block fixed right-0 top-0 h-screen w-[260px] bg-white/80 backdrop-blur-md border-l border-gray-200/50 shadow-lg overflow-y-auto z-40"
+        className="hidden md:block fixed right-0 top-14 h-[calc(100vh-3.5rem)] w-[260px] bg-white/80 backdrop-blur-md border-l border-gray-200/50 shadow-lg overflow-y-auto z-40"
         style={{
           backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',

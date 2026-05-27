@@ -10,6 +10,11 @@
     "language": "言語",
     "menu": "メニュー"
   },
+  "footer": {
+    "rights": "無断転載を禁じます。",
+    "terms": "利用規約",
+    "support": "サポート"
+  },
   "common": {
     "loading": "読み込み中…"
   }

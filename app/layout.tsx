@@ -3,7 +3,8 @@ import { Inter } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale } from 'next-intl/server';
 import RightSidebar from '@/src/components/RightSidebar';
-import LegacyJjconnectNavbar from '@/src/components/LegacyJjconnectNavbar';
+import SiteNav from '@/src/components/site-nav';
+import SiteFooter from '@/src/components/site-footer';
 import { getCurrentUser } from '@/lib/auth';
 import { getAuthProvider } from '@/lib/auth/provider';
 import './globals.css';
@@ -50,18 +51,16 @@ window.__JJC_SKIP_REMOTE_PUBLIC_CONFIG__ = true;
           }}
         />
         <NextIntlClientProvider>
-          <LegacyJjconnectNavbar />
-          <div className="min-h-screen bg-gray-50 flex flex-col">
-            <div className="flex-1 flex relative">
-              <main className="flex-1 md:mr-[260px] transition-all duration-300">
-                <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                  {children}
-                </div>
-              </main>
-
-              <RightSidebar user={user} />
-            </div>
+          <SiteNav />
+          <div className="flex min-h-[calc(100vh-3.5rem)] flex-col md:mr-[260px]">
+            <main className="flex-1">
+              <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                {children}
+              </div>
+            </main>
+            <SiteFooter />
           </div>
+          <RightSidebar user={user} />
         </NextIntlClientProvider>
       </body>
     </html>
