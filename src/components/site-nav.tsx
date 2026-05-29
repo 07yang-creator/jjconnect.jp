@@ -66,7 +66,7 @@ export default function SiteNav() {
 
   const links = [
     { href: '/', label: t('home') },
-    { href: '/services.html', label: t('services') },
+    { href: '/services', label: t('services') },
     { href: '/about', label: t('about') },
   ];
 

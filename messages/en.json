@@ -53,5 +53,25 @@
       "title": "Let's find out how we connect.",
       "button": "Get in touch"
     }
+  },
+  "services": {
+    "hero": {
+      "title": "JJConnect Services",
+      "subtitle": "Professional services and digital solutions for your business"
+    },
+    "offer": {
+      "title": "What we offer",
+      "body": "JJConnect provides consulting and managed offerings in financial analysis, property operations, and real estate intelligence. We focus on practical outcomes — clear reporting, smoother workflows, and decisions backed by data — so your team can move faster with confidence."
+    },
+    "items": {
+      "learnMore": "Learn more",
+      "raft": { "name": "RAFT 2.03", "desc": "Financial analysis and forecasting support to help you read the market and plan ahead." },
+      "mansion": { "name": "Mansion Manager", "desc": "Structured apartment and building operations support for owners and managers." },
+      "property": { "name": "Property Report", "desc": "Real estate market insight and reporting tailored to your questions." }
+    },
+    "cta": {
+      "title": "Let's find the right fit for your business.",
+      "button": "Get in touch"
+    }
   }
 }

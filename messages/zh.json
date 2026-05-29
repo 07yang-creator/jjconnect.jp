@@ -53,5 +53,25 @@
       "title": "一起看看我们能如何连接。",
       "button": "联系我们"
     }
+  },
+  "services": {
+    "hero": {
+      "title": "JJConnect 服务",
+      "subtitle": "为您的业务提供专业服务与数字解决方案"
+    },
+    "offer": {
+      "title": "我们提供什么",
+      "body": "JJConnect 在财务分析、物业运营和房地产情报领域提供咨询与托管服务。我们专注于务实的成果——清晰的报告、更顺畅的流程、以数据为依据的决策——让您的团队更快、更有信心地行动。"
+    },
+    "items": {
+      "learnMore": "了解更多",
+      "raft": { "name": "RAFT 2.03", "desc": "财务分析与预测支持，助您读懂市场、提前布局。" },
+      "mansion": { "name": "Mansion Manager", "desc": "为业主和管理者提供结构化的公寓与楼宇运营支持。" },
+      "property": { "name": "Property Report", "desc": "针对您的问题量身定制的房地产市场洞察与报告。" }
+    },
+    "cta": {
+      "title": "一起为您的业务找到最合适的方案。",
+      "button": "联系我们"
+    }
   }
 }
