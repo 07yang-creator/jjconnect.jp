@@ -110,6 +110,78 @@
         "title": "Ready to set sail with RAFT 2.03?",
         "button": "Talk to us"
       }
+    },
+    "mansion": {
+      "hero": {
+        "icon": "🏢",
+        "name": "Mansion Manager",
+        "tagline": "Professional Apartment Management System",
+        "subtitle": "Making property management easier and tenant living more comfortable."
+      },
+      "overview": {
+        "title": "Product overview",
+        "body": "Mansion Manager is a comprehensive management system built specifically for apartment and property management. It integrates tenant management, financial tracking, maintenance work orders, and facility booking into a single platform — helping property managers boost efficiency and optimize the tenant experience. Whether you manage a small apartment building or a large residential community, Mansion Manager turns complex property management into a streamlined operation and significantly improves tenant satisfaction."
+      },
+      "features": {
+        "title": "Core features",
+        "items": {
+          "tenant": { "icon": "👥", "name": "Tenant management", "desc": "A complete tenant information system — move-in registration, contracts, renewal reminders, communication logs. All information at a glance." },
+          "financial": { "icon": "💰", "name": "Financial management", "desc": "Automated rent collection, expense tracking, and invoice generation. Multiple payment methods with real-time financial reports for clear visibility into income and expenses." },
+          "maintenance": { "icon": "🔧", "name": "Maintenance work orders", "desc": "Tenants submit repair requests anytime; managers track progress in real time — improving response speed and service quality." },
+          "booking": { "icon": "📅", "name": "Facility booking", "desc": "Online booking for shared amenities (meeting rooms, gyms, parking) — preventing conflicts and maximizing utilization." },
+          "announcements": { "icon": "📢", "name": "Announcements & notifications", "desc": "One-click community announcements, payment reminders, and event notices via SMS, email, and in-app push." },
+          "analytics": { "icon": "📊", "name": "Data analytics", "desc": "Multi-dimensional reports on occupancy, revenue, and maintenance trends — supporting data-driven decisions." }
+        }
+      },
+      "whyChoose": {
+        "title": "Why choose Mansion Manager",
+        "items": {
+          "efficiency": { "title": "Improved management efficiency", "desc": "Automated workflows reduce manual operations — saving management staff over 50% of daily working hours for higher-value service improvements." },
+          "experience": { "title": "Better tenant experience", "desc": "Self-service features (online repairs, facility booking, billing inquiries) give tenants a more convenient living experience and boost satisfaction by 40%." },
+          "cost": { "title": "Lower operating costs", "desc": "Optimize resource allocation, reduce labor costs, and surface savings opportunities through precise analysis — cutting annual operating costs by 20-30%." },
+          "mobile": { "title": "Mobile-friendly management", "desc": "Accessible via smartphone and tablet — handle tasks anytime, anywhere, staying in control even off-site." }
+        }
+      },
+      "cta": {
+        "title": "Ready to simplify property management?",
+        "button": "Talk to us"
+      }
+    },
+    "property": {
+      "hero": {
+        "icon": "📊",
+        "name": "Property Report",
+        "tagline": "Professional Real Estate Market Analysis & Report Platform",
+        "subtitle": "Gain deep insights into the real estate market and make data-driven investment decisions."
+      },
+      "overview": {
+        "title": "Product overview",
+        "body": "Property Report is a market analysis and report-generation platform built for the real estate industry. By integrating massive real estate datasets and advanced analytics, it gives investors, developers, and agencies accurate market insights and professional reports. Whether you need to assess investment value, analyze regional trends, or generate client-facing reports, Property Report delivers authoritative data and professional analytical tools — making real estate decisions more scientific and efficient."
+      },
+      "features": {
+        "title": "Core features",
+        "items": {
+          "regional": { "icon": "📍", "name": "Regional analysis", "desc": "In-depth regional market research — price trends, supply and demand, amenities, population flows — for a comprehensive view of regional investment value." },
+          "custom": { "icon": "📄", "name": "Custom reports", "desc": "Generate tailored reports — investment analyses, market research, valuations — with customizable content and formats." },
+          "visualization": { "icon": "📈", "name": "Data visualization", "desc": "Intuitive charts — trend lines, heat maps, comparative analyses — making complex data easy to understand and market patterns easy to spot." },
+          "comparison": { "icon": "🏘️", "name": "Property comparison", "desc": "Side-by-side analysis of multiple properties across price, floor plans, amenities, and transportation — helping clients make informed choices." },
+          "recommendations": { "icon": "💡", "name": "Investment recommendations", "desc": "A big-data advisory system evaluating ROI, appreciation potential, and risk factors — delivering professional investment guidance." },
+          "realtime": { "icon": "🔄", "name": "Real-time updates", "desc": "Automatic data refresh ensures you always have the latest market information. Set up watchlists and price alerts to stay ahead of market changes." }
+        }
+      },
+      "whyChoose": {
+        "title": "Why choose Property Report",
+        "items": {
+          "data": { "title": "Authoritative data sources", "desc": "Aggregates data from government records, transaction platforms, and research institutions — ensuring accuracy and comprehensiveness." },
+          "models": { "title": "Professional analysis models", "desc": "Uses internationally recognized real-estate valuation models and methodologies, adapted to local market characteristics, for scientifically grounded conclusions." },
+          "closings": { "title": "Faster closings", "desc": "Professional reports build client trust — agencies using this platform see an average 30% reduction in closing time and 25% increase in deal success rates." },
+          "time": { "title": "Save time & resources", "desc": "Automated report generation completes in minutes what used to take hours of market research and manual report writing." }
+        }
+      },
+      "cta": {
+        "title": "Ready to make smarter real estate decisions?",
+        "button": "Talk to us"
+      }
     }
   }
 }
