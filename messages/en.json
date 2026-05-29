@@ -73,5 +73,43 @@
       "title": "Let's find the right fit for your business.",
       "button": "Get in touch"
     }
+  },
+  "tools": {
+    "raft": {
+      "hero": {
+        "icon": "🚢",
+        "name": "RAFT 2.03",
+        "tagline": "Intelligent Financial Analysis & Forecasting System",
+        "subtitle": "Navigate the business ocean with data-driven insights and intelligent decision-making."
+      },
+      "overview": {
+        "title": "Product overview",
+        "body": "RAFT 2.03 is an intelligent financial analysis and forecasting system built for modern enterprises. By combining advanced data analytics with AI, it helps businesses track financial metrics in real time, predict future trends, and generate professional reports — making financial management simpler and more efficient. Whether you're a startup or an established corporation, RAFT 2.03 delivers tailored financial solutions to help you navigate the business landscape with confidence."
+      },
+      "features": {
+        "title": "Core features",
+        "items": {
+          "realtime": { "icon": "📊", "name": "Real-time data analytics", "desc": "Powerful visualization that tracks your financial metrics in real time — every transaction visible. Multi-dimensional views and custom dashboards." },
+          "ai": { "icon": "🔮", "name": "AI-powered forecasting", "desc": "A machine-learning trend engine that combines historical data and market conditions to deliver accurate financial forecasts and risk alerts." },
+          "reports": { "icon": "📈", "name": "Professional report generation", "desc": "One-click, standards-compliant reports — income statements, balance sheets, cash flow — exportable to PDF or Excel." },
+          "analysis": { "icon": "🔍", "name": "In-depth financial analysis", "desc": "Multi-dimensional ratio analysis that automatically computes profitability, solvency, and operational efficiency, with expert interpretation." },
+          "alerts": { "icon": "🔔", "name": "Intelligent alerts", "desc": "Monitors unusual financial activity and detects risks early — notifies managers via email, SMS, or in-app alerts." },
+          "multiplatform": { "icon": "🌐", "name": "Multi-platform access", "desc": "Web, mobile, and API access — your team can view and manage financial data anytime, anywhere." }
+        }
+      },
+      "whyChoose": {
+        "title": "Why choose RAFT 2.03",
+        "items": {
+          "speed": { "title": "Faster decisions", "desc": "Real-time data and intelligent analysis let management make informed financial decisions quickly — cutting decision time by up to 60%." },
+          "cost": { "title": "Lower operating cost", "desc": "Automated workflows reduce manual work and errors, saving finance teams up to 40% of their working hours each month." },
+          "risk": { "title": "Stronger risk control", "desc": "The alert system detects potential risks early, enabling proactive measures that minimize financial losses." },
+          "security": { "title": "Secure & reliable", "desc": "Bank-grade encryption and multi-layer backups keep your financial data fully secure, meeting international data-protection standards." }
+        }
+      },
+      "cta": {
+        "title": "Ready to set sail with RAFT 2.03?",
+        "button": "Talk to us"
+      }
+    }
   }
 }

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 // Icons + target pages are non-translatable; the info pages are still static (ported later).
 const SERVICES = [
-  { key: 'raft', icon: '🚢', href: '/raft_info.html' },
+  { key: 'raft', icon: '🚢', href: '/raft' },
   { key: 'mansion', icon: '🏢', href: '/mansion_info.html' },
   { key: 'property', icon: '📊', href: '/property_report_info.html' },
 ] as const;
