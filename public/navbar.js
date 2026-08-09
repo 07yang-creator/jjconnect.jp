@@ -210,6 +210,28 @@
                             </a>
                         </div>
                     </div>
+                    <!-- AIかつよ dropdown -->
+                    <div class="jjc-nav-dropdown" id="jjc-katsuyo-dropdown">
+                        <a href="/ai-katsuyo.html" class="jjc-nav-link jjc-nav-dropdown-toggle">AIかつよ</a>
+                        <div class="jjc-nav-dropdown-menu">
+                            <a href="/ai-katsuyo.html#idea" class="jjc-nav-dropdown-item">
+                                <span class="jjc-nav-dropdown-icon">💡</span>
+                                <span>AIかつよについて</span>
+                            </a>
+                            <a href="/ai-katsuyo.html#start" class="jjc-nav-dropdown-item">
+                                <span class="jjc-nav-dropdown-icon">🤝</span>
+                                <span>はじめの一歩</span>
+                            </a>
+                            <a href="/ai-katsuyo.html#apps" class="jjc-nav-dropdown-item">
+                                <span class="jjc-nav-dropdown-icon">🧰</span>
+                                <span>AIアプリ</span>
+                            </a>
+                            <a href="/ai-katsuyo.html#qa" class="jjc-nav-dropdown-item">
+                                <span class="jjc-nav-dropdown-icon">❓</span>
+                                <span>Q&amp;A</span>
+                            </a>
+                        </div>
+                    </div>
                     ${canUseAiTool ? '<a href="ai.html" class="jjc-nav-link">✨AI empowered</a>' : ''}
                     <a href="about.html" class="jjc-nav-link">About Us</a>
                 </div>
@@ -276,6 +298,26 @@
                     <a href="home.html" class="jjc-mobile-service-link">
                         <span>📄</span>
                         <span>Articles</span>
+                    </a>
+                </div>
+                <div class="jjc-mobile-divider"></div>
+                <a href="/ai-katsuyo.html" class="jjc-mobile-link" style="font-weight: 600;">AIかつよ</a>
+                <div class="jjc-mobile-services">
+                    <a href="/ai-katsuyo.html#idea" class="jjc-mobile-service-link">
+                        <span>💡</span>
+                        <span>AIかつよについて</span>
+                    </a>
+                    <a href="/ai-katsuyo.html#start" class="jjc-mobile-service-link">
+                        <span>🤝</span>
+                        <span>はじめの一歩</span>
+                    </a>
+                    <a href="/ai-katsuyo.html#apps" class="jjc-mobile-service-link">
+                        <span>🧰</span>
+                        <span>AIアプリ</span>
+                    </a>
+                    <a href="/ai-katsuyo.html#qa" class="jjc-mobile-service-link">
+                        <span>❓</span>
+                        <span>Q&amp;A</span>
                     </a>
                 </div>
                 ${canUseAiTool ? '<a href="ai.html" class="jjc-mobile-link">✨AI empowered</a>' : ''}
@@ -549,7 +591,31 @@
                 });
             });
         }
-        
+
+        // AIかつよ dropdown
+        const katsuyoDropdown = document.getElementById('jjc-katsuyo-dropdown');
+        if (katsuyoDropdown) {
+            const toggle = katsuyoDropdown.querySelector('.jjc-nav-dropdown-toggle');
+
+            toggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                katsuyoDropdown.classList.toggle('active');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!katsuyoDropdown.contains(e.target)) {
+                    katsuyoDropdown.classList.remove('active');
+                }
+            });
+
+            katsuyoDropdown.querySelectorAll('.jjc-nav-dropdown-item').forEach((item) => {
+                item.addEventListener('click', () => {
+                    katsuyoDropdown.classList.remove('active');
+                });
+            });
+        }
+
         // 用户菜单下拉
         const userMenuBtn = document.getElementById('jjc-user-menu-btn');
         const userDropdown = document.getElementById('jjc-user-dropdown');

@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="ja" data-jjc-skip-public-config>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIかつよ | JJConnect</title>
+    <meta name="description" content="動かす側になるか、動かされる側になるか。「活用」は新しくない、「AI活用」は新しい。JJConnectのAI活用の考え方、いま動いているアプリ、はじめかた、そしてQ&A。">
+    <link rel="icon" href="/brand/jjconnect-logo.png?v=2" type="image/png">
+    <link rel="stylesheet" href="/navbar.css">
+    <link rel="stylesheet" href="/ai-katsuyo.css">
+</head>
+<body>
+<script src="/jjc-default-config.js"></script>
+<script src="/navbar.js"></script>
+
+<div class="hero">
+    <div class="eyebrow">JJConnect ／ Drive, or be driven</div>
+    <h1>AIかつよ</h1>
+    <p class="lead">動かす側になるか、動かされる側になるか。</p>
+    <p class="sub">AI活用について、私たちが考えていること。<br>そして、いま探している「いちばん価値のある場面」について。</p>
+</div>
+
+<nav class="lp-nav">
+    <div class="lp-nav-inner">
+        <a href="#idea">考え方</a>
+        <a href="#apps">AIアプリ</a>
+        <a href="#start">はじめの一歩</a>
+        <a href="#qa">Q&amp;A</a>
+        <a href="#contact">お問い合わせ</a>
+        <a href="#english" class="lang">EN</a>
+    </div>
+</nav>
+
+<div class="container">
+
+    <div class="chapter" id="idea">
+        <span class="ch-label">考え方</span>
+        <h2>「活用」から、「AI活用」へ。</h2>
+        <p class="ch-lead">AI活用という言葉が、いま何を指しているのか。</p>
+    </div>
+
+    <section class="section">
+        <div class="section-num">01</div>
+        <h2>「活用」は、<br>気持ちのいい言葉です。</h2>
+
+        <p><strong>活用</strong>——日本語のなかでも、とりわけ気持ちのいい言葉です。親切で、安全で、やわらかい。<br>
+        道具を活用する。方法を活用する。——手軽で、しなやかで、どこにも角がありません。</p>
+
+        <p>そして「<strong>AI活用</strong>」も、たしかに、そのとおりです。</p>
+
+        <div class="pull">ただし、それは入り口にすぎません。<br>AI活用は、この言葉が思わせるより、はるかに遠くまで行きます。</div>
+
+        <p>「かつよ」とひらがなで書いているのは、その手ざわりのまま、遠くまで行きたいからです。</p>
+
+        <div class="quiz" data-badge="あなたの回答">
+            <button class="quiz-toggle" type="button" aria-expanded="false">
+                <span class="quiz-toggle-label">かんたんテスト</span>
+                <span class="quiz-toggle-title">あなたの「かつよ」度は、いまどのあたり？</span>
+                <span class="quiz-toggle-cue">質問はひとつだけ。押してはじめる ＋</span>
+            </button>
+            <div class="quiz-body" hidden>
+                <p class="quiz-q">Q. あなたはいま、AIサービスに毎月いくら払っていますか。
+                    <span class="quiz-note">汎用のAIモデルでも、特定の用途に特化した専門モデルでも構いません。会社が払っている分ではなく、<strong>自分のために、自分で払っている額</strong>でお答えください。</span>
+                </p>
+                <div class="quiz-options" role="radiogroup" aria-label="毎月の支払額">
+                    <label class="quiz-opt"><input type="radio" name="katsuyo-ja" value="a"><span class="quiz-key">A</span><span class="quiz-text">0円、または わからない（誰かが払ってくれている）</span></label>
+                    <label class="quiz-opt"><input type="radio" name="katsuyo-ja" value="b"><span class="quiz-key">B</span><span class="quiz-text">1,500円くらい</span></label>
+                    <label class="quiz-opt"><input type="radio" name="katsuyo-ja" value="c"><span class="quiz-key">C</span><span class="quiz-text">3,000円くらい</span></label>
+                    <label class="quiz-opt"><input type="radio" name="katsuyo-ja" value="d"><span class="quiz-key">D</span><span class="quiz-text">15,000円くらい</span></label>
+                    <label class="quiz-opt"><input type="radio" name="katsuyo-ja" value="e"><span class="quiz-key">E</span><span class="quiz-text">必要なだけ、いくらでも</span></label>
+                </div>
+                <button class="quiz-submit" type="button" disabled>結果を見る</button>
+                <div class="quiz-results" hidden>
+                    <div class="quiz-results-head">すべての結果</div>
+                    <div class="quiz-result" data-k="a"><span class="quiz-key">A</span><div><h4>入門</h4><p>AIは、あなたの生活に現れた新しいもののひとつ。ほかの多くの新しいものと、まだ同じ棚に並んでいます。</p></div></div>
+                    <div class="quiz-result" data-k="b"><span class="quiz-key">B</span><div><h4>本気の入門</h4><p>AIが本当に役に立つと気づいた段階。おそらく、すでに何かに使っています——文章を書く、調べる、学ぶ。</p></div></div>
+                    <div class="quiz-result" data-k="c"><span class="quiz-key">C</span><div><h4>アマチュア</h4><p>もっと払えば、もっと返ってくる。それを自分で確かめた段階です。</p></div></div>
+                    <div class="quiz-result" data-k="d"><span class="quiz-key">D</span><div><h4>本気のアマチュア</h4><p>これだけ払わなければ、本当に価値のあるものは作れない——そう気づいてしまった段階。</p></div></div>
+                    <div class="quiz-result" data-k="e"><span class="quiz-key">E</span><div><h4>プロ</h4><p>おそらく複数のモデルを契約しています。達成したい目標がはっきりしていて、締切も決まっている。</p></div></div>
+                    <p class="quiz-close-note">正解はありません。ただ——<strong>AがEを想像するのは難しく、Eは自分がAだった頃をはっきり覚えています。</strong></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-num">02</div>
+        <h2>新しい蛮族が、扉の前に。</h2>
+
+        <p>いま、あなたはまだ家のなかにいて、安全です。<br>
+        けれど、外の世界はこれから大きく変わります。</p>
+
+        <p>AIは、これまでの誰も届かなかった規模で世界の秩序に手をつけ、これまでの何よりも速く、それをやります。そのとき、<strong>あなたの意見が求められることはありません。</strong>意見を聞かれないということは、おそらく<strong>交渉の機会も来ない</strong>ということです。</p>
+
+        <p>その意味で、AIは新しい蛮族です。<br>
+        ただし、ひとつだけ決定的に違います。</p>
+
+        <div class="pull amber">蛮族は、扉を壊して入ってくる。<br>AIは、ただ通り過ぎていく。</div>
+
+        <p>壊されるなら、まだ気づけます。気づけば、抵抗もできます。<br>
+        通り過ぎられるほうが、はるかに静かで、はるかに取り返しがつきません。</p>
+
+        <p>過去の産業革命には、人間のほうが合わせて変わるだけの時間が、どうにか用意されていました。<strong>AIは、その時間を用意してくれないようです。</strong></p>
+
+        <p>この3年ほどで、どれだけのものが生まれたか。そして、これからどれだけ来るのか。</p>
+
+        <div class="choice">
+            私たちに残されているのは、じつに単純な選択です。<br>
+            ——<span class="em">乗るか、乗らないか。</span>
+            <span class="small">Join in, or not.</span>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-num">03</div>
+        <h2>全局が、底上げされる。</h2>
+
+        <p>これまで「活用」という言葉が指してきたのは、道具であり、機械であり、方法でした。一歩ずつ改善して、少しずつ良い未来にしていく。それが活用です。</p>
+
+        <p>AIは、その先に行きます。</p>
+
+        <p>AIが本当に持ち込んだのは、<span class="em">知性そのものの底上げ</span>です。<br>
+        だから、ほとんどすべてが変わります。効率も、便利さも、そこから出てくる<strong>結果であり、副産物にすぎません。</strong></p>
+
+        <p>生産。管理。情報。手続き。——そのひとつひとつに「AI活用」が要るのだとしたら。</p>
+
+        <p>私たちは、まだ「活用」という言葉を使ってもいいと思います。<br>
+        ただし、<strong>当たり前の言葉として使わないほうがいい。</strong></p>
+    </section>
+
+    <section class="section">
+        <div class="section-num">04</div>
+        <h2>「やる」より、「考える」ほうが<br>はるかに多い。</h2>
+
+        <p>AI活用は、手を動かす仕事に見えます。実際にやってみると、考えている時間のほうが圧倒的に長い。</p>
+
+        <p>何をやらせるか。どこまでやらせるか。どこから先は人がやるか。——決めるべきことが、作業のはるか手前に山ほどあります。</p>
+
+        <p>だからといって、誰かが計画を立ててくれるのを待つことはできません。</p>
+
+        <div class="pull">PDCAは、最初から壊れています。</div>
+
+        <p>計画してから回す、という順番が、そもそも成り立たない。<strong>すべてが同時に起こり、混ざり合ったまま進んでいる</strong>からです。計画している間に前提が変わり、検証している間に道具のほうが入れ替わる。</p>
+
+        <p>ですから私たちは、考えながら動き、動きながら考えます。<br>
+        いまのところ、それ以外の方法を知りません。</p>
+    </section>
+
+    <section class="section">
+        <div class="section-num">05</div>
+        <h2>競争のなかで読む。そして、速める。</h2>
+
+        <p>AIを「珍しいもの」として売るつもりはありません。同じことをする会社は、必ず増えます。<br>
+        だから見るべきは、技術そのものではなく——<span class="em">どこで差がつくか</span>です。</p>
+
+        <ul class="points">
+            <li><strong>誰でも手に入るデータでは、差はつきません。</strong>データは入口であって、強みではありません。</li>
+            <li><strong>差がつくのは、そのデータをどう読むかです。</strong>同じ資料から、違う結論が出る。そこに価値があります。</li>
+            <li><strong>そして、読んだ結果に誰が責任を持つか。</strong>さらに、それを後から確かめられる形で残しているか。信頼は、そこにしか積み上がりません。</li>
+        </ul>
+
+        <p>競合がいる場面ほど、私たちは冷静に見ます。相手が何を持っていて、何を持っていないのか。自分たちがどこで勝てて、どこでは勝てないのか。<br>
+        ——そのうえで、<strong>速く動きます。</strong></p>
+
+        <p>小さくつくる。現場で使ってもらう。翌週には直す。<br>
+        いまのAIの世界では、<strong>正しく速いことが、そのまま強さになります。</strong>私たちは、その速度を出す準備ができています。</p>
+    </section>
+
+    <div class="chapter" id="apps">
+        <span class="ch-label">AIアプリ</span>
+        <h2>構想ではなく、動いているもの。</h2>
+        <p class="ch-lead">jjconnect.jp で、実際に走っている三つ。</p>
+    </div>
+
+    <section class="section">
+        <div class="section-num">06</div>
+        <h2>いま動いているもの</h2>
+
+        <p>どれも、どこかの現場の「面倒な30分」から始まったものです。汎用のAIサービスではなく、ひとつの場面のために作られています。</p>
+
+        <div class="app-cards">
+            <div class="app-card">
+                <div class="app-icon">🚢</div>
+                <h3>RAFT2.03</h3>
+                <p>財務の分析と予測。過去の数字と市場の状況を機械学習で読み、予測とリスク警告、そして報告書の形まで持っていきます。</p>
+                <a href="/raft_info.html" class="app-link">詳しく見る →</a>
+            </div>
+            <div class="app-card cyan">
+                <div class="app-icon">🏢</div>
+                <h3>Mansion Manager</h3>
+                <p>建物運営の実務。入居者、費用、修繕依頼、共用施設の予約——バラバラだった作業を、一本の流れにまとめます。</p>
+                <a href="/mansion_info.html" class="app-link">詳しく見る →</a>
+            </div>
+            <div class="app-card orange">
+                <div class="app-icon">📊</div>
+                <h3>Property Report</h3>
+                <p>不動産市場の調査と報告。地域分析、物件の比較、データの可視化を、人がそのまま読める報告書の形にします。</p>
+                <a href="/property_report_info.html" class="app-link">詳しく見る →</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-num">07</div>
+        <h2>三つに共通していること</h2>
+
+        <p>見た目も、扱う中身もまったく違います。それでも、設計の芯はひとつです。</p>
+
+        <div class="pull">AIが答えを出して、終わりにしない。</div>
+
+        <ul class="points">
+            <li><strong>最後に読むのは人です。</strong>AIは、人が判断できる形に材料を整えるところまでをやります。</li>
+            <li><strong>責任を持つのも人です。</strong>だから私たちは「AIが下した判断」を納品しません。</li>
+            <li><strong>判断した結果は、記録に残ります。</strong>正しかったかどうかを、あとから確かめられる。間違いは、そこで見つかります。</li>
+        </ul>
+
+        <p>間違えない仕組みより、<strong>間違いが見つかる仕組み</strong>のほうが、ずっと信頼できると考えています。</p>
+    </section>
+
+    <section class="section">
+        <div class="section-num">08</div>
+        <h2>どうやって作られているか</h2>
+
+        <p>いきなり全体を設計することはしません。順番はいつも同じです。</p>
+
+        <div class="steps">
+            <div class="step">
+                <h3>その業務を、自分たちでやってみる</h3>
+                <p>手を動かさずに設計だけした仕組みは、現場ではまず使われません。まず実際にやってみて、どこが面倒かを体で知るところから始めます。</p>
+            </div>
+            <div class="step">
+                <h3>いちばん面倒なところだけ、先に作る</h3>
+                <p>全体をきれいにするのは後回しです。効き目が大きい一点に絞れば、翌週には触れるものができます。</p>
+            </div>
+            <div class="step">
+                <h3>現場で使ってもらい、直しつづける</h3>
+                <p>使われ方は、たいてい想定と違います。その違いのほうが正しいので、こちらを直します。</p>
+            </div>
+        </div>
+
+        <p>汎用のAIは、あらゆる場面で60点を出します。私たちがやっているのは、<strong>ひとつの場面で95点を出すこと</strong>です。</p>
+    </section>
+
+    <div class="chapter" id="start">
+        <span class="ch-label">はじめの一歩</span>
+        <h2>30分ひとつから、始まります。</h2>
+        <p class="ch-lead">大きく始める必要は、ありません。</p>
+    </div>
+
+    <section class="section">
+        <div class="section-num">09</div>
+        <h2>「うちにはまだ早い」<br>——その判断だけは、早すぎます。</h2>
+
+        <p>AIの導入を急ぐ必要はありません。けれど、<strong>見ておくことだけは、急いだほうがいい。</strong></p>
+
+        <p>いま何ができて、何ができないのか。自分の仕事のどこに効いて、どこには効かないのか。それを知らないまま一年が過ぎると、判断の材料ごと古くなります。</p>
+
+        <div class="pull">通り過ぎられてからでは、<br>追いかける距離が変わります。</div>
+
+        <p>私たちがお願いしているのは、契約でも、決断でもありません。<br>
+        <strong>まず、見せていただくことです。</strong></p>
+    </section>
+
+    <section class="section">
+        <div class="section-num">10</div>
+        <h2>いちばん面倒な30分を、<br>教えてください。</h2>
+
+        <p>大きな案件を探しているわけではありません。探しているのは、あなたの現場でいちばん面倒な、たった30分の作業です。</p>
+
+        <p>毎週おなじ手順を踏んでいる作業。資料を何か所も開いて、突き合わせて、また閉じる作業。あの人しかできない、と言われている作業。——そういうものが、いちばん価値のある<span class="em">場面（シーン）</span>になります。</p>
+
+        <h3>効く場面には、だいたい次の特徴があります</h3>
+        <ul class="checklist">
+            <li>毎回おなじ手順を、人が手で繰り返している</li>
+            <li>判断の材料が、あちこちに散らばっている（PDF、紙、現地、そして誰かの記憶）</li>
+            <li>詳しい人が、社内に一人しかいない</li>
+            <li>その判断に、金額が直接ついている</li>
+            <li>正しかったかどうかを、あとから確かめられる</li>
+        </ul>
+
+        <div class="note-box">
+            <div class="note-label">ひとつでも当てはまれば</div>
+            <p>それは、話すだけの価値がある場面です。<br>
+            全部そろっている必要はありません。</p>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-num">11</div>
+        <h2>ご相談のあと、何が起きるか。</h2>
+
+        <p>いきなり見積もりも、いきなり提案書も出しません。順番はいつも同じです。</p>
+
+        <div class="steps">
+            <div class="step">
+                <h3>作業を見せていただく（30分ほど）</h3>
+                <p>資料を整えていただく必要はありません。散らかったまま、ふだんのままで結構です。整っていない状態こそ、いちばん見たいものです。</p>
+            </div>
+            <div class="step">
+                <h3>効くか、効かないかをお伝えする</h3>
+                <p>どこまでAIに任せられて、どこから先は人がやるべきか。私たちの見立てを、理由とあわせてお話しします。</p>
+            </div>
+            <div class="step">
+                <h3>効くなら、小さく作って試す</h3>
+                <p>大きく設計してから動き出すことはしません。小さくつくり、現場で使っていただき、翌週に直す。その繰り返しです。</p>
+            </div>
+        </div>
+
+        <div class="note-box">
+            <div class="note-label">お約束</div>
+            <p>見せていただいたうえで、<strong>「これはAIでやらないほうがいい」と判断したら、そうお伝えします。</strong></p>
+            <p>売れないと分かっている仕組みを勧めるのは、私たちにとっても損だからです。</p>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-num">12</div>
+        <h2>準備は、要りません。</h2>
+
+        <ul class="points">
+            <li><strong>資料を整えなくて結構です。</strong>整っている業務は、すでに仕組みで回っているはずです。散らかっているところにこそ、伸びしろがあります。</li>
+            <li><strong>AIの知識は要りません。</strong>知っていただく必要があるのは、ご自身の仕事のほうだけです。</li>
+            <li><strong>社内の合意も要りません。</strong>まずはお一人で構いません。持ち帰れる材料は、こちらで用意します。</li>
+        </ul>
+
+        <p>必要なのは、<strong>「これ、面倒なんですよね」と言える作業がひとつあること</strong>。それだけです。</p>
+    </section>
+    <div class="cta-band">
+        <h3>その30分を、見せてください。</h3>
+        <p>ご相談は無料です。<br>まだ何も決めていない段階で、けっこうです。</p>
+        <a href="#contact" class="cta-btn">お問い合わせへ</a>
+    </div>
+
+    <div class="chapter" id="qa">
+        <span class="ch-label">Q&amp;A</span>
+        <h2>意外と、知られていないこと</h2>
+        <p class="ch-lead">よくある質問ではなく、実際に聞かれて答えに困った問い。</p>
+    </div>
+
+    <section class="section">
+        <p>ここに並んでいるのは、実際に打ち合わせの席で出た問いです。答えは私たちの現在の見解であって、業界の定説ではありません。<strong>違う立場の会社は、違う答えを出すはずです。</strong></p>
+
+        <div class="faq">
+            <details>
+                <summary>Q. 「うちの業界は特殊だから、AIには無理」と言われます。</summary>
+                <div class="answer">
+                    <p>たいてい、本当です。ただし——<strong>特殊なのは業界ではなく、社内の誰か一人</strong>であることがほとんどです。</p>
+                    <p>業界そのものが特殊なら、同業他社も同じところで詰まっているはずです。実際にはそうなっていない。詰まっているのは、その会社のなかの、ある一人の頭のなかにしかない手順です。</p>
+                    <p>ですから私たちは、業界の話を聞きにいくのではなく、<strong>その一人が何を見て決めているか</strong>を聞きにいきます。</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Q. 競合も同じAIを使い始めたら、優位はなくなりませんか。</summary>
+                <div class="answer">
+                    <p>同じモデルは、誰でも使えます。同じデータも、いずれ誰でも買えます。</p>
+                    <p><strong>同じ「判断の履歴」だけは、誰も持っていません。</strong></p>
+                    <p>どういう材料から、どう読んで、どう決めて、それが結果として正しかったのか。この積み重ねは買えませんし、真似もできません。優位が残るとすれば、そこだけだと考えています。</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Q. AIに任せると、社内にノウハウが残らなくなりませんか。</summary>
+                <div class="answer">
+                    <p>逆のことが起きています。</p>
+                    <p>いま、ノウハウの多くは人の頭のなかにあって、外からは見えません。その人が辞めれば、消えます。</p>
+                    <p>AIに渡すには、まず手順を言葉にしなければなりません。<strong>その作業そのものが、見えなかったノウハウを、はじめて社内の資産に変えます。</strong></p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Q. 導入した会社としなかった会社で、3年後に本当に差がつきますか。</summary>
+                <div class="answer">
+                    <p>差がつくのは「導入したかどうか」ではありません。<strong>導入して、やめなかったかどうか</strong>です。</p>
+                    <p>導入は一日で終わります。使われ続ける状態にするには、毎週手を入れる必要があります。半年後に誰も開いていないダッシュボードを、私たちは何度も見てきました。</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Q. 成果は、どう測りますか。</summary>
+                <div class="answer">
+                    <p>正直に言えば、<strong>最初は測れません。</strong></p>
+                    <p>測れるようになるのは、判断の記録が溜まってからです。ですから私たちは、効果測定より先に「あとから確かめられる形で残す」ほうを作ります。測定は、その結果としてついてきます。</p>
+                    <p>——初回の提案で精緻なROIを出してくる会社があったら、<strong>その数字がどこから来たのかを聞いてみてください。</strong></p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Q. 社内から反対が出ています。</summary>
+                <div class="answer">
+                    <p>反対の中身は、たいてい二種類に分かれます。「自分の仕事が取られる」と「責任の所在が曖昧になる」。</p>
+                    <p>前者は、ほぼ杞憂です。後者は、正当な指摘です。</p>
+                    <p>そして——<strong>後者を言っている人は、味方にすべき人です。</strong>責任の線をどこに引くかを、社内でいちばん真剣に考えているからです。</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Q. AIの判断が間違っていたら、誰が責任を取るのですか。</summary>
+                <div class="answer">
+                    <p>人です。例外はありません。</p>
+                    <p>だから私たちは<strong>「AIが下した判断」を納品しません。</strong>人が判断できる形に材料を整えて渡し、判断した結果を記録に残す。責任の所在が動かないように作ります。</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Q. どのAIを使っているのですか。</summary>
+                <div class="answer">
+                    <p>場面によって変えます。そして、<strong>変わります。</strong></p>
+                    <p>特定のモデルに依存した作りにはしません。3年前の最良は、いまの平均以下です。同じことが、これからも起きます。</p>
+                    <p>道具を選ぶことより、<strong>道具が入れ替わっても壊れない形にしておくこと</strong>のほうが重要だと考えています。</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Q. うちのデータは、まったく整っていません。</summary>
+                <div class="answer">
+                    <p>整っていないほうが、効果は出ます。</p>
+                    <p>すでに整っているなら、その業務はもう仕組みで回っているはずです。PDF、紙のスキャン、手書きのメモ、担当者の記憶——<strong>いちばん面倒なところが、いちばん伸びしろです。</strong></p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Q. 費用はどうなりますか。</summary>
+                <div class="answer">
+                    <p>場面によって大きく変わるため、定価は置いていません。まず、その作業を見せていただくところからお願いしています。</p>
+                    <p>そして、見たうえで<strong>「これはAIでやらないほうがいい」と判断したら、そうお伝えします。</strong>売れないと分かっている仕組みを勧めるのは、私たちにとっても損だからです。</p>
+                </div>
+            </details>
+        </div>
+    </section>
+    <div class="cta-band" id="contact">
+        <h3>まず、その作業を見せてください。</h3>
+        <p>30分の作業ひとつからで構いません。<br>ここにない問いも、直接どうぞ。答えを持っていない場合は、そうお伝えします。</p>
+        <a href="/feedback.html" class="cta-btn">ご相談・お問い合わせ</a>
+    </div>
+
+    <div class="lang-divider" id="english"></div>
+    <div class="lang-label">English</div>
+
+    <div class="chapter" id="idea-en">
+        <span class="ch-label">THE IDEA</span>
+        <h2>From katsuyō to AI katsuyō</h2>
+        <p class="ch-lead">What the phrase “AI katsuyō” actually points at now.</p>
+    </div>
+
+    <section class="section">
+        <div class="section-num">01</div>
+        <h2>Katsuyō is<br>a comfortable word.</h2>
+
+        <p><strong>Katsuyō (活用)</strong> — putting something to good use — is one of the most comfortable words in Japanese. Kind, safe, soft.<br>
+        Make good use of the tools. Make good use of the method. Easy, flexible, and without a single edge on it.</p>
+
+        <p>And <strong>AI katsuyō</strong> is all of that too.</p>
+
+        <div class="pull">But that is only the entrance.<br>AI katsuyō goes far beyond what the word suggests.</div>
+
+        <p>We write it in hiragana — かつよ — because we would like to keep that texture the whole way.</p>
+
+        <div class="quiz" data-badge="YOUR ANSWER">
+            <button class="quiz-toggle" type="button" aria-expanded="false">
+                <span class="quiz-toggle-label">QUICK TEST</span>
+                <span class="quiz-toggle-title">Where is your katsuyō level right now?</span>
+                <span class="quiz-toggle-cue">One question only. Tap to start ＋</span>
+            </button>
+            <div class="quiz-body" hidden>
+                <p class="quiz-q">Q. How much do you currently pay, per month, for AI services?
+                    <span class="quiz-note">General-purpose models or specialised ones, either counts. Not what your company pays — <strong>what you pay for yourself.</strong></span>
+                </p>
+                <div class="quiz-options" role="radiogroup" aria-label="Monthly spend">
+                    <label class="quiz-opt"><input type="radio" name="katsuyo-en" value="a"><span class="quiz-key">A</span><span class="quiz-text">Nothing, or I don't know — someone else pays</span></label>
+                    <label class="quiz-opt"><input type="radio" name="katsuyo-en" value="b"><span class="quiz-key">B</span><span class="quiz-text">Around ¥1,500</span></label>
+                    <label class="quiz-opt"><input type="radio" name="katsuyo-en" value="c"><span class="quiz-key">C</span><span class="quiz-text">Around ¥3,000</span></label>
+                    <label class="quiz-opt"><input type="radio" name="katsuyo-en" value="d"><span class="quiz-key">D</span><span class="quiz-text">Around ¥15,000</span></label>
+                    <label class="quiz-opt"><input type="radio" name="katsuyo-en" value="e"><span class="quiz-key">E</span><span class="quiz-text">As much as it takes</span></label>
+                </div>
+                <button class="quiz-submit" type="button" disabled>Show the results</button>
+                <div class="quiz-results" hidden>
+                    <div class="quiz-results-head">ALL RESULTS</div>
+                    <div class="quiz-result" data-k="a"><span class="quiz-key">A</span><div><h4>Beginner</h4><p>AI is one more new thing that has turned up in your life — still on the same shelf as all the other new things.</p></div></div>
+                    <div class="quiz-result" data-k="b"><span class="quiz-key">B</span><div><h4>Serious beginner</h4><p>You have found AI genuinely useful. You are probably already using it for something — writing, researching, learning.</p></div></div>
+                    <div class="quiz-result" data-k="c"><span class="quiz-key">C</span><div><h4>Amateur</h4><p>You have learned that paying more gets you more — and you verified that yourself.</p></div></div>
+                    <div class="quiz-result" data-k="d"><span class="quiz-key">D</span><div><h4>Serious amateur</h4><p>You have realised you cannot produce anything genuinely worth something without paying at this level.</p></div></div>
+                    <div class="quiz-result" data-k="e"><span class="quiz-key">E</span><div><h4>Pro</h4><p>You probably subscribe to more than one model. You have a clear target, and a tight schedule.</p></div></div>
+                    <p class="quiz-close-note">There is no right answer. But — <strong>A finds E hard to imagine, and E remembers being A perfectly well.</strong></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-num">02</div>
+        <h2>New barbarians at the door.</h2>
+
+        <p>You are still at home, and you are still safe. But the world outside is about to change drastically.</p>
+
+        <p>AI will reach the order of the world at a scale nothing before it reached, and as fast as nothing before it could. And <strong>you will not be consulted for your opinion.</strong> Not being asked means, in all likelihood, that <strong>you will never get the chance to negotiate.</strong></p>
+
+        <p>In that sense, AI is the new barbarian. With one decisive difference.</p>
+
+        <div class="pull amber">Barbarians break down your door.<br>AI just passes by.</div>
+
+        <p>A broken door you would at least notice — and noticing, you could resist. Being passed by is far quieter, and far harder to undo.</p>
+
+        <p>Previous industrial revolutions took long enough that human beings could evolve alongside them. <strong>AI does not seem willing to bother.</strong></p>
+
+        <p>Look at how much has been created in roughly three years — and how much more is coming.</p>
+
+        <div class="choice">
+            What is left to us is a very simple choice:<br>
+            — <span class="em">join in, or not.</span>
+            <span class="small">乗るか、乗らないか。</span>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-num">03</div>
+        <h2>Everything gets boosted.</h2>
+
+        <p>Katsuyō has always pointed at tools, machines, methods — improving step by step toward a better and better future. That is what the word carries.</p>
+
+        <p>AI goes far beyond that.</p>
+
+        <p>What AI actually brought us is <span class="em">a boost to intellect itself</span>. Which is why almost everything is going to change — and why efficiency and utility are <strong>consequences, byproducts</strong> of that, not the point of it.</p>
+
+        <p>Production. Management. Information. Procedure. If every one of these now needs “AI katsuyō” —</p>
+
+        <p>we can still use the word. We had just better <strong>not take it for granted.</strong></p>
+    </section>
+
+    <section class="section">
+        <div class="section-num">04</div>
+        <h2>Far more thinking than doing.</h2>
+
+        <p>AI katsuyō looks like hands-on work. In practice, the thinking runs far longer than the doing.</p>
+
+        <p>What to hand over. How far. Where the human takes it back. Those decisions pile up well before any actual task begins.</p>
+
+        <p>And still — we cannot wait for someone else to plan it for us.</p>
+
+        <div class="pull">PDCA is broken at the beginning.</div>
+
+        <p>Plan-then-run does not hold as a sequence, because <strong>it is all happening at once, all mixed together.</strong> The premise shifts while you are planning; the tools are replaced while you are checking.</p>
+
+        <p>So we think while moving, and move while thinking. For now, we know of no other method.</p>
+    </section>
+
+    <section class="section">
+        <div class="section-num">05</div>
+        <h2>We read the competitive picture — then we move fast</h2>
+
+        <p>We have no intention of selling AI as something rare. More companies will do this; that is certain. So the question is never the technology itself — it is <span class="em">where the difference actually comes from</span>.</p>
+
+        <ul class="points">
+            <li><strong>Data everyone can get creates no advantage.</strong> Data is the entrance, not the edge.</li>
+            <li><strong>The difference is in how the data is read.</strong> The same documents, a different conclusion — that is where the value sits.</li>
+            <li><strong>And then: who stands behind that reading,</strong> and is it recorded in a form that can be checked later? Trust accumulates nowhere else.</li>
+        </ul>
+
+        <p>The more competition there is in a situation, the more coldly we look at it: what the other side has, what they don't, where we can win, and where we honestly cannot. And then we <strong>move quickly.</strong></p>
+
+        <p>Build small. Put it in front of the people doing the work. Fix it the following week. In AI right now, <strong>being correct and fast is itself the advantage</strong> — and we are set up to run at that speed.</p>
+    </section>
+
+    <div class="chapter" id="apps-en">
+        <span class="ch-label">OUR AI APPS</span>
+        <h2>Not a concept deck.</h2>
+        <p class="ch-lead">Three things genuinely running on jjconnect.jp today.</p>
+    </div>
+
+    <section class="section">
+        <div class="section-num">06</div>
+        <h2>What is running today</h2>
+
+        <p>Every one of these started as somebody's most tedious thirty minutes. They are not general-purpose AI services; each was built for one specific scene.</p>
+
+        <div class="app-cards">
+            <div class="app-card">
+                <div class="app-icon">🚢</div>
+                <h3>RAFT2.03</h3>
+                <p>Financial analysis and forecasting — reading historical numbers against market conditions, through to risk alerts and finished reports.</p>
+                <a href="/raft_info.html" class="app-link">Learn more →</a>
+            </div>
+            <div class="app-card cyan">
+                <div class="app-icon">🏢</div>
+                <h3>Mansion Manager</h3>
+                <p>Building operations — tenants, costs, maintenance requests and shared-facility bookings pulled into a single working flow.</p>
+                <a href="/mansion_info.html" class="app-link">Learn more →</a>
+            </div>
+            <div class="app-card orange">
+                <div class="app-icon">📊</div>
+                <h3>Property Report</h3>
+                <p>Real estate research and reporting — regional analysis, property comparison and visualisation, delivered as something a person can read.</p>
+                <a href="/property_report_info.html" class="app-link">Learn more →</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-num">07</div>
+        <h2>What all three share</h2>
+
+        <p>They look nothing alike and handle unrelated material. The design spine is the same.</p>
+
+        <div class="pull">The AI does not get the last word.</div>
+
+        <ul class="points">
+            <li><strong>A person reads the result.</strong> The AI's job ends at putting the material into a form a human can judge.</li>
+            <li><strong>A person carries the responsibility.</strong> Which is why we never deliver “the AI's decision.”</li>
+            <li><strong>The decision is recorded.</strong> Whether it was right can be checked later — and that is where mistakes surface.</li>
+        </ul>
+
+        <p>A system where errors become visible is far more trustworthy than one that promises there won't be any.</p>
+    </section>
+
+    <section class="section">
+        <div class="section-num">08</div>
+        <h2>How they get built</h2>
+
+        <div class="steps">
+            <div class="step">
+                <h3>We do the work ourselves first</h3>
+                <p>Systems designed without touching the actual task tend not to survive contact with the people who do it.</p>
+            </div>
+            <div class="step">
+                <h3>Build only the worst part, first</h3>
+                <p>Tidying the whole thing comes later. Narrow to the one point with the most bite and there is something to touch within a week.</p>
+            </div>
+            <div class="step">
+                <h3>Put it in front of people and keep fixing</h3>
+                <p>How it actually gets used is rarely what we expected — and that reality is the correct one, so we change our side.</p>
+            </div>
+        </div>
+
+        <p>A general model scores 60 on almost anything. Our job is <strong>95 on one specific scene.</strong></p>
+    </section>
+
+    <div class="chapter" id="start-en">
+        <span class="ch-label">GETTING STARTED</span>
+        <h2>It starts with thirty minutes.</h2>
+        <p class="ch-lead">There is no need to start big.</p>
+    </div>
+
+    <section class="section">
+        <div class="section-num">09</div>
+        <h2>“It's too early for us” — that judgement is the early one.</h2>
+
+        <p>There is no need to rush into adopting AI. But there is a reason to hurry on <strong>looking</strong> at it: what it can and cannot do, where it bites in your work and where it does not. Go a year without knowing that, and the material you make decisions from goes stale with it.</p>
+
+        <div class="pull">Once it has passed you by,<br>the distance you have to close is different.</div>
+
+        <p>We are not asking for a contract or a decision. We are asking to be shown the work.</p>
+    </section>
+
+    <section class="section">
+        <div class="section-num">10</div>
+        <h2>Tell us about your most tedious thirty minutes.</h2>
+
+        <p>We are not looking for a large project. We are looking for the single most annoying half-hour on your floor — the weekly ritual, the task that means opening five documents to reconcile them, the one only a certain person can do.</p>
+
+        <h3>The scenes where it works usually look like this</h3>
+        <ul class="checklist">
+            <li>The same steps are repeated by hand, every single time</li>
+            <li>The material for the decision is scattered — PDFs, paper, the site itself, someone's memory</li>
+            <li>Only one person in the company really knows how it's done</li>
+            <li>There is money attached directly to the decision</li>
+            <li>Whether it was right can be checked afterwards</li>
+        </ul>
+
+        <div class="note-box">
+            <div class="note-label">IF EVEN ONE APPLIES</div>
+            <p>It is worth a conversation. You do not need all five.</p>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-num">11</div>
+        <h2>What happens after you get in touch</h2>
+
+        <p>No instant quote, no instant proposal. The order is always the same.</p>
+
+        <div class="steps">
+            <div class="step">
+                <h3>You show us the work (about 30 minutes)</h3>
+                <p>Don't tidy anything up first. Messy and ordinary is exactly what we want to see.</p>
+            </div>
+            <div class="step">
+                <h3>We tell you whether it bites</h3>
+                <p>How much can be handed over, and where the human has to take it back — with our reasoning, not just a verdict.</p>
+            </div>
+            <div class="step">
+                <h3>If it bites, we build small and try it</h3>
+                <p>Nothing gets designed large before it moves. Build small, put it in front of the people doing the work, fix it the following week.</p>
+            </div>
+        </div>
+
+        <div class="note-box">
+            <div class="note-label">OUR COMMITMENT</div>
+            <p>If, having looked, we think <strong>this one is better off without AI — we will say so.</strong> Recommending something we know won't stick costs us more than it costs you.</p>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-num">12</div>
+        <h2>No preparation required</h2>
+
+        <ul class="points">
+            <li><strong>Don't organise your files.</strong> Anything already tidy is already running on a system. The mess is where the gain is.</li>
+            <li><strong>No AI knowledge needed.</strong> The only thing you need to know is your own work.</li>
+            <li><strong>No internal consensus needed.</strong> Come alone. We'll prepare something you can take back to the others.</li>
+        </ul>
+
+        <p>All you need is <strong>one task you can describe as “this one is a pain.”</strong></p>
+    </section>
+
+    <div class="chapter" id="qa-en">
+        <span class="ch-label">Q&amp;A</span>
+        <h2>Things you might not know</h2>
+        <p class="ch-lead">Not an FAQ — questions that actually came up across a table.</p>
+    </div>
+
+    <section class="section">
+        <p>These are questions that actually came up across a table. The answers are our current position, not industry consensus — <strong>a company standing somewhere else would answer differently.</strong></p>
+
+        <div class="faq">
+            <details>
+                <summary>Q. We're told our industry is too specialised for AI.</summary>
+                <div class="answer">
+                    <p>Usually true — except that <strong>what's specialised is rarely the industry. It's one person inside the company.</strong></p>
+                    <p>If the industry itself were the obstacle, your competitors would be stuck at exactly the same point. They aren't. What's stuck is a procedure that exists only inside one person's head.</p>
+                    <p>So we don't come to ask about the industry. We come to ask <strong>what that person looks at before deciding.</strong></p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Q. Once our competitors use the same AI, doesn't the advantage disappear?</summary>
+                <div class="answer">
+                    <p>Anyone can use the same model. Anyone will eventually be able to buy the same data.</p>
+                    <p><strong>Nobody else has the same record of decisions.</strong></p>
+                    <p>What material, read which way, decided how — and whether it turned out to be right. That accumulation cannot be purchased or copied. If an advantage survives, we think it survives only there.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Q. If we hand work to AI, won't the know-how stop accumulating internally?</summary>
+                <div class="answer">
+                    <p>The opposite happens.</p>
+                    <p>Right now most of your know-how sits inside someone's head, invisible from outside. When they leave, it leaves.</p>
+                    <p>Handing it to an AI requires putting the procedure into words first — and <strong>that act is what turns invisible know-how into an asset the company actually holds.</strong></p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Q. Will there really be a gap in three years between firms that adopted and firms that didn't?</summary>
+                <div class="answer">
+                    <p>The gap isn't between adopting and not adopting. It's between <strong>adopting and not quitting.</strong></p>
+                    <p>Adoption takes a day. Keeping something in use takes a touch every week. We have seen a lot of dashboards that nobody has opened since month six.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Q. How do you measure the result?</summary>
+                <div class="answer">
+                    <p>Honestly — <strong>at the start, you can't.</strong></p>
+                    <p>Measurement becomes possible once a record of decisions exists. So we build the “recorded in a checkable form” part before the measurement part. The metrics follow from it.</p>
+                    <p>If a vendor hands you a precise ROI in the first proposal, <strong>ask where that number came from.</strong></p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Q. There's internal opposition.</summary>
+                <div class="answer">
+                    <p>Opposition usually splits in two: “my job will be taken” and “accountability will get blurry.”</p>
+                    <p>The first is nearly always unfounded. The second is a legitimate objection.</p>
+                    <p>And <strong>the person raising the second one is the person to bring onto your side</strong> — they are thinking harder than anyone about where the line of responsibility should sit.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Q. If the AI gets it wrong, who is accountable?</summary>
+                <div class="answer">
+                    <p>A person. Without exception.</p>
+                    <p>Which is why <strong>we never deliver “the AI's decision.”</strong> We deliver material in a form a person can judge, and we record what they decided — built so that accountability does not move.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Q. Which AI are you using?</summary>
+                <div class="answer">
+                    <p>It depends on the scene — and <strong>it changes.</strong></p>
+                    <p>We don't build anything that depends on one particular model. The best available three years ago is below today's average, and that will keep happening.</p>
+                    <p>Choosing the tool matters far less than <strong>building in a shape that survives the tool being swapped out.</strong></p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Q. Our data is a complete mess.</summary>
+                <div class="answer">
+                    <p>Messy works better.</p>
+                    <p>If it were already tidy, that process would already be running on a system. PDFs, paper scans, handwritten notes, one person's memory — <strong>the most annoying part is the part with the most room to gain.</strong></p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Q. What does it cost?</summary>
+                <div class="answer">
+                    <p>It varies enough by scene that we don't publish a price list. We start by asking to see the work.</p>
+                    <p>And if, having looked, we think <strong>this one is better off without AI — we will say so.</strong> Recommending something we know won't stick costs us more than it costs you.</p>
+                </div>
+            </details>
+        </div>
+    </section>
+    <div class="cta-band">
+        <h3>Start by showing us the work.</h3>
+        <p>One thirty-minute task is enough.<br>If your question isn't here, ask it directly — and if we don't have an answer, we'll say so.</p>
+        <a href="/feedback.html" class="cta-btn">Get in touch</a>
+    </div>
+
+</div>
+
+<script>
+// highlight the section the reader is currently in
+(function () {
+    var links = Array.prototype.slice.call(document.querySelectorAll('.lp-nav a[href^="#"]'));
+    var targets = links.map(function (a) { return document.getElementById(a.getAttribute('href').slice(1)); });
+    function sync() {
+        var line = window.innerHeight * 0.35, current = -1;
+        targets.forEach(function (el, i) {
+            if (el && el.getBoundingClientRect().top <= line) current = i;
+        });
+        links.forEach(function (a, i) { a.classList.toggle('is-active', i === current); });
+    }
+    window.addEventListener('scroll', sync, { passive: true });
+    window.addEventListener('resize', sync);
+    sync();
+})();
+</script>
+<script>
+// かつよ度 self-test: fold open, pick one, confirm -> reveal every result, highlight the reader's
+(function () {
+    Array.prototype.forEach.call(document.querySelectorAll('.quiz'), function (quiz) {
+        var toggle  = quiz.querySelector('.quiz-toggle');
+        var body    = quiz.querySelector('.quiz-body');
+        var submit  = quiz.querySelector('.quiz-submit');
+        var results = quiz.querySelector('.quiz-results');
+        var opts    = Array.prototype.slice.call(quiz.querySelectorAll('.quiz-opt'));
+        var badge   = quiz.getAttribute('data-badge') || '';
+
+        toggle.addEventListener('click', function () {
+            var opening = body.hasAttribute('hidden');
+            if (opening) { body.removeAttribute('hidden'); } else { body.setAttribute('hidden', ''); }
+            toggle.setAttribute('aria-expanded', String(opening));
+        });
+
+        opts.forEach(function (opt) {
+            opt.querySelector('input').addEventListener('change', function () {
+                opts.forEach(function (o) { o.classList.toggle('is-checked', o.querySelector('input').checked); });
+                submit.disabled = false;
+            });
+        });
+
+        submit.addEventListener('click', function () {
+            var picked = quiz.querySelector('.quiz-opt input:checked');
+            if (!picked) return;
+            results.removeAttribute('hidden');
+            Array.prototype.forEach.call(quiz.querySelectorAll('.quiz-result'), function (row) {
+                var mine = row.getAttribute('data-k') === picked.value;
+                row.classList.toggle('is-you', mine);
+                var head = row.querySelector('h4');
+                var old  = head.querySelector('.quiz-badge');
+                if (old) { head.removeChild(old); }
+                if (mine && badge) {
+                    var tag = document.createElement('span');
+                    tag.className = 'quiz-badge';
+                    tag.textContent = badge;
+                    head.appendChild(tag);
+                }
+            });
+        });
+    });
+})();
+</script>
+</body>
+</html>
