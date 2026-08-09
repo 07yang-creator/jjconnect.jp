@@ -280,34 +280,41 @@ body {
 
 /* ---------- pull quote ---------- */
 .pull {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #1A202C;
-    line-height: 1.75;
-    border-left: 4px solid #2B6CB0;
-    padding: 0.5rem 0 0.5rem 1.5rem;
+    font-size: 1.3125rem;
+    font-weight: 600;
+    color: #2D3748;
+    line-height: 2;
+    border-left: 3px solid #2B6CB0;
+    padding: 0.35rem 0 0.35rem 1.35rem;
     margin: 2.5rem 0;
 }
 .pull.amber { border-left-color: #F59E0B; }
 
 .choice {
     text-align: center;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #1A202C;
     line-height: 1.8;
-    background: white;
-    border-radius: 8px;
-    padding: 2.25rem 2rem;
+    background: linear-gradient(135deg, #EBF4FA 0%, #F7FAFC 60%, #FEF6E7 100%);
+    border: 1px solid #BEE3F8;
+    border-radius: 10px;
+    padding: 2.5rem 2rem;
     margin: 2.5rem 0;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 18px rgba(43, 108, 176, 0.10);
 }
 .choice .small {
     display: block;
     font-size: 1rem;
-    font-weight: 400;
-    color: #718096;
-    margin-top: 0.75rem;
+    font-weight: 500;
+    color: #4A5568;
+}
+/* short amber rule between the English line and its Japanese */
+.choice .small::before {
+    content: "";
+    display: block;
+    width: 2.75rem;
+    height: 3px;
+    background: #F59E0B;
+    border-radius: 2px;
+    margin: 1.1rem auto 1rem;
 }
 
 @media (max-width: 768px) {
@@ -317,7 +324,7 @@ body {
     .container { padding: 3rem 1.5rem 4rem; }
     .section h2 { font-size: 1.5rem; }
     .kana-equation { font-size: 1.375rem; }
-    .pull { font-size: 1.1875rem; padding-left: 1.125rem; }
+    .pull { font-size: 1.125rem; padding-left: 1.05rem; }
     .choice { font-size: 1.1875rem; padding: 1.75rem 1.25rem; }
     .cta-band { padding: 2.5rem 1.5rem; }
     .cta-band h3 { font-size: 1.375rem; }
@@ -643,7 +650,7 @@ html { scroll-behavior: smooth; }
     display: block;
     font-size: 2.25rem;
     font-weight: 700;
-    color: #1A202C;
+    color: #2B6CB0;
     line-height: 1.35;
     letter-spacing: 0.01em;
 }
