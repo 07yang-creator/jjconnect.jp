@@ -637,3 +637,16 @@ html { scroll-behavior: smooth; }
 @media (max-width: 900px) {
     .term-pop { left: auto; right: 0; }
 }
+
+/* choice box: English carries the line, Japanese sits under it */
+.choice-main {
+    display: block;
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #1A202C;
+    line-height: 1.35;
+    letter-spacing: 0.01em;
+}
+@media (max-width: 768px) {
+    .choice-main { font-size: 1.625rem; }
+}
