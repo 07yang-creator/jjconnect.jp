@@ -280,14 +280,15 @@ body {
 
 /* ---------- pull quote ---------- */
 .pull {
-    font-size: 1.3125rem;
-    font-weight: 600;
+    font-size: 1.25rem;
+    font-weight: 500;
     color: #2D3748;
-    line-height: 2;
-    border-left: 3px solid #2B6CB0;
-    padding: 0.35rem 0 0.35rem 1.35rem;
+    line-height: 2.05;
+    border-left: 2px solid #2B6CB0;
+    padding: 0.25rem 0 0.25rem 1.25rem;
     margin: 2.5rem 0;
 }
+.pull strong { font-weight: 700; color: #1A202C; }
 .pull.amber { border-left-color: #F59E0B; }
 
 .choice {
@@ -324,7 +325,7 @@ body {
     .container { padding: 3rem 1.5rem 4rem; }
     .section h2 { font-size: 1.5rem; }
     .kana-equation { font-size: 1.375rem; }
-    .pull { font-size: 1.125rem; padding-left: 1.05rem; }
+    .pull { font-size: 1.0625rem; padding-left: 1rem; }
     .choice { font-size: 1.1875rem; padding: 1.75rem 1.25rem; }
     .cta-band { padding: 2.5rem 1.5rem; }
     .cta-band h3 { font-size: 1.375rem; }
@@ -657,3 +658,19 @@ html { scroll-behavior: smooth; }
 @media (max-width: 768px) {
     .choice-main { font-size: 1.625rem; }
 }
+
+/* share-of-users badge on each result */
+.quiz-pct {
+    display: inline-block;
+    margin-left: 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: #2B6CB0;
+    background: #EBF4FA;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    vertical-align: 0.12em;
+    white-space: nowrap;
+}
+.quiz-result.is-you .quiz-pct { background: #2B6CB0; color: #fff; }
