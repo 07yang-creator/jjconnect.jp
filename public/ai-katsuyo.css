@@ -674,3 +674,67 @@ html { scroll-behavior: smooth; }
     white-space: nowrap;
 }
 .quiz-result.is-you .quiz-pct { background: #2B6CB0; color: #fff; }
+
+/* ================= statement → click for the answer ================= */
+.stmt-set { margin: 3.5rem 0; }
+.stmt-intro { font-size: 1.0625rem; color: #4A5568; margin-bottom: 1.25rem; }
+.stmt {
+    background: white;
+    border: 1px solid #E2E8F0;
+    border-left: 3px solid #F59E0B;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+.stmt summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 1.35rem 3.25rem 1.35rem 1.5rem;
+    position: relative;
+}
+.stmt summary::-webkit-details-marker { display: none; }
+.stmt summary:hover { background: #FFFCF5; }
+.stmt summary::after {
+    content: "＋";
+    position: absolute;
+    right: 1.5rem;
+    top: 1.35rem;
+    color: #B7791F;
+    font-weight: 700;
+}
+.stmt[open] summary::after { content: "－"; }
+.stmt-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #B7791F;
+    margin-bottom: 0.45rem;
+}
+.stmt-q { display: block; font-size: 1.125rem; font-weight: 700; color: #1A202C; line-height: 1.75; }
+.stmt-cue { display: block; margin-top: 0.55rem; font-size: 0.875rem; font-weight: 600; color: #2B6CB0; }
+.stmt[open] .stmt-cue { display: none; }
+
+.stmt-a { padding: 0 1.5rem 1.6rem; }
+.stmt-verdict { font-size: 1.0625rem; font-weight: 700; color: #1A202C; margin-bottom: 1rem; }
+.stmt-a p { font-size: 1rem; color: #4A5568; margin-bottom: 0.9rem; line-height: 1.9; }
+.stmt-a ol { margin: 1.1rem 0 0 1.35rem; }
+.stmt-a li { font-size: 1rem; color: #4A5568; line-height: 1.9; margin-bottom: 1rem; }
+.stmt-a li:last-child { margin-bottom: 0; }
+.stmt-a li strong { color: #1A202C; }
+.stmt-cmd {
+    display: block;
+    background: #1A202C;
+    color: #E2E8F0;
+    border-radius: 6px;
+    padding: 0.9rem 1.15rem;
+    margin-top: 0.7rem;
+    font-size: 0.9375rem;
+    line-height: 1.85;
+}
+
+@media (max-width: 768px) {
+    .stmt summary { padding: 1.15rem 2.75rem 1.15rem 1.15rem; }
+    .stmt-q { font-size: 1.0625rem; }
+    .stmt-a { padding: 0 1.15rem 1.25rem; }
+}
