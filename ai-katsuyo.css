@@ -738,3 +738,46 @@ html { scroll-behavior: smooth; }
     .stmt-q { font-size: 1.0625rem; }
     .stmt-a { padding: 0 1.15rem 1.25rem; }
 }
+
+/* ================= front-page teaser ================= */
+.katsuyo-teaser {
+    background: #F7FAFC;
+    border-top: 1px solid #E2E8F0;
+    padding: 4.5rem 0 5rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+    font-size: 16px;
+    line-height: 1.9;
+    color: #1A202C;
+}
+.katsuyo-teaser .container { padding: 0 2rem; }
+.katsuyo-teaser .chapter:first-of-type { margin-top: 0; }
+.katsuyo-teaser .section:last-of-type { margin-bottom: 0; }
+.katsuyo-more { text-align: center; margin-top: 3.5rem; }
+.katsuyo-more a {
+    display: inline-block;
+    padding: 0.95rem 2.75rem;
+    background: #2B6CB0;
+    color: #fff;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 1.0625rem;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+.katsuyo-more a:hover {
+    background: #215387;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(43,108,176,0.28);
+}
+.katsuyo-more .katsuyo-more-note {
+    display: block;
+    margin-top: 0.9rem;
+    font-size: 0.9375rem;
+    color: #718096;
+}
+@media (max-width: 768px) {
+    .katsuyo-teaser { padding: 3rem 0 3.5rem; }
+    .katsuyo-teaser .container { padding: 0 1.25rem; }
+    .katsuyo-more a { width: 100%; }
+}

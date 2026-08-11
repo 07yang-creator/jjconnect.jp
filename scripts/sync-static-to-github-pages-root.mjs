@@ -69,6 +69,7 @@ const pairs = [
   ['public/ai.html', 'ai.html'],
   ['public/ai-katsuyo.html', 'ai-katsuyo.html'],
   ['public/ai-katsuyo.css', 'ai-katsuyo.css'],
+  ['public/ai-katsuyo.js', 'ai-katsuyo.js'],
   ['public/feedback.html', 'feedback.html'],
   ['public/backend-status.html', 'backend-status.html'],
   ['public/joint-mamori-submission.html', 'joint-mamori-submission.html'],
