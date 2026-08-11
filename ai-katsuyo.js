@@ -41,3 +41,22 @@
         });
     });
 })();
+
+// in-page nav: highlight the section the reader is currently in.
+// no-ops on pages without an .lp-nav (e.g. the front-page teaser)
+(function () {
+    var nav = document.querySelector('.lp-nav');
+    if (!nav) { return; }
+    var links = Array.prototype.slice.call(nav.querySelectorAll('a[href^="#"]'));
+    var targets = links.map(function (a) { return document.getElementById(a.getAttribute('href').slice(1)); });
+    function sync() {
+        var line = window.innerHeight * 0.35, current = -1;
+        targets.forEach(function (el, i) {
+            if (el && el.getBoundingClientRect().top <= line) { current = i; }
+        });
+        links.forEach(function (a, i) { a.classList.toggle('is-active', i === current); });
+    }
+    window.addEventListener('scroll', sync, { passive: true });
+    window.addEventListener('resize', sync);
+    sync();
+})();

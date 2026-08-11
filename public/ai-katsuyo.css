@@ -86,26 +86,6 @@ body {
     padding-bottom: 1px;
 }
 
-/* ---------- kana callout ---------- */
-.kana-card {
-    background: white;
-    border-left: 4px solid #F59E0B;
-    border-radius: 6px;
-    padding: 2rem 2rem 1.75rem;
-    margin: 2rem 0;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-}
-.kana-equation {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #1A202C;
-    margin-bottom: 1rem;
-    letter-spacing: 0.04em;
-}
-.kana-equation .kana { color: #F59E0B; }
-.kana-card p { margin-bottom: 0.75rem; }
-.kana-card p:last-child { margin-bottom: 0; }
-
 /* ---------- app cards ---------- */
 .app-cards {
     display: grid;
@@ -263,21 +243,6 @@ body {
     text-align: center;
 }
 
-.back-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    background: #2B6CB0;
-    color: white;
-    text-decoration: none;
-    border-radius: 8px;
-    font-weight: 600;
-    transition: all 0.2s;
-    margin-top: 1rem;
-}
-.back-btn:hover { background: #215387; transform: translateY(-1px); }
-
 /* ---------- pull quote ---------- */
 .pull {
     font-size: 1.25rem;
@@ -324,8 +289,7 @@ body {
     .hero .lead { font-size: 1.125rem; }
     .container { padding: 3rem 1.5rem 4rem; }
     .section h2 { font-size: 1.5rem; }
-    .kana-equation { font-size: 1.375rem; }
-    .pull { font-size: 1.0625rem; padding-left: 1rem; }
+        .pull { font-size: 1.0625rem; padding-left: 1rem; }
     .choice { font-size: 1.1875rem; padding: 1.75rem 1.25rem; }
     .cta-band { padding: 2.5rem 1.5rem; }
     .cta-band h3 { font-size: 1.375rem; }
@@ -364,43 +328,6 @@ body {
 @media (max-width: 768px) {
     .step { padding: 1.25rem 1.25rem 1.25rem 3.75rem; }
     .step::before { left: 1rem; top: 1.25rem; }
-}
-
-/* ---------- prev / next pager ---------- */
-.pager {
-    display: flex;
-    gap: 1rem;
-    margin-top: 3.5rem;
-    padding-top: 2rem;
-    border-top: 1px solid #E2E8F0;
-}
-.pager a {
-    flex: 1 1 0;
-    display: block;
-    background: white;
-    border-radius: 8px;
-    padding: 1.25rem 1.5rem;
-    text-decoration: none;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-.pager a:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0,0,0,0.1); }
-.pager .spacer { flex: 1 1 0; }
-.pager .dir {
-    display: block;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    color: #718096;
-    margin-bottom: 0.35rem;
-}
-.pager .ttl { display: block; font-size: 1.0625rem; font-weight: 700; color: #2B6CB0; }
-.pager .next { text-align: right; }
-
-@media (max-width: 768px) {
-    .pager { flex-direction: column; }
-    .pager .next { text-align: left; }
-    .pager .spacer { display: none; }
 }
 
 /* ================= single-page LP components ================= */
@@ -743,14 +670,14 @@ html { scroll-behavior: smooth; }
 .katsuyo-teaser {
     background: #F7FAFC;
     border-top: 1px solid #E2E8F0;
-    padding: 4.5rem 0 5rem;
+    padding: 0 0 5rem;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
                  "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
     font-size: 16px;
     line-height: 1.9;
     color: #1A202C;
 }
-.katsuyo-teaser .container { padding: 0 2rem; }
+.katsuyo-teaser .container { padding: 4rem 2rem 0; }
 .katsuyo-teaser .chapter:first-of-type { margin-top: 0; }
 .katsuyo-teaser .section:last-of-type { margin-bottom: 0; }
 .katsuyo-more { text-align: center; margin-top: 3.5rem; }
@@ -777,7 +704,7 @@ html { scroll-behavior: smooth; }
     color: #718096;
 }
 @media (max-width: 768px) {
-    .katsuyo-teaser { padding: 3rem 0 3.5rem; }
-    .katsuyo-teaser .container { padding: 0 1.25rem; }
+    .katsuyo-teaser { padding: 0 0 3.5rem; }
+    .katsuyo-teaser .container { padding: 2.5rem 1.25rem 0; }
     .katsuyo-more a { width: 100%; }
 }
