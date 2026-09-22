@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>日语接续表达 100题</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EEF2EF; --card:#FBFCFA; --ink:#1C2A30; --sub:#5B6B70; --rule:#CFD8D3;
+  --ai:#27466F; --ai-soft:#DCE5F0; --shu:#C23B2A; --shu-soft:#F6DED9; --midori:#2C7652; --midori-soft:#D9ECE1;
+  --l1:#7FA88C; --l2:#5E9AA6; --l3:#4F76A8; --l4:#6B5CA0; --l5:#8E3F5E;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#151C1F; --card:#1D262A; --ink:#E4EAE7; --sub:#98A7A3; --rule:#33413F;
+  --ai:#8FB0DC; --ai-soft:#24344A; --shu:#E9776A; --shu-soft:#452521; --midori:#6FC39A; --midori-soft:#1F3A2C;
+}}
+:root[data-theme="dark"]{
+  --paper:#151C1F; --card:#1D262A; --ink:#E4EAE7; --sub:#98A7A3; --rule:#33413F;
+  --ai:#8FB0DC; --ai-soft:#24344A; --shu:#E9776A; --shu-soft:#452521; --midori:#6FC39A; --midori-soft:#1F3A2C;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;font-size:15px;line-height:1.6}
+[lang=ja],.ja{font-family:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:24px 18px 48px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+h1{margin:0;font-size:26px;line-height:1.2;font-weight:700;letter-spacing:.02em}
+h1 small{display:block;font-size:13px;font-weight:400;color:var(--sub);letter-spacing:0;margin-top:4px}
+.score{text-align:right;font-size:13px;color:var(--sub)}
+.score b{font-size:24px;color:var(--ink);font-weight:700}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tabs button{border:1px solid var(--rule);background:transparent;color:var(--ink);font:inherit;font-size:13px;padding:5px 12px;border-radius:999px;cursor:pointer}
+.tabs button[aria-pressed=true]{background:var(--ai);border-color:var(--ai);color:var(--card)}
+.grid{display:grid;grid-template-columns:repeat(20,1fr);gap:3px;margin-bottom:20px}
+.grid button{aspect-ratio:1;border:0;border-radius:3px;cursor:pointer;padding:0;font-size:9px;color:transparent;background:var(--rule);position:relative}
+.grid button.lv1{box-shadow:inset 0 -3px 0 var(--l1)}.grid button.lv2{box-shadow:inset 0 -3px 0 var(--l2)}.grid button.lv3{box-shadow:inset 0 -3px 0 var(--l3)}.grid button.lv4{box-shadow:inset 0 -3px 0 var(--l4)}.grid button.lv5{box-shadow:inset 0 -3px 0 var(--l5)}
+.grid button.ok{background:var(--midori)}.grid button.ng{background:var(--shu)}
+.grid button.cur{outline:2px solid var(--ink);outline-offset:1px}
+.grid button.dim{opacity:.25}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:22px 22px 18px;position:relative;overflow:hidden}
+.meta{display:flex;justify-content:space-between;font-size:13px;color:var(--sub);margin-bottom:14px}
+.lvtag{display:inline-flex;align-items:center;gap:6px}
+.lvtag i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.stem{font-size:21px;line-height:1.75;margin:0 0 18px;padding-right:104px;font-weight:500;min-height:2em}
+.stem .blank{display:inline-block;min-width:3.2em;border-bottom:2px solid var(--ai);text-align:center;color:var(--ai);font-weight:700;padding:0 4px}
+.opts{display:grid;gap:8px}
+.opt{display:flex;align-items:center;gap:12px;text-align:left;width:100%;font:inherit;font-size:17px;color:var(--ink);background:transparent;border:1.5px solid var(--rule);border-radius:8px;padding:10px 14px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--ai)}
+.opt .k{flex:none;width:24px;height:24px;border-radius:50%;border:1px solid var(--rule);display:grid;place-items:center;font-size:12px;color:var(--sub);font-family:"Noto Sans SC",sans-serif}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--midori);background:var(--midori-soft)}
+.opt.right .k{background:var(--midori);border-color:var(--midori);color:var(--card)}
+.opt.wrong{border-color:var(--shu);background:var(--shu-soft)}
+.opt.wrong .k{background:var(--shu);border-color:var(--shu);color:var(--card)}
+.opt.long{font-size:15px}
+.stamp{position:absolute;right:18px;top:40px;width:96px;height:96px;border-radius:50%;border:5px solid currentColor;display:grid;place-items:center;font-size:30px;font-weight:700;line-height:1;letter-spacing:.02em;opacity:0;transform:scale(1.6) rotate(-14deg);pointer-events:none;font-family:"Zen Kaku Gothic New",sans-serif}
+.stamp.show{opacity:.85;transform:scale(1) rotate(-14deg);transition:transform .22s cubic-bezier(.3,1.6,.5,1),opacity .15s}
+.stamp.ok{color:var(--midori)}.stamp.ng{color:var(--shu);border-radius:10px}
+.exp{margin-top:16px;padding:12px 14px;border-left:3px solid var(--ai);background:var(--ai-soft);border-radius:0 6px 6px 0;font-size:14px}
+.exp[hidden]{display:none}
+.exp .ans{font-weight:700;margin-bottom:2px}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px}
+.nav button{white-space:nowrap;font:inherit;font-size:14px;padding:8px 18px;border-radius:8px;cursor:pointer;border:1px solid var(--rule);background:var(--card);color:var(--ink)}
+.nav .primary{background:var(--ai);border-color:var(--ai);color:var(--card);font-weight:500}
+.nav button:disabled{opacity:.4;cursor:default}
+.hint{font-size:12px;color:var(--sub);text-align:center}
+.result{margin-top:22px}
+.result h2{font-size:18px;margin:0 0 10px}
+.bars{display:grid;gap:8px}
+.bar{display:grid;grid-template-columns:5.5em 1fr 4.5em;align-items:center;gap:10px;font-size:13px}
+.bar .t{height:10px;background:var(--rule);border-radius:5px;overflow:hidden}
+.bar .t span{display:block;height:100%}
+.foot{display:flex;justify-content:space-between;margin-top:26px;font-size:12px;color:var(--sub);gap:12px;flex-wrap:wrap}
+.foot button{font:inherit;font-size:12px;background:none;border:0;color:var(--shu);cursor:pointer;padding:0;text-decoration:underline}
+button:focus-visible{outline:2px solid var(--ai);outline-offset:2px}
+
+.modes{display:inline-flex;border:1.5px solid var(--ai);border-radius:8px;overflow:hidden;margin-bottom:14px}
+.modes button{font:inherit;font-size:14px;padding:7px 20px;border:0;background:transparent;color:var(--ai);cursor:pointer}
+.modes button[aria-pressed=true]{background:var(--ai);color:var(--card);font-weight:500}
+.setup h2,.report h2{font-size:18px;margin:0 0 4px}
+.setup p{margin:0 0 16px;color:var(--sub);font-size:14px}
+.row{margin-bottom:16px}.row .lab{font-size:13px;color:var(--sub);margin-bottom:6px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{border:1px solid var(--rule);background:transparent;color:var(--ink);font:inherit;font-size:13px;padding:6px 14px;border-radius:999px;cursor:pointer}
+.chips button[aria-pressed=true]{background:var(--ai);border-color:var(--ai);color:var(--card)}
+.big{font:inherit;font-size:16px;font-weight:500;padding:11px 28px;border-radius:8px;border:0;background:var(--ai);color:var(--card);cursor:pointer}
+.big.ghost{background:transparent;color:var(--ai);border:1.5px solid var(--ai)}
+.grid button.sel{background:var(--ai)}
+.opt.picked{border-color:var(--ai);background:var(--ai-soft)}
+.opt.picked .k{background:var(--ai);border-color:var(--ai);color:var(--card)}
+.exambar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;font-size:14px;color:var(--sub)}
+.exambar b{color:var(--ink);font-variant-numeric:tabular-nums}
+.submit{font:inherit;font-size:14px;font-weight:500;padding:8px 18px;border-radius:8px;border:1.5px solid var(--shu);background:transparent;color:var(--shu);cursor:pointer;white-space:nowrap}
+.report .top{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin:10px 0 18px}
+.report .pts{font-size:64px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.report .pts small{font-size:20px;color:var(--sub);font-weight:400}
+.report .grade{display:inline-grid;place-items:center;width:84px;height:84px;border:4px solid currentColor;border-radius:50%;font-size:22px;font-weight:700;transform:rotate(-12deg);font-family:"Zen Kaku Gothic New",sans-serif}
+.report .facts{font-size:14px;color:var(--sub);line-height:1.9}
+.report .facts b{color:var(--ink)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 6px}
+.wrongs{margin-top:22px}
+.wrongs h3{font-size:16px;margin:0 0 10px}
+.w{border-top:1px solid var(--rule);padding:12px 0}
+.w .s{font-size:16px;margin-bottom:4px}
+.w .s .blank{border-bottom:2px solid var(--midori);color:var(--midori);font-weight:700;padding:0 4px}
+.w .yo{font-size:13px}.w .yo .x{color:var(--shu);font-weight:500}.w .yo .o{color:var(--midori);font-weight:500}
+.w .e{font-size:13px;color:var(--sub);margin-top:2px}
+.perfect{padding:14px;background:var(--midori-soft);border-radius:8px;color:var(--midori);font-weight:500}
+[hidden]{display:none!important}
+@media (max-width:560px){
+  .report .pts{font-size:48px}
+  .grid{grid-template-columns:repeat(10,1fr)}
+  .stem{font-size:18px;padding-right:74px}.hint{display:none}.opt{font-size:16px}
+  .stamp{width:70px;height:70px;font-size:22px;top:34px;right:12px;border-width:4px}
+  .card{padding:18px 16px 16px}
+}
+@media (prefers-reduced-motion:reduce){.stamp.show{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>日语接续表达 100题<small>从入门到高级，五个难度递进。练习模式即时判题，考试模式交卷后自动评分。</small></h1>
+  <div class="score" id="scorebox"><b id="sc">0</b> / <span id="done">0</span> 答对<br>已完成 <span id="pct">0</span>%</div>
+</header>
+<div class="modes" role="group" aria-label="模式"><button id="mP">练习模式</button><button id="mE">考试模式</button></div>
+
+<section id="practice">
+<div class="tabs" id="tabs" role="group" aria-label="难度筛选"></div>
+<div class="grid" id="grid" aria-label="题目导航"></div>
+<main class="card" id="card">
+  <div class="meta"><span class="lvtag" id="lv"></span><span id="no"></span></div>
+  <p class="stem ja" id="stem" lang="ja"></p>
+  <div class="opts" id="opts"></div>
+  <div class="stamp" id="stamp" aria-hidden="true"></div>
+  <div class="exp" id="exp" hidden><div class="ans" id="ans"></div><div id="why"></div></div>
+  <div class="nav">
+    <button id="prev">上一题</button>
+    <span class="hint">键盘 1–4 选择，← → 翻页</span>
+    <button id="next" class="primary">下一题</button>
+  </div>
+</main>
+<section class="result" id="result"></section>
+<div class="foot"><span>题号颜色：灰＝未答　绿＝答对　红＝答错；下方色条表示难度。</span><button id="reset">清空练习记录</button></div>
+</section>
+
+<section id="exam" hidden>
+  <div class="card setup" id="setup">
+    <h2>开始一场测验</h2>
+    <p>作答过程中不显示对错，交卷后自动评分，并列出错题解析。</p>
+    <div class="row"><div class="lab">出题范围</div><div class="chips" id="cRange"></div></div>
+    <div class="row"><div class="lab">题数（随机抽取，按难度由易到难排列）</div><div class="chips" id="cCount"></div></div>
+    <button class="big" id="startBtn">开始测验</button>
+  </div>
+  <div id="running" hidden>
+    <div class="exambar"><span>已答 <b id="eDone">0</b> / <b id="eTot">0</b>　用时 <b id="eTime">00:00</b></span><button class="submit" id="submitBtn">交卷评分</button></div>
+    <div class="grid" id="eGrid" aria-label="测验题目导航"></div>
+    <main class="card">
+      <div class="meta"><span class="lvtag" id="eLv"></span><span id="eNo"></span></div>
+      <p class="stem ja" id="eStem" lang="ja" style="padding-right:0"></p>
+      <div class="opts" id="eOpts"></div>
+      <div class="nav">
+        <button id="ePrev">上一题</button>
+        <span class="hint">可随时返回修改答案</span>
+        <button id="eNext" class="primary">下一题</button>
+      </div>
+    </main>
+  </div>
+  <div class="card report" id="report" hidden></div>
+</section>
+</div>
+<script>
+const Q = [
+// ===== 1 入门 =====
+[1,"机の上に本（　）ペンがあります。",["と","が","を","に"],"「と」连接名词，把项目全部列举出来。"],
+[1,"この部屋は広く（　）明るいです。",["て","で","に","と"],"い形容词「広い」的て形是「広くて」，用于并列两个性质。"],
+[1,"雨が降っています。（　）、傘を持って行きます。",["だから","でも","それとも","ところで"],"前句是原因，后句是结果，用「だから」。"],
+[1,"日本語は難しいです。（　）、おもしろいです。",["でも","だから","それから","それとも"],"前后意思相反（难↔有趣），用口语转折「でも」。"],
+[1,"朝ご飯を食べ（　）、学校へ行きます。",["て","に","を","や"],"动词て形表示动作先后：吃完早饭，然后去学校。"],
+[1,"コーヒー（　）紅茶、どちらがいいですか。",["と","や","も","を"],"「AとB、どちらが～」是二选一提问的固定句型。"],
+[1,"時間がない（　）、タクシーで行きましょう。",["から","のに","けど","ても"],"后句是劝诱（～ましょう），表示理由用「から」。"],
+[1,"駅で切符を買いました。（　）、電車に乗りました。",["それから","でも","それとも","だって"],"叙述动作先后「然后」，用「それから」。"],
+[1,"歩いて行きますか。（　）、バスで行きますか。",["それとも","それから","だから","そして"],"疑问句中二选一「还是」，只能用「それとも」。"],
+[1,"この店は料理がおいしい（　）、値段も安い。",["し","のに","けど","ても"],"「～し、～も」罗列优点；后句的「も」是提示。"],
+[1,"休みの日は本を読ん（　）、映画を見たりします。",["だり","で","だら","でも"],"「～たり～たりする」举例列举动作；「読む」变为「読んだり」。"],
+[1,"疲れました（　）、まだ宿題が終わっていません。",["が","ので","から","と"],"前后逆接，接续助词「が」表示「但是」。"],
+[1,"春になる（　）、桜が咲きます。",["と","ので","のに","けど"],"「と」表示自然规律「一……就必然……」。"],
+[1,"暑い（　）、窓を開けてください。",["ので","のに","けど","ても"],"后句是请求，理由用「ので」，比「から」更委婉。"],
+[1,"もし明日雨が降っ（　）、試合は中止です。",["たら","ても","て","たり"],"「もし～たら」表示假设条件「如果……的话」。"],
+[1,"音楽を聞き（　）、勉強します。",["ながら","たら","ても","てから"],"ます形词干＋「ながら」表示同时进行「一边……一边」。"],
+[1,"寝る（　）、歯を磨きます。",["前に","後で","ながら","うちに"],"动词辞书形＋「前に」表示「……之前」。「後で」须接た形。"],
+[1,"兄（　）弟も医者です。",["も","と","や","か"],"「AもBも」表示「A和B都……」。"],
+[1,"仕事が終わっ（　）、飲みに行きましょう。",["てから","ながら","たり","ても"],"「～てから」强调先后顺序「……之后再……」。"],
+[1,"コーヒー（　）紅茶を選んでください。",["か","も","の","に"],"「AかB」表示选择「A或B」。"],
+// ===== 2 初级 =====
+[2,"約束した（　）、彼は来なかった。",["のに","ので","から","し"],"「のに」表示「明明……却」，带不满或意外。"],
+[2,"雨が降っ（　）、試合は行います。",["ても","たら","て","ので"],"「～ても」表示让步「即使……也」。"],
+[2,"電車が止まりました。（　）、会社に遅刻しました。",["それで","それとも","でも","ところで"],"叙述前因后果「所以」，用「それで」。"],
+[2,"「今日は暑いですね。」「ええ。（　）、来週の旅行はどうなりましたか。」",["ところで","だから","それに","それで"],"转换话题「对了／话说」用「ところで」。"],
+[2,"京都に行く（　）、金閣寺がおすすめですよ。",["なら","と","ば","ても"],"以对方的话题为前提提建议，用「なら」。「と」后句不能接建议。"],
+[2,"安けれ（　）、買います。",["ば","たら","と","なら"],"い形容词假定形「安ければ」。空前已是「安けれ」，只能接「ば」。"],
+[2,"よく聞こえる（　）、前の席に座った。",["ように","ために","のに","けど"],"「聞こえる」是非意志动词，表目的要用「ように」，不能用「ために」。"],
+[2,"留学する（　）、お金を貯めています。",["ために","ように","のに","ながら"],"意志动词「留学する」表目的用「ために」。"],
+[2,"ドアを開ける（　）、猫がいました。",["と","ば","なら","ても"],"「～と、～た」表示动作后的意外发现。"],
+[2,"「明日は休みです。」「（　）、ゆっくり休んでください。」",["それなら","それとも","それに","それでも"],"承接对方的话「那样的话」，用「それなら」。"],
+[2,"牛乳を買ってきて。（　）、パンもお願い。",["それから","それとも","だから","でも"],"口语中补充追加「还有」，用「それから」。"],
+[2,"急が（　）、間に合わないよ。",["ないと","ないで","ないのに","ないながら"],"「～ないと」表示「不……的话就……」，常用于提醒。"],
+[2,"渋滞の（　）、会議に遅れてしまった。",["せいで","おかげで","くせに","ように"],"坏结果的原因用「せいで」（都怪）；好结果才用「おかげで」。"],
+[2,"体調が悪い（　）、今日は休ませていただけませんか。",["ので","のに","くせに","ても"],"郑重请求的理由，用客观委婉的「ので」。"],
+[2,"毎日練習した。（　）、優勝できた。",["その結果","それとも","ところが","ただし"],"「その結果」引出努力带来的结果。"],
+[2,"入場は無料です。（　）、予約が必要です。",["ただし","だから","それに","そこで"],"「ただし」补充条件或例外「但是（须）」，公告常用。"],
+[2,"ボタンを押した。（　）、ドアが開いた。",["すると","それとも","だって","ところで"],"「すると」表示前一动作之后随即发生的事。"],
+[2,"晴れると思った。（　）、大雨になった。",["ところが","そこで","それに","それで"],"「ところが」表示结果出乎意料「然而」。"],
+[2,"彼は仕事が速い。（　）、正確だ。",["しかも","ところが","それとも","だから"],"「しかも」表示递进「而且还」。"],
+[2,"温かい（　）食べてください。",["うちに","あいだ","まえに","あとで"],"「～うちに」表示「趁……（状态还在时）」。"],
+// ===== 3 中级 =====
+[3,"何度も失敗した。（　）、彼は諦めなかった。",["それでも","それで","そこで","すると"],"「それでも」表示「尽管如此（仍然）」。"],
+[3,"資金が足りない。（　）、銀行に相談することにした。",["そこで","ところが","それでも","ただし"],"「そこで」表示针对前面状况而采取的行动「于是」。"],
+[3,"彼を推薦します。（　）、経験が豊富だからです。",["なぜなら","したがって","それで","すると"],"先说结论后补理由，「なぜなら～からだ」呼应。"],
+[3,"彼は父の弟、（　）私の叔父だ。",["つまり","しかし","それとも","ところで"],"「つまり」表示换言「也就是说」。"],
+[3,"会議は10時開始です。（　）、資料は当日配布します。",["なお","しかし","それとも","したがって"],"「なお」用于补充说明、附注，书面・通知常用。"],
+[3,"知っている（　）、教えてくれない。",["くせに","ために","ように","ので"],"「くせに」表示责难「明明……却」，带贬义。"],
+[3,"詳細が分かり（　）、ご連絡いたします。",["次第","とたん","うちに","前に"],"ます形词干＋「次第」表示「一……就立刻」，商务常用。"],
+[3,"ドアを開けた（　）、猫が飛び出した。",["とたん","次第","うちに","ながら"],"た形＋「とたん（に）」表示「刚一……就（突然）」。"],
+[3,"彼は日本語（　）、英語も話せる。",["だけでなく","に対して","によって","にしては"],"「～だけでなく～も」表示「不仅……也」。"],
+[3,"この店は安い（　）、量も多い。",["上に","くせに","ものの","限り"],"「～上に」表示分句级递进「不但……还」。"],
+[3,"兄は活発な（　）、弟は静かだ。",["のに対して","のおかげで","のために","ように"],"「～のに対して」表示两者对比。"],
+[3,"去年（　）、今年は売上が伸びた。",["に比べて","にとって","について","によって"],"「～に比べて」表示比较「与……相比」。"],
+[3,"地震（　）、道路が通行止めになった。",["により","に対して","にとって","について"],"「～により」表示客观原因，书面・新闻常用。"],
+[3,"注意したら、（　）怒られてしまった。",["逆に","特に","例えば","実は"],"「逆に」表示结果与预期相反「反而」。"],
+[3,"「返事がないね。」「（　）、断られたのかな。」",["ということは","ところで","それとも","さて"],"「ということは」根据前面事实进行推断。"],
+[3,"薬を飲んでも治らない。（　）、悪化してしまった。",["それどころか","それなのに","それとも","それで"],"「それどころか」表示「岂止如此，反而更……」。"],
+[3,"参加した（　）、何も発言しなかった。",["ものの","ので","うえに","からには"],"「～ものの」表示书面转折「虽然……但」。"],
+[3,"悪天候（　）、多くの人が集まった。",["にもかかわらず","のおかげで","によって","に比べて"],"「～にもかかわらず」表示「尽管……（仍然）」。"],
+[3,"便利だ。（　）、費用が高すぎる。",["とはいえ","したがって","すなわち","そこで"],"「とはいえ」表示「话虽如此」，承认前句再转折。"],
+[3,"努力する（　）、チャンスはある。",["限り","くせに","ものの","とたん"],"「～限り」表示条件范围「只要……就」。"],
+// ===== 4 中高级 =====
+[4,"薬（　）飲めば、すぐ治りますよ。",["さえ","こそ","まで","しか"],"「～さえ～ば」强调唯一条件「只要……就」。"],
+[4,"今すぐ出発しなさい。（　）、間に合わないよ。",["さもないと","それなら","そうすれば","それでは"],"「さもないと」表示「否则」。「そうすれば」后应接好结果。"],
+[4,"引っ越す（　）、どこがいいと思う？",["としたら","ものの","くせに","上に"],"「～としたら」表示假设「假如……的话」。"],
+[4,"申込書には氏名（　）住所を記入してください。",["および","または","それとも","ただし"],"两项都要填写，用书面并列「および」。"],
+[4,"安全（　）迅速に処理する。",["かつ","または","ないし","ところが"],"「かつ」表示两个条件同时满足「且」。"],
+[4,"電話（　）メールでご連絡ください。",["または","および","かつ","それとも"],"二者择一的书面表达用「または」；「それとも」只用于疑问句。"],
+[4,"都市の人口は増えている。（　）、地方は減少している。",["一方","そのうえ","したがって","すなわち"],"「一方」表示对比「另一方面」。"],
+[4,"行く（　）行かない（　）、早く決めてほしい。",["にしろ","として","にとって","による"],"「AにしろBにしろ」表示「无论A还是B」。"],
+[4,"話が長くなったけど、（　）、お金が足りないということだね。",["要するに","ところで","そういえば","さて"],"「要するに」归纳总结「总而言之」。"],
+[4,"改善が必要だ。（　）、納期の短縮とコストの削減だ。",["具体的には","それとも","ところが","ちなみに"],"「具体的には」把抽象内容具体化。"],
+[4,"彼は優秀だ。（　）、欠点がないわけではない。",["もっとも","したがって","すなわち","そのうえ"],"「もっとも」补充限定「不过」，部分修正前句。"],
+[4,"条件を満たしていない。（　）、申請は認められない。",["したがって","ところが","もっとも","それとも"],"「したがって」表示逻辑推论「因此」，正式文体。"],
+[4,"台風が接近している。（　）、全便欠航となった。",["そのため","それなのに","ところが","それとも"],"「そのため」表示客观原因导致的结果「因此」。"],
+[4,"知ってい（　）、黙っていた。",["ながら","ものの","くせで","うえで"],"「～ていながら」表示逆接「明知……却」。「ものの」须接「知っていたものの」。"],
+[4,"語学力（　）、交渉力も求められる。",["に加えて","に対して","に比べて","にとって"],"「～に加えて」表示「除……之外还」。"],
+[4,"彼は国内（　）、海外でも高く評価されている。",["のみならず","に反して","をめぐって","にかけては"],"「～のみならず」书面递进「不仅……而且」。"],
+[4,"「どうして食べないの？」「（　）、嫌いなんだもん。」",["だって","だから","それで","すると"],"「だって～もん」口语辩解「因为嘛」。"],
+[4,"冗談は（　）、本題に入りましょう。",["さておき","ともなく","ところで","いずれにせよ"],"「～はさておき」表示「先不说……」，拉回正题。"],
+[4,"行くかどうかはまだ分からないが、（　）、準備だけはしておこう。",["いずれにせよ","それとも","したがって","すなわち"],"「いずれにせよ」表示「无论如何」，收束结论。"],
+[4,"顧客第一とは、（　）、売上より信頼を優先するということだ。",["言い換えれば","それにもかかわらず","それどころか","そういえば"],"「言い換えれば」表示「换言之」。"],
+// ===== 5 高级 =====
+[5,"証拠が不十分である。（　）、被告人を無罪とする。",["よって","ところが","もっとも","ちなみに"],"「よって」是判决书、证书中表示结论的「故」。"],
+[5,"本件は、役員（　）従業員に通知する。",["ならびに","ないし","もしくは","かつ"],"「ならびに」书面并列「以及」；「ないし」「もしくは」表示选择。"],
+[5,"法令文で二段階の並列を表すとき：「理事及び監事（　）職員」",["並びに","及び","又は","若しくは"],"法令中小的并列用「及び」，更大一级的并列用「並びに」。"],
+[5,"法令文で二段階の選択を表すとき：「甲若しくは乙（　）丙」",["又は","若しくは","及び","並びに"],"法令中小的选择用「若しくは」，更大一级的选择用「又は」。"],
+[5,"納品まで三日（　）五日程度かかる見込みです。",["ないし","および","かつ","ならびに"],"「AないしB」表示范围「A乃至B」。"],
+[5,"目標を達成す（　）、全力を尽くす。",["べく","べき","べし","べからず"],"「～べく」表示目的「为了」，硬质书面语；「する」可接成「すべく」。"],
+[5,"手続きには印鑑（　）署名が必要です。",["もしくは","かつ","ならびに","それとも"],"「もしくは」书面・公文表示选择「或者」。"],
+[5,"本件については、別途ご案内いたします。（　）、ご不明な点は担当者までお問い合わせください。",["なお","しかしながら","それどころか","さもないと"],"商务邮件中「なお」引出附加事项。"],
+[5,"景気は回復傾向にある。（　）、中小企業の資金繰りは依然として厳しい。",["しかしながら","したがって","すなわち","そのうえ"],"「しかしながら」是「しかし」更正式的形式。"],
+[5,"突然のご連絡で恐縮です（　）、一点ご確認いただけますでしょうか。",["が","ので","のに","ものの"],"这里的「が」不是转折，而是开场铺垫（前置きの「が」）。"],
+[5,"大方の予想（　）、A社が落札した。",["に反して","に加えて","に比べて","によって"],"「～に反して」表示与预期相反。"],
+[5,"この価格は安いというより、（　）安すぎて不安になる。",["むしろ","もっとも","ちなみに","ところが"],"「～というより、むしろ～」表示「与其说……不如说」。"],
+[5,"（　）、新システムの導入により業務時間は約三割削減された。（報告書の結論部分）",["以上のように","それとも","そういえば","だって"],"报告结尾总结用「以上のように」。"],
+[5,"仮にこの計画が失敗した（　）、誰が責任を取るのか。",["とすれば","にしては","ばかりか","からこそ"],"「仮に～とすれば」表示假设。"],
+[5,"彼は謝らない（　）、逆にこちらを責めてきた。",["ばかりか","ものの","にしろ","とはいえ"],"「～ばかりか」表示「不仅……反而更……」。"],
+[5,"次のうち、不自然な文はどれか。",["春になると、旅行に行こう。","春になったら、旅行に行こう。","春になれば、暖かくなる。","春が来たら、花見をしよう。"],"条件「と」的后句不能接意志・劝诱・命令，应改为「～たら」。"],
+[5,"次のうち、不自然な文はどれか。",["雨が降っているのに、傘を持っていかないでください。","雨が降っているのに、彼は傘を持たずに出かけた。","せっかく作ったのに、誰も食べてくれない。","安いのに、品質がいい。"],"「のに」的后句不能接命令・请求，应改为「～ても」或「～から」。"],
+[5,"一生懸命頑張った（　）、結果が出ず悔しい。",["のに","ものを","くせに","ばかりか"],"说自己的遗憾用「のに」；「くせに」用于责难他人。"],
+[5,"明日、駅に（　）、電話してください。",["着いたら","着くと","着けば","着くなら"],"动作完成后再做某事（请求）用「たら」；「と」不能接请求，「ば」「なら」语义不合。"],
+[5,"本契約の有効期間は一年とする。（　）、期間満了の一か月前までに双方から申し出がない場合は、同一条件で更新されるものとする。",["ただし","だけど","だって","それに"],"合同中的「但书」（例外条款）用「ただし」。"],
+];
+const LV=[null,{n:"入门",c:"var(--l1)"},{n:"初级",c:"var(--l2)"},{n:"中级",c:"var(--l3)"},{n:"中高级",c:"var(--l4)"},{n:"高级",c:"var(--l5)"}];
+const KEY="jp-setsuzoku-100-v1";
+function rng(s){return()=>{s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff}}
+const ITEMS=Q.map((q,i)=>{const r=rng(i*7919+17);const idx=[0,1,2,3];for(let j=3;j>0;j--){const k=Math.floor(r()*(j+1));[idx[j],idx[k]]=[idx[k],idx[j]]}
+  return{lv:q[0],stem:q[1],opts:idx.map(x=>q[2][x]),ans:idx.indexOf(0),exp:q[3],correct:q[2][0]}});
+let st={a:{},cur:0,f:0,mode:"practice",range:0,count:20,exam:null};
+try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.a)st=Object.assign(st,s)}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const fill=(it,txt)=>esc(it.stem).replace(/（　）/g,`<span class="blank">${txt}</span>`);
+const lvTag=it=>`<i style="background:${LV[it.lv].c}"></i>${LV[it.lv].n}`;
+
+/* ---------- mode ---------- */
+function setMode(m){st.mode=m;save();render()}
+$("mP").onclick=()=>setMode("practice");$("mE").onclick=()=>setMode("exam");
+
+/* ---------- practice ---------- */
+function visible(){return ITEMS.map((_,i)=>i).filter(i=>!st.f||ITEMS[i].lv===st.f)}
+function tabs(){const t=$("tabs");t.innerHTML="";
+  [["全部",0],...LV.slice(1).map((l,i)=>[`${l.n}（${i*20+1}–${i*20+20}）`,i+1])].forEach(([n,v])=>{
+    const b=document.createElement("button");b.textContent=n;b.setAttribute("aria-pressed",st.f===v);
+    b.onclick=()=>{st.f=v;if(v&&ITEMS[st.cur].lv!==v)st.cur=(v-1)*20;save();render()};t.appendChild(b)})}
+function grid(){const g=$("grid");g.innerHTML="";
+  ITEMS.forEach((it,i)=>{const b=document.createElement("button");const a=st.a[i];
+    b.className=`lv${it.lv}`+(a!=null?(a===it.ans?" ok":" ng"):"")+(i===st.cur?" cur":"")+(st.f&&it.lv!==st.f?" dim":"");
+    b.textContent=i+1;b.setAttribute("aria-label",`第${i+1}题`+(a!=null?(a===it.ans?"，答对":"，答错"):""));
+    b.onclick=()=>{st.cur=i;if(st.f&&it.lv!==st.f)st.f=0;save();render()};g.appendChild(b)})}
+function card(){const i=st.cur,it=ITEMS[i],a=st.a[i];
+  $("lv").innerHTML=lvTag(it);$("no").textContent=`第 ${i+1} 题 / 100`;
+  $("stem").innerHTML=fill(it,a!=null?esc(it.correct):"　");
+  const o=$("opts");o.innerHTML="";
+  it.opts.forEach((t,k)=>{const b=document.createElement("button");b.className="opt ja"+(t.length>12?" long":"");b.lang="ja";
+    b.innerHTML=`<span class="k">${k+1}</span><span>${esc(t)}</span>`;
+    if(a!=null){b.disabled=true;if(k===it.ans)b.classList.add("right");else if(k===a)b.classList.add("wrong")}
+    b.onclick=()=>choose(k);o.appendChild(b)});
+  const s=$("stamp");s.className="stamp";
+  if(a!=null){s.textContent=a===it.ans?"正解":"誤";s.classList.add(a===it.ans?"ok":"ng","show");
+    $("exp").hidden=false;$("ans").innerHTML=`正确答案：<span class="ja" lang="ja">${esc(it.correct)}</span>`;$("why").textContent=it.exp}
+  else $("exp").hidden=true;
+  const v=visible(),p=v.indexOf(i);$("prev").disabled=p<=0;$("next").disabled=p>=v.length-1}
+function choose(k){const i=st.cur;if(st.a[i]!=null)return;st.a[i]=k;save();card();grid();score();
+  const s=$("stamp");s.classList.remove("show");void s.offsetWidth;s.classList.add("show")}
+function score(){const keys=Object.keys(st.a);const ok=keys.filter(i=>st.a[i]===ITEMS[i].ans).length;
+  $("sc").textContent=ok;$("done").textContent=keys.length;$("pct").textContent=keys.length;
+  const r=$("result");if(!keys.length){r.innerHTML="";return}
+  let h=`<h2>各难度得分</h2><div class="bars">`;
+  for(let l=1;l<=5;l++){const ids=ITEMS.map((_,i)=>i).filter(i=>ITEMS[i].lv===l);const d=ids.filter(i=>st.a[i]!=null);const c=d.filter(i=>st.a[i]===ITEMS[i].ans).length;
+    h+=`<div class="bar"><span>${LV[l].n}</span><div class="t"><span style="width:${c/20*100}%;background:${LV[l].c}"></span></div><span>${c} / ${d.length}</span></div>`}
+  r.innerHTML=h+"</div>"}
+function go(d){const v=visible(),p=v.indexOf(st.cur);const n=v[p+d];if(n!=null){st.cur=n;save();render()}}
+$("prev").onclick=()=>go(-1);$("next").onclick=()=>go(1);
+$("reset").onclick=()=>{if(confirm("确定清空全部练习记录？")){st.a={};st.cur=0;st.f=0;save();render()}};
+
+/* ---------- exam ---------- */
+const RANGES=[["全部难度",0],["入门",1],["初级",2],["中级",3],["中高级",4],["高级",5]];
+function counts(){const max=st.range?20:100;return(st.range?[10,20]:[20,50,100]).filter(n=>n<=max)}
+function chips(el,list,key){el.innerHTML="";list.forEach(([n,v])=>{const b=document.createElement("button");b.textContent=n;b.setAttribute("aria-pressed",st[key]===v);
+  b.onclick=()=>{st[key]=v;if(key==="range"&&!counts().includes(st.count))st.count=counts().slice(-1)[0];save();renderSetup()};el.appendChild(b)})}
+function renderSetup(){chips($("cRange"),RANGES,"range");chips($("cCount"),counts().map(n=>[n+" 题",n]),"count")}
+function startExam(ids){
+  if(!ids){let pool=ITEMS.map((_,i)=>i).filter(i=>!st.range||ITEMS[i].lv===st.range);
+    for(let j=pool.length-1;j>0;j--){const k=Math.floor(Math.random()*(j+1));[pool[j],pool[k]]=[pool[k],pool[j]]}
+    ids=pool.slice(0,st.count)}
+  ids=ids.slice().sort((a,b)=>a-b);
+  st.exam={ids,ans:{},cur:0,start:Date.now(),end:null};save();render()}
+$("startBtn").onclick=()=>startExam();
+const fmt=ms=>{const s=Math.floor(ms/1000);return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")};
+let timer=null;
+function tick(){const e=st.exam;if(e&&!e.end)$("eTime").textContent=fmt(Date.now()-e.start)}
+function renderRun(){const e=st.exam,n=e.ids.length,i=e.ids[e.cur],it=ITEMS[i],a=e.ans[e.cur];
+  $("eDone").textContent=Object.keys(e.ans).length;$("eTot").textContent=n;tick();
+  const g=$("eGrid");g.innerHTML="";g.style.gridTemplateColumns=`repeat(${Math.min(n,20)},1fr)`;
+  e.ids.forEach((qi,k)=>{const b=document.createElement("button");b.className=`lv${ITEMS[qi].lv}`+(e.ans[k]!=null?" sel":"")+(k===e.cur?" cur":"");
+    b.setAttribute("aria-label",`第${k+1}题`+(e.ans[k]!=null?"，已答":"，未答"));b.onclick=()=>{e.cur=k;save();renderRun()};g.appendChild(b)});
+  $("eLv").innerHTML=lvTag(it);$("eNo").textContent=`第 ${e.cur+1} 题 / ${n}`;
+  $("eStem").innerHTML=fill(it,a!=null?esc(it.opts[a]):"　");
+  const o=$("eOpts");o.innerHTML="";
+  it.opts.forEach((t,k)=>{const b=document.createElement("button");b.className="opt ja"+(t.length>12?" long":"")+(a===k?" picked":"");b.lang="ja";
+    b.innerHTML=`<span class="k">${k+1}</span><span>${esc(t)}</span>`;b.onclick=()=>pick(k);o.appendChild(b)});
+  $("ePrev").disabled=e.cur<=0;$("eNext").textContent=e.cur>=n-1?"交卷评分":"下一题"}
+function pick(k){const e=st.exam;e.ans[e.cur]=k;save();renderRun();
+  if(e.cur<e.ids.length-1)setTimeout(()=>{if(st.exam===e&&!e.end){e.cur++;save();renderRun()}},280)}
+$("ePrev").onclick=()=>{const e=st.exam;if(e.cur>0){e.cur--;save();renderRun()}};
+$("eNext").onclick=()=>{const e=st.exam;if(e.cur<e.ids.length-1){e.cur++;save();renderRun()}else submit()};
+$("submitBtn").onclick=submit;
+function submit(){const e=st.exam,left=e.ids.length-Object.keys(e.ans).length;
+  if(left&&!confirm(`还有 ${left} 题未作答，未答按错误计分。确定交卷？`))return;
+  e.end=Date.now();save();render();window.scrollTo({top:0})}
+function grade(p){return p>=90?["秀","var(--midori)"]:p>=75?["優","var(--l3)"]:p>=60?["可","var(--l4)"]:["再","var(--shu)"]}
+function renderReport(){const e=st.exam,n=e.ids.length;
+  const res=e.ids.map((qi,k)=>({qi,k,a:e.ans[k],ok:e.ans[k]===ITEMS[qi].ans}));
+  const c=res.filter(r=>r.ok).length,p=Math.round(c/n*100),[g,gc]=grade(p);
+  let h=`<h2>测验结果</h2><div class="top"><div class="pts">${p}<small> 分</small></div><div class="grade" style="color:${gc}">${g}</div>
+    <div class="facts">答对 <b>${c}</b> / ${n} 题<br>未作答 <b>${res.filter(r=>r.a==null).length}</b> 题<br>用时 <b>${fmt(e.end-e.start)}</b></div></div><div class="bars">`;
+  for(let l=1;l<=5;l++){const rs=res.filter(r=>ITEMS[r.qi].lv===l);if(!rs.length)continue;const ok=rs.filter(r=>r.ok).length;
+    h+=`<div class="bar"><span>${LV[l].n}</span><div class="t"><span style="width:${ok/rs.length*100}%;background:${LV[l].c}"></span></div><span>${ok} / ${rs.length}</span></div>`}
+  h+=`</div><div class="actions"><button class="big" id="again">再考一次</button>${c<n?'<button class="big ghost" id="redo">只重做错题</button>':""}<button class="big ghost" id="toSetup">重新设置</button></div>`;
+  const wr=res.filter(r=>!r.ok);
+  h+=`<div class="wrongs">`+(wr.length?`<h3>错题解析（${wr.length}）</h3>`+wr.map(r=>{const it=ITEMS[r.qi];
+    return `<div class="w"><div class="s ja" lang="ja">${r.k+1}．${fill(it,esc(it.correct))}</div>
+    <div class="yo">你的答案：<span class="x ja" lang="ja">${r.a!=null?esc(it.opts[r.a]):"未作答"}</span>　正确答案：<span class="o ja" lang="ja">${esc(it.correct)}</span>　<span style="color:var(--sub)">（原题第 ${r.qi+1} 题・${LV[it.lv].n}）</span></div>
+    <div class="e">${esc(it.exp)}</div></div>`}).join(""):`<div class="perfect">全部答对，满分！</div>`)+`</div>`;
+  $("report").innerHTML=h;
+  $("again").onclick=()=>startExam();
+  if($("redo"))$("redo").onclick=()=>startExam(wr.map(r=>r.qi));
+  $("toSetup").onclick=()=>{st.exam=null;save();render()}}
+
+/* ---------- keys & render ---------- */
+document.addEventListener("keydown",e=>{
+  if(st.mode==="practice"){if(e.key>="1"&&e.key<="4")choose(+e.key-1);else if(e.key==="ArrowRight")go(1);else if(e.key==="ArrowLeft")go(-1)}
+  else if(st.exam&&!st.exam.end){if(e.key>="1"&&e.key<="4")pick(+e.key-1);else if(e.key==="ArrowRight")$("eNext").click();else if(e.key==="ArrowLeft")$("ePrev").click()}});
+function render(){const P=st.mode==="practice";
+  $("mP").setAttribute("aria-pressed",P);$("mE").setAttribute("aria-pressed",!P);
+  $("practice").hidden=!P;$("exam").hidden=P;$("scorebox").hidden=!P;
+  clearInterval(timer);
+  if(P){tabs();grid();card();score();return}
+  const e=st.exam;
+  $("setup").hidden=!!e;$("running").hidden=!(e&&!e.end);$("report").hidden=!(e&&e.end);
+  if(!e)renderSetup();else if(!e.end){renderRun();timer=setInterval(tick,1000)}else renderReport()}
+render();
+</script>
+</body>
+</html>

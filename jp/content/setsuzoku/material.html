@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>日语接续表达一览</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EEF2EF; --card:#FBFCFA; --ink:#1C2A30; --sub:#5B6B70; --rule:#CFD8D3; --rule-soft:#E4EAE6;
+  --ai:#27466F; --ai-soft:#DCE5F0; --shu:#C23B2A; --shu-soft:#F6DED9; --midori:#2C7652; --midori-soft:#D9ECE1;
+  --kin:#9A6A1B; --kin-soft:#F5E9CF; --head:#1E3A5F;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --paper:#151C1F; --card:#1D262A; --ink:#E4EAE7; --sub:#98A7A3; --rule:#33413F; --rule-soft:#26312F;
+  --ai:#8FB0DC; --ai-soft:#24344A; --shu:#E9776A; --shu-soft:#452521; --midori:#6FC39A; --midori-soft:#1F3A2C;
+  --kin:#E0B35C; --kin-soft:#3D2F14; --head:#24344A;
+}}
+:root[data-theme="dark"]{
+  --paper:#151C1F; --card:#1D262A; --ink:#E4EAE7; --sub:#98A7A3; --rule:#33413F; --rule-soft:#26312F;
+  --ai:#8FB0DC; --ai-soft:#24344A; --shu:#E9776A; --shu-soft:#452521; --midori:#6FC39A; --midori-soft:#1F3A2C;
+  --kin:#E0B35C; --kin-soft:#3D2F14; --head:#24344A;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:120px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Noto Sans SC","PingFang SC","Hiragino Sans","Microsoft YaHei",sans-serif;font-size:14.5px;line-height:1.6}
+[lang=ja],.ja{font-family:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:26px 18px 60px}
+header h1{margin:0 0 8px;font-size:27px;line-height:1.2;letter-spacing:.02em}
+header p{margin:0 0 8px;color:var(--sub);font-size:13.5px;max-width:80ch}
+header p b{color:var(--ink);font-weight:500}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--sub);margin-top:8px;align-items:center}
+.reg{display:inline-block;font-size:11px;line-height:1;padding:3px 5px;border-radius:3px;font-weight:700;font-family:"Zen Kaku Gothic New",sans-serif;vertical-align:1px;margin-right:2px}
+.reg.k{background:var(--shu-soft);color:var(--shu)}     /* 口 */
+.reg.s{background:var(--ai-soft);color:var(--ai)}       /* 書 */
+.reg.g{background:var(--kin-soft);color:var(--kin)}     /* 公 */
+.reg.o{background:var(--rule-soft);color:var(--sub)}    /* 其他 */
+
+.bar{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:12px 0 10px;margin:14px -18px 10px;padding-left:18px;padding-right:18px;border-bottom:1px solid var(--rule)}
+.bar .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.bar input{flex:1;min-width:200px;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--rule);border-radius:8px;padding:8px 12px}
+.bar .cnt{font-size:12.5px;color:var(--sub);white-space:nowrap;min-width:5em}
+.bar label{font-size:13px;color:var(--sub);display:inline-flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap}
+.bar .chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.bar .chips a{font-size:12px;color:var(--ink);border:1px solid var(--rule);background:var(--card);border-radius:999px;padding:3px 10px;text-decoration:none;white-space:nowrap}
+.bar .chips a:hover{border-color:var(--ai);color:var(--ai)}
+.bar .chips a.cur{background:var(--ai);border-color:var(--ai);color:var(--card)}
+
+section{margin-top:26px;scroll-margin-top:120px}
+section h2{margin:0;background:var(--head);color:#fff;font-size:16px;font-weight:600;padding:9px 14px;border-radius:8px 8px 0 0;display:flex;align-items:baseline;gap:10px}
+section h2 small{font-weight:400;font-size:12.5px;opacity:.75;margin-left:auto}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--rule);border-top:0;border-radius:0 0 8px 8px;overflow:hidden}
+th{font-size:12px;color:var(--sub);font-weight:500;text-align:left;padding:7px 10px;background:var(--ai-soft);border-bottom:1px solid var(--rule)}
+td{padding:9px 10px;vertical-align:top;border-bottom:1px solid var(--rule-soft);font-size:14px}
+tr:last-child td{border-bottom:0}
+tr:nth-child(even) td{background:color-mix(in srgb,var(--paper) 45%,var(--card))}
+td.n{color:var(--sub);font-size:12px;width:2.2em;text-align:right;padding-right:6px;font-variant-numeric:tabular-nums}
+td.e{font-weight:700;font-size:15px;width:11em;font-family:"Zen Kaku Gothic New",sans-serif}
+td.t{color:var(--sub);font-size:12.5px;width:6.5em}
+td.u{width:16em}
+td.x .ja{display:block;font-size:14.5px}
+td.x .zh{display:block;color:var(--sub);font-size:12.5px;margin-top:2px}
+body.hide-zh td.x .zh{filter:blur(5px);transition:filter .15s}
+body.hide-zh td.x .zh:hover{filter:none}
+tr.hit td{background:var(--kin-soft)!important}
+tr.off{display:none}
+section.off{display:none}
+mark{background:var(--kin-soft);color:inherit;padding:0 1px;border-radius:2px}
+.note{margin-top:28px;border-left:3px solid var(--ai);background:var(--ai-soft);padding:10px 14px;border-radius:0 6px 6px 0;font-size:13px}
+.none{margin-top:26px;padding:24px;text-align:center;color:var(--sub);border:1px dashed var(--rule);border-radius:8px}
+.foot{margin-top:24px;font-size:12px;color:var(--sub);display:flex;gap:12px;flex-wrap:wrap;justify-content:space-between}
+@media (max-width:700px){
+  th{display:none}
+  table,tbody{display:block}
+  tr{display:grid;grid-template-columns:2.2em 1fr;gap:2px 8px;padding:10px 10px;border-bottom:1px solid var(--rule-soft)}
+  tr:nth-child(even){background:color-mix(in srgb,var(--paper) 45%,var(--card))}
+  tr:nth-child(even) td{background:transparent}
+  td{display:block;padding:0;border:0;width:auto!important;font-size:14px}
+  td.n{grid-row:1/span 4;padding-top:2px}
+  td.e{font-size:16px}
+  td.t{margin-top:-2px}
+  td.u{margin-top:4px}
+  td.x{margin-top:6px}
+}
+@media print{
+  .bar{display:none}
+  body{background:#fff;color:#000}
+  section{break-inside:avoid}
+  td.x .zh{filter:none!important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>日语接续表达一览</h1>
+  <p>三个层级：<b>接続詞</b>（句首独立词，连接两个句子，如 しかし）、<b>接続助詞</b>（接在谓语后，把两个分句连成一句，如 ～が、～ので）、<b>並立助詞／句型</b>（连接词语或固定复合表达，如 と、～にもかかわらず）。各表内按常用频率由高到低排列。</p>
+  <div class="legend">语体标记：<span><span class="reg k">口</span>口语</span><span><span class="reg s">書</span>书面</span><span><span class="reg g">公</span>公文・法律</span></div>
+</header>
+
+<div class="bar">
+  <div class="row">
+    <input type="search" id="q" placeholder="搜索表达・用法・例句（日文或中文）" aria-label="搜索">
+    <span class="cnt" id="cnt"></span>
+    <label><input type="checkbox" id="hz"> 遮住中文译文</label>
+  </div>
+  <div class="chips" id="chips"></div>
+</div>
+
+<div id="body"></div>
+<div class="none" id="none" hidden>没有匹配的条目</div>
+
+<div class="note">频率排序为综合语料库总体倾向的大致排序，口语与书面差别很大：口语中 でも／けど／から／たら 占压倒性多数；书面与公文中 が／しかし／ため／および／したがって 更多。</div>
+<div class="foot"><span>共 <span id="total"></span> 条 · 10 类</span><span>配套练习：日语接续表达 100题</span></div>
+</div>
+
+<script>
+// [expr, type, registers[], usage, ja, zh]
+const SECTIONS = [
+["一、并列・列举","並列・列挙",[
+["と","並立助詞",[],"「和」，把项目全部列完","机の上に本とペンがある。","桌上有书和笔。"],
+["～て／～で","接続助詞",[],"最中性的分句并列，形容词・名词・动词都可","この部屋は広くて明るい。","这房间又宽敞又明亮。"],
+["や（～など）","並立助詞",[],"「……啦……等」，只举几个，暗示还有","引き出しに切手やはがきなどが入っている。","抽屉里有邮票、明信片之类。"],
+["～し（～し）","接続助詞",[],"「又……又……」，罗列性质或理由，带评价","この店は安いし、料理もうまい。","这家店又便宜，菜又好吃。"],
+["～も～も","副助詞",[],"「既……也……」","兄も弟も医者だ。","哥哥和弟弟都是医生。"],
+["連用中止形（～く／～であり／ます形去ます）","接続助詞书面形",["書"],"报告・论文・商务文书的标准并列","当社は東京に本社を置き、大阪に支店を持つ。","本公司总部设在东京，在大阪设有分公司。"],
+["～たり～たり（する）","接続助詞",[],"「时而……时而……」，举例列举动作","休みの日は本を読んだり、映画を見たりする。","休息日看看书、看看电影。"],
+["とか（～とか）","並立助詞",["口"],"「や」的口语版，随意列举","週末は掃除とか買い物とかで終わる。","周末做做打扫啦买东西啦就过去了。"],
+["および","接続詞",["書","公"],"「以及」","氏名および住所を記入してください。","请填写姓名及住址。"],
+["かつ","接続詞",["書","公"],"「且」，逻辑・法律","安全かつ迅速に処理する。","安全且迅速地处理。"],
+["ならびに","接続詞",["公"],"「以及」；法令中「A及びB並びにC」，並びに连接更大的层级","役員ならびに従業員に通知する。","通知董事及员工。"]
+]],
+["二、添加・递进","添加・累加",[
+["そして","接続詞",[],"「并且／然后」，口书通用（也是最常用的先后接续）","彼は医者であり、そして作家でもある。","他是医生，也是作家。"],
+["また","接続詞",[],"「另外／也」，偏书面，追加同类信息","彼は英語が話せる。また、中国語も少しできる。","他会英语，另外也会一点中文。"],
+["それに","接続詞",["口"],"「而且」","この部屋は狭い。それに、日当たりも悪い。","这房间小，而且采光也差。"],
+["さらに","接続詞",[],"「进一步／更」，程度递进","売上が伸び、さらに利益率も改善した。","销售增长，利润率更是改善。"],
+["しかも","接続詞",[],"「而且还」，强调递进，带意外感","彼は仕事が速い。しかも正確だ。","他干活快，而且准确。"],
+["それから","接続詞",["口"],"「还有」，补充追加","牛乳と卵を買ってきて。それから、パンも。","买牛奶和鸡蛋，还有面包。"],
+["～だけでなく／～ばかりでなく（～も）","句型",[],"「不仅……也」","彼は日本語だけでなく、英語も話せる。","他不仅会日语，还会英语。"],
+["その上","接続詞",["書"],"「加之」","道に迷い、その上雨まで降ってきた。","迷了路，还下起了雨。"],
+["～上に","句型",[],"「不但……还」，分句级","この店は安い上に、量も多い。","这家店不但便宜，量还多。"],
+["～に加えて／加えて","句型・接続詞",["書"],"「除……之外还」","語学力に加えて、交渉力も求められる。","除语言能力外，还要求谈判能力。"],
+["～のみならず／～ばかりか","句型",["書"],"「不仅……甚至」，语气强","彼は国内のみならず、海外でも有名だ。","他不仅在国内，在海外也有名。"],
+["それどころか","接続詞",[],"「岂止如此，反而」，递进兼反转","薬を飲んでも治らない。それどころか、悪化した。","吃了药也没好，反而恶化了。"]
+]],
+["三、转折・让步","逆接・譲歩",[
+["～が","接続助詞",[],"「但是」，最常用最中性；也用作铺垫（前置きの「が」）","行きたいが、時間がない。","想去，但没时间。"],
+["～けど／～けれど／～けれども","接続助詞",["口"],"「但」；けど最随意→けれども最正式","高いけど、買う。","虽然贵，还是买。"],
+["でも／だけど／ですが","接続詞",["口"],"「可是」；ですが用于敬体","疲れた。でも、まだ終わっていない。","累了。可是还没做完。"],
+["しかし","接続詞",["書"],"标准转折；更正式为しかしながら","計画は完璧だった。しかし、実行は難しかった。","计划完美，但执行很难。"],
+["～ても／～でも","接続助詞",[],"「即使……也」，让步条件","雨が降っても、試合は行う。","即使下雨也照常比赛。"],
+["～のに","接続助詞",[],"「明明……却」，带不满・意外；后句不能接意志・命令","約束したのに、来なかった。","明明约好了，却没来。"],
+["だが","接続詞",["書"],"简体文章的「但」","理論は正しい。だが、証拠がない。","理论正确，但没有证据。"],
+["ところが","接続詞",[],"「然而（出乎意料）」，后接意外事实","晴れると思った。ところが、大雨になった。","以为会晴，结果下了大雨。"],
+["ただし","接続詞",[],"「但是（附加条件・例外）」，公告常用","入場無料。ただし、予約が必要です。","免费入场，但需预约。"],
+["それでも","接続詞",[],"「尽管如此」","何度も失敗した。それでも、諦めなかった。","失败了多次，尽管如此也没放弃。"],
+["～ながら（も）","接続助詞",["書"],"「虽然……却」，接ます形／ている／名詞","知っていながら、黙っていた。","明知却保持沉默。"],
+["～ものの","接続助詞",["書"],"「虽然……但」","参加したものの、何も発言しなかった。","虽然参加了，但什么也没说。"],
+["～にもかかわらず","句型",["書"],"「尽管」","悪天候にもかかわらず、多くの人が集まった。","尽管天气恶劣，仍来了很多人。"],
+["とはいえ","接続詞・句型",[],"「话虽如此」","便利だ。とはいえ、費用が高い。","虽然方便，但费用高。"],
+["それなのに／なのに","接続詞",["口"],"「可是（明明）」，带情绪","一生懸命練習した。それなのに、負けた。","拼命练了，可还是输了。"],
+["～くせに","接続助詞",["口"],"「明明……却」，贬义责难","知っているくせに、教えてくれない。","明明知道却不告诉我。"]
+]],
+["四、因果・顺接","順接・因果",[
+["～から","接続助詞",["口"],"「因为」，主观理由；后句可接意志・命令・推量","時間がないから、急ごう。","没时间了，快点吧。"],
+["～ので","接続助詞",[],"「由于」，客观・委婉；郑重场合优先用","体調が悪いので、今日は休みます。","因为身体不适，今天请假。"],
+["～て／名詞＋で","接続助詞・格助詞",[],"原因，后接非意志结果（感情・能力・状态）","遅れてすみません。／風邪で休んだ。","迟到了很抱歉。／因感冒请假。"],
+["だから／ですから","接続詞",["口"],"「所以」；ですから为敬体","明日は試験だ。だから、今夜は勉強する。","明天考试，所以今晚学习。"],
+["それで","接続詞",[],"「于是・所以」，叙述前因后果；也用于追问「然后呢」","電車が止まった。それで、遅刻した。","电车停了，所以迟到了。"],
+["～ため（に）","句型",["書"],"「由于」，客观原因；名詞＋の／た形","事故のため、電車が遅れています。","因事故，电车晚点。"],
+["そのため","接続詞",["書"],"「因此」","台風が接近している。そのため、全便欠航となった。","台风逼近，因此全部航班取消。"],
+["したがって","接続詞",["書"],"「因此」，逻辑推论・正式","条件を満たしていない。したがって、申請は認められない。","不满足条件，因此申请不予批准。"],
+["そこで","接続詞",[],"「于是（针对状况采取行动）」","資金が足りない。そこで、銀行に相談した。","资金不足，于是找银行商量。"],
+["すると","接続詞",[],"「结果・于是（随即发生）」，叙述发现","ボタンを押した。すると、ドアが開いた。","按了按钮，门就开了。"],
+["なぜなら（～からだ）／というのも","接続詞",["書"],"「因为」，先说结论后补理由","彼を推薦する。なぜなら、経験が豊富だからだ。","我推荐他，因为他经验丰富。"],
+["よって／ゆえに","接続詞",["公"],"「故」，法律・证书・逻辑","証拠が不十分である。よって、無罪とする。","证据不足，故判无罪。"],
+["～おかげで／～せいで","句型",[],"「多亏／都怪」，含褒贬","先生のおかげで合格した。／渋滞のせいで遅れた。","多亏老师才考上。／都怪堵车迟到了。"],
+["～により／～によって","句型",["書"],"「因……」，客观","地震により、道路が通行止めになった。","因地震道路封闭。"],
+["その結果","接続詞",["書"],"「结果」","毎日練習した。その結果、優勝できた。","每天练习，结果夺冠了。"],
+["だって","接続詞",["口"],"「因为嘛」，辩解・撒娇","行きたくない。だって、寒いんだもん。","不想去，因为很冷嘛。"]
+]],
+["五、先后・时间","継起・時間",[
+["～て","接続助詞",[],"「……然后」，动作先后的基本形","手を洗って、ご飯を食べる。","洗手，然后吃饭。"],
+["～てから","接続助詞",[],"「……之后（再）」，强调顺序","仕事が終わってから、飲みに行こう。","下班之后去喝一杯吧。"],
+["それから","接続詞",["口"],"「然后」，叙事","駅で切符を買った。それから、ホームに向かった。","在车站买了票，然后去了站台。"],
+["そして","接続詞",[],"「然后・接着」，口书通用","家を出た。そして、駅に向かった。","出了门，然后去了车站。"],
+["～たら","接続助詞",[],"「……之后（发现／就）」","家に帰ったら、手紙が届いていた。","回到家，发现有信寄到。"],
+["～と","接続助詞",[],"「一……就」，随即发生・发现","ドアを開けると、猫がいた。","一开门，发现有只猫。"],
+["～前に／～た後（で）","句型",[],"「之前／之后」","寝る前に歯を磨く。／食事をした後で薬を飲む。","睡前刷牙。／饭后吃药。"],
+["～ながら","接続助詞",[],"「一边……一边」，同时进行","音楽を聞きながら、勉強する。","边听音乐边学习。"],
+["～とき（に）","句型",[],"「……的时候」","日本に行くとき、カメラを買った。","去日本时买了相机。"],
+["まず／次に／最後に","接続詞（副詞）",[],"步骤说明「首先／其次／最后」","まず材料を切る。次に炒める。最後に味をつける。","先切菜，再炒，最后调味。"],
+["その後（で）","接続詞",["書"],"「之后」","会議は正午に終了した。その後、昼食会が開かれた。","会议中午结束，之后举行午餐会。"],
+["～たとたん（に）","句型",[],"「刚一……就」，突发","ドアを開けたとたん、猫が飛び出した。","一开门猫就窜了出来。"],
+["～うちに","句型",[],"「趁……」","温かいうちに食べてください。","趁热吃。"],
+["～間（に）","句型",[],"「在……期间」","留守の間に、荷物が届いた。","不在家期间包裹送到了。"],
+["～次第","句型",["書","商务"],"「一……立刻」","詳細が分かり次第、ご連絡します。","一了解详情就联系您。"],
+["続いて／引き続き","接続詞",[],"会议・播报「接下来」","続いて、社長からご挨拶をいただきます。","接下来请社长致辞。"]
+]],
+["六、条件・假设","条件・仮定",[
+["～たら","接続助詞",[],"「如果……的话」，口语最万能；常与もし连用","雨が降ったら、中止します。","要是下雨就取消。"],
+["～ば","接続助詞",[],"「如果」，偏书面・一般规律；后句接意志・命令有限制","安ければ、買います。","便宜就买。"],
+["～と","接続助詞",[],"「一……就（必然）」，后句不能接意志・命令","春になると、桜が咲く。","一到春天樱花就开。"],
+["～なら","接続助詞",[],"「要是……的话」，以对方话题为前提，给建议","京都に行くなら、金閣寺がおすすめだ。","要去京都的话，推荐金阁寺。"],
+["それなら／それでは／じゃあ","接続詞",[],"「那样的话／那么」，承接对方的话","「明日は休みです。」「それなら、ゆっくり休んでください。」","“明天休息。”“那就好好休息。”"],
+["～場合（は／には）","句型",["書","公"],"「……的情况下」","遅れる場合は、ご連絡ください。","如会迟到，请联系。"],
+["～ないと／～なければ","接続助詞",[],"「不……就」","急がないと、間に合わない。","不快点就赶不上了。"],
+["～限り（は）","句型",[],"「只要……就」","努力する限り、チャンスはある。","只要努力就有机会。"],
+["～さえ～ば","句型",[],"「只要……就」，强调唯一条件","薬さえ飲めば、治る。","只要吃药就会好。"],
+["そうすれば／そうしたら","接続詞",[],"「那样一来」","毎日復習しなさい。そうすれば、忘れない。","每天复习，那样就不会忘。"],
+["さもないと／さもなければ","接続詞",["書"],"「否则」","今すぐ出発しなさい。さもないと、間に合わない。","现在就出发，否则来不及。"],
+["～としたら／～とすれば／～とすると","句型",[],"「假如……的话」","引っ越すとしたら、どこがいい？","假如要搬家，哪里好？"]
+]],
+["七、选择・对比","選択・対比",[
+["～か（～か）","並立助詞",[],"「或者」，口书通用","コーヒーか紅茶を選んでください。","请选咖啡或红茶。"],
+["それとも","接続詞",[],"「还是」，只用于疑问句","歩いて行く？それとも、タクシーを呼ぶ？","走着去？还是叫车？"],
+["または","接続詞",["書"],"「或者」","電話またはメールでご連絡ください。","请电话或邮件联系。"],
+["あるいは","接続詞",["書"],"「或者／或许」","電車、あるいはバスで行く。","乘电车或巴士去。"],
+["一方（で）／それに対して","接続詞",["書"],"「另一方面」","都市の人口は増えている。一方、地方は減っている。","城市人口增加，另一方面地方在减少。"],
+["～に対して","句型",[],"「与……相对」，分句级对比","兄は活発なのに対して、弟は静かだ。","哥哥活泼，而弟弟安静。"],
+["逆に／反対に","接続詞",[],"「反过来／反而」","注意したら、逆に怒られた。","提醒了他，反而被骂了。"],
+["もしくは","接続詞",["公"],"「或者」","印鑑もしくは署名が必要です。","需要印章或签名。"],
+["むしろ／～というより","接続詞・句型",[],"「与其说……不如说」","安いというより、むしろ安すぎて不安だ。","与其说便宜，不如说太便宜让人不安。"],
+["～に比べて","句型",[],"「与……相比」","去年に比べて、売上が伸びた。","与去年相比销售增长了。"],
+["～にしろ～にしろ／～にせよ","句型",["書"],"「无论……还是」","行くにしろ行かないにしろ、早く決めてほしい。","去也好不去也好，希望早点决定。"],
+["ないし（は）","接続詞",["公"],"「或」；另有「乃至（从……到……）」义","委任状ないし契約書の写しを添付する。／三日ないし五日かかる。","附委托书或合同副本。／需三到五天。"]
+]],
+["八、说明・补充・换言・举例","説明・補足・換言・例示",[
+["例えば","接続詞",[],"「例如」","果物、例えばりんごやみかんが好きだ。","喜欢水果，比如苹果和橘子。"],
+["つまり","接続詞",[],"「也就是说」，概括・换言","彼は父の弟、つまり私の叔父だ。","他是我父亲的弟弟，也就是我叔叔。"],
+["なお","接続詞",["書","公"],"「另外」，补充说明・附注","会議は10時開始です。なお、資料は当日配布します。","会议10点开始。另外，资料当天发放。"],
+["ちなみに","接続詞",["口"],"「顺便说一下」","彼は独身だ。ちなみに、私もだ。","他单身。顺便说，我也是。"],
+["実は","接続詞（副詞）",[],"「其实」，引出内情","実は、会社を辞めようと思っている。","其实我打算辞职。"],
+["すなわち","接続詞",["書"],"「即」，正式换言","日本の首都、すなわち東京。","日本的首都，即东京。"],
+["要するに","接続詞",[],"「总之／简言之」，归纳","要するに、金が足りないということだ。","总而言之就是钱不够。"],
+["具体的には","接続詞",[],"「具体来说」","改善が必要だ。具体的には、納期の短縮だ。","需要改进，具体来说是缩短交期。"],
+["言い換えれば／言い換えると","接続詞",[],"「换言之」","顧客第一とは、言い換えれば、売上より信頼を優先することだ。","所谓客户至上，换言之就是信任优先于销售。"],
+["もっとも","接続詞",[],"「不过（补充限定）」","彼は優秀だ。もっとも、欠点もないわけではない。","他很优秀。不过也不是没缺点。"],
+["～といった／～など","句型",[],"举例「……等」","東京や大阪といった大都市","东京、大阪等大城市"],
+["ということは","接続詞",[],"「也就是说／这意味着」，推断","返事がない。ということは、断られたのだろう。","没回复，也就是说被拒绝了吧。"]
+]],
+["九、转换话题・总结","転換・結論",[
+["ところで","接続詞",[],"「对了／话说回来」；更委婉：話は変わりますが","ところで、来週の予定は決まりましたか。","对了，下周安排定了吗？"],
+["では／それでは／じゃあ","接続詞",[],"「那么」，进入下一步或收尾","では、始めましょう。","那么开始吧。"],
+["さて","接続詞",["書"],"「那么／话说」，演讲・文章切换段落","さて、本題に入ろう。","那么进入正题。"],
+["そういえば","接続詞",["口"],"「说起来」，由联想引出","そういえば、鍵はどこに置いたっけ。","说起来，钥匙放哪儿了？"],
+["とにかく","接続詞（副詞）",[],"「总之／反正」","とにかく、やってみよう。","总之先试试看。"],
+["いずれにしても／いずれにせよ／どちらにしても","接続詞",[],"「无论如何」，收束","いずれにせよ、決断は必要だ。","无论如何都得做决定。"],
+["このように／以上のように","接続詞",["書"],"「如上所述」，总结","このように、AIは業務効率を大きく高める。","如上所述，AI大幅提升业务效率。"],
+["結局","接続詞（副詞）",[],"「结果／到头来」","結局、何も決まらなかった。","结果什么也没定下来。"],
+["それはさておき／それはそうと","接続詞",[],"「先不说那个」，拉回话题","それはさておき、次の議題に移ろう。","先不说那个，进入下一个议题。"]
+]],
+["十、目的","目的",[
+["～ために","句型",[],"「为了」，前接意志动词・名詞の","留学するために、お金を貯めている。","为了留学在攒钱。"],
+["～ように","接続助詞",[],"「为了能……」，前接可能形・否定形・非意志动词","忘れないように、メモした。","为了不忘记，做了笔记。"],
+["～のに","句型",[],"「用于……」，后接便利・必要・使う・かかる等","この道具は瓶を開けるのに便利だ。","这工具开瓶很方便。"],
+["～には","句型",[],"「要……（就得）」","合格するには、毎日勉強するしかない。","要及格只能每天学习。"],
+["～べく","句型",["書"],"「为了」，硬质文体","目標を達成すべく、全力を尽くす。","为达目标全力以赴。"]
+]]
+];
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const REG={"口":"k","書":"s","公":"g"};
+const regHTML=r=>r.map(x=>`<span class="reg ${REG[x]||"o"}">${esc(x)}</span>`).join("");
+const ZH=["一","二","三","四","五","六","七","八","九","十"];
+
+// render once
+let total=0;
+$("body").innerHTML=SECTIONS.map((s,si)=>{
+  const [zh,ja,rows]=s;total+=rows.length;
+  return `<section id="s${si+1}"><h2>${esc(zh)}<span class="ja" lang="ja" style="font-weight:400;opacity:.85">（${esc(ja)}）</span><small>${rows.length} 条</small></h2>
+  <table><thead><tr><th>#</th><th>表达</th><th>类型</th><th>用法・语感</th><th>例句</th></tr></thead><tbody>${rows.map((r,i)=>{
+    const [e,t,reg,u,jp,cn]=r;
+    return `<tr data-s="${si}" data-i="${i}"><td class="n">${i+1}</td><td class="e" lang="ja" data-f>${esc(e)}</td><td class="t">${esc(t)}</td><td class="u" data-f>${regHTML(reg)}${esc(u)}</td><td class="x"><span class="ja" lang="ja" data-f>${esc(jp)}</span><span class="zh" data-f>${esc(cn)}</span></td></tr>`}).join("")}</tbody></table></section>`}).join("");
+$("total").textContent=total;
+$("chips").innerHTML=SECTIONS.map((s,i)=>`<a href="#s${i+1}" data-s="${i}">${ZH[i]} ${esc(s[0].replace(/^.+、/,""))}</a>`).join("");
+
+// search
+const rows=[...document.querySelectorAll("tbody tr")];
+const secs=[...document.querySelectorAll("section")];
+const texts=rows.map(tr=>tr.textContent.toLowerCase());
+const orig=rows.map(tr=>[...tr.querySelectorAll("[data-f]")].map(el=>el.innerHTML));
+function search(q){
+  q=q.trim().toLowerCase();
+  let n=0;const alive=new Set();
+  rows.forEach((tr,k)=>{
+    const els=tr.querySelectorAll("[data-f]");
+    if(!q){tr.classList.remove("off","hit");els.forEach((el,j)=>el.innerHTML=orig[k][j]);alive.add(tr.dataset.s);n++;return}
+    const hit=texts[k].includes(q);
+    tr.classList.toggle("off",!hit);tr.classList.toggle("hit",hit);
+    if(hit){n++;alive.add(tr.dataset.s);
+      els.forEach((el,j)=>{const html=orig[k][j];
+        // highlight in text nodes only (skip tags)
+        el.innerHTML=html.replace(/>([^<]+)</g,(m,txt)=>">"+txt.replace(new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi"),x=>`<mark>${x}</mark>`)+"<").replace(/^([^<]+)/,txt=>txt.replace(new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi"),x=>`<mark>${x}</mark>`))});
+    }else els.forEach((el,j)=>el.innerHTML=orig[k][j]);
+  });
+  secs.forEach((s,i)=>s.classList.toggle("off",!!q&&!alive.has(String(i))));
+  $("cnt").textContent=q?`${n} / ${total} 条`:"";
+  $("none").hidden=n>0;
+}
+$("q").addEventListener("input",e=>search(e.target.value));
+$("hz").addEventListener("change",e=>{document.body.classList.toggle("hide-zh",e.target.checked);try{localStorage.setItem("jp-setsuzoku-hidezh",e.target.checked?"1":"")}catch(_){}});
+try{if(localStorage.getItem("jp-setsuzoku-hidezh")){$("hz").checked=true;document.body.classList.add("hide-zh")}}catch(_){}
+
+// current-section chip
+const chips=[...document.querySelectorAll("#chips a")];
+const io=new IntersectionObserver(es=>{es.forEach(en=>{if(en.isIntersecting){const i=secs.indexOf(en.target);chips.forEach((c,k)=>c.classList.toggle("cur",k===i))}})},{rootMargin:"-120px 0px -70% 0px"});
+secs.forEach(s=>io.observe(s));
+document.addEventListener("keydown",e=>{if(e.key==="/"&&document.activeElement!==$("q")){e.preventDefault();$("q").focus()}});
+</script>
+</body>
+</html>

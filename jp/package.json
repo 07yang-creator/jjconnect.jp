@@ -1,0 +1,11 @@
+{
+  "name": "jp-learn",
+  "version": "1.0.0",
+  "private": true,
+  "description": "jp.jjconnect.jp — 日语学习：专题・学习资料・在线测试",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@vercel/blob": "^2.8.0"
+  }
+}

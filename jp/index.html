@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>日语学习 | jp.jjconnect.jp</title>
+<meta name="description" content="日语学习专题、学习资料与在线测试">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+<main class="wrap">
+  <section class="hero">
+    <h1>日语学习<small>专题 · 学习资料 · 在线测试</small></h1>
+    <div class="stats" id="stats"></div>
+  </section>
+
+  <section class="sec" id="topics">
+    <div class="sec-head">
+      <h2>专题</h2>
+      <div class="tabs" role="group" aria-label="视图">
+        <button type="button" data-view="latest">最新</button>
+        <button type="button" data-view="category">按分类</button>
+        <button type="button" data-view="all">全部</button>
+      </div>
+      <span class="sp"></span>
+      <input type="search" id="q" placeholder="筛选专题…" aria-label="筛选专题">
+    </div>
+    <div id="topicView"><div class="empty">加载中…</div></div>
+  </section>
+
+  <section class="sec" id="tests">
+    <div class="sec-head"><h2>在线测试</h2><span class="count" id="testCount"></span></div>
+    <div class="list" id="testList"></div>
+  </section>
+
+  <section class="sec" id="materials">
+    <div class="sec-head"><h2>学习资料</h2><span class="count" id="matCount"></span><span class="sp"></span><button class="btn sm" type="button" data-wizard>＋ 新建专题</button></div>
+    <div class="list" id="matList"></div>
+    <div class="drop" id="homeDrop" tabindex="0" role="button"><b>拖入 HTML / PDF / Markdown 直接上传</b>会打开新建向导，文件已附上 · 也可点击选择文件</div>
+    <input type="file" id="homeFile" multiple accept=".html,.htm,.pdf,.md,.markdown,.txt" hidden>
+  </section>
+</main>
+
+<script src="/assets/app.js"></script>
+<script src="/assets/nav.js"></script>
+<script src="/assets/wizard.js"></script>
+<script>
+(function () {
+  const { esc, topicCard, itemRow } = JP;
+  const $ = (id) => document.getElementById(id);
+  let DATA = null, view = localStorage.getItem('jp-home-view') || 'latest', q = '';
+
+  function filtered() {
+    const s = q.trim().toLowerCase();
+    return DATA.topics.filter((t) => !s || [t.title, t.category, t.summary, ...(t.tags || [])].join(' ').toLowerCase().includes(s));
+  }
+  function renderTopics() {
+    document.querySelectorAll('[data-view]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.view === view));
+    const ts = filtered();
+    const box = $('topicView');
+    if (!ts.length) { box.innerHTML = `<div class="empty">${DATA.topics.length ? '没有匹配的专题' : '还没有专题 — 点右上角「＋ 新建」创建第一个'}</div>`; return; }
+    if (view === 'latest') {
+      const sorted = [...ts].sort((a, b) => String(b.updated).localeCompare(String(a.updated)));
+      box.innerHTML = `<div class="grid">${sorted.slice(0, 9).map(topicCard).join('')}</div>` + (sorted.length > 9 ? `<p style="text-align:center;margin:14px 0 0"><button class="btn sm" type="button" data-view="all">查看全部 ${sorted.length} 个专题</button></p>` : '');
+    } else if (view === 'category') {
+      const g = new Map();
+      ts.forEach((t) => { const c = t.category || '未分类'; if (!g.has(c)) g.set(c, []); g.get(c).push(t); });
+      box.innerHTML = [...g.entries()].sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0], 'zh'))
+        .map(([c, arr]) => `<div class="cat-group"><h3>${esc(c)} <span class="chip kind">${arr.length}</span></h3><div class="grid">${arr.map(topicCard).join('')}</div></div>`).join('');
+    } else {
+      const sorted = [...ts].sort((a, b) => a.title.localeCompare(b.title, 'zh'));
+      box.innerHTML = `<div class="grid">${sorted.map(topicCard).join('')}</div>`;
+    }
+    box.querySelectorAll('[data-view]').forEach((b) => b.addEventListener('click', () => setView(b.dataset.view)));
+  }
+  function renderLists() {
+    const tests = [], mats = [];
+    DATA.topics.forEach((t) => t.items.forEach((i) => (i.type === 'test' ? tests : mats).push([i, t])));
+    const byDate = (a, b) => String(b[0].created || b[1].updated).localeCompare(String(a[0].created || a[1].updated));
+    tests.sort(byDate); mats.sort(byDate);
+    $('testCount').textContent = tests.length ? `${tests.length} 套` : '';
+    $('matCount').textContent = mats.length ? `${mats.length} 份` : '';
+    $('testList').innerHTML = tests.length ? tests.map(([i, t]) => itemRow(i, t, { showTopic: true })).join('') : '<div class="empty">还没有测试</div>';
+    $('matList').innerHTML = mats.length ? mats.map(([i, t]) => itemRow(i, t, { showTopic: true })).join('') : '<div class="empty">还没有资料</div>';
+    const nt = DATA.topics.length;
+    $('stats').innerHTML = `<div><b>${nt}</b>专题</div><div><b>${mats.length}</b>资料</div><div><b>${tests.length}</b>测试</div>`;
+  }
+  function setView(v) { view = v; localStorage.setItem('jp-home-view', v); renderTopics(); }
+
+  async function boot() {
+    try { DATA = await JP.load(); } catch (e) { $('topicView').innerHTML = `<div class="empty">加载失败：${esc(e.message)}</div>`; return; }
+    renderTopics(); renderLists();
+  }
+  document.querySelectorAll('.tabs [data-view]').forEach((b) => b.addEventListener('click', () => setView(b.dataset.view)));
+  $('q').addEventListener('input', (e) => { q = e.target.value; renderTopics(); });
+  document.addEventListener('jp:changed', async () => { DATA = await JP.load(); renderTopics(); renderLists(); });
+
+  // home drop zone → wizard with files attached
+  const drop = $('homeDrop'), file = $('homeFile');
+  drop.addEventListener('click', () => file.click());
+  drop.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); file.click(); } });
+  file.addEventListener('change', () => { if (file.files.length) JPWizard.open({ files: [...file.files] }); file.value = ''; });
+  ['dragenter', 'dragover'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('over'); }));
+  drop.addEventListener('drop', (e) => { if (e.dataTransfer.files.length) JPWizard.open({ files: [...e.dataTransfer.files] }); });
+  boot();
+})();
+</script>
+</body>
+</html>

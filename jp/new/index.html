@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>新建专题 | 日语学习</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+<main class="wrap">
+  <section class="hero"><h1>新建专题<small>上传学习资料与在线测试，三步发布</small></h1></section>
+  <div class="sec" style="margin-top:20px">
+    <div class="grid">
+      <div class="card"><h3>1 · 专题</h3><p class="sum">起标题、选分类、加标签和一句简介；也可以选择「追加到已有专题」。</p></div>
+      <div class="card"><h3>2 · 内容</h3><p class="sum">拖入 HTML 网页 / PDF / Markdown，或直接粘贴文本；每个文件标为「资料」或「测试」。</p></div>
+      <div class="card"><h3>3 · 发布</h3><p class="sum">确认后立即上线，专题页与首页同步更新。之后随时可在专题页「编辑 / 追加内容」。</p></div>
+    </div>
+    <p style="margin-top:22px"><button class="btn primary" type="button" data-wizard>＋ 打开向导</button> <a class="btn" href="/">返回首页</a></p>
+  </div>
+</main>
+<script src="/assets/app.js"></script>
+<script src="/assets/nav.js"></script>
+<script src="/assets/wizard.js"></script>
+<script>
+  const s = new URLSearchParams(location.search).get('s');
+  JPWizard.open({ slug: s || undefined });
+</script>
+</body>
+</html>

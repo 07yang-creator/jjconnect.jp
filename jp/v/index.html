@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>查看 | 日语学习</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<style>body{overflow:hidden}body.md{overflow:auto}</style>
+</head>
+<body data-nofoot="1">
+<div class="vbar" id="vbar"><span class="path">加载中…</span></div>
+<div id="stage"></div>
+
+<script src="/assets/app.js"></script>
+<script src="/assets/nav.js"></script>
+<script src="/assets/wizard.js"></script>
+<script>
+(async function () {
+  const { esc } = JP;
+  const m = location.pathname.match(/^\/v\/([^/]+)\/([^/]+)/);
+  const slug = decodeURIComponent(m?.[1] || ''), file = decodeURIComponent(m?.[2] || '');
+  const bar = document.getElementById('vbar'), stage = document.getElementById('stage');
+  let data;
+  try { data = await JP.load(); } catch (e) { bar.innerHTML = `<span class="path">加载失败：${esc(e.message)}</span>`; return; }
+  const t = data.topics.find((x) => x.slug === slug);
+  const it = t?.items.find((i) => i.file === file);
+  if (!it) { bar.innerHTML = `<span class="path">未找到内容 · <a href="/">返回首页</a></span>`; return; }
+  document.title = `${it.title} | ${t.title} | 日语学习`;
+
+  const idx = t.items.indexOf(it);
+  const sib = (d) => t.items[idx + d];
+  bar.innerHTML = `
+    <span class="path"><a href="/t/${esc(t.slug)}">${esc(t.title)}</a> › <b>${esc(it.title)}</b> <span class="chip ${it.type}">${it.type === 'test' ? '测试' : '资料'}</span></span>
+    ${sib(-1) ? `<a class="btn sm" href="/v/${esc(t.slug)}/${esc(sib(-1).file)}" title="${esc(sib(-1).title)}">‹</a>` : ''}
+    ${sib(1) ? `<a class="btn sm" href="/v/${esc(t.slug)}/${esc(sib(1).file)}" title="${esc(sib(1).title)}">›</a>` : ''}
+    <a class="btn sm" href="${esc(it.url)}" target="_blank" rel="noopener">新窗口打开 ↗</a>`;
+
+  if (it.kind === 'md') {
+    document.body.classList.add('md');
+    const art = document.createElement('article'); art.className = 'vmd'; art.textContent = '加载中…'; stage.append(art);
+    try {
+      const [txt] = await Promise.all([fetch(it.url).then((r) => r.text()), import('https://cdn.jsdelivr.net/npm/marked@15/lib/marked.esm.js').then((mod) => { window.marked = mod.marked; })]);
+      art.innerHTML = window.marked.parse(txt);
+      art.querySelectorAll('script').forEach((s) => s.remove());
+    } catch (e) { art.textContent = '无法渲染：' + e.message; }
+  } else {
+    const f = document.createElement('iframe');
+    f.className = 'vframe'; f.src = it.url; f.title = it.title;
+    f.setAttribute('allow', 'fullscreen');
+    stage.append(f);
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>专题 | 日语学习</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+<main class="wrap" id="main"><div class="empty">加载中…</div></main>
+
+<script src="/assets/app.js"></script>
+<script src="/assets/nav.js"></script>
+<script src="/assets/wizard.js"></script>
+<script>
+(async function () {
+  const { esc, itemRow, fmtDate } = JP;
+  const main = document.getElementById('main');
+  const slug = (location.pathname.match(/^\/t\/([^/]+)/) || [])[1] || new URLSearchParams(location.search).get('s') || '';
+
+  async function render() {
+    let data;
+    try { data = await JP.load(); } catch (e) { main.innerHTML = `<div class="empty">加载失败：${esc(e.message)}</div>`; return; }
+    const t = data.topics.find((x) => x.slug === decodeURIComponent(slug));
+    if (!t) { main.innerHTML = `<div class="empty">未找到专题「${esc(slug)}」 · <a href="/">返回首页</a></div>`; return; }
+    document.title = `${t.title} | 日语学习`;
+    const mats = t.items.filter((i) => i.type === 'material'), tests = t.items.filter((i) => i.type === 'test');
+    main.innerHTML = `
+      <div class="topic-head">
+        <div class="crumbs"><a href="/">首页</a> › <a href="/#topics">专题</a> › ${esc(t.category || '未分类')}</div>
+        <h1>${esc(t.title)}</h1>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <span class="chip">${esc(t.category || '未分类')}</span>
+          ${(t.tags || []).map((x) => `<span class="tag">${esc(x)}</span>`).join('')}
+          <span style="color:var(--sub);font-size:12.5px">创建 ${fmtDate(t.created)} · 更新 ${fmtDate(t.updated)}</span>
+        </div>
+        ${t.summary ? `<p>${esc(t.summary)}</p>` : ''}
+        <div class="bar">
+          ${tests[0] ? `<a class="btn primary" href="/v/${esc(t.slug)}/${esc(tests[0].file)}">✎ 开始测试</a>` : ''}
+          ${mats[0] ? `<a class="btn" href="/v/${esc(t.slug)}/${esc(mats[0].file)}">📄 打开资料</a>` : ''}
+          <span style="flex:1"></span>
+          <button class="btn sm" type="button" data-wizard="${esc(t.slug)}">✎ 编辑 / 追加内容</button>
+        </div>
+      </div>
+      <div class="two">
+        <section><h2>📄 学习资料 <span class="chip kind">${mats.length}</span></h2><div class="list">${mats.length ? mats.map((i) => itemRow(i, t, { showDate: true })).join('') : '<div class="empty">暂无资料</div>'}</div></section>
+        <section><h2>✎ 在线测试 <span class="chip kind">${tests.length}</span></h2><div class="list">${tests.length ? tests.map((i) => itemRow(i, t, { showDate: true })).join('') : '<div class="empty">暂无测试</div>'}</div></section>
+      </div>`;
+  }
+  document.addEventListener('jp:changed', render);
+  render();
+})();
+</script>
+</body>
+</html>

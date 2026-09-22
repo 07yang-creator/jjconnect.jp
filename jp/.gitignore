@@ -1,0 +1,8 @@
+node_modules/
+.vercel/
+.claude/
+.env
+.env.*
+.DS_Store
+# the host repo ignores lockfiles globally; this site pins its one dependency
+!package-lock.json
