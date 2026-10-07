@@ -117,6 +117,11 @@ mark{background:var(--kin-soft);color:inherit;padding:0 1px;border-radius:2px}
 <div class="foot"><span>共 <span id="total"></span> 条 · 10 类</span><span>配套练习：日语接续表达 100题</span></div>
 </div>
 
+<!-- tells the site search where this page's data lives: one entry per row,
+     headword = row[0], gloss = row[3], located by section + row number -->
+<script type="application/json" id="jp-search">
+{"var":"SECTIONS","key":0,"gloss":3,"ex":[4,5],"label":"{a} · {i}"}
+</script>
 <script>
 // [expr, type, registers[], usage, ja, zh]
 const SECTIONS = [
@@ -312,6 +317,16 @@ const chips=[...document.querySelectorAll("#chips a")];
 const io=new IntersectionObserver(es=>{es.forEach(en=>{if(en.isIntersecting){const i=secs.indexOf(en.target);chips.forEach((c,k)=>c.classList.toggle("cur",k===i))}})},{rootMargin:"-120px 0px -70% 0px"});
 secs.forEach(s=>io.observe(s));
 document.addEventListener("keydown",e=>{if(e.key==="/"&&document.activeElement!==$("q")){e.preventDefault();$("q").focus()}});
+
+/* deep link from the site search: ?q=ただし prefills and runs the in-page search */
+(function(){try{
+  const q=new URLSearchParams(location.search).get("q");
+  if(!q)return;
+  $("q").value=q;search(q);
+  document.documentElement.dataset.jpq="1";   // tells the viewer not to re-find it
+  const first=document.querySelector("tr.hit");
+  if(first)requestAnimationFrame(()=>first.scrollIntoView({block:"center"}));
+}catch(e){}})();
 </script>
 </body>
 </html>

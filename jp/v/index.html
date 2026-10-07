@@ -23,6 +23,10 @@
   const { esc } = JP;
   const m = location.pathname.match(/^\/v\/([^/]+)\/([^/]+)/);
   const slug = decodeURIComponent(m?.[1] || ''), file = decodeURIComponent(m?.[2] || '');
+  // forwarded from a search result: q = what to find, plus the page's own jump (n=42)
+  const params = new URLSearchParams(location.search);
+  const q = (params.get('q') || '').trim();
+  const extra = [...params.entries()].filter(([k]) => k !== 'q' && /^[a-z][a-z0-9_]{0,15}$/i.test(k));
   const bar = document.getElementById('vbar'), stage = document.getElementById('stage');
   let data;
   try { data = await JP.load(); } catch (e) { bar.innerHTML = `<span class="path">加载失败：${esc(e.message)}</span>`; return; }
@@ -33,10 +37,12 @@
 
   const idx = t.items.indexOf(it);
   const sib = (d) => t.items[idx + d];
+  const keep = (f) => `/v/${esc(t.slug)}/${esc(f)}${q ? '?q=' + encodeURIComponent(q) : ''}`;
   bar.innerHTML = `
     <span class="path"><a href="/t/${esc(t.slug)}">${esc(t.title)}</a> › <b>${esc(it.title)}</b> <span class="chip ${it.type}">${it.type === 'test' ? '测试' : '资料'}</span></span>
-    ${sib(-1) ? `<a class="btn sm" href="/v/${esc(t.slug)}/${esc(sib(-1).file)}" title="${esc(sib(-1).title)}">‹</a>` : ''}
-    ${sib(1) ? `<a class="btn sm" href="/v/${esc(t.slug)}/${esc(sib(1).file)}" title="${esc(sib(1).title)}">›</a>` : ''}
+    ${q ? `<span class="chip new" title="来自搜索">找：${esc(q)}</span><a class="btn sm" href="/s?q=${encodeURIComponent(q)}">返回结果</a>` : ''}
+    ${sib(-1) ? `<a class="btn sm" href="${keep(sib(-1).file)}" title="${esc(sib(-1).title)}">‹</a>` : ''}
+    ${sib(1) ? `<a class="btn sm" href="${keep(sib(1).file)}" title="${esc(sib(1).title)}">›</a>` : ''}
     <a class="btn sm" href="${esc(it.url)}" target="_blank" rel="noopener">新窗口打开 ↗</a>`;
 
   if (it.kind === 'md') {
@@ -46,12 +52,80 @@
       const [txt] = await Promise.all([fetch(it.url).then((r) => r.text()), import('https://cdn.jsdelivr.net/npm/marked@15/lib/marked.esm.js').then((mod) => { window.marked = mod.marked; })]);
       art.innerHTML = window.marked.parse(txt);
       art.querySelectorAll('script').forEach((s) => s.remove());
+      if (q) highlight(art, q);
     } catch (e) { art.textContent = '无法渲染：' + e.message; }
   } else {
+    // the content page reads ?q= (and its own jump, e.g. n=42) and finds it itself
+    const qs = new URLSearchParams(extra);
+    if (q) qs.set('q', q);
     const f = document.createElement('iframe');
-    f.className = 'vframe'; f.src = it.url; f.title = it.title;
+    f.className = 'vframe';
+    f.src = it.url + (qs.toString() ? (it.url.includes('?') ? '&' : '?') + qs : '');
+    f.title = it.title;
     f.setAttribute('allow', 'fullscreen');
     stage.append(f);
+
+    // Most content is uploaded pages that know nothing about ?q=. They are served
+    // from our own origin, so when a page does not claim to have handled the
+    // query (data-jpq), find it for them. JS-rendered pages may need a moment.
+    if (q) {
+      let tries = 0;
+      const attempt = () => {
+        let doc = null;
+        try { doc = f.contentDocument; } catch { return true; }   // give up quietly
+        if (!doc || !doc.body) return false;
+        if (doc.documentElement.dataset.jpq) return true;         // the page did it
+        const n = highlight(doc.body, q);
+        if (n) return true;
+        if (++tries >= 3) {
+          const chip = bar.querySelector('.chip.new');
+          if (chip) { chip.textContent = `找：${q}（本页请手动查找）`; chip.title = '该页面由脚本渲染，无法自动定位'; }
+          return true;
+        }
+        return false;
+      };
+      f.addEventListener('load', () => {
+        if (attempt()) return;
+        const iv = setInterval(() => { if (attempt()) clearInterval(iv); }, 700);
+        setTimeout(() => clearInterval(iv), 4000);
+      });
+    }
+  }
+
+  // Mark every occurrence under `root`, scroll to the first, return how many.
+  // Works on this document or on a same-origin iframe's document.
+  function highlight(root, term) {
+    if (!root || !term) return 0;
+    const doc = root.ownerDocument || document;
+    const needle = term.toLowerCase();
+    const nodes = [];
+    const walk = doc.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: (n) => {
+        const p = n.parentNode && n.parentNode.nodeName;
+        if (p === 'SCRIPT' || p === 'STYLE' || p === 'TEXTAREA' || p === 'MARK') return NodeFilter.FILTER_REJECT;
+        return n.nodeValue.toLowerCase().includes(needle) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      },
+    });
+    for (let n = walk.nextNode(); n; n = walk.nextNode()) nodes.push(n);
+    let first = null, count = 0;
+    for (const node of nodes) {
+      const frag = doc.createDocumentFragment();
+      let s = node.nodeValue, i;
+      while ((i = s.toLowerCase().indexOf(needle)) !== -1) {
+        if (i) frag.append(s.slice(0, i));
+        const mk = doc.createElement('mark');
+        mk.textContent = s.slice(i, i + term.length);
+        mk.style.cssText = 'background:#F5E9CF;color:inherit;border-radius:2px';
+        frag.append(mk);
+        first = first || mk;
+        count++;
+        s = s.slice(i + term.length);
+      }
+      if (s) frag.append(s);
+      node.replaceWith(frag);
+    }
+    if (first) first.scrollIntoView({ block: 'center' });
+    return count;
   }
 })();
 </script>

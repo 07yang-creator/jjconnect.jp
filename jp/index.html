@@ -30,6 +30,7 @@
       <input type="search" id="q" placeholder="筛选专题…" aria-label="筛选专题">
     </div>
     <div id="topicView"><div class="empty">加载中…</div></div>
+    <p id="deep" hidden style="margin:12px 0 0;font-size:13.5px;color:var(--sub)"></p>
   </section>
 
   <section class="sec" id="tests">
@@ -76,6 +77,10 @@
       box.innerHTML = `<div class="grid">${sorted.map(topicCard).join('')}</div>`;
     }
     box.querySelectorAll('[data-view]').forEach((b) => b.addEventListener('click', () => setView(b.dataset.view)));
+    // this box only filters topic cards — offer the full-text search for the same words
+    const deep = $('deep'), s = q.trim();
+    deep.hidden = !s;
+    if (s) deep.innerHTML = `在全部内容中搜索「${esc(s)}」：词条・用法・例句・题目　<a href="/s?q=${encodeURIComponent(s)}">打开搜索 →</a>`;
   }
   function renderLists() {
     const tests = [], mats = [];

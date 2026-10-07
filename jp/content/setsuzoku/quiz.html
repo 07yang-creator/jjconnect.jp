@@ -173,6 +173,10 @@ button:focus-visible{outline:2px solid var(--ai);outline-offset:2px}
   <div class="card report" id="report" hidden></div>
 </section>
 </div>
+<!-- tells the site search where this page's data lives: one record per question -->
+<script type="application/json" id="jp-search">
+{"var":"Q","label":"第 {i} 题","link":"n={i}"}
+</script>
 <script>
 const Q = [
 // ===== 1 入门 =====
@@ -402,6 +406,16 @@ function render(){const P=st.mode==="practice";
   $("setup").hidden=!!e;$("running").hidden=!(e&&!e.end);$("report").hidden=!(e&&e.end);
   if(!e)renderSetup();else if(!e.end){renderRun();timer=setInterval(tick,1000)}else renderReport()}
 render();
+
+/* deep link from the site search: ?n=42 opens that question in practice mode */
+(function(){try{
+  const n=parseInt(new URLSearchParams(location.search).get("n"),10);
+  if(!(n>=1&&n<=ITEMS.length))return;
+  if(st.exam&&!st.exam.end)return;            // never interrupt a running 考试
+  st.mode="practice";st.f=0;st.cur=n-1;save();render();
+  document.documentElement.dataset.jpq="1";   // tells the viewer not to re-find it
+  const b=$("grid").children[n-1];if(b)b.scrollIntoView({block:"nearest"});
+}catch(e){}})();
 </script>
 </body>
 </html>

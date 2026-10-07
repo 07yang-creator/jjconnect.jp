@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>搜索 | 日语学习</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+<main class="wrap">
+  <h1 style="margin:14px 0 2px;font-size:26px">搜索</h1>
+  <div class="sbar">
+    <form id="f" action="/s" method="get" autocomplete="off">
+      <span class="ico" aria-hidden="true">🔍</span>
+      <input type="search" name="q" id="q" placeholder="输入单词、语法或例句中的字" aria-label="搜索站内内容">
+    </form>
+    <div class="tabs" role="group" aria-label="范围">
+      <button type="button" data-type="">全部</button>
+      <button type="button" data-type="material">资料</button>
+      <button type="button" data-type="test">测试</button>
+    </div>
+  </div>
+  <div class="sres" id="sres"></div>
+  <div id="out"></div>
+</main>
+
+<script src="/assets/app.js"></script>
+<script src="/assets/nav.js"></script>
+<script src="/assets/wizard.js"></script>
+<script>
+(function () {
+  const { esc, mark, viewHref, snipHTML } = JP;
+  const $ = (id) => document.getElementById(id);
+  const SUGGEST = ['ただし', 'のに', 'ても', 'から', 'ので', 'ところが', '〜次第', 'つまり'];
+  let type = '', q = '', seq = 0;
+
+  function readURL() {
+    const p = new URLSearchParams(location.search);
+    q = (p.get('q') || '').trim();
+    type = ['material', 'test'].includes(p.get('type')) ? p.get('type') : '';
+    $('q').value = q;
+    document.querySelectorAll('[data-type]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.type === type));
+    document.title = q ? `${q} — 搜索 | 日语学习` : '搜索 | 日语学习';
+    window.dispatchEvent(new CustomEvent('jp:query', { detail: q }));   // keep the navbar box in step
+  }
+
+  function pushURL(replace) {
+    const p = new URLSearchParams();
+    if (q) p.set('q', q);
+    if (type) p.set('type', type);
+    const url = '/s' + (p.toString() ? '?' + p : '');
+    history[replace ? 'replaceState' : 'pushState']({}, '', url);
+  }
+
+  function wordCard(w, terms, qq) {
+    return `<a class="word-card" href="${esc(viewHref(w.view, w.term || qq, w.link))}">
+      <span class="k ja" lang="ja">${mark(w.key, terms)}</span>
+      ${w.gloss ? `<span class="g">${mark(w.gloss, terms)}</span>` : ''}
+      <span class="x ja" lang="ja">${mark(w.text, terms)}</span>
+      <span class="w">${esc(w.item.title)}${w.label ? ' · ' + esc(w.label) : ''} · ${esc(w.topic.title)}</span>
+    </a>`;
+  }
+
+  function group(r, terms, qq) {
+    const first = r.hits[0]?.term || terms[0] || qq;
+    const hits = r.hits.map((h) => `<a class="hit" href="${esc(viewHref(r.view, h.term || qq, h.link))}">
+        <span class="loc">${esc(h.label || '正文')}</span>
+        <span class="txt ja" lang="ja">${snipHTML(h.snippet, terms)}</span>
+        <span class="go">→</span></a>`).join('');
+    const more = r.total > r.hits.length
+      ? `<a class="more" href="${esc(viewHref(r.view, first, ''))}">在该页查看全部 ${r.total} 处 →</a>` : '';
+    const empty = !r.total
+      ? `<a class="hit" href="${esc(viewHref(r.view, first, ''))}"><span class="loc">标题</span><span class="txt">${r.indexed ? '标题或备注匹配' : '该文件按标题收录（PDF 不检索正文）'}</span><span class="go">→</span></a>` : '';
+    return `<section class="hitgroup">
+      <div class="hd">
+        <span class="ico ${esc(r.type)}">${r.type === 'test' ? '問' : r.kind === 'pdf' ? 'PDF' : '資'}</span>
+        <b><a href="${esc(viewHref(r.view, first, ''))}">${mark(r.itemTitle, terms)}</a></b>
+        <span class="where">${esc(r.topicTitle)}${r.total ? ' · ' + r.total + ' 处' : ''}</span>
+        <span class="sp"></span>
+        <a class="btn sm" href="/t/${esc(r.slug)}">专题</a>
+      </div>${hits}${empty}${more}</section>`;
+  }
+
+  function render(d) {
+    const terms = d.terms, out = $('out');
+    const n = d.counts;
+    $('sres').innerHTML = (n.hits || n.items || n.topics
+      ? `找到 <b>${n.hits}</b> 处匹配，分布在 <b>${n.items}</b> 个文件${n.words ? ` · <b>${n.words}</b> 个词条` : ''}${n.topics ? ` · <b>${n.topics}</b> 个专题` : ''}${n.moreFiles ? ` · 另有 ${n.moreFiles} 个文件未显示` : ''}`
+      : '') + (d.droppedTerms ? `<br>只用了前 ${d.terms.length} 个词（忽略了 ${d.droppedTerms} 个）` : '');
+    if (!d.results.length && !d.topics.length) {
+      out.innerHTML = `<div class="sempty"><h2>没有找到「${esc(d.q)}」</h2>
+        <p>试试更短的词，或去掉 ～ 和括号。搜索会匹配词条、用法说明、例句和题目。</p>
+        <div class="tryme">${SUGGEST.map((s) => `<a href="/s?q=${encodeURIComponent(s)}">${esc(s)}</a>`).join('')}</div></div>`;
+      return;
+    }
+    let html = '';
+    if (d.words.length) html += `<h2 style="font-size:17px;margin:18px 0 10px">词条</h2><div class="words">${d.words.map((w) => wordCard(w, terms, d.q)).join('')}</div>`;
+    if (d.results.length) html += `<h2 style="font-size:17px;margin:22px 0 10px">出现位置</h2>${d.results.map((r) => group(r, terms, d.q)).join('')}`;
+    if (d.topics.length) html += `<h2 style="font-size:17px;margin:22px 0 10px">专题</h2><div class="grid">${d.topics.map((t) => `<a class="card" href="/t/${esc(t.slug)}"><span class="chip">${esc(t.category || '未分类')}</span><h3>${mark(t.title, terms)}</h3>${t.summary ? `<p class="sum">${mark(t.summary, terms)}</p>` : ''}<div class="meta"><span>${t.items} 项内容</span></div></a>`).join('')}</div>`;
+    out.innerHTML = html;
+  }
+
+  async function run() {
+    if (!q) {
+      $('sres').innerHTML = '';
+      $('out').innerHTML = `<div class="sempty"><h2>搜索站内所有内容</h2>
+        <p>词条、用法说明、例句、测试题都会被检索；点击结果直接跳到它在页面中的位置。</p>
+        <div class="tryme">${SUGGEST.map((s) => `<a href="/s?q=${encodeURIComponent(s)}">${esc(s)}</a>`).join('')}</div></div>`;
+      return;
+    }
+    const my = ++seq;
+    $('sres').innerHTML = '';                       // never show a stale count
+    $('out').innerHTML = '<div class="empty">搜索中…</div>';
+    try {
+      const r = await fetch(`/api/search?q=${encodeURIComponent(q)}&limit=40${type ? '&type=' + type : ''}`, { cache: 'no-store' });
+      if (my !== seq) return;
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      render(await r.json());
+    } catch (e) {
+      if (my !== seq) return;
+      $('sres').innerHTML = '';
+      $('out').innerHTML = `<div class="empty">搜索失败，请重试。<br><button class="btn sm" type="button" onclick="location.reload()">重新加载</button></div>`;
+    }
+  }
+
+  $('f').addEventListener('submit', (e) => {
+    e.preventDefault();
+    q = $('q').value.trim();
+    pushURL(false);
+    document.title = q ? `${q} — 搜索 | 日语学习` : '搜索 | 日语学习';
+    window.dispatchEvent(new CustomEvent('jp:query', { detail: q }));
+    run();
+  });
+  document.querySelectorAll('[data-type]').forEach((b) => b.addEventListener('click', () => {
+    if (type === b.dataset.type) return;
+    type = b.dataset.type;
+    document.querySelectorAll('[data-type]').forEach((x) => x.setAttribute('aria-pressed', x === b));
+    pushURL(false);          // a filter is a step the user can come back from
+    run();
+  }));
+  window.addEventListener('popstate', () => { readURL(); run(); });
+
+  readURL();
+  run();
+  if (!q) $('q').focus();
+})();
+</script>
+</body>
+</html>

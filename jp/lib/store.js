@@ -11,6 +11,7 @@
 
 import { put, list, del } from '@vercel/blob';
 import fs from 'node:fs';
+import { INDEX_VERSION } from './extract.js';
 
 // Resolved relative to THIS module, never process.cwd(): under a Vercel Root
 // Directory the function's cwd is the repo root, not the site folder.
@@ -102,6 +103,57 @@ export async function blobTopics() {
   return metas.filter(Boolean).map(decorate);
 }
 
+// ---------- blob: search docs ----------
+// Records extracted at publish time, kept beside the meta so /api/topics stays
+// small and a search never downloads the content files. One doc per topic:
+//   search/<slug>/index-<rand>.json  ->  { slug, files: { "<file>": [record] } }
+
+export async function readSearchDoc(slug) {
+  if (!enabled()) return null;
+  const objs = await listAll(`search/${slug}/`);
+  if (!objs.length) return null;
+  objs.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+  const doc = await fetchJSON(objs[0].url).catch(() => null);
+  if (!doc) return null;
+  // records from an older extractor must not survive a merge-and-re-stamp
+  return doc.v === INDEX_VERSION ? doc : { slug, v: INDEX_VERSION, files: {} };
+}
+
+export async function saveSearchDoc(slug, files) {
+  if (!enabled()) throw new Error('storage-disabled');
+  const at = Date.now();
+  const res = await put(`search/${slug}/index.json`, JSON.stringify({ slug, v: INDEX_VERSION, files }), {
+    access: 'public',
+    addRandomSuffix: true,
+    contentType: 'application/json',
+    cacheControlMaxAge: 60,
+  });
+  await pruneOlderThan(`search/${slug}/`, res.url, at);
+  return res;
+}
+
+// Map "<slug>/<file>" -> records, across every wizard-created topic.
+export async function allSearchDocs() {
+  const m = new Map();
+  if (!enabled()) return m;
+  const newest = new Map();
+  for (const b of await listAll('search/')) {
+    const slug = b.pathname.split('/')[1];
+    if (!slug) continue;
+    const cur = newest.get(slug);
+    if (!cur || new Date(b.uploadedAt) > new Date(cur.uploadedAt)) newest.set(slug, b);
+  }
+  const docs = await Promise.all([...newest.values()].map((b) => fetchJSON(b.url).catch(() => null)));
+  for (const d of docs) {
+    if (!d?.slug || !d.files) continue;
+    if (d.v !== INDEX_VERSION) continue; // stale shape — let the backfill rebuild it
+    for (const [file, recs] of Object.entries(d.files)) {
+      if (Array.isArray(recs)) m.set(`${d.slug}/${file}`, recs);
+    }
+  }
+  return m;
+}
+
 // ---------- merged view ----------
 function nonEmpty(v) {
   if (Array.isArray(v)) return v.length ? v : undefined;
@@ -137,18 +189,25 @@ export function publicTopic(t) {
 }
 
 // ---------- blob: writes ----------
+// Prune only objects written BEFORE ours. Deleting "everything but mine" means
+// two concurrent writers delete each other and the topic loses its doc entirely.
+async function pruneOlderThan(prefix, keepUrl, writtenAt) {
+  const olds = (await listAll(prefix)).filter(
+    (b) => b.url !== keepUrl && new Date(b.uploadedAt).getTime() < writtenAt,
+  );
+  if (olds.length) await del(olds.map((b) => b.url));
+}
+
 export async function saveMeta(meta) {
   if (!enabled()) throw new Error('storage-disabled');
-  const body = JSON.stringify(meta);
-  const res = await put(`meta/${meta.slug}/topic.json`, body, {
+  const at = Date.now();
+  const res = await put(`meta/${meta.slug}/topic.json`, JSON.stringify(meta), {
     access: 'public',
     addRandomSuffix: true,
     contentType: 'application/json',
     cacheControlMaxAge: 60,
   });
-  // prune older versions
-  const olds = (await listAll(`meta/${meta.slug}/`)).filter((b) => b.url !== res.url);
-  if (olds.length) await del(olds.map((b) => b.url));
+  await pruneOlderThan(`meta/${meta.slug}/`, res.url, at);
   return res;
 }
 
@@ -163,7 +222,11 @@ export async function putFile(slug, filename, buffer, kind) {
 
 export async function deleteBlobTopic(slug) {
   if (!enabled()) throw new Error('storage-disabled');
-  const objs = [...(await listAll(`meta/${slug}/`)), ...(await listAll(`c/${slug}/`))];
+  const objs = [
+    ...(await listAll(`meta/${slug}/`)),
+    ...(await listAll(`c/${slug}/`)),
+    ...(await listAll(`search/${slug}/`)),
+  ];
   if (objs.length) await del(objs.map((b) => b.url));
   return objs.length;
 }

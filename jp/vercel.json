@@ -4,9 +4,10 @@
   "regions": ["hnd1"],
   "ignoreCommand": "git diff --quiet ${VERCEL_GIT_PREVIOUS_SHA:-HEAD^} HEAD -- . || exit 1",
   "functions": {
-    "api/*.js": { "maxDuration": 30, "includeFiles": "content/index.json" }
+    "api/*.js": { "maxDuration": 30, "includeFiles": "content/**" }
   },
   "rewrites": [
+    { "source": "/s", "destination": "/s/index.html" },
     { "source": "/t/:slug", "destination": "/t/index.html" },
     { "source": "/v/:slug/:file", "destination": "/v/index.html" },
     { "source": "/c/:slug/:file", "destination": "/api/c?slug=:slug&file=:file" }

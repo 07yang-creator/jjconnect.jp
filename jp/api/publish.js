@@ -7,8 +7,10 @@
 // }
 import {
   enabled, staticIndex, readMeta, saveMeta, putFile, deleteUrls,
+  readSearchDoc, saveSearchDoc,
   slugify, randomSlug, safeFilename, kindOf, today,
 } from '../lib/store.js';
+import { recordsFor } from '../lib/extract.js';
 
 const MAX_FILE = 3.5 * 1024 * 1024; // Vercel function body cap is 4.5 MB (base64 inflates ~33%)
 const MAX_ITEMS = 12;
@@ -66,13 +68,18 @@ export default async function handler(req, res) {
   meta.updated = now;
   meta.items = Array.isArray(meta.items) ? meta.items : [];
 
+  // search records for this topic's uploaded files, keyed by filename
+  const searchFiles = (await readSearchDoc(slug))?.files || {};
+
   // ---- remove items (blob ones only) ----
   const toDelete = [];
   if (remove.length) {
     const keep = [];
     for (const it of meta.items) {
-      if (remove.includes(String(it.id))) { if (it.blob) toDelete.push(it.blob); }
-      else keep.push(it);
+      if (remove.includes(String(it.id))) {
+        if (it.blob) toDelete.push(it.blob);
+        delete searchFiles[it.file];
+      } else keep.push(it);
     }
     meta.items = keep;
   }
@@ -100,6 +107,12 @@ export default async function handler(req, res) {
 
       const put = await putFile(slug, file, buf, kind);
       uploaded.push(put.url);
+      try {
+        const recs = recordsFor(kind, buf);
+        if (recs.length) searchFiles[file] = recs;
+      } catch (e) {
+        console.error('publish: indexing failed for', file, e?.message || e); // searchable by title only
+      }
       meta.items.push({
         id: `${Date.now().toString(36)}${n}`,
         type: a.type === 'test' ? 'test' : 'material',
@@ -117,6 +130,12 @@ export default async function handler(req, res) {
     // roll back anything uploaded in this request
     if (uploaded.length) await deleteUrls(uploaded).catch(() => {});
     return bad(res, 500, `发布失败：${e?.message || e}`);
+  }
+  // the topic is published either way; a failed index only costs searchability
+  try {
+    await saveSearchDoc(slug, searchFiles);
+  } catch (e) {
+    console.error('publish: cannot save search doc for', slug, e?.message || e);
   }
   if (toDelete.length) await deleteUrls(toDelete).catch(() => {});
 
