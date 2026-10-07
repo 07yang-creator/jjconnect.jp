@@ -30,7 +30,7 @@ const MAX_TEXT = 600;
 
 // Bump when extraction changes shape — stored indexes with an older version are
 // ignored and rebuilt, so a better extractor reaches old uploads too.
-export const INDEX_VERSION = 4;
+export const INDEX_VERSION = 5;
 
 // A single-file page built by Claude keeps its content in top-level arrays
 // (often several: Q, Q2, Q3). We find every all-caps data array and merge them,
@@ -418,11 +418,7 @@ function autoDetect(html) {
 
 export function recordsFromHtml(html) {
   const hint = readHint(html);
-  if (hint) {
-    const r = recordsFromHint(html, hint);
-    if (r && r.length) return r;
-  }
-
+  const declared = hint ? recordsFromHint(html, hint) : null;
   const blocks = htmlToBlocks(html);
   const out = [];
   const seen = new Set();
@@ -432,9 +428,11 @@ export function recordsFromHtml(html) {
     out.push(r);
   };
 
-  // structured rows first, then the visible page, then anything still only in
-  // script strings (a second data array that would not parse, for instance)
-  for (const r of autoDetect(html) || []) push(r);
+  // Structured rows first, then the visible page, then anything still only in
+  // script strings (a second data array that would not parse, for instance).
+  // A page that declares its data still gets the rest indexed for recall — its
+  // intro, section names and footnotes are content too. Duplicates are dropped.
+  for (const r of declared?.length ? declared : autoDetect(html) || []) push(r);
   for (const b of blocks) push({ text: b.text, label: b.label, link: '', key: '', gloss: '' });
   for (const text of scriptLiteralLines(html)) {
     if (!NOISE.test(text)) push({ text, label: '', link: '', key: '', gloss: '' });
