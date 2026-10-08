@@ -60,6 +60,7 @@
   function wordCard(w, terms, qq) {
     return `<a class="word-card" href="${esc(viewHref(w.view, w.term || qq, w.link))}">
       <span class="k ja" lang="ja">${mark(w.key, terms)}</span>
+      ${w.en ? `<span class="e" lang="en">${mark(w.en, terms)}</span>` : ''}
       ${w.gloss ? `<span class="g">${mark(w.gloss, terms)}</span>` : ''}
       <span class="x ja" lang="ja">${mark(w.text, terms)}</span>
       <span class="w">${esc(w.item.title)}${w.label ? ' · ' + esc(w.label) : ''} · ${esc(w.topic.title)}</span>

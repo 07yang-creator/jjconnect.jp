@@ -13,9 +13,11 @@
 //      <script type="application/json" id="jp-search">
 //      {"var":"Q","label":"第 {i} 题","link":"n={i}"}
 //      </script>
-//    `key` / `gloss` / `ex` are indexes into each row — `ex` may be a list, e.g.
-//    {"var":"SECTIONS","key":0,"gloss":3,"ex":[4,5]} for headword, meaning and
-//    the example sentence with its translation.
+//    `key` / `en` / `gloss` / `ex` are indexes into each row — `ex` may be a
+//    list, e.g. {"var":"SECTIONS","key":0,"en":6,"gloss":3,"ex":[4,5]} for the
+//    headword, its English equivalent, its meaning, and an example with its
+//    translation. `en` is searchable as a headword in its own right, so an
+//    English query returns the entry card too.
 //    We then parse that JS array literal (JSON-compatible data, comments and
 //    trailing commas tolerated) and make one record per innermost row. This is
 //    how an interactive page that renders from JS stays searchable.
@@ -30,7 +32,7 @@ const MAX_TEXT = 600;
 
 // Bump when extraction changes shape — stored indexes with an older version are
 // ignored and rebuilt, so a better extractor reaches old uploads too.
-export const INDEX_VERSION = 5;
+export const INDEX_VERSION = 6;
 
 // A single-file page built by Claude keeps its content in top-level arrays
 // (often several: Q, Q2, Q3). We find every all-caps data array and merge them,
@@ -264,6 +266,7 @@ function recordsFromHint(html, hint) {
         // the hint comes from an uploaded file, so the jump must be a plain param
         link: SAFE_LINK.test(link) ? link : '',
         key: atIndex(row, hint.key).slice(0, 60),
+        en: atIndex(row, hint.en).slice(0, 90),
         gloss: atIndex(row, hint.gloss).slice(0, 160),
         ex: atIndex(row, hint.ex).slice(0, 220),
       };

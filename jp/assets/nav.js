@@ -89,6 +89,7 @@
       for (const w of d.words.slice(0, 4)) {
         parts.push(`<a class="sx-i word" role="option" aria-selected="false" href="${esc(viewHref(w.view, w.term || d.q, w.link))}">
           <b class="ja" lang="ja">${mark(w.key, d.terms)}</b>
+          ${w.en ? `<span class="en">${mark(w.en, d.terms)}</span>` : ''}
           ${w.gloss ? `<span>${mark(w.gloss, d.terms)}</span>` : ''}
           <em>${esc(w.item.title)}${w.label ? ' · ' + esc(w.label) : ''}</em></a>`);
       }

@@ -17,6 +17,7 @@ Lives in the `jp/` folder of the `07yang-creator/jjconnect.jp` repo. Vercel proj
 | `assets/app.js` | Data layer: `/api/topics` with static fallback; card/row/highlight helpers |
 | `assets/wizard.js` | 3-step wizard modal (create / append / edit / delete) |
 | `content/index.json` | **Static topics** (git-tracked, curated) |
+| `content/setsuzoku/material.html` | 121 connectives: Japanese · type · English + POS · Chinese usage · example. Row shape `[expr, type, register[], usage_zh, example_ja, example_zh, english]` |
 | `content/<slug>/…` | Static files for those topics |
 | `api/topics.js` | GET merged index (static ⊕ Blob) |
 | `api/search.js` | GET `/api/search?q=` — word + full-text search over every file |
@@ -44,10 +45,12 @@ Searches words, not just titles: the index holds one record per grammar entry, p
 1. **The page declares its data.** Add to a content page:
    ```html
    <script type="application/json" id="jp-search">
-   {"var":"SECTIONS","key":0,"gloss":3,"ex":[4,5],"label":"{a} · {i}"}
+   {"var":"SECTIONS","key":0,"en":6,"gloss":3,"ex":[4,5],"label":"{a} · {i}"}
    </script>
    ```
-   `var` names a top-level `const … = [ … ]`; `key`/`gloss`/`ex` are indexes (or object keys) inside each row giving the headword, its meaning and an example; `label` locates the row (`{i}` = row number, `{a}` = nearest enclosing title); optional `link` adds a jump the page understands, e.g. `"link":"n={i}"`.
+   `var` names a top-level `const … = [ … ]`; `key`/`en`/`gloss`/`ex` are indexes (or object keys) inside each row giving the headword, its English equivalent, its meaning and an example; `label` locates the row (`{i}` = row number, `{a}` = nearest enclosing title); optional `link` adds a jump the page understands, e.g. `"link":"n={i}"`.
+
+   **`en` is a headword in its own right**, so the search works in both directions: `ただし` and `however` both return the ただし entry card. Equivalents are split on commas and semicolons with the part-of-speech tags stripped, so `despite` matches `despite, in spite of (prep.); although (conj.)` exactly.
 2. **Auto-detected.** With no hint, every all-caps top-level array is parsed the same way and merged — which is exactly how a Claude-built single-file page stores its content (`Q`, `Q2`, `SEC`, …). Rows are located by number only.
 3. **Fallback.** Visible text per block, plus CJK string literals per script line.
 

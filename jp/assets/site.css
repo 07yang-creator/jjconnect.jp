@@ -60,6 +60,7 @@ button{font:inherit;color:inherit}
 .sx-i.word b{font-size:17px}
 .sx-i > span{display:block;font-size:13px;color:var(--sub);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sx-i b .chip{font-size:10.5px;vertical-align:1px}
+.sx-i > span.en{color:var(--midori);font-weight:600}
 .sx-i em{display:block;font-style:normal;font-size:11.5px;color:var(--sub);opacity:.8;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sx-all{display:block;text-align:center;padding:9px;margin-top:4px;border-top:1px solid var(--rule);color:var(--ai);font-size:13px}
 .sx-all:hover,.sx-all.on{background:var(--ai-soft);text-decoration:none}
@@ -228,6 +229,7 @@ dialog.wiz::backdrop{background:rgba(20,28,32,.55);backdrop-filter:blur(2px)}
 .word-card{display:block;background:var(--card);border:1px solid var(--rule);border-left:3px solid var(--ai);border-radius:var(--radius);padding:14px 16px;color:var(--ink);box-shadow:var(--shadow)}
 .word-card:hover{text-decoration:none;border-color:var(--ai)}
 .word-card .k{font-size:22px;font-weight:700;line-height:1.25;display:block}
+.word-card .e{display:block;color:var(--midori);font-size:14px;font-weight:600;margin-top:3px}
 .word-card .g{display:block;color:var(--sub);font-size:13.5px;margin-top:4px}
 .word-card .x{display:block;font-size:14px;margin-top:8px;padding-top:8px;border-top:1px solid var(--rule-soft);line-height:1.6}
 .word-card .w{display:block;font-size:11.5px;color:var(--sub);margin-top:8px;opacity:.85}

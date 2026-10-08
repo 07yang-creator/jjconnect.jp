@@ -136,7 +136,14 @@ function staticRecords(topics) {
 
 /* ---------------- scoring ---------------- */
 
-const W = { title: 120, tag: 70, summary: 40, itemTitle: 60, note: 35, key: 90, gloss: 20, body: 10 };
+const W = { title: 120, tag: 70, summary: 40, itemTitle: 60, note: 35, key: 90, en: 80, gloss: 20, body: 10 };
+
+// "despite, in spite of (prep.); although (conj.)" -> the equivalents alone
+const enParts = (en) => String(en || '')
+  .replace(/\([^)]*\)/g, ' ')
+  .split(/[,;，；]/)
+  .map((s) => trimB(norm(s)))
+  .filter(Boolean);
 
 function scoreField(value, terms, weight, out, preNormalized) {
   const hay = preNormalized ? value : norm(value);
@@ -280,10 +287,9 @@ export async function search(q, opts = {}) {
       for (const r of recs) {
         const rOut = { score: 0 };
         let matched = false;
-        if (r.key) {
-          const keyAll = scoreField(trimB(norm(r.key)), terms, W.key, rOut, true);
-          if (keyAll) matched = true;
-        }
+        if (r.key && scoreField(trimB(norm(r.key)), terms, W.key, rOut, true)) matched = true;
+        // the English equivalent is a headword too, so "despite" finds ～にもかかわらず
+        if (r.en && scoreField(trimB(norm(r.en)), terms, W.en, rOut, true)) matched = true;
         if (r.gloss) scoreField(r.gloss, terms, W.gloss, rOut);
         const bodyAll = scoreField(r.text, terms, W.body, rOut);
         if (bodyAll) matched = true;
@@ -298,7 +304,7 @@ export async function search(q, opts = {}) {
           // the literal string that matched here, so the page can find it again
           term: snip.term || terms[0].raw,
         };
-        if (r.key) { hit.key = r.key; hit.gloss = r.gloss || ''; hit.ex = r.ex || ''; }
+        if (r.key) { hit.key = r.key; hit.en = r.en || ''; hit.gloss = r.gloss || ''; hit.ex = r.ex || ''; }
         hits.push(hit);
       }
 
@@ -309,18 +315,24 @@ export async function search(q, opts = {}) {
       for (const h of hits) {
         if (!h.key) continue;
         const nk = trimB(norm(h.key));
-        const isWord = terms.every((t2) => nk.includes(t2.n));
-        if (!isWord) continue;
+        const parts = enParts(h.en);
+        const inKey = terms.every((t2) => nk.includes(t2.n));
+        const inEn = parts.length && terms.every((t2) => parts.some((p) => p.includes(t2.n)));
+        if (!inKey && !inEn) continue;
         // a headword that IS the query beats one that merely contains it:
         // searching ても should surface ～ても／～でも, not いずれにしても／…
-        const tight = terms.reduce((a, t2) => a + t2.n.length, 0) / Math.max(nk.length, 1);
+        const need = terms.reduce((a, t2) => a + t2.n.length, 0);
+        const basis = inKey ? nk.length
+          : Math.min(...parts.filter((p) => terms.some((t2) => p.includes(t2.n))).map((p) => p.length));
+        const tight = need / Math.max(basis, 1);
         words.push({
           key: h.key,
+          en: h.en,
           gloss: h.gloss,
           label: h.label,
           text: h.ex || h.snippet.text,   // prefer the page's own example sentence
           term: h.term,
-          exact: terms.length === 1 && nk === terms[0].n,
+          exact: terms.length === 1 && (nk === terms[0].n || parts.includes(terms[0].n)),
           score: h.score * (0.6 + 0.8 * Math.min(tight, 1)),
           topic: { slug: t.slug, title: t.title },
           item: { file: i.file, title: i.title, type: i.type, kind: i.kind },
