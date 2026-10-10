@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>日语接续表达 易混辨析</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EEF2EF;--card:#FBFCFA;--ink:#1C2A30;--sub:#5B6B70;--rule:#CFD8D3;
+  --ai:#27466F;--ai-soft:#DCE5F0;--shu:#C23B2A;--shu-soft:#F6DED9;--midori:#2C7652;--midori-soft:#D9ECE1;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#151C1F;--card:#1D262A;--ink:#E4EAE7;--sub:#98A7A3;--rule:#33413F;
+  --ai:#8FB0DC;--ai-soft:#24344A;--shu:#E9776A;--shu-soft:#452521;--midori:#6FC39A;--midori-soft:#1F3A2C}}
+:root[data-theme="dark"]{--paper:#151C1F;--card:#1D262A;--ink:#E4EAE7;--sub:#98A7A3;--rule:#33413F;
+  --ai:#8FB0DC;--ai-soft:#24344A;--shu:#E9776A;--shu-soft:#452521;--midori:#6FC39A;--midori-soft:#1F3A2C}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;font-size:15px;line-height:1.65}
+[lang=ja],.ja{font-family:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:26px 18px 64px;display:grid;grid-template-columns:210px 1fr;gap:34px;align-items:start}
+.hero{grid-column:1/-1;border-bottom:2px solid var(--ink);padding-bottom:16px;margin-bottom:4px}
+h1{margin:0;font-size:30px;letter-spacing:.02em}
+.hero p{margin:8px 0 0;color:var(--sub);font-size:14px;max-width:62ch}
+.hero .lk{margin-top:12px;font-size:13px}
+.hero a{color:var(--ai)}
+nav{position:sticky;top:12px;font-size:13px}
+nav .nt{font-size:12px;color:var(--sub);letter-spacing:.14em;margin:0 0 8px}
+nav a{display:block;padding:5px 9px;border-radius:6px;color:var(--ink);text-decoration:none;border-left:2px solid transparent}
+nav a:hover{background:var(--ai-soft)}
+nav a.on{border-left-color:var(--ai);background:var(--ai-soft);color:var(--ai);font-weight:500}
+nav a .c{color:var(--sub);font-size:11px;margin-right:6px}
+main{min-width:0}
+section{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:24px;margin-bottom:22px;scroll-margin-top:80px}
+.cat{display:inline-block;font-size:11px;letter-spacing:.1em;color:var(--card);background:var(--ai);padding:2px 9px;border-radius:999px;vertical-align:middle}
+h2{margin:10px 0 6px;font-size:23px;line-height:1.35}
+.lead{margin:0 0 16px;color:var(--sub);font-size:14px}
+table{width:100%;border-collapse:collapse;margin-bottom:18px;font-size:14px}
+th{text-align:left;background:var(--ai-soft);color:var(--ai);padding:7px 10px;font-weight:700;font-size:13px;white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:700;white-space:nowrap;font-family:"Zen Kaku Gothic New",sans-serif}
+.ex{display:grid;gap:10px}
+.e{display:grid;grid-template-columns:26px 1fr;gap:10px;padding:10px 12px;border-radius:8px;align-items:start}
+.e.o{background:var(--midori-soft)}.e.x{background:var(--shu-soft)}
+.e .m{font-size:17px;font-weight:700;line-height:1.3;text-align:center}
+.e.o .m{color:var(--midori)}.e.x .m{color:var(--shu)}
+.e .s{font-size:17px;line-height:1.55}
+.e .n{font-size:13px;color:var(--sub);margin-top:3px}
+.tip{margin-top:16px;padding:11px 14px;border-left:3px solid var(--ai);background:var(--ai-soft);border-radius:0 6px 6px 0;font-size:14px}
+.tip b{color:var(--ai)}
+footer{grid-column:1/-1;margin-top:10px;padding-top:16px;border-top:1px solid var(--rule);color:var(--sub);font-size:13px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+footer a{color:var(--ai)}
+.top{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:42px;height:42px;border-radius:50%;border:1px solid var(--rule);background:var(--card);color:var(--ink);font-size:17px;cursor:pointer;display:none;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.top.show{display:block}
+@media (max-width:900px){
+  .wrap{grid-template-columns:1fr;gap:16px;padding:20px 14px 56px}
+  nav{position:static;display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch}
+  nav .nt{display:none}
+  nav a{white-space:nowrap;border:1px solid var(--rule);border-left:1px solid var(--rule);border-radius:999px;padding:6px 13px}
+  nav a.on{border-color:var(--ai)}
+  nav a .c{display:none}
+  h1{font-size:24px}h2{font-size:20px}section{padding:18px 15px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  td:not(:first-child){white-space:normal;min-width:11em}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <h1>日语接续表达　易混辨析</h1>
+    <p>把最容易用错的 16 组接续表达放在一起对比：先看区别表，再看 ○ × 例句，最后记一句口诀。例句中的 × 句大多是语法本身没错、但场合或逻辑不对的说法，也是实际写邮件、写合同时最容易踩的坑。</p>
+    <p class="lk">配套练习：<a href="/v/300/jp-setsuzoku-quiz2.html" target="_top">日语接续表达 400题（在线测验）</a>　|　<a href="/v/300/fukushu.html" target="_top">文型・語彙 復習ノート</a></p>
+  </div>
+  <nav id="nav"></nav>
+  <main id="main"></main>
+  <footer><span>共 16 组辨析・73 个对照例句</span><span>株式会社JJconnect</span></footer>
+</div>
+<button class="top" id="top" aria-label="回到顶部">↑</button>
+<script>

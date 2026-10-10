@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>日语接续表达 400题</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EEF2EF; --card:#FBFCFA; --ink:#1C2A30; --sub:#5B6B70; --rule:#CFD8D3;
+  --ai:#27466F; --ai-soft:#DCE5F0; --shu:#C23B2A; --shu-soft:#F6DED9; --midori:#2C7652; --midori-soft:#D9ECE1;
+  --l1:#7FA88C; --l2:#5E9AA6; --l3:#4F76A8; --l4:#6B5CA0; --l5:#8E3F5E;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#151C1F; --card:#1D262A; --ink:#E4EAE7; --sub:#98A7A3; --rule:#33413F;
+  --ai:#8FB0DC; --ai-soft:#24344A; --shu:#E9776A; --shu-soft:#452521; --midori:#6FC39A; --midori-soft:#1F3A2C;
+}}
+:root[data-theme="dark"]{
+  --paper:#151C1F; --card:#1D262A; --ink:#E4EAE7; --sub:#98A7A3; --rule:#33413F;
+  --ai:#8FB0DC; --ai-soft:#24344A; --shu:#E9776A; --shu-soft:#452521; --midori:#6FC39A; --midori-soft:#1F3A2C;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;font-size:15px;line-height:1.6}
+[lang=ja],.ja{font-family:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:24px 18px 48px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+h1{margin:0;font-size:26px;line-height:1.2;font-weight:700;letter-spacing:.02em}
+h1 small{display:block;font-size:13px;font-weight:400;color:var(--sub);letter-spacing:0;margin-top:4px}
+.score{text-align:right;font-size:13px;color:var(--sub)}
+.score b{font-size:24px;color:var(--ink);font-weight:700}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tabs button{border:1px solid var(--rule);background:transparent;color:var(--ink);font:inherit;font-size:13px;padding:5px 12px;border-radius:999px;cursor:pointer}
+.tabs button[aria-pressed=true]{background:var(--ai);border-color:var(--ai);color:var(--card)}
+#sets button{font-weight:500;padding:6px 16px}
+.grid{display:grid;grid-template-columns:repeat(20,1fr);gap:3px;margin-bottom:20px}
+.grid button{aspect-ratio:1;border:0;border-radius:3px;cursor:pointer;padding:0;font-size:9px;color:transparent;background:var(--rule);position:relative}
+.grid button.lv1{box-shadow:inset 0 -3px 0 var(--l1)}.grid button.lv2{box-shadow:inset 0 -3px 0 var(--l2)}.grid button.lv3{box-shadow:inset 0 -3px 0 var(--l3)}.grid button.lv4{box-shadow:inset 0 -3px 0 var(--l4)}.grid button.lv5{box-shadow:inset 0 -3px 0 var(--l5)}
+.grid button.ok{background:var(--midori)}.grid button.ng{background:var(--shu)}
+.grid button.cur{outline:2px solid var(--ink);outline-offset:1px}
+.grid button.dim{opacity:.25}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:22px 22px 18px;position:relative;overflow:hidden}
+.meta{display:flex;justify-content:space-between;font-size:13px;color:var(--sub);margin-bottom:14px}
+.lvtag{display:inline-flex;align-items:center;gap:6px}
+.lvtag i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.stem{font-size:21px;line-height:1.75;margin:0 0 18px;padding-right:104px;font-weight:500;min-height:2em}
+.stem .blank{display:inline-block;min-width:3.2em;border-bottom:2px solid var(--ai);text-align:center;color:var(--ai);font-weight:700;padding:0 4px}
+.opts{display:grid;gap:8px}
+.opt{display:flex;align-items:center;gap:12px;text-align:left;width:100%;font:inherit;font-size:17px;color:var(--ink);background:transparent;border:1.5px solid var(--rule);border-radius:8px;padding:10px 14px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--ai)}
+.opt .k{flex:none;width:24px;height:24px;border-radius:50%;border:1px solid var(--rule);display:grid;place-items:center;font-size:12px;color:var(--sub);font-family:"Noto Sans SC",sans-serif}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--midori);background:var(--midori-soft)}
+.opt.right .k{background:var(--midori);border-color:var(--midori);color:var(--card)}
+.opt.wrong{border-color:var(--shu);background:var(--shu-soft)}
+.opt.wrong .k{background:var(--shu);border-color:var(--shu);color:var(--card)}
+.opt.long{font-size:15px}
+.stamp{position:absolute;right:18px;top:40px;width:96px;height:96px;border-radius:50%;border:5px solid currentColor;display:grid;place-items:center;font-size:30px;font-weight:700;line-height:1;letter-spacing:.02em;opacity:0;transform:scale(1.6) rotate(-14deg);pointer-events:none;font-family:"Zen Kaku Gothic New",sans-serif}
+.stamp.show{opacity:.85;transform:scale(1) rotate(-14deg);transition:transform .22s cubic-bezier(.3,1.6,.5,1),opacity .15s}
+.stamp.ok{color:var(--midori)}.stamp.ng{color:var(--shu);border-radius:10px}
+.exp{margin-top:16px;padding:12px 14px;border-left:3px solid var(--ai);background:var(--ai-soft);border-radius:0 6px 6px 0;font-size:14px}
+.exp[hidden]{display:none}
+.exp .ans{font-weight:700;margin-bottom:2px}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px}
+.nav button{white-space:nowrap;font:inherit;font-size:14px;padding:8px 18px;border-radius:8px;cursor:pointer;border:1px solid var(--rule);background:var(--card);color:var(--ink)}
+.nav .primary{background:var(--ai);border-color:var(--ai);color:var(--card);font-weight:500}
+.nav button:disabled{opacity:.4;cursor:default}
+.hint{font-size:12px;color:var(--sub);text-align:center}
+.result{margin-top:22px}
+.result h2{font-size:18px;margin:0 0 10px}
+.bars{display:grid;gap:8px}
+.bar{display:grid;grid-template-columns:5.5em 1fr 4.5em;align-items:center;gap:10px;font-size:13px}
+.bar .t{height:10px;background:var(--rule);border-radius:5px;overflow:hidden}
+.bar .t span{display:block;height:100%}
+.foot{display:flex;justify-content:space-between;margin-top:26px;font-size:12px;color:var(--sub);gap:12px;flex-wrap:wrap}
+.foot button{font:inherit;font-size:12px;background:none;border:0;color:var(--shu);cursor:pointer;padding:0;text-decoration:underline}
+button:focus-visible{outline:2px solid var(--ai);outline-offset:2px}
+
+.modes{display:inline-flex;border:1.5px solid var(--ai);border-radius:8px;overflow:hidden;margin-bottom:14px}
+.modes button{font:inherit;font-size:14px;padding:7px 20px;border:0;background:transparent;color:var(--ai);cursor:pointer}
+.modes button[aria-pressed=true]{background:var(--ai);color:var(--card);font-weight:500}
+.setup h2,.report h2{font-size:18px;margin:0 0 4px}
+.setup p{margin:0 0 16px;color:var(--sub);font-size:14px}
+.row{margin-bottom:16px}.row .lab{font-size:13px;color:var(--sub);margin-bottom:6px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{border:1px solid var(--rule);background:transparent;color:var(--ink);font:inherit;font-size:13px;padding:6px 14px;border-radius:999px;cursor:pointer}
+.chips button[aria-pressed=true]{background:var(--ai);border-color:var(--ai);color:var(--card)}
+.big{font:inherit;font-size:16px;font-weight:500;padding:11px 28px;border-radius:8px;border:0;background:var(--ai);color:var(--card);cursor:pointer}
+.big.ghost{background:transparent;color:var(--ai);border:1.5px solid var(--ai)}
+.grid button.sel{background:var(--ai)}
+.opt.picked{border-color:var(--ai);background:var(--ai-soft)}
+.opt.picked .k{background:var(--ai);border-color:var(--ai);color:var(--card)}
+.exambar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;font-size:14px;color:var(--sub)}
+.exambar b{color:var(--ink);font-variant-numeric:tabular-nums}
+.submit{font:inherit;font-size:14px;font-weight:500;padding:8px 18px;border-radius:8px;border:1.5px solid var(--shu);background:transparent;color:var(--shu);cursor:pointer;white-space:nowrap}
+.report .top{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin:10px 0 18px}
+.report .pts{font-size:64px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.report .pts small{font-size:20px;color:var(--sub);font-weight:400}
+.report .grade{display:inline-grid;place-items:center;width:84px;height:84px;border:4px solid currentColor;border-radius:50%;font-size:22px;font-weight:700;transform:rotate(-12deg);font-family:"Zen Kaku Gothic New",sans-serif}
+.report .facts{font-size:14px;color:var(--sub);line-height:1.9}
+.report .facts b{color:var(--ink)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 6px}
+.wrongs{margin-top:22px}
+.wrongs h3{font-size:16px;margin:0 0 10px}
+.w{border-top:1px solid var(--rule);padding:12px 0}
+.w .s{font-size:16px;margin-bottom:4px}
+.w .s .blank{border-bottom:2px solid var(--midori);color:var(--midori);font-weight:700;padding:0 4px}
+.w .yo{font-size:13px}.w .yo .x{color:var(--shu);font-weight:500}.w .yo .o{color:var(--midori);font-weight:500}
+.w .e{font-size:13px;color:var(--sub);margin-top:2px}
+.perfect{padding:14px;background:var(--midori-soft);border-radius:8px;color:var(--midori);font-weight:500}
+[hidden]{display:none!important}
+@media (max-width:560px){
+  .report .pts{font-size:48px}
+  .grid{grid-template-columns:repeat(10,1fr)}
+  .stem{font-size:18px;padding-right:74px}.hint{display:none}.opt{font-size:16px}
+  .stamp{width:70px;height:70px;font-size:22px;top:34px;right:12px;border-width:4px}
+  .card{padding:18px 16px 16px}
+}
+@media (prefers-reduced-motion:reduce){.stamp.show{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>日语接续表达 400题<small>基础100题按难度递进，进阶100题按接续关系分类，文型・語彙100题按复习笔记分类，実務100题按文书场景分类（口语→书面・邮件・契約・後置詞・综合判断）。练习模式即时判题，考试模式交卷后自动评分。</small></h1>
+  <div class="score" id="scorebox"><b id="sc">0</b> / <span id="done">0</span> 答对<br>已完成 <span id="pct">0</span>%</div>
+</header>
+<div class="tabs" id="sets" role="group" aria-label="题库" style="margin-bottom:12px"></div>
+<div class="modes" role="group" aria-label="模式"><button id="mP">练习模式</button><button id="mE">考试模式</button></div>
+
+<section id="practice">
+<div class="tabs" id="tabs" role="group" aria-label="难度筛选"></div>
+<div class="grid" id="grid" aria-label="题目导航"></div>
+<main class="card" id="card">
+  <div class="meta"><span class="lvtag" id="lv"></span><span id="no"></span></div>
+  <p class="stem ja" id="stem" lang="ja"></p>
+  <div class="opts" id="opts"></div>
+  <div class="stamp" id="stamp" aria-hidden="true"></div>
+  <div class="exp" id="exp" hidden><div class="ans" id="ans"></div><div id="why"></div></div>
+  <div class="nav">
+    <button id="prev">上一题</button>
+    <span class="hint">键盘 1–4 选择，← → 翻页</span>
+    <button id="next" class="primary">下一题</button>
+  </div>
+</main>
+<section class="result" id="result"></section>
+<div class="foot"><span>题号颜色：灰＝未答　绿＝答对　红＝答错；下方色条表示难度。</span><button id="reset">清空练习记录</button></div>
+</section>
+
+<section id="exam" hidden>
+  <div class="card setup" id="setup">
+    <h2>开始一场测验</h2>
+    <p>作答过程中不显示对错，交卷后自动评分，并列出错题解析。</p>
+    <div class="row"><div class="lab">出题范围</div><div class="chips" id="cRange"></div></div>
+    <div class="row"><div class="lab">题数（随机抽取，按难度由易到难排列）</div><div class="chips" id="cCount"></div></div>
+    <button class="big" id="startBtn">开始测验</button>
+  </div>
+  <div id="running" hidden>
+    <div class="exambar"><span>已答 <b id="eDone">0</b> / <b id="eTot">0</b>　用时 <b id="eTime">00:00</b></span><button class="submit" id="submitBtn">交卷评分</button></div>
+    <div class="grid" id="eGrid" aria-label="测验题目导航"></div>
+    <main class="card">
+      <div class="meta"><span class="lvtag" id="eLv"></span><span id="eNo"></span></div>
+      <p class="stem ja" id="eStem" lang="ja" style="padding-right:0"></p>
+      <div class="opts" id="eOpts"></div>
+      <div class="nav">
+        <button id="ePrev">上一题</button>
+        <span class="hint">可随时返回修改答案</span>
+        <button id="eNext" class="primary">下一题</button>
+      </div>
+    </main>
+  </div>
+  <div class="card report" id="report" hidden></div>
+</section>
+</div>
+<script>
