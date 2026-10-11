@@ -2,7 +2,7 @@ const SETS=[
  {name:"基础 100题",lv:[null,{n:"入门",c:"var(--l1)"},{n:"初级",c:"var(--l2)"},{n:"中级",c:"var(--l3)"},{n:"中高级",c:"var(--l4)"},{n:"高级",c:"var(--l5)"}],raw:Q},
  {name:"进阶 100题",lv:[null,{n:"时间・先后",c:"var(--l1)"},{n:"紧接・因果",c:"var(--l2)"},{n:"转折・让步",c:"var(--l3)"},{n:"条件・并列",c:"var(--l4)"},{n:"商务・公文",c:"var(--l5)"}],raw:Q2},
  {name:"文型・語彙 100题",lv:[null,{n:"文型①句尾",c:"var(--l1)"},{n:"文型②接续",c:"var(--l2)"},{n:"文型③授受推量",c:"var(--l3)"},{n:"語彙①动词名词",c:"var(--l4)"},{n:"語彙②副词惯用",c:"var(--l5)"}],raw:Q3},
- {name:"実務 100题",lv:[null,{n:"口语→书面",c:"var(--l1)"},{n:"邮件・通知",c:"var(--l2)"},{n:"契約・公文",c:"var(--l3)"},{n:"後置詞・条件",c:"var(--l4)"},{n:"综合判断",c:"var(--l5)"}],raw:Q4}];
+ {name:"一览实战 100题",lv:[null,{n:"并列・添加",c:"var(--l1)"},{n:"转折・因果",c:"var(--l2)"},{n:"时间・条件",c:"var(--l3)"},{n:"选择・说明",c:"var(--l4)"},{n:"转换・目的・综合",c:"var(--l5)"}],raw:Q4}];
 const KEY="jp-setsuzoku-200-v2";
 function rng(s){return()=>{s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff}}
 SETS.forEach((S,si)=>{S.items=S.raw.map((q,i)=>{const r=rng((i+1)*7919+17+si*131);const idx=[0,1,2,3];

@@ -30,7 +30,7 @@ src/quiz/
   data/set1-basic.js    const Q  = [...]   基础100题（按难度递进）
   data/set2-advanced.js const Q2 = [...]   进阶100题（按接续关系分类）
   data/set3-bunkei-goi.js const Q3 = [...] 文型・語彙100题
-  data/set4-jitsumu.js  const Q4 = [...]   実務100题（口语→书面 / 邮件・通知 / 契約・公文 / 後置詞・条件 / 综合判断）
+  data/set4-ichiran.js  const Q4 = [...]   一览实战100题：正确答案与干扰项都取自站点的《接续表达一览》121 条，按其十类分五级
   app.js                SETS 定义 + 练习/考试两套渲染逻辑 + localStorage
   footer.html           </script></body></html>
 
@@ -45,6 +45,8 @@ src/fukushu/  同上
 ```
 
 - `level` 1–5，每套每级 20 题，决定题号色条与筛选分类（分类名在 `app.js` 的 `SETS[].lv`）
+- **出题范围只能是学习材料里已有的词**：《接续表达一览》（`jp/content/setsuzoku/material.html` 的 121 条）、
+  易混辨析 16 组、復習ノート 41 组。不要引入材料之外的新词当考点（2026-10-11 用户明确要求）。
 - `stem` 用全角 `（　）` 标记空格，渲染时替换为答案；答对后 blank 填入正确答案
 - **选项数组第一个永远是正确答案**，运行时按 `rng(index*7919+17+set*131)` 确定性打乱，所以每题选项顺序固定但不总在第一位
 - `explanation` 中文解析，答题后显示

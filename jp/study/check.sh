@@ -16,7 +16,7 @@ PY
 done
 node - << 'EOF2' || fail=1
 const fs=require('fs');
-const src=['set1-basic','set2-advanced','set3-bunkei-goi','set4-jitsumu'].map(n=>fs.readFileSync(`src/quiz/data/${n}.js`,'utf8'));
+const src=['set1-basic','set2-advanced','set3-bunkei-goi','set4-ichiran'].map(n=>fs.readFileSync(`src/quiz/data/${n}.js`,'utf8'));
 let bad=0;
 src.forEach((s,i)=>{
   const arr=eval(s.replace(/^const Q\d* =/,''));

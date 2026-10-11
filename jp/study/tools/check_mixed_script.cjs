@@ -11,7 +11,7 @@ const flag = (where, s) => {
   const bad = [...s].filter(c => SIMPLIFIED.has(c));
   if (bad.length) hits.push(`  ${where}  ${bad.join('')}  →  ${s.slice(0, 60)}`);
 };
-for (const [file, varname] of [['src/quiz/data/set1-basic.js','Q'],['src/quiz/data/set2-advanced.js','Q2'],['src/quiz/data/set3-bunkei-goi.js','Q3'],['src/quiz/data/set4-jitsumu.js','Q4']]) {
+for (const [file, varname] of [['src/quiz/data/set1-basic.js','Q'],['src/quiz/data/set2-advanced.js','Q2'],['src/quiz/data/set3-bunkei-goi.js','Q3'],['src/quiz/data/set4-ichiran.js','Q4']]) {
   const arr = eval(fs.readFileSync(file,'utf8').replace(/^const \w+ =/,''));
   arr.forEach((q,i) => { flag(`${file}#${i+1} stem`, q[1]); q[2].forEach(o => flag(`${file}#${i+1} option`, o)); });
 }

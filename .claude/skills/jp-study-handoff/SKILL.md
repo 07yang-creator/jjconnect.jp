@@ -23,6 +23,8 @@ argument-hint: "[要做的项目，如 待遇表現編 / 第五套 / 导航条]"
 
 ## 改动规则
 
+0. **考点只能来自学习材料**：《接续表达一览》121 条（`jp/content/setsuzoku/material.html`）、易混辨析 16 组、
+   復習ノート 41 组。不要拿材料之外的新词当正确答案（2026-10-11 用户退回过一整套）。要考新词，先写进讲义。
 1. 题目：`[level, stem, [正确, 干扰, 干扰, 干扰], 解析]`，每套 100 题、五级各 20，正确答案放第一位。
    加一套 = 新 `src/quiz/data/setN-*.js` + `app.js` 的 `SETS` 追加一项 + `build.sh` / `check.sh` /
    `tools/check_mixed_script.cjs` 的文件表 + `shell.html` 的 `<title>`／`<h1>` 题数。

@@ -8,7 +8,7 @@ cat src/quiz/shell.html \
     src/quiz/data/set1-basic.js \
     src/quiz/data/set2-advanced.js \
     src/quiz/data/set3-bunkei-goi.js \
-    src/quiz/data/set4-jitsumu.js \
+    src/quiz/data/set4-ichiran.js \
     src/quiz/app.js \
     src/quiz/footer.html > dist/quiz.html
 
