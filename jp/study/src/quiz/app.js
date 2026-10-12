@@ -4,14 +4,17 @@ const SETS=[
  {name:"文型・語彙 100题",lv:[null,{n:"文型①句尾",c:"var(--l1)"},{n:"文型②接续",c:"var(--l2)"},{n:"文型③授受推量",c:"var(--l3)"},{n:"語彙①动词名词",c:"var(--l4)"},{n:"語彙②副词惯用",c:"var(--l5)"}],raw:Q3},
  {name:"一览实战 100题",lv:[null,{n:"并列・添加",c:"var(--l1)"},{n:"转折・因果",c:"var(--l2)"},{n:"时间・条件",c:"var(--l3)"},{n:"选择・说明",c:"var(--l4)"},{n:"转换・目的・综合",c:"var(--l5)"}],raw:Q4}];
 const KEY="jp-setsuzoku-200-v2";
-function rng(s){return()=>{s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff}}
-SETS.forEach((S,si)=>{S.items=S.raw.map((q,i)=>{const r=rng((i+1)*7919+17+si*131);const idx=[0,1,2,3];
+function rng(s){return()=>{s=(Math.imul(s,1103515245)+12345)&0x7fffffff;return s/0x7fffffff}}
+// option order is fixed per question (so a redo looks the same), but a set gets a new seed whenever its practice record is reset
+function buildItems(si){const S=SETS[si],salt=st.salt[si]||0;S.items=S.raw.map((q,i)=>{const r=rng((i+1)*7919+17+si*131+salt*7001);const idx=[0,1,2,3];
   for(let j=3;j>0;j--){const k=Math.floor(r()*(j+1));[idx[j],idx[k]]=[idx[k],idx[j]]}
-  return{lv:q[0],stem:q[1],opts:idx.map(x=>q[2][x]),ans:idx.indexOf(0),exp:q[3],correct:q[2][0]}})});
+  return{lv:q[0],stem:q[1],opts:idx.map(x=>q[2][x]),ans:idx.indexOf(0),exp:q[3],correct:q[2][0]}})}
 let st={set:0,a:[{},{},{}],cur:[0,0,0],f:0,mode:"practice",range:0,count:20,exam:null};
 try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&Array.isArray(s.a))st=Object.assign(st,s);
   else{const o=JSON.parse(localStorage.getItem("jp-setsuzoku-100-v1"));if(o&&o.a)st.a[0]=o.a}}catch(e){}
 while(st.a.length<SETS.length){st.a.push({});st.cur.push(0)}
+if(!Array.isArray(st.salt))st.salt=[];while(st.salt.length<SETS.length)st.salt.push(0);
+SETS.forEach((_,si)=>buildItems(si));
 const SET=()=>SETS[st.set], IT=()=>SET().items, LVS=()=>SET().lv, ANS=()=>st.a[st.set];
 const CUR=()=>st.cur[st.set], setCur=v=>{st.cur[st.set]=v};
 function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
@@ -62,7 +65,8 @@ function score(){const keys=Object.keys(ANS());const ok=keys.filter(i=>ANS()[i]=
   r.innerHTML=h+"</div>"}
 function go(d){const v=visible(),p=v.indexOf(CUR());const n=v[p+d];if(n!=null){setCur(n);save();render()}}
 $("prev").onclick=()=>go(-1);$("next").onclick=()=>go(1);
-$("reset").onclick=()=>{if(confirm(`确定清空「${SET().name}」的练习记录？`)){st.a[st.set]={};setCur(0);st.f=0;save();render()}};
+$("reset").onclick=()=>{if(confirm(`确定清空「${SET().name}」的练习记录？选项顺序也会重新打乱。`)){st.a[st.set]={};setCur(0);st.f=0;
+  st.salt[st.set]=1+Math.floor(Math.random()*9998);if(st.exam&&st.exam.set===st.set)st.exam=null;buildItems(st.set);save();render()}};
 
 /* ---------- exam ---------- */
 const RANGES=()=>[["全部",0],...LVS().slice(1).map((l,i)=>[l.n,i+1])];

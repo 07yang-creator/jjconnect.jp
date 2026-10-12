@@ -21,6 +21,7 @@
 | 13 | 2026-10-10 Mac 上的 code session（`/jp`）：源码并入 `jjconnect.jp/jp/study/`；「接续词测试再出100测试题，直接上线」→ 第四套（実務100题）上线；讲义互链改站内路径 |
 | 15 | 2026-10-12 新专题「日语动词」：用户给了两张表（こどば-变形表.pdf 的动词页、自动词-他动词 分类频度列表.pdf），要求讲义＋分组测验，重点受身形和自他，不必绑定不动产。做成静态专题 `content/doushi/`：讲义（活用表 50・受身 10 组・自他 45 对＋6 组・表の訂正）＋ 180 题（9 组×20）。表里的误标（入る・帰る等标成一段，ら抜き当标准可能形，乾く读 ひらく，投げる・押す 列为自动词……）在讲义里订正 |
 | 16 | 2026-10-12 用户：「the total amount of tests should cover every verb given, but not limited to」→ 動詞测验扩到 240 题（活用 60・受身形 100・自他 80，12 组），两张表的 136 个动词（含使役形当他动词的条目）每个至少作为考点出现一次；check_doushi.cjs 的 coverage 审计从此强制 |
+| 17 | 2026-10-12 用户：「better shift the order of answer options upon each reset」→ 三个测验引擎（400题・動詞 240题・旧 100题）加 salt：清空练习记录时该题库重新打乱选项（salt 存 localStorage，考试中的同题库作废）；LCG 改用 Math.imul，salt=0 时顺序与之前完全一致 |
 | 14 | 2026-10-11 用户退回第四套：「those core words are not from the learning material」→ 撤下，改写为「一览实战100题」：考点全部取自《接续表达一览》121 条（先覆盖未考过的 41 条），重新上线。**规则：考点只能来自学习材料** |
 
 ## 关键设计决策

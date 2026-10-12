@@ -3,13 +3,16 @@ const SETS=[
  {name:"受身形 100题",lv:[null,{n:"作り方",c:"var(--l1)"},{n:"四种受身・助词",c:"var(--l2)"},{n:"受身・尊敬・可能",c:"var(--l3)"},{n:"使役受身・综合",c:"var(--l4)"},{n:"受身 実戦",c:"var(--l5)"}],raw:Q2},
  {name:"自動詞・他動詞 80题",lv:[null,{n:"対応ペア",c:"var(--l1)"},{n:"助词・ている／てある",c:"var(--l2)"},{n:"視点・情感・综合",c:"var(--l3)"},{n:"自然現象・情感",c:"var(--l4)"}],raw:Q3}];
 const KEY="jp-doushi-v1";
-function rng(s){return()=>{s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff}}
-SETS.forEach((S,si)=>{S.items=S.raw.map((q,i)=>{const r=rng((i+1)*7919+17+si*131);const idx=[0,1,2,3];
+function rng(s){return()=>{s=(Math.imul(s,1103515245)+12345)&0x7fffffff;return s/0x7fffffff}}
+// option order is fixed per question (so a redo looks the same), but a set gets a new seed whenever its practice record is reset
+function buildItems(si){const S=SETS[si],salt=st.salt[si]||0;S.items=S.raw.map((q,i)=>{const r=rng((i+1)*7919+17+si*131+salt*7001);const idx=[0,1,2,3];
   for(let j=3;j>0;j--){const k=Math.floor(r()*(j+1));[idx[j],idx[k]]=[idx[k],idx[j]]}
-  return{lv:q[0],stem:q[1],opts:idx.map(x=>q[2][x]),ans:idx.indexOf(0),exp:q[3],correct:q[2][0]}})});
+  return{lv:q[0],stem:q[1],opts:idx.map(x=>q[2][x]),ans:idx.indexOf(0),exp:q[3],correct:q[2][0]}})}
 let st={set:0,a:[{},{},{}],cur:[0,0,0],f:0,mode:"practice",range:0,count:20,exam:null};
 try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&Array.isArray(s.a))st=Object.assign(st,s)}catch(e){}
 while(st.a.length<SETS.length){st.a.push({});st.cur.push(0)}
+if(!Array.isArray(st.salt))st.salt=[];while(st.salt.length<SETS.length)st.salt.push(0);
+SETS.forEach((_,si)=>buildItems(si));
 const SET=()=>SETS[st.set], IT=()=>SET().items, LVS=()=>SET().lv, ANS=()=>st.a[st.set], N=()=>IT().length;
 const CUR=()=>st.cur[st.set], setCur=v=>{st.cur[st.set]=v};
 function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
@@ -61,7 +64,8 @@ function score(){const keys=Object.keys(ANS());const ok=keys.filter(i=>ANS()[i]=
   r.innerHTML=h+"</div>"}
 function go(d){const v=visible(),p=v.indexOf(CUR());const n=v[p+d];if(n!=null){setCur(n);save();render()}}
 $("prev").onclick=()=>go(-1);$("next").onclick=()=>go(1);
-$("reset").onclick=()=>{if(confirm(`确定清空「${SET().name}」的练习记录？`)){st.a[st.set]={};setCur(0);st.f=0;save();render()}};
+$("reset").onclick=()=>{if(confirm(`确定清空「${SET().name}」的练习记录？选项顺序也会重新打乱。`)){st.a[st.set]={};setCur(0);st.f=0;
+  st.salt[st.set]=1+Math.floor(Math.random()*9998);if(st.exam&&st.exam.set===st.set)st.exam=null;buildItems(st.set);save();render()}};
 
 /* ---------- exam ---------- */
 const RANGES=()=>[["全部",0],...LVS().slice(1).map((l,i)=>[l.n,i+1])];

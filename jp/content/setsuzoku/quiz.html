@@ -145,7 +145,7 @@ button:focus-visible{outline:2px solid var(--ai);outline-offset:2px}
   </div>
 </main>
 <section class="result" id="result"></section>
-<div class="foot"><span>题号颜色：灰＝未答　绿＝答对　红＝答错；下方色条表示难度。</span><button id="reset">清空练习记录</button></div>
+<div class="foot"><span>题号颜色：灰＝未答　绿＝答对　红＝答错；下方色条表示难度。</span><button id="reset">清空练习记录・重新打乱选项</button></div>
 </section>
 
 <section id="exam" hidden>
@@ -287,11 +287,14 @@ const Q = [
 ];
 const LV=[null,{n:"入门",c:"var(--l1)"},{n:"初级",c:"var(--l2)"},{n:"中级",c:"var(--l3)"},{n:"中高级",c:"var(--l4)"},{n:"高级",c:"var(--l5)"}];
 const KEY="jp-setsuzoku-100-v1";
-function rng(s){return()=>{s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff}}
-const ITEMS=Q.map((q,i)=>{const r=rng(i*7919+17);const idx=[0,1,2,3];for(let j=3;j>0;j--){const k=Math.floor(r()*(j+1));[idx[j],idx[k]]=[idx[k],idx[j]]}
-  return{lv:q[0],stem:q[1],opts:idx.map(x=>q[2][x]),ans:idx.indexOf(0),exp:q[3],correct:q[2][0]}});
-let st={a:{},cur:0,f:0,mode:"practice",range:0,count:20,exam:null};
+function rng(s){return()=>{s=(Math.imul(s,1103515245)+12345)&0x7fffffff;return s/0x7fffffff}}
+// option order is fixed per question, but re-seeded whenever the practice record is reset
+let ITEMS;
+function buildItems(){const salt=st.salt||0;ITEMS=Q.map((q,i)=>{const r=rng(i*7919+17+salt*7001);const idx=[0,1,2,3];for(let j=3;j>0;j--){const k=Math.floor(r()*(j+1));[idx[j],idx[k]]=[idx[k],idx[j]]}
+  return{lv:q[0],stem:q[1],opts:idx.map(x=>q[2][x]),ans:idx.indexOf(0),exp:q[3],correct:q[2][0]}})}
+let st={a:{},cur:0,f:0,mode:"practice",range:0,count:20,exam:null,salt:0};
 try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.a)st=Object.assign(st,s)}catch(e){}
+buildItems();
 function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
 const $=id=>document.getElementById(id);
 const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
@@ -337,7 +340,7 @@ function score(){const keys=Object.keys(st.a);const ok=keys.filter(i=>st.a[i]===
   r.innerHTML=h+"</div>"}
 function go(d){const v=visible(),p=v.indexOf(st.cur);const n=v[p+d];if(n!=null){st.cur=n;save();render()}}
 $("prev").onclick=()=>go(-1);$("next").onclick=()=>go(1);
-$("reset").onclick=()=>{if(confirm("确定清空全部练习记录？")){st.a={};st.cur=0;st.f=0;save();render()}};
+$("reset").onclick=()=>{if(confirm("确定清空全部练习记录？选项顺序也会重新打乱。")){st.a={};st.cur=0;st.f=0;st.salt=1+Math.floor(Math.random()*9998);st.exam=null;buildItems();save();render()}};
 
 /* ---------- exam ---------- */
 const RANGES=[["全部难度",0],["入门",1],["初级",2],["中级",3],["中高级",4],["高级",5]];
