@@ -9,7 +9,7 @@ const load = (file, re) => eval(fs.readFileSync(file, 'utf8').replace(re, ''));
 // data.js holds three consts; evaluate it in one scope
 const dataSrc = fs.readFileSync('src/doushi/data.js', 'utf8');
 const data = new Function(dataSrc + ';return {VERBS,PAIRS,SEC};')();
-const sets = [['katsuyo', 'Q1', 3], ['ukemi', 'Q2', 5], ['jita', 'Q3', 4]];
+const sets = [['katsuyo', 'Q1', 4], ['ukemi', 'Q2', 6], ['jita', 'Q3', 4]];
 const allQ = []; // every question, for the coverage audit below
 let bad = 0;
 const hits = [];
@@ -50,8 +50,10 @@ for (const [name, varname, groups] of sets) {
 }
 // coverage: every verb given in the two charts must be tested at least once
 // (its stem appears in a question's stem text or correct answer)
-const given = new Set([...data.VERBS.filter(r => r[12] === 1).map(r => r[0]), ...data.PAIRS.flatMap(r => [r[0], r[2]])]); // the owner's charts only; added verbs are optional
-const untested = [...given].filter(v => !allQ.some(q => (q[1] + '\n' + q[2][0]).includes(stemOf(v))));
+// every verb in the material: the chart's 50, the 43 added ones, and the 46 pairs
+const given = new Set([...data.VERBS.map(r => r[0]), ...data.PAIRS.flatMap(r => [r[0], r[2]])]);
+const coverStem = v => v.startsWith('〜する') ? '勉強' : stemOf(v); // the 〜する row stands for 名詞＋する (tested through 勉強する)
+const untested = [...given].filter(v => !allQ.some(q => (q[1] + '\n' + q[2][0]).includes(coverStem(v))));
 console.log(`  coverage: ${given.size - untested.length} / ${given.size} given verbs tested${untested.length ? ' — UNTESTED: ' + untested.join('、') : ''}`);
 if (untested.length) bad = 1;
 // material

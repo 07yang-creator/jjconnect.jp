@@ -23,6 +23,7 @@
 | 16 | 2026-10-12 用户：「the total amount of tests should cover every verb given, but not limited to」→ 動詞测验扩到 240 题（活用 60・受身形 100・自他 80，12 组），两张表的 136 个动词（含使役形当他动词的条目）每个至少作为考点出现一次；check_doushi.cjs 的 coverage 审计从此强制 |
 | 17 | 2026-10-12 用户：「better shift the order of answer options upon each reset」→ 三个测验引擎（400题・動詞 240题・旧 100题）加 salt：清空练习记录时该题库重新打乱选项（salt 存 localStorage，考试中的同题库作废）；LCG 改用 Math.imul，salt=0 时顺序与之前完全一致 |
 | 18 | 2026-10-12 用户看了活用表的截图：類 放最左、可能形放仮定形旁边（五段两者只差る）、再加常用动词并分组。→ 93 词（表里 50＋常用 43）分 移動／日常／伝達／思考／授受・売買／変化／存在・特殊 7 组，每组一张小表＋顶部跳转；VERBS 行末加 グループ／出典 两列，coverage 审计只看出典=1 |
+| 19 | 2026-10-12 「update tests accordingly」→ 新加的 43 个常用动词也进测验：活用④ 常用動詞の活用（20）＋受身⑥ 受身 実戦②（20），共 280 题 14 组；coverage 审计改为覆盖活用表 93 词＋自他 46 组＝178 个动词，全部通过 |
 | 14 | 2026-10-11 用户退回第四套：「those core words are not from the learning material」→ 撤下，改写为「一览实战100题」：考点全部取自《接续表达一览》121 条（先覆盖未考过的 41 条），重新上线。**规则：考点只能来自学习材料** |
 
 ## 关键设计决策

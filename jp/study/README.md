@@ -11,7 +11,7 @@
 | `dist/benseki.html` | 接续表达 易混辨析（16 组） | `/v/t260924-h8rz/benseki.html` |
 | `dist/fukushu.html` | 文型・語彙 復習ノート（文型 23 组 + 語彙 18 组） | `/v/300/fukushu.html` |
 | `../content/doushi/material.html` | 日语动词 讲义：活用表 93 词（表里 50＋常用 43，按意思分 7 组，可检索）・受身形 8 组・自他 46 组＋5 组 | `/v/doushi/material.html`（**静态专题**） |
-| `../content/doushi/quiz.html` | 日语动词 240 题：活用 60・受身形 100・自他 80，12 个分组各 20 题；两张表的每个动词至少考一次（check_doushi.cjs 审计） | `/v/doushi/quiz.html`（**静态专题**） |
+| `../content/doushi/quiz.html` | 日语动词 280 题：活用 80・受身形 120・自他 80，14 个分组各 20 题；活用表 93 词＋自他 46 组的每个动词至少考一次（check_doushi.cjs 审计） | `/v/doushi/quiz.html`（**静态专题**） |
 
 另有 `/mnt/user-data/outputs/日语接续表达一览.pdf`（7 页 A4，接续表达分类表，WeasyPrint 生成，源码未保留，见 BACKLOG 第 6 项）。
 
@@ -40,7 +40,7 @@ src/benseki/  shell.html + sec.js (const SEC) + render.js + footer.html
 src/fukushu/  同上
 
 src/doushi/        shell.html + data.js (VERBS 活用表 93 行・末两列是 グループ／出典 / PAIRS 自他 46 行 / SEC 讲解 15 组) + render.js + footer.html
-src/doushi-quiz/   shell.html + data/katsuyo.js (Q1 60) + data/ukemi.js (Q2 100) + data/jita.js (Q3 80) + app.js + footer.html
+src/doushi-quiz/   shell.html + data/katsuyo.js (Q1 80) + data/ukemi.js (Q2 120) + data/jita.js (Q3 80) + app.js + footer.html
                    app.js 是 quiz/app.js 的泛化版：每套题数不固定（N），每级固定 20 题；localStorage key `jp-doushi-v1`
 ```
 

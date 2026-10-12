@@ -1,6 +1,6 @@
 const SETS=[
- {name:"活用 60题",lv:[null,{n:"見分け・基本活用",c:"var(--l1)"},{n:"使役形・可能形",c:"var(--l2)"},{n:"活用総合",c:"var(--l3)"}],raw:Q1},
- {name:"受身形 100题",lv:[null,{n:"作り方",c:"var(--l1)"},{n:"四种受身・助词",c:"var(--l2)"},{n:"受身・尊敬・可能",c:"var(--l3)"},{n:"使役受身・综合",c:"var(--l4)"},{n:"受身 実戦",c:"var(--l5)"}],raw:Q2},
+ {name:"活用 80题",lv:[null,{n:"見分け・基本活用",c:"var(--l1)"},{n:"使役形・可能形",c:"var(--l2)"},{n:"活用総合",c:"var(--l3)"},{n:"常用動詞の活用",c:"var(--l4)"}],raw:Q1},
+ {name:"受身形 120题",lv:[null,{n:"作り方",c:"var(--l1)"},{n:"四种受身・助词",c:"var(--l2)"},{n:"受身・尊敬・可能",c:"var(--l3)"},{n:"使役受身・综合",c:"var(--l4)"},{n:"受身 実戦①",c:"var(--l5)"},{n:"受身 実戦②",c:"var(--l6)"}],raw:Q2},
  {name:"自動詞・他動詞 80题",lv:[null,{n:"対応ペア",c:"var(--l1)"},{n:"助词・ている／てある",c:"var(--l2)"},{n:"視点・情感・综合",c:"var(--l3)"},{n:"自然現象・情感",c:"var(--l4)"}],raw:Q3}];
 const KEY="jp-doushi-v1";
 function rng(s){return()=>{s=(Math.imul(s,1103515245)+12345)&0x7fffffff;return s/0x7fffffff}}
@@ -69,7 +69,7 @@ $("reset").onclick=()=>{if(confirm(`确定清空「${SET().name}」的练习记�
 
 /* ---------- exam ---------- */
 const RANGES=()=>[["全部",0],...LVS().slice(1).map((l,i)=>[l.n,i+1])];
-function counts(){const max=st.range?20:N();return(st.range?[10,20]:[20,40,60,80,100]).filter(n=>n<=max)}
+function counts(){const max=st.range?20:N();return(st.range?[10,20]:[20,40,60,80,100,120]).filter(n=>n<=max)}
 function chips(el,list,key){el.innerHTML="";list.forEach(([n,v])=>{const b=document.createElement("button");b.textContent=n;b.setAttribute("aria-pressed",st[key]===v);
   b.onclick=()=>{st[key]=v;if(key==="range"&&!counts().includes(st.count))st.count=counts().slice(-1)[0];save();renderSetup()};el.appendChild(b)})}
 function renderSetup(){if(!counts().includes(st.count))st.count=counts().slice(-1)[0];$("setup").querySelector("h2").textContent=`开始一场测验　·　${SET().name}`;chips($("cRange"),RANGES(),"range");chips($("cCount"),counts().map(n=>[n+" 题",n]),"count")}

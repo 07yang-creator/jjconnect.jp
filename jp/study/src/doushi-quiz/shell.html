@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>日语动词 240题</title>
+<title>日语动词 280题</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -11,7 +11,7 @@
 :root{
   --paper:#EEF2EF; --card:#FBFCFA; --ink:#1C2A30; --sub:#5B6B70; --rule:#CFD8D3;
   --ai:#27466F; --ai-soft:#DCE5F0; --shu:#C23B2A; --shu-soft:#F6DED9; --midori:#2C7652; --midori-soft:#D9ECE1;
-  --l1:#7FA88C; --l2:#5E9AA6; --l3:#4F76A8; --l4:#6B5CA0; --l5:#8E3F5E;
+  --l1:#7FA88C; --l2:#5E9AA6; --l3:#4F76A8; --l4:#6B5CA0; --l5:#8E3F5E; --l6:#A8663A;
   box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
@@ -39,7 +39,7 @@ h1 small a{color:var(--ai)}
 #sets button{font-weight:500;padding:6px 16px}
 .grid{display:grid;grid-template-columns:repeat(20,1fr);gap:3px;margin-bottom:20px}
 .grid button{aspect-ratio:1;border:0;border-radius:3px;cursor:pointer;padding:0;font-size:9px;color:transparent;background:var(--rule);position:relative}
-.grid button.lv1{box-shadow:inset 0 -3px 0 var(--l1)}.grid button.lv2{box-shadow:inset 0 -3px 0 var(--l2)}.grid button.lv3{box-shadow:inset 0 -3px 0 var(--l3)}.grid button.lv4{box-shadow:inset 0 -3px 0 var(--l4)}.grid button.lv5{box-shadow:inset 0 -3px 0 var(--l5)}
+.grid button.lv1{box-shadow:inset 0 -3px 0 var(--l1)}.grid button.lv2{box-shadow:inset 0 -3px 0 var(--l2)}.grid button.lv3{box-shadow:inset 0 -3px 0 var(--l3)}.grid button.lv4{box-shadow:inset 0 -3px 0 var(--l4)}.grid button.lv5{box-shadow:inset 0 -3px 0 var(--l5)}.grid button.lv6{box-shadow:inset 0 -3px 0 var(--l6)}
 .grid button.ok{background:var(--midori)}.grid button.ng{background:var(--shu)}
 .grid button.cur{outline:2px solid var(--ink);outline-offset:1px}
 .grid button.dim{opacity:.25}
@@ -126,7 +126,7 @@ button:focus-visible{outline:2px solid var(--ai);outline-offset:2px}
 <body>
 <div class="wrap">
 <header>
-  <h1>日语动词 240题<small>活用 60 题（見分け・基本活用／使役・可能／活用総合）、受身形 100 题（作り方／四种受身・助词／受身・尊敬・可能／使役受身・综合／受身 実戦）、自動詞・他動詞 80 题（対応ペア／助词・ている／てある／視点・情感・综合／自然現象・情感）。<a href="/v/doushi/material.html" target="_top">讲义</a>两张表里的每一个动词都至少考到一次。练习模式即时判题，考试模式交卷后自动评分。</small></h1>
+  <h1>日语动词 280题<small>活用 80 题（見分け・基本活用／使役・可能／活用総合／常用動詞の活用）、受身形 120 题（作り方／四种受身・助词／受身・尊敬・可能／使役受身・综合／受身 実戦①②）、自動詞・他動詞 80 题（対応ペア／助词・ている／てある／視点・情感・综合／自然現象・情感）。<a href="/v/doushi/material.html" target="_top">讲义</a>活用表 93 词和自他表 46 组里的每一个动词都至少考到一次。练习模式即时判题，考试模式交卷后自动评分。</small></h1>
   <div class="score" id="scorebox"><b id="sc">0</b> / <span id="done">0</span> 答对<br>已完成 <span id="pct">0</span>%</div>
 </header>
 <div class="tabs" id="sets" role="group" aria-label="题库" style="margin-bottom:12px"></div>
