@@ -50,7 +50,7 @@ for (const [name, varname, groups] of sets) {
 }
 // coverage: every verb given in the two charts must be tested at least once
 // (its stem appears in a question's stem text or correct answer)
-const given = new Set([...data.VERBS.map(r => r[0]), ...data.PAIRS.flatMap(r => [r[0], r[2]])]);
+const given = new Set([...data.VERBS.filter(r => r[12] === 1).map(r => r[0]), ...data.PAIRS.flatMap(r => [r[0], r[2]])]); // the owner's charts only; added verbs are optional
 const untested = [...given].filter(v => !allQ.some(q => (q[1] + '\n' + q[2][0]).includes(stemOf(v))));
 console.log(`  coverage: ${given.size - untested.length} / ${given.size} given verbs tested${untested.length ? ' — UNTESTED: ' + untested.join('、') : ''}`);
 if (untested.length) bad = 1;
@@ -59,8 +59,10 @@ data.SEC.forEach(s => { flag(`SEC:${s.id} title`, s.t); s.tb.slice(1).forEach(r 
 data.VERBS.forEach(r => r.slice(0, 10).forEach(c => flag(`VERBS:${r[0]}`, c)));
 data.PAIRS.forEach(r => [r[0], r[2]].forEach(c => flag(`PAIRS:${r[0]}`, c)));
 const ids = new Set(data.SEC.map(s => s.id));
-console.log(`  doushi material: ${data.VERBS.length} verbs, ${data.PAIRS.length} pairs, ${data.SEC.length} sections, dup ids ${data.SEC.length - ids.size}`);
-if (data.VERBS.length !== 50 || data.PAIRS.length !== 46 || ids.size !== data.SEC.length) bad = 1;
+const chartVerbs = data.VERBS.filter(r => r[12] === 1).length;
+const badRows = data.VERBS.filter(r => r.length !== 13 || !r[11]).length;
+console.log(`  doushi material: ${data.VERBS.length} verbs (${chartVerbs} from the chart, bad rows ${badRows}), ${data.PAIRS.length} pairs, ${data.SEC.length} sections, dup ids ${data.SEC.length - ids.size}`);
+if (chartVerbs !== 50 || badRows || data.PAIRS.length !== 46 || ids.size !== data.SEC.length) bad = 1;
 // the material must not talk about its sources' mistakes: corrections are applied silently
 const meta = [data.SEC.map(s => [s.t, s.lead, s.tip, ...s.tb.flat(), ...s.ex.flat()]).flat(), data.VERBS.flat(), data.PAIRS.flat()].flat()
   .filter(x => typeof x === 'string' && /誤り|误标|有误|误写|订正|訂正|表里|表の|表では/.test(x));

@@ -17,24 +17,30 @@ function section(s){return `
 
 /* ---------- 活用表 ---------- */
 const KCLS={"五段":"g5","一段":"g1","特殊":"gs"};
+const VGROUPS=[...new Set(VERBS.map(r=>r[11]))];
+const VHEAD=`<thead><tr><th>類</th><th>辞書形</th><th>未然形</th><th>連用形</th><th>仮定形</th><th>可能形</th><th>命令形</th><th>使役形</th><th>受身形</th><th>備考</th></tr></thead>`;
 function verbsSection(){return `
 <section id="katsuyo-hyo">
   <span class="cat">活用表</span>
-  <h2><span class="ja" lang="ja">動詞活用表（50 語）</span></h2>
-  <p class="lead">終止形・連体形＝辞書形，省略。一段的可能形写标准形，口语的ら抜き形在备注栏。可按类别筛选或输入任何活用形检索。</p>
+  <h2><span class="ja" lang="ja">動詞活用表（${VERBS.length} 語・${VGROUPS.length} 組）</span></h2>
+  <p class="lead">按意思分成 ${VGROUPS.length} 组。終止形・連体形＝辞書形，省略；可能形放在仮定形旁边，五段的两者只差一个「る」。一段的可能形写标准形，口语的ら抜き形在备注栏。可按类别筛选或输入任何活用形检索。</p>
   <div class="filters"><div class="chips" id="vf">${["全部","五段","一段","特殊"].map(k=>`<button data-k="${k}" aria-pressed="${k==="全部"}">${k}</button>`).join("")}</div>
   <input id="vq" type="search" placeholder="検索：辞書形・読み・活用形（例：られる）" aria-label="活用表检索"><span class="cnt" id="vcnt"></span></div>
-  <div class="tw"><table id="vt"><thead><tr><th>辞書形</th><th>類</th><th>未然形</th><th>連用形</th><th>仮定形</th><th>命令形</th><th>使役形</th><th>受身形</th><th>可能形</th><th>備考</th></tr></thead><tbody></tbody></table></div>
+  <div class="vgnav" id="vgnav">${VGROUPS.map((g,i)=>`<a href="#vg-${i}">${esc(g)}</a>`).join("")}</div>
+  <div id="vt"></div>
 </section>`}
 let vk="全部",vq="";
 function hl(s){if(!vq)return esc(s);const i=s.indexOf(vq);return i<0?esc(s):esc(s.slice(0,i))+"<mark>"+esc(s.slice(i,i+vq.length))+"</mark>"+esc(s.slice(i+vq.length))}
-function renderVerbs(){
-  const rows=VERBS.filter(r=>(vk==="全部"||r[2]===vk)&&(!vq||r.some(c=>c.includes(vq))));
-  document.querySelector("#vt tbody").innerHTML=rows.map(r=>`<tr>
-    <td class="ja" lang="ja">${hl(r[0])}<span class="yomi">${hl(r[1])}</span></td>
+const vrow=r=>`<tr>
     <td><span class="k ${KCLS[r[2]]}">${r[2]}</span></td>
-    ${r.slice(3,10).map(c=>`<td class="ja" lang="ja">${hl(c)}</td>`).join("")}
-    <td class="note">${hl(r[10])}</td></tr>`).join("")||`<tr><td colspan="10" style="color:var(--sub)">没有匹配的词</td></tr>`;
+    <td class="ja hw" lang="ja">${hl(r[0])}<span class="yomi">${hl(r[1])}</span></td>
+    ${[3,4,5,9,6,7,8].map(i=>`<td class="ja" lang="ja">${hl(r[i])}</td>`).join("")}
+    <td class="note">${hl(r[10])}</td></tr>`;
+function renderVerbs(){
+  const rows=VERBS.filter(r=>(vk==="全部"||r[2]===vk)&&(!vq||r.slice(0,11).some(c=>c.includes(vq))));
+  document.getElementById("vt").innerHTML=VGROUPS.map((g,i)=>{const rs=rows.filter(r=>r[11]===g);if(!rs.length)return "";
+    return `<h3 class="vg" id="vg-${i}"><span class="ja" lang="ja">${esc(g)}</span><small>${rs.length} 語</small></h3><div class="tw"><table>${VHEAD}<tbody>${rs.map(vrow).join("")}</tbody></table></div>`}).join("")
+    ||`<p style="color:var(--sub)">没有匹配的词</p>`;
   document.getElementById("vcnt").textContent=`${rows.length} / ${VERBS.length}`;
 }
 
@@ -63,7 +69,7 @@ function renderPairs(){
 }
 
 /* ---------- 组装 ---------- */
-const navParts=[[1,[link("katsuyo-hyo","表","活用表（50語）")]],[2,[]],[3,[link("jita-hyo","表","自他対応表（46組）")]]];
+const navParts=[[1,[link("katsuyo-hyo","表",`活用表（${VERBS.length}語）`)]],[2,[]],[3,[link("jita-hyo","表","自他対応表（46組）")]]];
 SEC.forEach(s=>navParts.find(p=>p[0]===s.p)[1].push(secLink(s)));
 document.getElementById("nav").innerHTML=navParts.map(([p,ls])=>`<p class="nt">${PARTS[p]}</p>`+ls.join("")).join("");
 let html="",lastP=0;
@@ -78,7 +84,7 @@ document.getElementById("vq").oninput=e=>{vq=e.target.value.trim();renderVerbs()
 document.getElementById("pf").onclick=e=>{const b=e.target.closest("button");if(!b)return;pk=b.dataset.k;[...e.currentTarget.children].forEach(x=>x.setAttribute("aria-pressed",x===b));renderPairs()};
 document.getElementById("pt").onclick=e=>{const b=e.target.closest("button");if(!b)return;pty=b.dataset.k;[...e.currentTarget.children].forEach(x=>x.setAttribute("aria-pressed",x===b));renderPairs()};
 /* 站内搜索的深链接 ?q= ：预填活用表检索 */
-try{const q=new URLSearchParams(location.search).get("q");if(q){const el=document.getElementById("vq");el.value=q;vq=q.trim();renderVerbs();if(VERBS.some(r=>r.some(c=>c.includes(vq))))document.getElementById("katsuyo-hyo").scrollIntoView()}}catch(e){}
+try{const q=new URLSearchParams(location.search).get("q");if(q){const el=document.getElementById("vq");el.value=q;vq=q.trim();renderVerbs();if(VERBS.some(r=>r.slice(0,11).some(c=>c.includes(vq))))document.getElementById("katsuyo-hyo").scrollIntoView()}}catch(e){}
 
 const links=[...document.querySelectorAll("#nav a")];
 const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+e.target.id))}})},{rootMargin:"-70px 0px -70% 0px"});
