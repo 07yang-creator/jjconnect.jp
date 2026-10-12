@@ -10,6 +10,8 @@
 | `dist/quiz.html` | 400 题交互测验（4 套 × 100 题），练习模式 + 考试模式 + 自动评分 | `/v/300/jp-setsuzoku-quiz2.html` |
 | `dist/benseki.html` | 接续表达 易混辨析（16 组） | `/v/t260924-h8rz/benseki.html` |
 | `dist/fukushu.html` | 文型・語彙 復習ノート（文型 23 组 + 語彙 18 组） | `/v/300/fukushu.html` |
+| `../content/doushi/material.html` | 日语动词 讲义：活用表 50 词（可检索）・受身形 10 组・自他 45 对＋6 组・表の訂正 | `/v/doushi/material.html`（**静态专题**） |
+| `../content/doushi/quiz.html` | 日语动词 180 题：活用 40・受身形 80・自他 60，9 个分组各 20 题 | `/v/doushi/quiz.html`（**静态专题**） |
 
 另有 `/mnt/user-data/outputs/日语接续表达一览.pdf`（7 页 A4，接续表达分类表，WeasyPrint 生成，源码未保留，见 BACKLOG 第 6 项）。
 
@@ -36,7 +38,14 @@ src/quiz/
 
 src/benseki/  shell.html + sec.js (const SEC) + render.js + footer.html
 src/fukushu/  同上
+
+src/doushi/        shell.html + data.js (VERBS 活用表 50 行 / PAIRS 自他 45 行 / SEC 讲解 16 组) + render.js + footer.html
+src/doushi-quiz/   shell.html + data/katsuyo.js (Q1 40) + data/ukemi.js (Q2 80) + data/jita.js (Q3 60) + app.js + footer.html
+                   app.js 是 quiz/app.js 的泛化版：每套题数不固定（N），每级固定 20 题；localStorage key `jp-doushi-v1`
 ```
+
+動詞 topic 的两页**不走 Blob**：`build.sh` 直接产出到 `jp/content/doushi/`，并在 `jp/content/index.json` 登记为静态专题，
+push 到 main 即上线（Vercel）。题目里的动词只能来自 `data.js` 的两张表，`tools/check_doushi.cjs` 会审计。
 
 ### 题目数据格式
 

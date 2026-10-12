@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>日语动词 180题</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EEF2EF; --card:#FBFCFA; --ink:#1C2A30; --sub:#5B6B70; --rule:#CFD8D3;
+  --ai:#27466F; --ai-soft:#DCE5F0; --shu:#C23B2A; --shu-soft:#F6DED9; --midori:#2C7652; --midori-soft:#D9ECE1;
+  --l1:#7FA88C; --l2:#5E9AA6; --l3:#4F76A8; --l4:#6B5CA0; --l5:#8E3F5E;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#151C1F; --card:#1D262A; --ink:#E4EAE7; --sub:#98A7A3; --rule:#33413F;
+  --ai:#8FB0DC; --ai-soft:#24344A; --shu:#E9776A; --shu-soft:#452521; --midori:#6FC39A; --midori-soft:#1F3A2C;
+}}
+:root[data-theme="dark"]{
+  --paper:#151C1F; --card:#1D262A; --ink:#E4EAE7; --sub:#98A7A3; --rule:#33413F;
+  --ai:#8FB0DC; --ai-soft:#24344A; --shu:#E9776A; --shu-soft:#452521; --midori:#6FC39A; --midori-soft:#1F3A2C;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;font-size:15px;line-height:1.6}
+[lang=ja],.ja{font-family:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:24px 18px 48px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+h1{margin:0;font-size:26px;line-height:1.2;font-weight:700;letter-spacing:.02em}
+h1 small{display:block;font-size:13px;font-weight:400;color:var(--sub);letter-spacing:0;margin-top:4px}
+h1 small a{color:var(--ai)}
+.score{text-align:right;font-size:13px;color:var(--sub)}
+.score b{font-size:24px;color:var(--ink);font-weight:700}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tabs button{border:1px solid var(--rule);background:transparent;color:var(--ink);font:inherit;font-size:13px;padding:5px 12px;border-radius:999px;cursor:pointer}
+.tabs button[aria-pressed=true]{background:var(--ai);border-color:var(--ai);color:var(--card)}
+#sets button{font-weight:500;padding:6px 16px}
+.grid{display:grid;grid-template-columns:repeat(20,1fr);gap:3px;margin-bottom:20px}
+.grid button{aspect-ratio:1;border:0;border-radius:3px;cursor:pointer;padding:0;font-size:9px;color:transparent;background:var(--rule);position:relative}
+.grid button.lv1{box-shadow:inset 0 -3px 0 var(--l1)}.grid button.lv2{box-shadow:inset 0 -3px 0 var(--l2)}.grid button.lv3{box-shadow:inset 0 -3px 0 var(--l3)}.grid button.lv4{box-shadow:inset 0 -3px 0 var(--l4)}.grid button.lv5{box-shadow:inset 0 -3px 0 var(--l5)}
+.grid button.ok{background:var(--midori)}.grid button.ng{background:var(--shu)}
+.grid button.cur{outline:2px solid var(--ink);outline-offset:1px}
+.grid button.dim{opacity:.25}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:22px 22px 18px;position:relative;overflow:hidden}
+.meta{display:flex;justify-content:space-between;font-size:13px;color:var(--sub);margin-bottom:14px}
+.lvtag{display:inline-flex;align-items:center;gap:6px}
+.lvtag i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.stem{font-size:21px;line-height:1.75;margin:0 0 18px;padding-right:104px;font-weight:500;min-height:2em}
+.stem .blank{display:inline-block;min-width:3.2em;border-bottom:2px solid var(--ai);text-align:center;color:var(--ai);font-weight:700;padding:0 4px}
+.opts{display:grid;gap:8px}
+.opt{display:flex;align-items:center;gap:12px;text-align:left;width:100%;font:inherit;font-size:17px;color:var(--ink);background:transparent;border:1.5px solid var(--rule);border-radius:8px;padding:10px 14px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--ai)}
+.opt .k{flex:none;width:24px;height:24px;border-radius:50%;border:1px solid var(--rule);display:grid;place-items:center;font-size:12px;color:var(--sub);font-family:"Noto Sans SC",sans-serif}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--midori);background:var(--midori-soft)}
+.opt.right .k{background:var(--midori);border-color:var(--midori);color:var(--card)}
+.opt.wrong{border-color:var(--shu);background:var(--shu-soft)}
+.opt.wrong .k{background:var(--shu);border-color:var(--shu);color:var(--card)}
+.opt.long{font-size:15px}
+.stamp{position:absolute;right:18px;top:40px;width:96px;height:96px;border-radius:50%;border:5px solid currentColor;display:grid;place-items:center;font-size:30px;font-weight:700;line-height:1;letter-spacing:.02em;opacity:0;transform:scale(1.6) rotate(-14deg);pointer-events:none;font-family:"Zen Kaku Gothic New",sans-serif}
+.stamp.show{opacity:.85;transform:scale(1) rotate(-14deg);transition:transform .22s cubic-bezier(.3,1.6,.5,1),opacity .15s}
+.stamp.ok{color:var(--midori)}.stamp.ng{color:var(--shu);border-radius:10px}
+.exp{margin-top:16px;padding:12px 14px;border-left:3px solid var(--ai);background:var(--ai-soft);border-radius:0 6px 6px 0;font-size:14px}
+.exp[hidden]{display:none}
+.exp .ans{font-weight:700;margin-bottom:2px}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px}
+.nav button{white-space:nowrap;font:inherit;font-size:14px;padding:8px 18px;border-radius:8px;cursor:pointer;border:1px solid var(--rule);background:var(--card);color:var(--ink)}
+.nav .primary{background:var(--ai);border-color:var(--ai);color:var(--card);font-weight:500}
+.nav button:disabled{opacity:.4;cursor:default}
+.hint{font-size:12px;color:var(--sub);text-align:center}
+.result{margin-top:22px}
+.result h2{font-size:18px;margin:0 0 10px}
+.bars{display:grid;gap:8px}
+.bar{display:grid;grid-template-columns:8em 1fr 4.5em;align-items:center;gap:10px;font-size:13px}
+.bar .t{height:10px;background:var(--rule);border-radius:5px;overflow:hidden}
+.bar .t span{display:block;height:100%}
+.foot{display:flex;justify-content:space-between;margin-top:26px;font-size:12px;color:var(--sub);gap:12px;flex-wrap:wrap}
+.foot button{font:inherit;font-size:12px;background:none;border:0;color:var(--shu);cursor:pointer;padding:0;text-decoration:underline}
+button:focus-visible{outline:2px solid var(--ai);outline-offset:2px}
+.modes{display:inline-flex;border:1.5px solid var(--ai);border-radius:8px;overflow:hidden;margin-bottom:14px}
+.modes button{font:inherit;font-size:14px;padding:7px 20px;border:0;background:transparent;color:var(--ai);cursor:pointer}
+.modes button[aria-pressed=true]{background:var(--ai);color:var(--card);font-weight:500}
+.setup h2,.report h2{font-size:18px;margin:0 0 4px}
+.setup p{margin:0 0 16px;color:var(--sub);font-size:14px}
+.row{margin-bottom:16px}.row .lab{font-size:13px;color:var(--sub);margin-bottom:6px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{border:1px solid var(--rule);background:transparent;color:var(--ink);font:inherit;font-size:13px;padding:6px 14px;border-radius:999px;cursor:pointer}
+.chips button[aria-pressed=true]{background:var(--ai);border-color:var(--ai);color:var(--card)}
+.big{font:inherit;font-size:16px;font-weight:500;padding:11px 28px;border-radius:8px;border:0;background:var(--ai);color:var(--card);cursor:pointer}
+.big.ghost{background:transparent;color:var(--ai);border:1.5px solid var(--ai)}
+.grid button.sel{background:var(--ai)}
+.opt.picked{border-color:var(--ai);background:var(--ai-soft)}
+.opt.picked .k{background:var(--ai);border-color:var(--ai);color:var(--card)}
+.exambar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;font-size:14px;color:var(--sub)}
+.exambar b{color:var(--ink);font-variant-numeric:tabular-nums}
+.submit{font:inherit;font-size:14px;font-weight:500;padding:8px 18px;border-radius:8px;border:1.5px solid var(--shu);background:transparent;color:var(--shu);cursor:pointer;white-space:nowrap}
+.report .top{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin:10px 0 18px}
+.report .pts{font-size:64px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.report .pts small{font-size:20px;color:var(--sub);font-weight:400}
+.report .grade{display:inline-grid;place-items:center;width:84px;height:84px;border:4px solid currentColor;border-radius:50%;font-size:22px;font-weight:700;transform:rotate(-12deg);font-family:"Zen Kaku Gothic New",sans-serif}
+.report .facts{font-size:14px;color:var(--sub);line-height:1.9}
+.report .facts b{color:var(--ink)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 6px}
+.wrongs{margin-top:22px}
+.wrongs h3{font-size:16px;margin:0 0 10px}
+.w{border-top:1px solid var(--rule);padding:12px 0}
+.w .s{font-size:16px;margin-bottom:4px}
+.w .s .blank{border-bottom:2px solid var(--midori);color:var(--midori);font-weight:700;padding:0 4px}
+.w .yo{font-size:13px}.w .yo .x{color:var(--shu);font-weight:500}.w .yo .o{color:var(--midori);font-weight:500}
+.w .e{font-size:13px;color:var(--sub);margin-top:2px}
+.perfect{padding:14px;background:var(--midori-soft);border-radius:8px;color:var(--midori);font-weight:500}
+[hidden]{display:none!important}
+@media (max-width:560px){
+  .report .pts{font-size:48px}
+  .grid{grid-template-columns:repeat(10,1fr)}
+  .stem{font-size:18px;padding-right:74px}.hint{display:none}.opt{font-size:16px}
+  .stamp{width:70px;height:70px;font-size:22px;top:34px;right:12px;border-width:4px}
+  .card{padding:18px 16px 16px}
+  .bar{grid-template-columns:6em 1fr 4em}
+}
+@media (prefers-reduced-motion:reduce){.stamp.show{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>日语动词 180题<small>活用 40 题（見分け・基本活用／使役・可能）、受身形 80 题（作り方／四种受身・助词／受身・尊敬・可能／使役受身・综合）、自動詞・他動詞 60 题（対応ペア／助词・ている／てある／視点・情感・综合）。题目中的动词全部来自<a href="/v/doushi/material.html" target="_top">讲义</a>的两张表。练习模式即时判题，考试模式交卷后自动评分。</small></h1>
+  <div class="score" id="scorebox"><b id="sc">0</b> / <span id="done">0</span> 答对<br>已完成 <span id="pct">0</span>%</div>
+</header>
+<div class="tabs" id="sets" role="group" aria-label="题库" style="margin-bottom:12px"></div>
+<div class="modes" role="group" aria-label="模式"><button id="mP">练习模式</button><button id="mE">考试模式</button></div>
+
+<section id="practice">
+<div class="tabs" id="tabs" role="group" aria-label="分组筛选"></div>
+<div class="grid" id="grid" aria-label="题目导航"></div>
+<main class="card" id="card">
+  <div class="meta"><span class="lvtag" id="lv"></span><span id="no"></span></div>
+  <p class="stem ja" id="stem" lang="ja"></p>
+  <div class="opts" id="opts"></div>
+  <div class="stamp" id="stamp" aria-hidden="true"></div>
+  <div class="exp" id="exp" hidden><div class="ans" id="ans"></div><div id="why"></div></div>
+  <div class="nav">
+    <button id="prev">上一题</button>
+    <span class="hint">键盘 1–4 选择，← → 翻页</span>
+    <button id="next" class="primary">下一题</button>
+  </div>
+</main>
+<section class="result" id="result"></section>
+<div class="foot"><span>题号颜色：灰＝未答　绿＝答对　红＝答错；下方色条表示分组。</span><button id="reset">清空练习记录</button></div>
+</section>
+
+<section id="exam" hidden>
+  <div class="card setup" id="setup">
+    <h2>开始一场测验</h2>
+    <p>作答过程中不显示对错，交卷后自动评分，并列出错题解析。</p>
+    <div class="row"><div class="lab">出题范围</div><div class="chips" id="cRange"></div></div>
+    <div class="row"><div class="lab">题数（随机抽取，按原题序排列）</div><div class="chips" id="cCount"></div></div>
+    <button class="big" id="startBtn">开始测验</button>
+  </div>
+  <div id="running" hidden>
+    <div class="exambar"><span>已答 <b id="eDone">0</b> / <b id="eTot">0</b>　用时 <b id="eTime">00:00</b></span><button class="submit" id="submitBtn">交卷评分</button></div>
+    <div class="grid" id="eGrid" aria-label="测验题目导航"></div>
+    <main class="card">
+      <div class="meta"><span class="lvtag" id="eLv"></span><span id="eNo"></span></div>
+      <p class="stem ja" id="eStem" lang="ja" style="padding-right:0"></p>
+      <div class="opts" id="eOpts"></div>
+      <div class="nav">
+        <button id="ePrev">上一题</button>
+        <span class="hint">可随时返回修改答案</span>
+        <button id="eNext" class="primary">下一题</button>
+      </div>
+    </main>
+  </div>
+  <div class="card report" id="report" hidden></div>
+</section>
+</div>
+<script>
+const Q1 = [
+// ===== 活用① 五段・一段の見分け＆基本活用（20） =====
+[1,"次のうち、一段動詞はどれか。",["食べる","走る","帰る","切る"],"「食べる」る前是 e 段且确为一段；「走る・帰る・切る」る前虽是 i/e 段，却是五段（表里 帰る 误标一段）。"],
+[1,"次のうち、五段動詞はどれか。",["知る","見る","着る","いる"],"「知る」是五段（知ら・知り・知れ）；「見る・着る・いる」是一段。る前 i 段的五段例外要单独记。"],
+[1,"「入る（はいる）」の未然形（ない形の前）はどれか。",["入ら","入","入り","入れ"],"「入る」是五段（入らない・入ります）；表里误标一段。「入れ」是命令形／仮定形。"],
+[1,"「書く」の仮定形はどれか。",["書け","書か","書き","書こ"],"五段的仮定形＝え段（書けば）；「書か」未然，「書き」連用，「書こ」是意志形。"],
+[1,"「食べる」の命令形はどれか。",["食べろ","食べれ","食べ","食べて"],"一段的命令形是词干＋「ろ」；「食べれ」是仮定形，「食べ」是連用形，「食べて」是请求形不是命令形。"],
+[1,"「話す」の連用形（ます形の前）はどれか。",["話し","話さ","話せ","話そ"],"五段的連用形＝い段（話します）；「話さ」未然，「話せ」仮定・命令，「話そ」意志。"],
+[1,"「終わる」の受身形はどれか。",["終わられる","終われる","終わらられる","終わるられる"],"「終わる」是五段：未然形「終わら」＋れる。表里写的「終われる」是可能形，不是受身。"],
+[1,"「来る」の命令形はどれか。",["来い（こい）","来ろ（くろ）","来れ（くれ）","来よ（きよ）"],"「来る」是特殊活用：命令形「来い」；「来れ」是仮定形。"],
+[1,"「する」の仮定形はどれか。",["すれ","しれ","せれ","され"],"「する」的仮定形是「すれ（ば）」；「され」是受身形的词干。"],
+[1,"「分かる」の未然形はどれか。",["分から","分か","分かり","分かれ"],"「分かる」是五段（分からない）；表里误标一段写成「分か」。"],
+[1,"「泳ぐ」の命令形はどれか。",["泳げ","泳ぎ","泳が","泳ご"],"五段命令形＝え段（泳げ）；「泳ぎ」連用，「泳が」未然，「泳ご」意志。"],
+[1,"「起きる」の未然形はどれか。",["起き","起か","起こ","起きら"],"一段去る＝词干，未然・連用同形（起きない・起きます）。"],
+[1,"「待つ」の連用形はどれか。",["待ち","待た","待て","待と"],"五段「つ」的連用形是「ち」（待ちます）；「待て」是仮定・命令。"],
+[1,"「ある」の否定形はどれか。",["ない","あらない","ありない","あれない"],"「ある」的否定是特殊形「ない」，不用未然形＋ない。"],
+[1,"「教える」の仮定形はどれか。",["教えれ","教え","教えろ","教えら"],"一段的仮定形＝词干＋れ（教えれば）；「教えろ」是命令形。"],
+[1,"「買う」の未然形はどれか。",["買わ","買あ","買い","買え"],"う段五段的未然形是「わ」（買わない），不是「あ」。"],
+[1,"「降りる」と「降ろす」、一段動詞はどちらか。",["降りる","降ろす","両方","どちらでもない"],"「降りる（おりる）」是一段（降りない・降ります）；「降ろす」是五段（降ろさない）。"],
+[1,"次のうち、「る」で終わるが五段活用の動詞はどれか。",["走る","寝る","出る","開ける"],"「走る」是五段（走らない）；「寝る・出る・開ける」是一段。"],
+[1,"「持つ」の仮定形はどれか。",["持て","持た","持ち","持っ"],"五段仮定形＝え段「持て（ば）」；「持っ」是音便（持って）。"],
+[1,"「触れる」の未然形はどれか。",["触れ","触ら","触り","触れら"],"「触れる（ふれる）」是一段：未然形＝词干「触れ」（触れない）；「触ら」是「触る（さわる）」的未然形。"],
+// ===== 活用② 使役形・可能形（20） =====
+[2,"「書く」の使役形はどれか。",["書かせる","書かれる","書ける","書かさせる"],"五段使役＝未然形＋せる（書かせる）；「書かれる」是受身，「書ける」是可能，「書かさせる」是さ入れ误用。"],
+[2,"「食べる」の使役形はどれか。",["食べさせる","食べせる","食べられる","食べらせる"],"一段使役＝词干＋させる；「食べられる」是受身／可能。"],
+[2,"「来る」の使役形はどれか。",["来させる（こさせる）","来らせる（くらせる）","来せる（きせる）","来られる（こられる）"],"「来る」的使役形是「来させる」；「来られる」是受身／可能。"],
+[2,"「する」の可能形はどれか。",["できる","すれる","される","させる"],"「する」的可能形是特殊形「できる」；「される」是受身，「させる」是使役。"],
+[2,"「読む」の可能形はどれか。",["読める","読まれる","読ませる","読みられる"],"五段可能形＝え段＋る（読める）；「読まれる」是受身，「読ませる」是使役。"],
+[2,"「見る」の可能形（標準形）はどれか。",["見られる","見れる","見える","見せる"],"一段的可能形标准是「見られる」，与受身同形；「見れる」是ら抜き（口语），「見える」是自动词（看得见），「見せる」是他动词（给人看）。"],
+[2,"「起きる」の可能形（標準形）はどれか。",["起きられる","起きれる","起きれられる","起こせる"],"一段「起きる」的可能形标准是「起きられる」；「起きれる」是ら抜き；「起こせる」是「起こす」的可能形。"],
+[2,"「帰る」の可能形はどれか。",["帰れる","帰られる","帰れられる","帰りられる"],"「帰る」是五段，可能形＝え段＋る「帰れる」；「帰られる」是它的受身形（也可作尊敬）。"],
+[2,"次のうち、「ら抜き言葉」はどれか。",["食べれる","帰れる","走れる","話せる"],"「食べる」是一段，标准可能形是「食べられる」，「食べれる」是ら抜き；其余三个是五段的正规可能形。"],
+[2,"次のうち、「ら抜き言葉」ではないものはどれか。",["切れる","見れる","寝れる","来れる"],"「切る」是五段，「切れる」是正规可能形；「見れる・寝れる・来れる」都是ら抜き（标准：見られる・寝られる・来られる）。"],
+[2,"「飲む」の使役形はどれか。",["飲ませる","飲まれる","飲める","飲みさせる"],"五段使役＝未然形「飲ま」＋せる；「飲まれる」受身，「飲める」可能。"],
+[2,"「待つ」の可能形はどれか。",["待てる","待たれる","待たせる","待ちられる"],"五段可能形＝え段＋る「待てる」；「待たれる」受身，「待たせる」使役。"],
+[2,"「降りる」の使役形はどれか。",["降りさせる","降りらせる","降ろさせる","降りせる"],"一段「降りる」的使役＝词干＋させる「降りさせる」；「降ろさせる」是「降ろす」的使役。"],
+[2,"「知る」の使役形はどれか。",["知らせる","知させる","知れる","知られる"],"「知る」是五段，使役＝「知ら」＋せる，即常用的「知らせる（通知）」；「知られる」是受身。"],
+[2,"「会う」の可能形はどれか。",["会える","会われる","会わせる","会いられる"],"五段「う」的可能形＝え段「会え」＋る；「会わせる」是使役（让…见面）。"],
+[2,"「考える」の使役形はどれか。",["考えさせる","考えせる","考えられる","考えらせる"],"一段使役＝词干＋させる「考えさせる」；「考えられる」是受身／可能。"],
+[2,"「立つ」の使役形はどれか。",["立たせる","立てる","立たれる","立ちさせる"],"五段使役「立たせる」；「立てる」是可能形（也是他动词 立てる），「立たれる」是受身。"],
+[2,"「忘れる」の可能形（標準形）はどれか。",["忘れられる","忘れれる","忘れる","忘らせる"],"一段可能形标准「忘れられる」（也是受身形）；「忘れれる」是ら抜き。"],
+[2,"「泳ぐ」の使役形はどれか。",["泳がせる","泳がれる","泳げる","泳ぎさせる"],"五段使役＝未然形「泳が」＋せる，这也是自他表里当作「他動詞」列出的形式。"],
+[2,"「乗る」の可能形はどれか。",["乗れる","乗られる","乗らせる","乗りれる"],"五段可能形「乗れる」；「乗られる」受身，「乗らせる」使役。"],
+];
+const Q2 = [
+// ===== 受身① 作り方（20） =====
+[1,"「書く」の受身形はどれか。",["書かれる","書ける","書かせる","書きられる"],"五段受身＝未然形（あ段）＋れる；「書ける」可能，「書かせる」使役。"],
+[1,"「食べる」の受身形はどれか。",["食べられる","食べれる","食べさせる","食べらせる"],"一段受身＝词干＋られる，与可能形同形；「食べれる」是ら抜きの可能形，不能表示受身。"],
+[1,"「する」の受身形はどれか。",["される","させる","できる","すられる"],"「する」的受身是「される」；「させる」使役，「できる」可能。"],
+[1,"「来る」の受身形はどれか。",["来られる（こられる）","来れる（これる）","来させる（こさせる）","来るられる"],"「来る」的受身是「来られる」（与可能形同形）；「来れる」是ら抜きの可能形。"],
+[1,"「買う」の受身形はどれか。",["買われる","買あれる","買える","買わせる"],"う段五段的未然形是「わ」，受身＝「買われる」；「買える」是可能，「買わせる」是使役。"],
+[1,"「話す」の受身形はどれか。",["話される","話せる","話させる","話しられる"],"五段「す」：未然形「話さ」＋れる；「話せる」可能，「話させる」使役。"],
+[1,"「見る」の受身形はどれか。",["見られる","見れる","見える","見させる"],"一段受身「見られる」；「見れる」ら抜き可能，「見える」自动词，「見させる」使役。"],
+[1,"「待つ」の受身形はどれか。",["待たれる","待てる","待たせる","待ちられる"],"五段「つ」：未然形「待た」＋れる。"],
+[1,"「帰る」の受身形はどれか。",["帰られる","帰れる","帰らせる","帰りられる"],"「帰る」是五段：「帰ら」＋れる＝帰られる（表里误标一段）；「帰れる」是可能形。"],
+[1,"「入る」の受身形はどれか。",["入られる","入れる","入らせる","入りられる"],"「入る（はいる）」是五段：「入ら」＋れる；「入れる」是可能形（也是他动词 入れる・いれる）。"],
+[1,"「知る」の受身形はどれか。",["知られる","知れる","知らせる","知りられる"],"五段「知ら」＋れる＝知られる（被人知道・出名）；「知らせる」是使役（通知）。"],
+[1,"「切る」の受身形はどれか。",["切られる","切れる","切らせる","切りられる"],"「切る」是五段：「切ら」＋れる；「切れる」是可能形／自动词（断了）。"],
+[1,"「教える」の受身形はどれか。",["教えられる","教えれる","教えさせる","教わる"],"一段受身「教えられる」；「教わる」是另一个词（学・受教），不是活用形。"],
+[1,"「消す」の受身形はどれか。",["消される","消せる","消させる","消しられる"],"五段「す」：「消さ」＋れる。"],
+[1,"「飛ぶ」の受身形はどれか。",["飛ばれる","飛べる","飛ばせる","飛びられる"],"五段「ぶ」：未然形「飛ば」＋れる。"],
+[1,"「置く」の受身形はどれか。",["置かれる","置ける","置かせる","置きられる"],"五段「く」：「置か」＋れる（置かれている＝被放着）。"],
+[1,"「寝る」の受身形はどれか。",["寝られる","寝れる","寝させる","寝かせる"],"一段受身「寝られる」；「寝れる」ら抜き可能，「寝させる・寝かせる」是使役。"],
+[1,"「分かる」の受身形はどれか。",["分かられる","分かれる","分からせる","分かりられる"],"「分かる」是五段：「分から」＋れる；表里写的「分かれる」是可能形的形式（实际很少用）。"],
+[1,"「貸す」の受身形はどれか。",["貸される","貸せる","貸させる","借りられる"],"五段「す」：「貸さ」＋れる；「借りられる」是「借りる」的受身／可能。"],
+[1,"「直す」の受身形はどれか。",["直される","直せる","直させる","直しられる"],"五段「す」：「直さ」＋れる。"],
+// ===== 受身② 四种受身・助词（20） =====
+[2,"私は部長に理由を（　）。",["聞かれた","聞いた","聞かせた","聞けた"],"直接受身：承受者作主语，动作者用「に」。被问＝聞かれる；「聞かせた」是使役（让…听），「聞けた」是可能。"],
+[2,"この本は多くの人に（　）いる。",["読まれて","読んで","読ませて","読めて"],"主语是物的受身（非情の受身）：陈述事实「被很多人读」。"],
+[2,"この手紙は百年前に（　）ものだ。",["書かれた","書いた","書かせた","書けた"],"物作主语的受身，叙述来历；「書いた」要以人作主语。"],
+[2,"この小説は、有名な作家（　）書かれた。",["によって","に","から","で"],"创作・发明类（書く・作る・発見する）的动作者用「によって」；「に」是一般受身，「から」表示来源，「で」是手段。"],
+[2,"私は友人（　）本を貸された。",["に","によって","で","を"],"一般的受身动作者用「に」；「によって」用于书面・创作，「で」是手段，「を」是宾语。"],
+[2,"妹にケーキを（　）。（自分のケーキを）",["食べられた","食べた","食べさせた","食べれた"],"持ち主の受身：自己的东西被别人怎样，受害者作主语、东西用「を」；日语不说「私のケーキが食べられた」。"],
+[2,"次のうち、「持ち主の受身」として自然な文はどれか。",["弟に自転車を使われた。","弟に自転車が使われた。","私の自転車は弟が使われた。","弟は自転車を使われた。"],"受害者（私）作主语、所有物用「を」。「自転車が使われた」变成非情の受身，失去受害感；后两句主语错。"],
+[2,"帰り道で雨に（　）。",["降られた","降った","降らせた","降れた"],"自动词也能构成受身＝迷惑の受身（间接受身），表示受到影响・困扰。中文没有「被下雨」，是日语特有。"],
+[2,"忙しいときに友達に（　）、仕事ができなかった。",["来られて","来て","来させて","来れて"],"「来られる」在这里是迷惑の受身：朋友来了，我受影响。「来れて」是ら抜きの可能形。"],
+[2,"次のうち、「迷惑の受身」はどれか。",["夜中に赤ちゃんに泣かれた。","夜中に赤ちゃんが泣いた。","夜中に赤ちゃんを泣かせた。","夜中に赤ちゃんが泣けた。"],"自动词「泣く」的受身「泣かれる」＝婴儿哭了、我被折腾；「泣かせた」是使役（把婴儿弄哭）。"],
+[2,"この商品は全国で（　）いる。（受身で）",["売られて","売って","売らせて","売れて"],"受身「売られている」＝被售卖（非情の受身）；「売れている」是自动词 売れる＝卖得好，意思不同。"],
+[2,"机の上に書類が（　）いた。",["置かれて","置いて","置かせて","置けて"],"「置かれている」＝被放着（受身的状态）；「置いてある」（他動詞＋てある）也可以，但「置いていた」不行。"],
+[2,"子どものころ、よく母に（　）。",["怒られた","怒った","怒らせた","怒れた"],"直接受身：被妈妈骂。「怒らせた」是使役（惹妈妈生气），方向相反。"],
+[2,"先生に（　）、やっと問題が分かった。",["教えられて","教えて","教えさせて","教われて"],"直接受身「教えられる」；「教わる」是另一个词，其て形是「教わって」，「教われて」不存在。"],
+[2,"満員電車で後ろの人に背中を（　）。",["押された","押した","押させた","押せた"],"持ち主の受身：身体部位用「を」，施动者用「に」。"],
+[2,"知らない人に手を（　）、びっくりした。",["握られて","握って","握らせて","握れて"],"持ち主の受身：身体部位用「を」，施动者用「に」；「握らせた」是使役。"],
+[2,"大事なデータを同僚に（　）しまった。",["消されて","消して","消させて","消せて"],"持ち主の受身＋てしまう：自己的数据被同事删了（受害）。"],
+[2,"私は先輩（　）仕事を教えられた。——「に」のほかに使える助詞はどれか。",["から","によって","で","を"],"「教える・貸す・話す」等有传递方向的动词，受身的动作者可用「から」代替「に」；「によって」用于创作・书面。"],
+[2,"次のうち、受身の文として不自然なのはどれか。",["私は雨が降られた。","私は雨に降られた。","私は弟に自転車を使われた。","この本は多くの人に読まれている。"],"迷惑の受身的施动者（雨）要用「に」，不能用「が」。"],
+[2,"次のうち、「非情の受身（主語が物）」はどれか。",["この橋は多くの人に使われている。","私は友達に写真を見られた。","夜中に友達に来られた。","先生に名前を聞かれた。"],"主语是物（橋）、中立叙述事实的是非情の受身；其余是直接受身・持ち主の受身・迷惑の受身。"],
+// ===== 受身③ 受身・尊敬・可能・自発（20） =====
+[3,"「部長が帰られた」の「帰られた」は何か。",["尊敬","受身","可能","自発"],"主语是部長且用「が」，动作是他自己做的→尊敬语（＝お帰りになった）。受身要说「部長に帰られた」。"],
+[3,"「部長に先に帰られた」の「帰られた」は何か。",["受身（迷惑）","尊敬","可能","自発"],"「部長に」＋自动词的られる＝迷惑の受身：部长先走了，我受影响。"],
+[3,"「社長が来られました」の「来られました」は何か。",["尊敬","受身","可能","使役"],"主语「社長が」＋自己来→尊敬。要表示可能需要「こちらまで来られますか」这样的语境。"],
+[3,"「この川は泳げる」の「泳げる」は何か。",["可能","受身","尊敬","使役"],"五段可能形＝え段＋る（泳げる）；受身是「泳がれる」。"],
+[3,"「先生に見られた」と「先生が見られた」、受身はどちらか。",["先生に見られた","先生が見られた","両方","どちらでもない"],"「に」标记施动者＝受身（被老师看到）；「先生が見られた」是尊敬（老师看了）或可能。"],
+[3,"この現象は気温の変化が原因だと（　）。",["考えられる","考える","考えさせる","考えれる"],"「と考えられる」＝可以认为（自発・可能的用法），论述文常用，主语不是人。"],
+[3,"「朝早く起きられますか」の「起きられます」は何か。",["可能","受身","尊敬","使役"],"一段的「られる」兼表受身・可能・尊敬，这里问「能否早起」→可能。标准形不用ら抜き。"],
+[3,"「先生はもう帰られましたか」の「帰られました」は何か。",["尊敬","受身","可能","自発"],"对老师的动作用られる＝尊敬（轻度敬语）。"],
+[3,"次のうち、「られる・れる」が「尊敬」の文はどれか。",["社長が話された。","社長に話された。","社長に来られた。","社長の話が聞かれた。"],"「社長が＋動作」且动作是社长自己做→尊敬；「社長に」是受身。"],
+[3,"次のうち、「られる」が「可能」の文はどれか。",["この魚は生で食べられる。","魚は猫に食べられた。","先生は魚を食べられた。","魚が猫に食べられている。"],"「生で食べられる」＝可以生吃（可能）；其余是受身或尊敬（先生は…食べられた）。"],
+[3,"「忘れられない」の「られ」は何か。",["可能","受身","尊敬","使役"],"「忘れられない」＝忘不了（可能的否定）。"],
+[3,"「彼の名前は広く知られている」の「知られて」は何か。",["受身","可能","尊敬","自発"],"「知られている」＝被人知道（受身的状态）。"],
+[3,"「心配で夜も寝られない」の「寝られない」は何か。",["可能","受身","尊敬","自発"],"「寝られない」＝睡不着（可能的否定）；口语常说「寝れない」。"],
+[3,"「この窓からは富士山が見られる」の「見られる」は何か。",["可能","受身","尊敬","使役"],"「見られる」＝能看到（可能）；「見える」是自动词「看得见」，意思相近但不是活用形。"],
+[3,"受身と可能が同じ形になるのは、どの動詞か。",["一段動詞と「来る」","五段動詞","「する」","すべての動詞"],"一段动词和「来る」的受身・可能都是「られる」；五段的受身（書かれる）和可能（書ける）形式不同；「する」是される／できる。"],
+[3,"「お客様が先に食べられた」—— 尊敬か受身か、判断の決め手はどれか。",["主語の助詞「が」と動作の主体","動詞の種類","文の長さ","時制"],"看主语的助词：「が」＋自己做动作＝尊敬；「に」标记施动者＝受身。"],
+[3,"「先生が本を貸された」の「貸された」は何か。",["尊敬","受身","可能","使役"],"「先生が」＋自己做动作→尊敬（＝お貸しになった）；被老师借给是「先生に貸された」。"],
+[3,"この店では日本酒が（　）。（可能の意味で）",["飲める","飲まれる","飲ませる","飲みられる"],"「飲める」＝能喝到（可能）；「飲まれる」是受身（被喝）。"],
+[3,"「ここに荷物を置けますか」の「置けます」は何か。",["可能","受身","尊敬","使役"],"五段可能形「置ける」；受身是「置かれる」。"],
+[3,"次のうち、「尊敬」の意味になりえないのはどれか。",["私は先生に本を貸された。","先生が本を貸された。","先生は何時に来られますか。","部長はもう帰られました。"],"主语是「私」且施动者「先生に」→只能是受身；其余三句主语是尊敬对象，可理解为尊敬。"],
+// ===== 受身④ 使役受身・综合（20） =====
+[4,"「書く」の使役受身形はどれか。",["書かせられる／書かされる","書かれさせる","書けさせる","書かさせられる"],"使役受身＝使役形＋られる：書かせられる；五段（す以外）常缩成「書かされる」。"],
+[4,"「食べる」の使役受身形はどれか。",["食べさせられる","食べされる","食べられさせる","食べさされる"],"一段：させる＋られる＝食べさせられる，一段没有缩约形。"],
+[4,"「話す」の使役受身形で、正しいものはどれか。",["話させられる","話さされる","話されさせる","話せられる"],"「す」结尾的五段不能缩约（✕話さされる），只能用「話させられる」。"],
+[4,"子どものとき、母に野菜を（　）。（嫌だったが食べた）",["食べさせられた","食べられた","食べさせた","食べた"],"「被迫吃」＝使役受身；「食べられた」是被吃，「食べさせた」是让别人吃。"],
+[4,"先輩に無理やりお酒を（　）。",["飲まされた","飲まれた","飲ませた","飲めた"],"使役受身的缩约形「飲まされる」＝被灌酒（被迫喝）。"],
+[4,"会議で一時間も（　）、疲れた。",["待たされて","待たれて","待たせて","待てて"],"「待たされる」＝被迫等（使役受身）；「待たれる」是被人等，「待たせる」是让人等。"],
+[4,"新人のころ、毎日報告書を（　）。（上司の指示で）",["書かされた","書かれた","書かせた","書けた"],"被迫写＝使役受身的缩约形「書かされる」；「書かれた」是被写，「書かせた」是让人写。"],
+[4,"「使役受身」の意味として正しいものはどれか。",["させられて、仕方なくする","させる側になる","自然にそうなる","相手を敬う"],"使役受身＝被迫做（不情愿）；「させる側」是使役。"],
+[4,"「来る」の使役受身形はどれか。",["来させられる（こさせられる）","来られさせる","来させれる","来さされる"],"「来る」：来させる＋られる＝来させられる。"],
+[4,"「する」の使役受身形はどれか。",["させられる","されさせる","させれる","さされる"],"「する」：させる＋られる＝させられる。"],
+[4,"次のうち、「使役」と「使役受身」の組み合わせが正しいものはどれか。",["歌わせる／歌わされる","歌われる／歌わせられる","歌える／歌わされる","歌わせる／歌われる"],"使役「歌わせる」→使役受身「歌わせられる＝歌わされる」。"],
+[4,"部長に残業を（　）。——「被迫加班」の意味になるのはどれか。",["させられた","された","させた","できた"],"「残業をさせられる」＝被迫加班（使役受身）；「された」是被做，「させた」是让人做。"],
+[4,"次のうち、意味が「私は泣いた（泣かされた側）」になる文はどれか。",["私は彼に泣かされた。","私は彼に泣かれた。","私は彼を泣かせた。","私は彼が泣いた。"],"「泣かされた」＝被弄哭（使役受身：我哭了）；「泣かれた」＝他哭了我受困扰（迷惑の受身）；「泣かせた」＝我把他弄哭。"],
+[4,"「母に起こされた」の「起こされた」は何の受身か。",["他動詞「起こす」の直接受身","自動詞「起きる」の迷惑の受身","使役受身","尊敬"],"起こす 是他动词（叫醒），「起こされた」＝被叫醒，直接受身；迷惑の受身是「赤ちゃんに起きられた」。"],
+[4,"次の文で、受身の使い方が不自然なのはどれか。",["犬が私に逃げられた。","私は犬に逃げられた。","私は犬を逃がした。","犬が逃げた。"],"迷惑の受身的主语是受影响的人（私），施动者（犬）用「に」；「犬が私に逃げられた」主语和施动者颠倒了。"],
+[4,"「先生に作文を直された」—— この受身の種類は",["持ち主の受身（自分のものが対象）","非情の受身","迷惑の受身（自動詞）","尊敬"],"自己的作文被老师改＝持ち主の受身（对象是自己的东西，用「を」）。"],
+[4,"「山が崩された」と「山が崩れた」の違いとして正しいものはどれか。",["前者は誰かが崩した（動作者がいる）、後者は状態の変化だけ","同じ意味","前者は尊敬","後者は受身"],"他動詞の受身「崩された」含有施动者（有人弄的）；自動詞「崩れた」只说变化，不提谁做的。"],
+[4,"「雨に降られた」—— この受身を使うのはどんな気持ちのときか。",["困った・迷惑だった","うれしかった","丁寧に言いたい","可能を表したい"],"迷惑の受身的核心是「受影响・困扰」；高兴的事不用这个形式。"],
+[4,"次のうち、文法的に成り立たない形はどれか。",["話さされる","書かされる","飲まされる","待たされる"],"「す」动词的使役受身不能缩约（✕話さされる→話させられる）；其余三个是正规缩约形。"],
+[4,"「社長が来て、こちらは困った」という意味になる文はどれか。",["社長に来られた。","社長が来られた。","社長を来させた。","社長が来た。"],"迷惑の受身「社長に来られた」；「社長が来られた」是尊敬，「来させた」是使役，「来た」只是陈述。"],
+];
+const Q3 = [
+// ===== 自他① 対応ペア（20） =====
+[1,"「燃える」に対応する他動詞はどれか。",["燃やす","燃える","燃らす","燃えさせる"],"燃える（自）／燃やす（他）是词汇上的对子；「燃えさせる」是使役，有对子时不用。"],
+[1,"「固める」に対応する自動詞はどれか。",["固まる","固い","固める","固まらせる"],"固まる（自）／固める（他）：-aru／-eru 型。"],
+[1,"「隠す」に対応する自動詞はどれか。",["隠れる","隠す","隠される","隠さる"],"隠れる（自）／隠す（他）：-reru／-su 型；「隠される」是受身。"],
+[1,"「乾く」に対応する他動詞はどれか。",["乾かす","乾ける","乾かせる","乾らす"],"乾く（自）／乾かす（他）：-u／-asu 型。表里读音「ひらく」有误，应为「かわく／かわかす」。"],
+[1,"「起きる」に対応する他動詞はどれか。",["起こす","起きさせる","起きる","起かす"],"起きる（自）／起こす（他）是词汇对子（叫醒・引起）；「起きさせる」是使役，意思偏「让…起床」。"],
+[1,"「回す」に対応する自動詞はどれか。",["回る","回れる","回される","回らせる"],"回る（自）／回す（他）；「回される」是受身，「回らせる」是使役。"],
+[1,"「崩れる」に対応する他動詞はどれか。",["崩す","崩させる","崩れさせる","崩らす"],"崩れる（自）／崩す（他）：-reru／-su 型。表里「くずれえる」是误写。"],
+[1,"「逃げる」に対応する他動詞はどれか。",["逃がす","逃げさせる","逃げる","逃す"],"逃げる（自）／逃がす（他：放走）；「逃す（のがす）」是另一个词（错过），「逃げさせる」是使役。"],
+[1,"「揺らす」に対応する自動詞はどれか。",["揺れる","揺る","揺られる","揺らせる"],"揺れる（自）／揺らす（他）；「揺られる」是受身（電車に揺られる）。"],
+[1,"「積もる」に対応する他動詞はどれか。",["積む","積ませる","積もらせる","積める"],"積もる（自）／積む（他）；「積める」是可能形。"],
+[1,"「ぶつける」に対応する自動詞はどれか。",["ぶつかる","ぶつける","ぶつけられる","ぶつかせる"],"ぶつかる（自）／ぶつける（他）：-aru／-eru 型。"],
+[1,"「澄む」に対応する他動詞はどれか。",["澄ます","澄める","澄ませる","澄らす"],"澄む（自）／澄ます（他）：-mu／-masu 型（耳を澄ます）。"],
+[1,"「蒸す」に対応する自動詞はどれか。",["蒸れる","蒸される","蒸せる","蒸む"],"蒸れる（自）／蒸す（他）；「蒸される」受身，「蒸せる」可能。"],
+[1,"「驚く」に対応する他動詞はどれか。",["驚かす","驚かれる","驚ける","驚くす"],"驚く（自）／驚かす（他），也可用使役「驚かせる」；「驚かれる」是受身。"],
+[1,"「跳ぶ」に対応する他動詞はどれか。",["跳ばす（飛ばす）","跳ばれる","跳べる","跳ぶす"],"跳ぶ（自）／跳ばす（他），一般写作「飛ばす」。"],
+[1,"「溢れる」に対応する他動詞「溢す」の読みはどれか。",["こぼす","あふす","あふれす","いっす"],"「溢す」读「こぼす」（也写 零す）；表里的「あふす」有误。"],
+[1,"次の組のうち、自他のペア（別々の単語）になっているものはどれか。",["隠れる／隠す","走る／走らせる","喜ぶ／喜ばせる","座る／座らせる"],"其余三组的「他動詞」其实是使役形（没有对应的他动词时用使役代替）。"],
+[1,"次の組のうち、「他動詞」の欄が使役形になっているのはどれか。",["笑う／笑わせる","燃える／燃やす","起きる／起こす","乾く／乾かす"],"笑う 没有词汇上的他动词，表里用使役「笑わせる」代替；其余三组是真正的自他对子。"],
+[1,"「降ろす」に対応する自動詞はどれか。",["降りる","降る","降らす","降られる"],"降ろす 的自动词是「降りる（おりる）」；表里配对的「降る（ふる）」（下雨・下雪）没有他动词。"],
+[1,"「癒す」に対応する自動詞がないとき、表ではどの形で代用しているか。",["受身「癒される」","使役「癒させる」","可能「癒せる」","そのまま「癒す」"],"没有自动词时用受身「癒される」（被治愈）表示状态变化；这是「受」型对应。"],
+// ===== 自他② 助词・ている／てある（20） =====
+[2,"コンクリート（　）固まった。",["が","を","に","で"],"自动词「固まる」的主语用「が」。"],
+[2,"職人がコンクリート（　）固めた。",["を","が","に","で"],"他动词「固める」的对象用「を」。"],
+[2,"ごみ（　）燃やしている。",["を","が","に","と"],"他动词「燃やす」带宾语「を」；自动词是「ごみが燃えている」。"],
+[2,"雪が（　）いる。",["積もって","積んで","積もらせて","積まれて"],"自动词＋ている＝状态（雪积着）；「積んで」是他动词（堆东西）。"],
+[2,"荷物をトラックに（　）ある。",["積んで","積もって","積まれて","積もらせて"],"他动词＋てある＝有人堆好了（结果状态）；「積もって」是自动词，不能接「てある」。"],
+[2,"部屋に鍵が（　）ある。",["隠して","隠れて","隠されて","隠って"],"「てある」只接他动词：隠して＋ある＝有人把钥匙藏好了；「隠れて」是自动词，要接「いる」。"],
+[2,"猫がベッドの下に（　）いる。",["隠れて","隠して","隠されて","隠って"],"自动词「隠れる」＋ている＝躲着（状态）。"],
+[2,"次のうち、文法的に正しい文はどれか。",["洗濯物が乾いている。","洗濯物が乾かしている。","洗濯物を乾いている。","洗濯物が乾いてある。"],"自動詞 乾く→「が＋乾いている」；「が＋乾かしている」缺宾语，「を＋乾いている」自动词不带を，「乾いてある」自动词不能接てある。"],
+[2,"風で木が（　）。",["揺れている","揺らしている","揺られている","揺れてある"],"自然原因＋自动词：木が揺れている；「揺らしている」需要施动者（人）。"],
+[2,"子どもがブランコを（　）。",["揺らしている","揺れている","揺られている","揺らされている"],"有施动者＋对象「を」→他动词「揺らす」。"],
+[2,"窓を（　）ある。",["開けて","開いて","開かれて","開けられて"],"他动词「開ける」＋てある＝有人开着（结果状态）；「開いて」是自动词 開く，「開けられて」是受身。"],
+[2,"靴の中が（　）。",["蒸れている","蒸している","蒸されている","蒸れてある"],"自动词「蒸れる」＋ている＝闷热的状态；「蒸している」需要施动者和宾语。"],
+[2,"母が野菜を（　）。",["蒸している","蒸れている","蒸されている","蒸れてある"],"施动者＋を→他动词 蒸す＋ている（正在蒸）。"],
+[2,"ボールが壁に（　）。",["ぶつかった","ぶつけた","ぶつけられた","ぶつかられた"],"主语是球自己撞上去→自动词「ぶつかる」（に）；「ぶつけた」需要施动者。"],
+[2,"彼は車を電柱に（　）。",["ぶつけた","ぶつかった","ぶつけられた","ぶつかられた"],"施动者＋を＋に→他动词「ぶつける」。"],
+[2,"自動詞に「てある」が付けられないのはなぜか。",["「てある」は誰かの動作の結果を表すので、対象（を）が必要だから","自動詞は過去形がないから","自動詞は人が主語にならないから","「てある」は口語だから"],"「てある」＝某人做了某动作、结果留着，所以必须是有对象的他动词。"],
+[2,"「鍵が開けてある」と「鍵が開いている」——「誰かが開けた」ことが含意されるのはどちらか。",["鍵が開けてある","鍵が開いている","両方","どちらでもない"],"他動詞＋てある含有「有人做了」；自動詞＋ている只描述状态。"],
+[2,"次のうち、不自然な文はどれか。",["電気を消えている。","電気が消えている。","電気を消している。","電気が消してある。"],"「消える」是自动词，不能带「を」；他动词是「消す」（消している・消してある）。"],
+[2,"子どもを（　）。（寝る／寝かせる）",["寝かせている","寝ている","寝られている","寝れている"],"让孩子睡觉用他动词・使役「寝かせる」（子どもを寝かせる）；「寝ている」是自己在睡。"],
+[2,"お客様を（　）。（「座る」を使って）",["座らせる","座る","座られる","座れる"],"「座る」没有他动词，让人坐用使役「座らせる」（敬语：お掛けいただく）；「座られる」是受身／尊敬。"],
+// ===== 自他③ 視点・情感・综合（20） =====
+[3,"積んであった書類が（　）。（責任をぼかす言い方）",["崩れた","崩した","崩された","崩れさせた"],"自动词淡化施动者（视点与责任轴）：只说「塌了」，不说谁弄的。"],
+[3,"私が書類の山を（　）。（自分の責任を認める言い方）",["崩した","崩れた","崩された","崩れさせた"],"他动词点明主体（我弄塌的）。"],
+[3,"「資料が見つからない」と「資料を見つけられない」—— 自分の能力不足を含意するのはどちらか。",["資料を見つけられない","資料が見つからない","両方","どちらでもない"],"自动词 見つからない＝东西没出现（中立）；他动词的可能形否定＝我没能找到（能力・责任）。"],
+[3,"「火が消えた」と「火を消した」—— 消防士の活動を言うのはどちらか。",["火を消した","火が消えた","両方","どちらでもない"],"有施动者的行为用他动词「消す」；「消えた」只说火灭了。"],
+[3,"子どもを（　）ために、おもちゃを買った。",["喜ばせる","喜ぶ","喜ばれる","喜べる"],"「喜ぶ」没有他动词，让人高兴用使役「喜ばせる」。"],
+[3,"その知らせを聞いて、みんな（　）。",["喜んだ","喜ばせた","喜ばれた","喜ばした"],"主语自己高兴→自动词「喜ぶ」。"],
+[3,"彼の冗談はいつも私を（　）。",["笑わせる","笑う","笑われる","笑える"],"「笑う」没有他动词，「使人笑」用使役「笑わせる」；「笑われる」是被笑，「笑える」是可能／好笑。"],
+[3,"発表でみんなに（　）、恥ずかしかった。",["笑われて","笑わせて","笑って","笑えて"],"被大家笑→受身「笑われる」。"],
+[3,"大きな音が、子どもを（　）。",["驚かせた","驚いた","驚かれた","驚けた"],"使人吃惊→他动词「驚かす」或使役「驚かせる」；「驚いた」是自己吃惊。"],
+[3,"急な知らせに、私は（　）。",["驚いた","驚かした","驚かれた","驚かせた"],"自己吃惊→自动词「驚く」。"],
+[3,"遅刻して、先生を（　）しまった。",["怒らせて","怒って","怒られて","怒れて"],"惹老师生气→使役「怒らせる」；「怒られて」是被骂（受身）。"],
+[3,"遅刻して、先生に（　）。",["怒られた","怒らせた","怒った","怒れた"],"被老师骂→受身「怒られる」。"],
+[3,"この音楽は心を（　）。",["癒す","癒される","癒える","癒せる"],"音乐治愈人心→他动词「癒す」（心を）；「癒される」是受身（被治愈）。"],
+[3,"温泉に入って（　）。",["癒された","癒した","癒さされた","癒せた"],"自己被治愈→受身「癒される」（代替没有的自动词）。"],
+[3,"彼女を（　）つもりはなかった。",["悲しませる","悲しむ","悲しまれる","悲しめる"],"使人难过→使役「悲しませる」（悲しむ 没有他动词）。"],
+[3,"長い説明に、みんな（　）。",["飽きた","飽きさせた","飽きられた","飽きさした"],"主语自己厌烦→自动词「飽きる」；「飽きさせる」是使人厌烦。"],
+[3,"次のうち、「自動詞」はどれか。",["走る","走らせる","投げる","押す"],"「走る」是自动词；「投げる・押す」虽然表里列在自动词栏，其实是他动词（ボールを投げる・ボタンを押す）。"],
+[3,"「触れる」と「触る」の違いとして正しいものはどれか。",["どちらも「に」をとり、触る のほうが意図的・手で触る","触れる が自動詞、触る が他動詞（を）","触る が自動詞、触れる が他動詞","同じ意味で交換可能"],"两者都接「に」（手に触れる／手に触る），不是自他对子；触る 更主动、多指用手。"],
+[3,"犬を（　）しまった。（逃がした側）",["逃がして","逃げて","逃げられて","逃げさせて"],"自己放跑／没看住→他动词「逃がす」；「逃げられて」是迷惑の受身（狗跑了我受影响）。"],
+[3,"次のうち、自他の使い分けが不自然なのはどれか。",["ボールを跳んだ。","ボールを跳ばした。","ボールが跳んだ。","ボールが跳ばされた。"],"「跳ぶ」是自动词，不能带「を」；他动词是「跳ばす（飛ばす）」。"],
+];
+const SETS=[
+ {name:"活用 40题",lv:[null,{n:"見分け・基本活用",c:"var(--l1)"},{n:"使役形・可能形",c:"var(--l2)"}],raw:Q1},
+ {name:"受身形 80题",lv:[null,{n:"作り方",c:"var(--l1)"},{n:"四种受身・助词",c:"var(--l2)"},{n:"受身・尊敬・可能",c:"var(--l3)"},{n:"使役受身・综合",c:"var(--l4)"}],raw:Q2},
+ {name:"自動詞・他動詞 60题",lv:[null,{n:"対応ペア",c:"var(--l1)"},{n:"助词・ている／てある",c:"var(--l2)"},{n:"視点・情感・综合",c:"var(--l3)"}],raw:Q3}];
+const KEY="jp-doushi-v1";
+function rng(s){return()=>{s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff}}
+SETS.forEach((S,si)=>{S.items=S.raw.map((q,i)=>{const r=rng((i+1)*7919+17+si*131);const idx=[0,1,2,3];
+  for(let j=3;j>0;j--){const k=Math.floor(r()*(j+1));[idx[j],idx[k]]=[idx[k],idx[j]]}
+  return{lv:q[0],stem:q[1],opts:idx.map(x=>q[2][x]),ans:idx.indexOf(0),exp:q[3],correct:q[2][0]}})});
+let st={set:0,a:[{},{},{}],cur:[0,0,0],f:0,mode:"practice",range:0,count:20,exam:null};
+try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&Array.isArray(s.a))st=Object.assign(st,s)}catch(e){}
+while(st.a.length<SETS.length){st.a.push({});st.cur.push(0)}
+const SET=()=>SETS[st.set], IT=()=>SET().items, LVS=()=>SET().lv, ANS=()=>st.a[st.set], N=()=>IT().length;
+const CUR=()=>st.cur[st.set], setCur=v=>{st.cur[st.set]=v};
+function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const fill=(it,txt)=>esc(it.stem).replace(/（　）/g,`<span class="blank">${txt}</span>`);
+const lvTag=it=>`<i style="background:${LVS()[it.lv].c}"></i>${LVS()[it.lv].n}`;
+const lvIds=(items,l)=>items.map((_,i)=>i).filter(i=>items[i].lv===l);
+
+/* ---------- mode ---------- */
+function setTabs(){const el=$("sets");el.innerHTML="";SETS.forEach((S,i)=>{const b=document.createElement("button");
+  b.textContent=S.name;b.setAttribute("aria-pressed",st.set===i);
+  b.onclick=()=>{if(st.set===i)return;st.set=i;st.f=0;st.range=0;if(st.exam&&!st.exam.end){if(!confirm("正在进行的测验将被放弃，确定切换题库？"))return}st.exam=null;save();render()};el.appendChild(b)})}
+function setMode(m){st.mode=m;save();render()}
+$("mP").onclick=()=>setMode("practice");$("mE").onclick=()=>setMode("exam");
+
+/* ---------- practice ---------- */
+function visible(){return IT().map((_,i)=>i).filter(i=>!st.f||IT()[i].lv===st.f)}
+function tabs(){const t=$("tabs");t.innerHTML="";
+  [["全部",0],...LVS().slice(1).map((l,i)=>[`${l.n}（${i*20+1}–${i*20+20}）`,i+1])].forEach(([n,v])=>{
+    const b=document.createElement("button");b.textContent=n;b.setAttribute("aria-pressed",st.f===v);
+    b.onclick=()=>{st.f=v;if(v&&IT()[CUR()].lv!==v)setCur((v-1)*20);save();render()};t.appendChild(b)})}
+function grid(){const g=$("grid");g.innerHTML="";
+  IT().forEach((it,i)=>{const b=document.createElement("button");const a=ANS()[i];
+    b.className=`lv${it.lv}`+(a!=null?(a===it.ans?" ok":" ng"):"")+(i===CUR()?" cur":"")+(st.f&&it.lv!==st.f?" dim":"");
+    b.textContent=i+1;b.setAttribute("aria-label",`第${i+1}题`+(a!=null?(a===it.ans?"，答对":"，答错"):""));
+    b.onclick=()=>{setCur(i);if(st.f&&it.lv!==st.f)st.f=0;save();render()};g.appendChild(b)})}
+function card(){const i=CUR(),it=IT()[i],a=ANS()[i];
+  $("lv").innerHTML=lvTag(it);$("no").textContent=`第 ${i+1} 题 / ${N()}`;
+  $("stem").innerHTML=fill(it,a!=null?esc(it.correct):"　");
+  const o=$("opts");o.innerHTML="";
+  it.opts.forEach((t,k)=>{const b=document.createElement("button");b.className="opt ja"+(t.length>12?" long":"");b.lang="ja";
+    b.innerHTML=`<span class="k">${k+1}</span><span>${esc(t)}</span>`;
+    if(a!=null){b.disabled=true;if(k===it.ans)b.classList.add("right");else if(k===a)b.classList.add("wrong")}
+    b.onclick=()=>choose(k);o.appendChild(b)});
+  const s=$("stamp");s.className="stamp";
+  if(a!=null){s.textContent=a===it.ans?"正解":"誤";s.classList.add(a===it.ans?"ok":"ng","show");
+    $("exp").hidden=false;$("ans").innerHTML=`正确答案：<span class="ja" lang="ja">${esc(it.correct)}</span>`;$("why").textContent=it.exp}
+  else $("exp").hidden=true;
+  const v=visible(),p=v.indexOf(i);$("prev").disabled=p<=0;$("next").disabled=p>=v.length-1}
+function choose(k){const i=CUR();if(ANS()[i]!=null)return;ANS()[i]=k;save();card();grid();score();
+  const s=$("stamp");s.classList.remove("show");void s.offsetWidth;s.classList.add("show")}
+function score(){const keys=Object.keys(ANS());const ok=keys.filter(i=>ANS()[i]===IT()[i].ans).length;
+  $("sc").textContent=ok;$("done").textContent=keys.length;$("pct").textContent=Math.round(keys.length/N()*100);
+  const r=$("result");if(!keys.length){r.innerHTML="";return}
+  let h=`<h2>各部分得分</h2><div class="bars">`;
+  for(let l=1;l<LVS().length;l++){const ids=lvIds(IT(),l);const d=ids.filter(i=>ANS()[i]!=null);const c=d.filter(i=>ANS()[i]===IT()[i].ans).length;
+    h+=`<div class="bar"><span>${LVS()[l].n}</span><div class="t"><span style="width:${c/ids.length*100}%;background:${LVS()[l].c}"></span></div><span>${c} / ${d.length}</span></div>`}
+  r.innerHTML=h+"</div>"}
+function go(d){const v=visible(),p=v.indexOf(CUR());const n=v[p+d];if(n!=null){setCur(n);save();render()}}
+$("prev").onclick=()=>go(-1);$("next").onclick=()=>go(1);
+$("reset").onclick=()=>{if(confirm(`确定清空「${SET().name}」的练习记录？`)){st.a[st.set]={};setCur(0);st.f=0;save();render()}};
+
+/* ---------- exam ---------- */
+const RANGES=()=>[["全部",0],...LVS().slice(1).map((l,i)=>[l.n,i+1])];
+function counts(){const max=st.range?20:N();return(st.range?[10,20]:[20,40,60,80,100]).filter(n=>n<=max)}
+function chips(el,list,key){el.innerHTML="";list.forEach(([n,v])=>{const b=document.createElement("button");b.textContent=n;b.setAttribute("aria-pressed",st[key]===v);
+  b.onclick=()=>{st[key]=v;if(key==="range"&&!counts().includes(st.count))st.count=counts().slice(-1)[0];save();renderSetup()};el.appendChild(b)})}
+function renderSetup(){if(!counts().includes(st.count))st.count=counts().slice(-1)[0];$("setup").querySelector("h2").textContent=`开始一场测验　·　${SET().name}`;chips($("cRange"),RANGES(),"range");chips($("cCount"),counts().map(n=>[n+" 题",n]),"count")}
+function startExam(ids){
+  if(!ids){let pool=IT().map((_,i)=>i).filter(i=>!st.range||IT()[i].lv===st.range);
+    for(let j=pool.length-1;j>0;j--){const k=Math.floor(Math.random()*(j+1));[pool[j],pool[k]]=[pool[k],pool[j]]}
+    ids=pool.slice(0,st.count)}
+  ids=ids.slice().sort((a,b)=>a-b);
+  st.exam={set:st.set,ids,ans:{},cur:0,start:Date.now(),end:null};save();render()}
+$("startBtn").onclick=()=>startExam();
+const fmt=ms=>{const s=Math.floor(ms/1000);return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")};
+let timer=null;
+function tick(){const e=st.exam;if(e&&!e.end)$("eTime").textContent=fmt(Date.now()-e.start)}
+function renderRun(){const e=st.exam,EI=SETS[e.set].items,EL=SETS[e.set].lv,n=e.ids.length,i=e.ids[e.cur],it=EI[i],a=e.ans[e.cur];
+  $("eDone").textContent=Object.keys(e.ans).length;$("eTot").textContent=n;tick();
+  const g=$("eGrid");g.innerHTML="";g.style.gridTemplateColumns=`repeat(${Math.min(n,20)},1fr)`;
+  e.ids.forEach((qi,k)=>{const b=document.createElement("button");b.className=`lv${EI[qi].lv}`+(e.ans[k]!=null?" sel":"")+(k===e.cur?" cur":"");
+    b.setAttribute("aria-label",`第${k+1}题`+(e.ans[k]!=null?"，已答":"，未答"));b.onclick=()=>{e.cur=k;save();renderRun()};g.appendChild(b)});
+  $("eLv").innerHTML=`<i style="background:${EL[it.lv].c}"></i>${EL[it.lv].n}`;$("eNo").textContent=`第 ${e.cur+1} 题 / ${n}`;
+  $("eStem").innerHTML=fill(it,a!=null?esc(it.opts[a]):"　");
+  const o=$("eOpts");o.innerHTML="";
+  it.opts.forEach((t,k)=>{const b=document.createElement("button");b.className="opt ja"+(t.length>12?" long":"")+(a===k?" picked":"");b.lang="ja";
+    b.innerHTML=`<span class="k">${k+1}</span><span>${esc(t)}</span>`;b.onclick=()=>pick(k);o.appendChild(b)});
+  $("ePrev").disabled=e.cur<=0;$("eNext").textContent=e.cur>=n-1?"交卷评分":"下一题"}
+function pick(k){const e=st.exam;e.ans[e.cur]=k;save();renderRun();
+  if(e.cur<e.ids.length-1)setTimeout(()=>{if(st.exam===e&&!e.end){e.cur++;save();renderRun()}},280)}
+$("ePrev").onclick=()=>{const e=st.exam;if(e.cur>0){e.cur--;save();renderRun()}};
+$("eNext").onclick=()=>{const e=st.exam;if(e.cur<e.ids.length-1){e.cur++;save();renderRun()}else submit()};
+$("submitBtn").onclick=submit;
+function submit(){const e=st.exam,left=e.ids.length-Object.keys(e.ans).length;
+  if(left&&!confirm(`还有 ${left} 题未作答，未答按错误计分。确定交卷？`))return;
+  e.end=Date.now();save();render();window.scrollTo({top:0})}
+function grade(p){return p>=90?["秀","var(--midori)"]:p>=75?["優","var(--l3)"]:p>=60?["可","var(--l4)"]:["再","var(--shu)"]}
+function renderReport(){const e=st.exam,EI=SETS[e.set].items,EL=SETS[e.set].lv,n=e.ids.length;
+  const res=e.ids.map((qi,k)=>({qi,k,a:e.ans[k],ok:e.ans[k]===EI[qi].ans}));
+  const c=res.filter(r=>r.ok).length,p=Math.round(c/n*100),[g,gc]=grade(p);
+  let h=`<h2>测验结果</h2><div class="top"><div class="pts">${p}<small> 分</small></div><div class="grade" style="color:${gc}">${g}</div>
+    <div class="facts">答对 <b>${c}</b> / ${n} 题<br>未作答 <b>${res.filter(r=>r.a==null).length}</b> 题<br>用时 <b>${fmt(e.end-e.start)}</b></div></div><div class="bars">`;
+  for(let l=1;l<EL.length;l++){const rs=res.filter(r=>EI[r.qi].lv===l);if(!rs.length)continue;const ok=rs.filter(r=>r.ok).length;
+    h+=`<div class="bar"><span>${EL[l].n}</span><div class="t"><span style="width:${ok/rs.length*100}%;background:${EL[l].c}"></span></div><span>${ok} / ${rs.length}</span></div>`}
+  h+=`</div><div class="actions"><button class="big" id="again">再考一次</button>${c<n?'<button class="big ghost" id="redo">只重做错题</button>':""}<button class="big ghost" id="toSetup">重新设置</button></div>`;
+  const wr=res.filter(r=>!r.ok);
+  h+=`<div class="wrongs">`+(wr.length?`<h3>错题解析（${wr.length}）</h3>`+wr.map(r=>{const it=EI[r.qi];
+    return `<div class="w"><div class="s ja" lang="ja">${r.k+1}．${fill(it,esc(it.correct))}</div>
+    <div class="yo">你的答案：<span class="x ja" lang="ja">${r.a!=null?esc(it.opts[r.a]):"未作答"}</span>　正确答案：<span class="o ja" lang="ja">${esc(it.correct)}</span>　<span style="color:var(--sub)">（原题第 ${r.qi+1} 题・${EL[it.lv].n}）</span></div>
+    <div class="e">${esc(it.exp)}</div></div>`}).join(""):`<div class="perfect">全部答对，满分！</div>`)+`</div>`;
+  $("report").innerHTML=h;
+  $("again").onclick=()=>startExam();
+  if($("redo"))$("redo").onclick=()=>startExam(wr.map(r=>r.qi));
+  $("toSetup").onclick=()=>{st.exam=null;save();render()}}
+
+/* ---------- keys & render ---------- */
+document.addEventListener("keydown",e=>{
+  if(st.mode==="practice"){if(e.key>="1"&&e.key<="4")choose(+e.key-1);else if(e.key==="ArrowRight")go(1);else if(e.key==="ArrowLeft")go(-1)}
+  else if(st.exam&&!st.exam.end){if(e.key>="1"&&e.key<="4")pick(+e.key-1);else if(e.key==="ArrowRight")$("eNext").click();else if(e.key==="ArrowLeft")$("ePrev").click()}});
+function render(){const P=st.mode==="practice";setTabs();
+  $("mP").setAttribute("aria-pressed",P);$("mE").setAttribute("aria-pressed",!P);
+  $("practice").hidden=!P;$("exam").hidden=P;$("scorebox").hidden=!P;
+  clearInterval(timer);
+  if(P){tabs();grid();card();score();return}
+  const e=st.exam;
+  $("setup").hidden=!!e;$("running").hidden=!(e&&!e.end);$("report").hidden=!(e&&e.end);
+  if(!e)renderSetup();else if(!e.end){renderRun();timer=setInterval(tick,1000)}else renderReport()}
+/* 站内搜索的深链接 ?n=<题号> */
+try{const n=+new URLSearchParams(location.search).get("n");if(n>=1&&n<=N()){setCur(n-1);st.f=0;st.mode="practice"}}catch(e){}
+render();
+</script>
+</body>
+</html>

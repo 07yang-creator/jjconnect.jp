@@ -1,17 +1,77 @@
 {
   "topics": [
     {
+      "slug": "doushi",
+      "title": "日语动词：活用・受身形・自他動詞",
+      "category": "语法",
+      "tags": [
+        "動詞",
+        "活用",
+        "受身",
+        "自動詞",
+        "他動詞",
+        "使役"
+      ],
+      "summary": "根据《动词变形表》50 词和《自动词・他动词 分类频度列表》45 对整理：可检索的活用表、受身形的四种用法（直接／持ち主／迷惑／非情）与尊敬・可能・自発的区分、使役受身，自动词・他动词的对应型、ている／てある 和视点与责任；表里的误标已订正。配套 180 题（活用 40・受身形 80・自他 60），分组练习，支持练习模式与考试模式。",
+      "created": "2026-10-12",
+      "updated": "2026-10-12",
+      "items": [
+        {
+          "id": "material",
+          "type": "material",
+          "kind": "html",
+          "title": "日语动词 讲义（活用表・受身形・自他動詞）",
+          "file": "material.html",
+          "note": "活用表 50 词 · 自他 45 对 · 16 组讲解 · 可检索"
+        },
+        {
+          "id": "quiz",
+          "type": "test",
+          "kind": "html",
+          "title": "日语动词 180题",
+          "file": "quiz.html",
+          "note": "活用 40 · 受身形 80 · 自他 60 · 分组 · 练习／考试模式"
+        }
+      ]
+    },
+    {
       "slug": "setsuzoku",
       "title": "日语接续表达",
       "category": "语法",
-      "tags": ["接続詞", "接続助詞", "句型", "N3〜N1"],
+      "tags": [
+        "接続詞",
+        "接続助詞",
+        "句型",
+        "N3〜N1"
+      ],
       "summary": "接続詞・接続助詞・句型三个层级，按并列／添加／转折／因果／先后／条件／选择／说明／转换／目的十类整理 121 条常用接续表达，每条附例句与中文译文；配套 100 题五级递进练习，支持练习模式与考试模式。",
       "created": "2026-09-22",
       "updated": "2026-09-22",
       "items": [
-        { "id": "ichiran", "type": "material", "kind": "html", "title": "日语接续表达一览", "file": "material.html", "note": "10 类 · 121 条 · 可搜索、可遮译文" },
-        { "id": "ichiran-pdf", "type": "material", "kind": "pdf", "title": "日语接续表达一览（PDF 原版）", "file": "setsuzoku-ichiran.pdf", "note": "7 页 · 打印用" },
-        { "id": "quiz100", "type": "test", "kind": "html", "title": "日语接续表达 100题", "file": "quiz.html", "note": "100 题 · 入门→高级五级 · 练习／考试模式" }
+        {
+          "id": "ichiran",
+          "type": "material",
+          "kind": "html",
+          "title": "日语接续表达一览",
+          "file": "material.html",
+          "note": "10 类 · 121 条 · 可搜索、可遮译文"
+        },
+        {
+          "id": "ichiran-pdf",
+          "type": "material",
+          "kind": "pdf",
+          "title": "日语接续表达一览（PDF 原版）",
+          "file": "setsuzoku-ichiran.pdf",
+          "note": "7 页 · 打印用"
+        },
+        {
+          "id": "quiz100",
+          "type": "test",
+          "kind": "html",
+          "title": "日语接续表达 100题",
+          "file": "quiz.html",
+          "note": "100 题 · 入门→高级五级 · 练习／考试模式"
+        }
       ]
     }
   ]

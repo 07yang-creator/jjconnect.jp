@@ -14,6 +14,16 @@ pathlib.Path(f".tmp/{n}.js").write_text(h.split("<script>")[1].split("</script>"
 PY
   if node --check ".tmp/$f.js"; then echo "  syntax ok: $f"; else echo "  SYNTAX FAIL: $f"; fail=1; fi
 done
+for f in material quiz; do
+  python3 - "$f" << 'PY'
+import sys,pathlib
+n=sys.argv[1]
+h=pathlib.Path(f"../content/doushi/{n}.html").read_text(encoding="utf-8")
+pathlib.Path(f".tmp/doushi-{n}.js").write_text(h.split("<script>")[1].split("</script>")[0],encoding="utf-8")
+PY
+  if node --check ".tmp/doushi-$f.js"; then echo "  syntax ok: doushi/$f"; else echo "  SYNTAX FAIL: doushi/$f"; fail=1; fi
+done
+node tools/check_doushi.cjs || fail=1
 node - << 'EOF2' || fail=1
 const fs=require('fs');
 const src=['set1-basic','set2-advanced','set3-bunkei-goi','set4-ichiran'].map(n=>fs.readFileSync(`src/quiz/data/${n}.js`,'utf8'));
