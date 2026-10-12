@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /* Generate the 自他動詞 test bank from the map's own pair list (src/jita/map.html, const RAW).
    Six sets × 124 pairs, grouped by the map's 7 groups. Deterministic: same input → same files.
-   Row: [group(1-7), stem, [correct, d1, d2, d3], explanation, 自動詞, 他動詞, group id] */
+   Row: [group(1-7), stem, [correct, d1, d2, d3], explanation, 自動詞, 他動詞, 意味（自／他）] */
 const fs = require('fs');
+const EN = require('./glosses.cjs');
 const html = fs.readFileSync('src/jita/map.html', 'utf8');
 const RAW = html.match(/const RAW = `([\s\S]*?)`;/)[1];
 const PAIRS = RAW.trim().split('\n').map((l, i) => { const [g, jk, jr, tk, tr, m] = l.split('|'); return { id: i, g, ji: { k: jk, r: jr }, ta: { k: tk, r: tr }, m }; });
@@ -38,25 +39,27 @@ byGroup.forEach((p, n) => {
   const C = { jiC: conj(p.ji, 'caus'), taC: conj(p.ta, 'caus'), jiP: conj(p.ji, 'pass'), taP: conj(p.ta, 'pass'), taPot: conj(p.ta, 'pot'), jiPot: conj(p.ji, 'pot'), jiI: teIru(p.ji), taI: teIru(p.ta), jiA: teAru(p.ji), taA: teAru(p.ta) };
   const core = `${name}：${rule}。${p.ji.k}（自）／${p.ta.k}（他）＝${m}。`;
   sets.tota.push([g, `${show(p.ji)} に対応する他動詞はどれか。`, opts(p.ta, [C.jiC, C.taP, p.ji, C.jiI, C.taC, C.taA]),
-    core + `使役「${C.jiC.k}」是让别人做，受身「${C.taP.k}」背后有人，都不是成对的他动词。`, p.ji.k, p.ta.k, p.g]);
+    core + `使役「${C.jiC.k}」是让别人做，受身「${C.taP.k}」背后有人，都不是成对的他动词。`, p.ji.k, p.ta.k, `${m} · ${EN[p.ji.k] || '?'}／${EN[p.ta.k] || '?'}`]);
   sets.toji.push([g, `${show(p.ta)} に対応する自動詞はどれか。`, opts(p.ji, [C.taP, p.ta, C.jiC, C.taC, C.jiI, C.taA]),
-    core + `受身「${C.taP.k}」背后有人，自動詞「${p.ji.k}」背后没有人。`, p.ji.k, p.ta.k, p.g]);
+    core + `受身「${C.taP.k}」背后有人，自動詞「${p.ji.k}」背后没有人。`, p.ji.k, p.ta.k, `${m} · ${EN[p.ji.k] || '?'}／${EN[p.ta.k] || '?'}`]);
   sets.ukemi.push([g, `${show(p.ta)} の受身形はどれか。`, opts(C.taP, [p.ji, C.taC, C.jiP, C.taPot, C.jiI, C.jiC]),
-    `受身＝他動詞＋（ら）れる：${p.ta.k}→${C.taP.k}（被人…）。不要和自動詞「${p.ji.k}」（自然发生）混；${name}：${rule}。`, p.ji.k, p.ta.k, p.g]);
+    `受身＝他動詞＋（ら）れる：${p.ta.k}→${C.taP.k}（被人…）。不要和自動詞「${p.ji.k}」（自然发生）混；${name}：${rule}。`, p.ji.k, p.ta.k, `${m} · ${EN[p.ji.k] || '?'}／${EN[p.ta.k] || '?'}`]);
   sets.shieki.push([g, `${show(p.ji)} の使役形はどれか。`, opts(C.jiC, [p.ta, C.taC, C.taP, C.jiP, C.jiI, C.taA]),
-    `使役＝自動詞＋（さ）せる：${p.ji.k}→${C.jiC.k}（让别人去…）。成对的他動詞「${p.ta.k}」是独立的词，不是使役；${name}。`, p.ji.k, p.ta.k, p.g]);
+    `使役＝自動詞＋（さ）せる：${p.ji.k}→${C.jiC.k}（让别人去…）。成对的他動詞「${p.ta.k}」是独立的词，不是使役；${name}。`, p.ji.k, p.ta.k, `${m} · ${EN[p.ji.k] || '?'}／${EN[p.ta.k] || '?'}`]);
   if (n % 2 === 0) sets.teiru.push([g, `${label(p)}で「変化した後の状態」を言うとき、正しい形はどれか。`, opts(C.jiI, [C.jiA, C.taI, C.taA, C.taP]),
-    `〜ている 接自動詞＝变化后的状态：${C.jiI.k}。〜てある 接他動詞（有人特意做好）：${C.taA.k}。${name}：${rule}。`, p.ji.k, p.ta.k, p.g]);
+    `〜ている 接自動詞＝变化后的状态：${C.jiI.k}。〜てある 接他動詞（有人特意做好）：${C.taA.k}。${name}：${rule}。`, p.ji.k, p.ta.k, `${m} · ${EN[p.ji.k] || '?'}／${EN[p.ta.k] || '?'}`]);
   else sets.teiru.push([g, `${label(p)}で「誰かが準備してそのままにしてある」と言うとき、正しい形はどれか。`, opts(C.taA, [C.taI, C.jiA, C.jiI, C.taP]),
-    `〜てある 接他動詞＝有人特意做好：${C.taA.k}。〜ている 接自動詞（变化后的状态）：${C.jiI.k}。${name}：${rule}。`, p.ji.k, p.ta.k, p.g]);
+    `〜てある 接他動詞＝有人特意做好：${C.taA.k}。〜ている 接自動詞（变化后的状态）：${C.jiI.k}。${name}：${rule}。`, p.ji.k, p.ta.k, `${m} · ${EN[p.ji.k] || '?'}／${EN[p.ta.k] || '?'}`]);
   const forms = [[p.ji, '自動詞'], [p.ta, '他動詞'], [C.taP, '受身形'], [C.jiC, '使役形']];
   const [w, lab] = forms[n % 4]; const labs = ['自動詞', '他動詞', '受身形', '使役形'];
   sets.hantei.push([g, `${show(w)} は何か。`, [lab, ...labs.filter(x => x !== lab)],
-    `${w.k} 是${lab}。${core}${lab === '受身形' ? `受身＝他動詞 ${p.ta.k}＋（ら）れる。` : lab === '使役形' ? `使役＝自動詞 ${p.ji.k}＋（さ）せる。` : p.g === '5B' && lab === '自動詞' ? `注意：${w.k} 也是 ${p.ta.k} 的可能形（同形）。` : ''}`, p.ji.k, p.ta.k, p.g]);
+    `${w.k} 是${lab}。${core}${lab === '受身形' ? `受身＝他動詞 ${p.ta.k}＋（ら）れる。` : lab === '使役形' ? `使役＝自動詞 ${p.ji.k}＋（さ）せる。` : p.g === '5B' && lab === '自動詞' ? `注意：${w.k} 也是 ${p.ta.k} 的可能形（同形）。` : ''}`, p.ji.k, p.ta.k, `${m} · ${EN[p.ji.k] || '?'}／${EN[p.ta.k] || '?'}`]);
 });
 const names = { tota: ['Q1', '自→他'], toji: ['Q2', '他→自'], ukemi: ['Q3', '他→受身形'], shieki: ['Q4', '自→使役形'], teiru: ['Q5', 'ている／てある'], hantei: ['Q6', '自他判定'] };
 for (const k in sets) {
   const [v, title] = names[k];
-  fs.writeFileSync(`src/jita-quiz/data/${k}.js`, `// 自他動詞 ${title}：由 tools/gen_jita.cjs 从 src/jita/map.html 的词对表生成，勿手改。\n// [组, 题干, [正确, 干扰×3], 解析, 自動詞, 他動詞, 组id]\nconst ${v} = [\n` + sets[k].map(r => JSON.stringify(r)).join(',\n') + '\n];\n');
+  fs.writeFileSync(`src/jita-quiz/data/${k}.js`, `// 自他動詞 ${title}：由 tools/gen_jita.cjs 从 src/jita/map.html 的词对表生成，勿手改。\n// [组, 题干, [正确, 干扰×3], 解析, 自動詞, 他動詞, 意味]\nconst ${v} = [\n` + sets[k].map(r => JSON.stringify(r)).join(',\n') + '\n];\n');
 }
 console.log(`gen_jita: ${PAIRS.length} pairs → ${Object.values(sets).reduce((s, a) => s + a.length, 0)} questions in ${Object.keys(sets).length} sets`);
+
+const missing = PAIRS.flatMap(p => [p.ji.k, p.ta.k]).filter(k => !EN[k]); if (missing.length) { console.error('no English gloss for: ' + missing.join('、')); process.exit(1); }

@@ -45,9 +45,11 @@ src/quiz/
 src/benseki/  shell.html + sec.js (const SEC) + render.js + footer.html
 src/fukushu/  同上
 
-src/doushi/        shell.html + data.js (VERBS 活用表 93 行・末两列是 グループ／出典 / PAIRS 自他 46 行 / SEC 讲解 15 组) + render.js + footer.html
+src/doushi/        shell.html + data.js (VERBS 活用表 93 行・末四列是 グループ／出典／意味／English / PAIRS 自他 46 行 / SEC 讲解 15 组) + render.js + footer.html
 src/_engine/       **共用测验引擎**：quiz.js（练习／错题循环／考试／错题复习＋错题本导出）＋ shell.html（模板，{{TITLE}}／{{H1}}）。
-                   每页只有 config.js（CFG={key,title,wordInfo,sets}）＋ meta.json（标题）＋ data；tools/assemble.cjs 拼装。goi／jita／doushi-drill 都用它。
+                   每页只有 config.js（CFG={key,title,wordInfo,gloss?,sets}）＋ meta.json（标题）＋ data；tools/assemble.cjs 拼装。goi／jita／doushi-drill 都用它。
+                   gloss(it,setIndex,answered) 返回题干下的词义行（drill／jita 用；填空题不要给，会泄露答案）。
+tools/glosses.cjs  动词英文释义表（活用表 93 词＋自他 248 词）；gen_katsuyo／gen_jita 都从这里取英文，缺词即报错，加新动词先补这里。
 src/doushi-drill/  config1.js／meta1.json（基本活用 7 形）、config2.js／meta2.json（派生形 4 形）；data/*.js 由 tools/gen_katsuyo.cjs 生成（勿手改）：
                    从 doushi/data.js 的 VERBS＋jita map 的 124 对取 305 个动词，按类（五段／一段／五段例外／特殊）造每种形，干扰项＝真实的错误变形
 src/jita/map.html  用户的交互图原文件（勿改；要改先在 claude.ai 那边改再替换）

@@ -19,7 +19,10 @@ const CUR=()=>st.cur[st.set], setCur=v=>{st.cur[st.set]=v};
 function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
-const fill=(it,txt)=>esc(it.stem).replace(/（　）/g,`<span class="blank">${txt}</span>`);
+// 词义：CFG.gloss(it, setIndex, answered) returns the line shown under the question (drills／自他), "" to hide;
+// omitted for cloze quizzes where it would reveal the answer
+const gloss=(it,done)=>{const g=CFG.gloss&&it.w3?CFG.gloss(it,st.set,done):"";return g?`<small class="gloss">${esc(g)}</small>`:""};
+const fill=(it,txt,g=true)=>esc(it.stem).replace(/（　）/g,`<span class="blank">${txt}</span>`)+(g?gloss(it,txt!=="　"):"");
 const lvTag=(it,L)=>`<i style="background:${(L||LVS())[it.lv].c}"></i>${(L||LVS())[it.lv].n}`;
 const lvIds=(items,l)=>items.map((_,i)=>i).filter(i=>items[i].lv===l);
 const today=()=>new Date().toISOString().slice(0,10);
@@ -135,7 +138,7 @@ function renderLoop(){const L=LOOP();
   if(L.end){const w=Object.keys(L.wrong).map(Number);
     $("lReport").innerHTML=`<h2>全部答对！</h2><div class="top"><div class="pts">${L.total}<small> 题</small></div><div class="facts">共作答 <b>${L.seen}</b> 次<br>答错过 <b>${w.length}</b> 题（共 ${Object.values(L.wrong).reduce((a,b)=>a+b,0)} 次）</div></div>
       <div class="actions"><button class="big" id="lAgain">再来一轮</button>${w.length?'<button class="big ghost" id="lRedo">只循环错过的题</button>':""}<button class="big ghost" id="lSetupBtn">重新设置</button></div>
-      ${w.length?`<div class="wrongs"><h3>答错过的题（${w.length}）　<small>已记入错题本</small></h3>`+w.sort((a,b)=>a-b).map(i=>{const it=IT()[i];return `<div class="w"><div class="s ja" lang="ja">${fill(it,esc(it.correct))}${it.stem.includes("（　）")?"":"　→　"+esc(it.correct)}　<span style="color:var(--sub)">（第 ${i+1} 题・错 ${L.wrong[i]} 次）</span></div><div class="e">${esc(it.exp)}</div></div>`}).join("")+`</div>`:""}`;
+      ${w.length?`<div class="wrongs"><h3>答错过的题（${w.length}）　<small>已记入错题本</small></h3>`+w.sort((a,b)=>a-b).map(i=>{const it=IT()[i];return `<div class="w"><div class="s ja" lang="ja">${fill(it,esc(it.correct),false)}${it.stem.includes("（　）")?"":"　→　"+esc(it.correct)}　<span style="color:var(--sub)">（第 ${i+1} 题・错 ${L.wrong[i]} 次）</span></div><div class="e">${esc(it.exp)}</div></div>`}).join("")+`</div>`:""}`;
     $("lAgain").onclick=()=>loopStart();if($("lRedo"))$("lRedo").onclick=()=>loopStart(w);$("lSetupBtn").onclick=()=>{st.loop[st.set]=null;save();render()};return}
   const i=L.cur,it=IT()[i];
   $("lDone").textContent=L.done.length;$("lTot").textContent=L.total;$("lLeft").textContent=L.q.length+(L.ans==null?1:0);$("lWrong").textContent=Object.keys(L.wrong).length;
@@ -188,7 +191,7 @@ function renderReport(){const e=st.exam,EI=SETS[e.set].items,EL=SETS[e.set].lv,n
   const wr=res.filter(r=>!r.ok);
   h+=`</div><div class="actions"><button class="big" id="again">再考一次</button>${c<n?'<button class="big ghost" id="redo">只重做错题</button><button class="big ghost" id="loopWrong">错题循环到全对</button>':""}<button class="big ghost" id="toSetup">重新设置</button></div>`;
   h+=`<div class="wrongs">`+(wr.length?`<h3>错题解析（${wr.length}）　<small>已记入错题本</small></h3>`+wr.map(r=>{const it=EI[r.qi];
-    return `<div class="w"><div class="s ja" lang="ja">${r.k+1}．${fill(it,esc(it.correct))}${it.stem.includes("（　）")?"":"　→　"+esc(it.correct)}</div>
+    return `<div class="w"><div class="s ja" lang="ja">${r.k+1}．${fill(it,esc(it.correct),false)}${it.stem.includes("（　）")?"":"　→　"+esc(it.correct)}</div>
     <div class="yo">你的答案：<span class="x ja" lang="ja">${r.a!=null?esc(it.opts[r.a]):"未作答"}</span>　正确答案：<span class="o ja" lang="ja">${esc(it.correct)}</span>　<span style="color:var(--sub)">（原题第 ${r.qi+1} 题・${EL[it.lv].n}）</span></div>
     <div class="e">${esc(it.exp)}</div></div>`}).join(""):`<div class="perfect">全部答对，满分！</div>`)+`</div>`;
   $("report").innerHTML=h;

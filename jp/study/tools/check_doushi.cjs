@@ -62,7 +62,7 @@ data.VERBS.forEach(r => r.slice(0, 10).forEach(c => flag(`VERBS:${r[0]}`, c)));
 data.PAIRS.forEach(r => [r[0], r[2]].forEach(c => flag(`PAIRS:${r[0]}`, c)));
 const ids = new Set(data.SEC.map(s => s.id));
 const chartVerbs = data.VERBS.filter(r => r[12] === 1).length;
-const badRows = data.VERBS.filter(r => r.length !== 13 || !r[11]).length;
+const badRows = data.VERBS.filter(r => r.length !== 15 || !r[11] || !r[13] || !r[14]).length;
 console.log(`  doushi material: ${data.VERBS.length} verbs (${chartVerbs} from the chart, bad rows ${badRows}), ${data.PAIRS.length} pairs, ${data.SEC.length} sections, dup ids ${data.SEC.length - ids.size}`);
 if (chartVerbs !== 50 || badRows || data.PAIRS.length !== 46 || ids.size !== data.SEC.length) bad = 1;
 // the material must not talk about its sources' mistakes: corrections are applied silently

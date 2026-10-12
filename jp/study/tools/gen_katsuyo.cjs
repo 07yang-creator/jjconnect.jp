@@ -2,8 +2,9 @@
 /* Generate the 動詞活用 drill bank: every form of every verb in the material
    (src/doushi/data.js VERBS + the 124 pairs of src/jita/map.html), with distractors that are the real wrong formations
    (ら抜き, さ入れ, wrong 音便, 五段/一段 rule swapped). Deterministic. Output: src/doushi-drill/data/<form>.js (const F_<form>).
-   Row: [level, stem, [correct, d1, d2, d3], explanation, 辞書形, 読み, ""] */
+   Row: [level, stem, [correct, d1, d2, d3], explanation, 辞書形, 読み, 意味（中・英）] */
 const fs = require('fs');
+const EN = require('./glosses.cjs');
 const data = new Function(fs.readFileSync('src/doushi/data.js', 'utf8') + ';return {VERBS,PAIRS};')();
 const RAW = fs.readFileSync('src/jita/map.html', 'utf8').match(/const RAW = `([\s\S]*?)`;/)[1];
 const GODAN_RU = new Set(['入る', '減る', '切る', '散る', '照る', '返る', '帰る', '千切る', '走る', '知る', '要る', '限る', '蹴る', '滑る', '喋る', '握る', '混じる', '参る', '焦る', '戻る', '擦る']);
@@ -13,14 +14,15 @@ const looksIchidan = r => r.endsWith('る') && r.length >= 2 && (I_ROW.includes(
 
 /* ---- verb list ---- */
 const verbs = []; const seen = new Set();
-const add = (k, r, cls, src) => { if (seen.has(k)) return; seen.add(k); verbs.push({ k, r, cls, src }); };
+const gloss = (k, zh) => [zh, EN[k]].filter(Boolean).join(' · ');
+const add = (k, r, cls, src, zh) => { if (seen.has(k)) return; seen.add(k); verbs.push({ k, r, cls, src, m: gloss(k, zh) }); };
 for (const row of data.VERBS) {
-  const [k, r, type] = row;
-  if (k === 'ある') add(k, r, 'aru', 'v'); else if (k === 'する') add(k, r, 'suru', 'v'); else if (k.startsWith('〜する')) add('勉強する', 'べんきょうする', 'suru', 'v');
-  else if (k === '来る') add(k, r, 'kuru', 'v'); else if (k === 'くれる') add(k, r, 'kureru', 'v');
-  else if (type === '一段') add(k, r, 'g1', 'v'); else add(k, r, 'g5', 'v');
+  const [k, r, type] = row, zh = row[13] || '';
+  if (k === 'ある') add(k, r, 'aru', 'v', zh); else if (k === 'する') add(k, r, 'suru', 'v', zh); else if (k.startsWith('〜する')) add('勉強する', 'べんきょうする', 'suru', 'v', '学习');
+  else if (k === '来る') add(k, r, 'kuru', 'v', zh); else if (k === 'くれる') add(k, r, 'kureru', 'v', zh);
+  else if (type === '一段') add(k, r, 'g1', 'v', zh); else add(k, r, 'g5', 'v', zh);
 }
-for (const l of RAW.trim().split('\n')) { const [, jk, jr, tk, tr] = l.split('|'); for (const [k, r] of [[jk, jr], [tk, tr]]) add(k, r, GODAN_RU.has(k) ? 'g5' : looksIchidan(r) ? 'g1' : 'g5', 'p'); }
+for (const l of RAW.trim().split('\n')) { const [, jk, jr, tk, tr, mm] = l.split('|'); const [jm, tm] = (mm || '').split('／'); for (const [k, r, zh] of [[jk, jr, jm], [tk, tr, tm || jm]]) add(k, r, GODAN_RU.has(k) ? 'g5' : looksIchidan(r) ? 'g1' : 'g5', 'p', zh); }
 const level = v => v.cls === 'g5' ? (looksIchidan(v.r) ? 3 : 1) : v.cls === 'g1' ? 2 : 4;
 verbs.sort((a, b) => level(a) - level(b));
 
@@ -114,9 +116,11 @@ for (const v of verbs) for (const [f, fname] of FORMS) {
   for (const g of ALLF) { if (ds.length === 3) break; if (g === f) continue; const w = form(v, g); if (w && !seenR.has(w.r)) { seenR.add(w.r); ds.push(w); } }
   if (ds.length < 3) throw new Error(`distractors: ${v.k} ${f}`);
   const stem = `「${v.k === v.r ? v.k : v.k + '（' + v.r + '）'}」の${fname}はどれか。`;
-  out[f].push([level(v), stem, [ans, ...ds].map(show), explain(v, f, show(ans)), v.k, v.r, '']);
+  out[f].push([level(v), stem, [ans, ...ds].map(show), explain(v, f, show(ans)), v.k, v.r, v.m]);
 }
 fs.mkdirSync('src/doushi-drill/data', { recursive: true });
-for (const [f, fname] of FORMS) fs.writeFileSync(`src/doushi-drill/data/${f}.js`, `// 動詞活用ドリル ${fname}：由 tools/gen_katsuyo.cjs 从 活用表＋自他对 生成，勿手改。\n// [组, 题干, [正确, 干扰×3], 解析, 辞書形, 読み, ""]\nconst F_${f} = [\n` + out[f].map(r => JSON.stringify(r)).join(',\n') + '\n];\n');
+for (const [f, fname] of FORMS) fs.writeFileSync(`src/doushi-drill/data/${f}.js`, `// 動詞活用ドリル ${fname}：由 tools/gen_katsuyo.cjs 从 活用表＋自他对 生成，勿手改。\n// [组, 题干, [正确, 干扰×3], 解析, 辞書形, 読み, 意味]\nconst F_${f} = [\n` + out[f].map(r => JSON.stringify(r)).join(',\n') + '\n];\n');
 const lv = {}; verbs.forEach(v => lv[level(v)] = (lv[level(v)] || 0) + 1);
 console.log(`gen_katsuyo: ${verbs.length} verbs (levels ${JSON.stringify(lv)}) → ${ALLF.map(f => f + ':' + out[f].length).join(' ')}`);
+
+const missing = verbs.filter(v => !EN[v.k]).map(v => v.k); if (missing.length) { console.error('no English gloss for: ' + missing.join('、')); process.exit(1); }

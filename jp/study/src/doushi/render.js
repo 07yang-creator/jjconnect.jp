@@ -33,11 +33,11 @@ let vk="全部",vq="";
 function hl(s){if(!vq)return esc(s);const i=s.indexOf(vq);return i<0?esc(s):esc(s.slice(0,i))+"<mark>"+esc(s.slice(i,i+vq.length))+"</mark>"+esc(s.slice(i+vq.length))}
 const vrow=r=>`<tr>
     <td><span class="k ${KCLS[r[2]]}">${r[2]}</span></td>
-    <td class="ja hw" lang="ja">${hl(r[0])}<span class="yomi">${hl(r[1])}</span></td>
+    <td class="ja hw" lang="ja">${hl(r[0])}<span class="yomi">${hl(r[1])}</span>${r[13]?`<span class="yomi imi">${hl(r[13])}${r[14]?" · "+hl(r[14]):""}</span>`:""}</td>
     ${[3,4,5,9,6,7,8].map(i=>`<td class="ja" lang="ja">${hl(r[i])}</td>`).join("")}
     <td class="note">${hl(r[10])}</td></tr>`;
 function renderVerbs(){
-  const rows=VERBS.filter(r=>(vk==="全部"||r[2]===vk)&&(!vq||r.slice(0,11).some(c=>c.includes(vq))));
+  const rows=VERBS.filter(r=>(vk==="全部"||r[2]===vk)&&(!vq||[...r.slice(0,11),r[13]||"",(r[14]||"").toLowerCase()].some(c=>c.includes(vq.toLowerCase()))));
   document.getElementById("vt").innerHTML=VGROUPS.map((g,i)=>{const rs=rows.filter(r=>r[11]===g);if(!rs.length)return "";
     return `<h3 class="vg" id="vg-${i}"><span class="ja" lang="ja">${esc(g)}</span><small>${rs.length} 語</small></h3><div class="tw"><table>${VHEAD}<tbody>${rs.map(vrow).join("")}</tbody></table></div>`}).join("")
     ||`<p style="color:var(--sub)">没有匹配的词</p>`;
