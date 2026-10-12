@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>N2 語彙 单词表</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EEF2EF;--card:#FBFCFA;--ink:#1C2A30;--sub:#5B6B70;--rule:#CFD8D3;
+  --ai:#27466F;--ai-soft:#DCE5F0;--shu:#C23B2A;--shu-soft:#F6DED9;--midori:#2C7652;--midori-soft:#D9ECE1;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#151C1F;--card:#1D262A;--ink:#E4EAE7;--sub:#98A7A3;--rule:#33413F;
+  --ai:#8FB0DC;--ai-soft:#24344A;--shu:#E9776A;--shu-soft:#452521;--midori:#6FC39A;--midori-soft:#1F3A2C}}
+:root[data-theme="dark"]{--paper:#151C1F;--card:#1D262A;--ink:#E4EAE7;--sub:#98A7A3;--rule:#33413F;
+  --ai:#8FB0DC;--ai-soft:#24344A;--shu:#E9776A;--shu-soft:#452521;--midori:#6FC39A;--midori-soft:#1F3A2C}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;font-size:15px;line-height:1.65}
+[lang=ja],.ja{font-family:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}
+.wrap{max-width:960px;margin:0 auto;padding:26px 18px 64px}
+.hero{border-bottom:2px solid var(--ink);padding-bottom:16px;margin-bottom:18px}
+h1{margin:0;font-size:30px;letter-spacing:.02em}
+.hero p{margin:8px 0 0;color:var(--sub);font-size:14px;max-width:62ch}
+.hero .lk{margin-top:12px;font-size:13px}
+.hero a{color:var(--ai)}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:4px 0 14px;position:sticky;top:0;background:var(--paper);padding:10px 0;z-index:2}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{border:1px solid var(--rule);background:transparent;color:var(--ink);font:inherit;font-size:13px;padding:5px 12px;border-radius:999px;cursor:pointer}
+.chips button[aria-pressed=true]{background:var(--ai);border-color:var(--ai);color:var(--card)}
+.filters input{font:inherit;font-size:14px;padding:6px 12px;border:1px solid var(--rule);border-radius:8px;background:var(--card);color:var(--ink);min-width:220px}
+.filters input:focus{outline:2px solid var(--ai);outline-offset:1px}
+.cnt{font-size:12px;color:var(--sub);margin-left:auto}
+section{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:20px 22px;margin-bottom:18px;scroll-margin-top:80px}
+h2{margin:0 0 4px;font-size:20px}
+h3{margin:14px 0 6px;font-size:15px;color:var(--sub);font-weight:500;display:flex;gap:10px;align-items:baseline}
+h3 small{font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;background:var(--ai-soft);color:var(--ai);padding:6px 10px;font-weight:700;font-size:13px;white-space:nowrap}
+td{padding:7px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.w{font-weight:700;white-space:nowrap}
+td.y{color:var(--sub);white-space:nowrap}
+td.e{color:var(--sub)}
+td.e b{color:var(--ai);font-weight:700}
+mark{background:var(--ai-soft);color:inherit;padding:0 2px;border-radius:2px}
+.empty{color:var(--sub)}
+footer{margin-top:10px;padding-top:16px;border-top:1px solid var(--rule);color:var(--sub);font-size:13px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+@media (max-width:700px){
+  .wrap{padding:20px 14px 56px}h1{font-size:24px}section{padding:16px 14px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  td.e{white-space:normal;min-width:16em}
+  .filters input{min-width:0;flex:1}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <h1>N2 語彙　单词表</h1>
+    <p>测验里出现的 320 个 N2 级单词，按题库和分组排列：单词・读音・意思・例句（例句就是题干）。可按题库筛选或检索任意一栏；从站内搜索进来时自动定位。</p>
+    <p class="lk">配套练习：<a href="/v/goi/quiz.html" target="_top">N2 語彙 320题（练习／考试／错题复习）</a></p>
+  </div>
+  <div class="filters"><div class="chips" id="sf"></div><input id="sq" type="search" placeholder="検索：単語・読み・意味・例文" aria-label="检索"><span class="cnt" id="scnt"></span></div>
+  <main id="main"></main>
+  <footer><span>N2 語彙 320 语・16 组</span><span>株式会社JJconnect</span></footer>
+</div>
+<script>

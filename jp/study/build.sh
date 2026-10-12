@@ -25,4 +25,10 @@ cat src/doushi-quiz/shell.html \
     src/doushi-quiz/app.js \
     src/doushi-quiz/footer.html > ../content/doushi/quiz.html
 
-echo "built:"; ls -l dist/*.html ../content/doushi/*.html | awk '{print "  "$9" "$5" bytes"}'
+# N2 語彙 topic: static, same pattern (quiz + word list built from the same data)
+mkdir -p ../content/goi
+GOI_DATA="src/goi-quiz/data/meishi.js src/goi-quiz/data/doushi.js src/goi-quiz/data/keiyoushi.js src/goi-quiz/data/fukushi.js"
+cat src/goi-quiz/shell.html $GOI_DATA src/goi-quiz/app.js src/goi-quiz/footer.html > ../content/goi/quiz.html
+cat src/goi-list/shell.html $GOI_DATA src/goi-list/render.js src/goi-list/footer.html > ../content/goi/list.html
+
+echo "built:"; ls -l dist/*.html ../content/doushi/*.html ../content/goi/*.html | awk '{print "  "$9" "$5" bytes"}'
