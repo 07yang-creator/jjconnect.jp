@@ -9,7 +9,8 @@ const load = (file, re) => eval(fs.readFileSync(file, 'utf8').replace(re, ''));
 // data.js holds three consts; evaluate it in one scope
 const dataSrc = fs.readFileSync('src/doushi/data.js', 'utf8');
 const data = new Function(dataSrc + ';return {VERBS,PAIRS,SEC};')();
-const sets = [['katsuyo', 'Q1', 2], ['ukemi', 'Q2', 4], ['jita', 'Q3', 3]];
+const sets = [['katsuyo', 'Q1', 3], ['ukemi', 'Q2', 5], ['jita', 'Q3', 4]];
+const allQ = []; // every question, for the coverage audit below
 let bad = 0;
 const hits = [];
 const flag = (where, s) => { if (typeof s !== 'string') return; const b = [...s].filter(c => SIMPLIFIED.has(c)); if (b.length) hits.push(`  ${where}  ${b.join('')}  →  ${s.slice(0, 50)}`); };
@@ -19,15 +20,17 @@ const vocab = new Set();
 for (const r of data.VERBS) vocab.add(r[0]);
 for (const r of data.PAIRS) { vocab.add(r[0]); vocab.add(r[2]); }
 const kanjiOf = s => s.replace(/[^一-鿿]/g, '');
-const kanjiStems = [...vocab].map(kanjiOf).filter(Boolean);           // 書, 走, 燃, 落込 …
-const kanaVerbs = [...vocab].filter(v => !kanjiOf(v)).map(v => v.replace(/る$/, '')); // す(る)・い(る)・あ(る)・ぶつか(る)…
-// a string "uses a chart verb" when it contains the kanji stem of one, or a kana-only chart verb
-const hasChartVerb = s => vocab.has(s) || kanjiStems.some(k => s.includes(k)) || kanaVerbs.some(k => k.length >= 2 && s.includes(k));
+// stem = the verb minus its final okurigana: 書く→書, 引っ張る→引っ張, 落ち込む→落ち込, 蒸発する→蒸発, ぶつかる→ぶつか, する→する
+const stemOf = v => (v.endsWith('する') ? v.slice(0, -2) : v.replace(/[るうくぐすつぬぶむ]$/, '')) || v;
+const stems = [...vocab].map(stemOf).filter(s => /[一-鿿]/.test(s) || s.length >= 2); // drops い／あ／し, keeps ぶつか
+// a string "uses a chart verb" when it is one, or contains the stem of one
+const hasChartVerb = s => vocab.has(s) || stems.some(k => s.includes(k));
 // a fill-in answer is fine when it is kana-only (particles, する/いる forms) or carries a chart verb
 const inMaterial = w => !kanjiOf(w) || hasChartVerb(w);
 
 for (const [name, varname, groups] of sets) {
   const arr = load(`src/doushi-quiz/data/${name}.js`, new RegExp(`^const ${varname} =`));
+  allQ.push(...arr);
   const lv = Array.from({ length: groups }, (_, i) => arr.filter(q => q[0] === i + 1).length);
   const shape = arr.filter(q => q.length !== 4 || q[2].length !== 4 || typeof q[1] !== 'string' || typeof q[3] !== 'string').length;
   const dup = arr.filter(q => new Set(q[2]).size !== 4).length;
@@ -45,6 +48,12 @@ for (const [name, varname, groups] of sets) {
   console.log(`  ${name}: ${arr.length} items, per group ${lv.join('/')}, bad shape ${shape}, dup options ${dup}, outside groups ${extra}, tested word not in charts: ${notIn.length ? notIn.join(', ') : 'none'}`);
   if (arr.length !== groups * 20 || lv.some(x => x !== 20) || shape || dup || extra || notIn.length) bad = 1;
 }
+// coverage: every verb given in the two charts must be tested at least once
+// (its stem appears in a question's stem text or correct answer)
+const given = new Set([...data.VERBS.map(r => r[0]), ...data.PAIRS.flatMap(r => [r[0], r[2]])]);
+const untested = [...given].filter(v => !allQ.some(q => (q[1] + '\n' + q[2][0]).includes(stemOf(v))));
+console.log(`  coverage: ${given.size - untested.length} / ${given.size} given verbs tested${untested.length ? ' — UNTESTED: ' + untested.join('、') : ''}`);
+if (untested.length) bad = 1;
 // material
 data.SEC.forEach(s => { flag(`SEC:${s.id} title`, s.t); s.tb.slice(1).forEach(r => flag(`SEC:${s.id} headword`, r[0])); s.ex.forEach(e => flag(`SEC:${s.id} example`, e[1])); });
 data.VERBS.forEach(r => r.slice(0, 10).forEach(c => flag(`VERBS:${r[0]}`, c)));

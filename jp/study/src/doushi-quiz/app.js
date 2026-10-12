@@ -1,7 +1,7 @@
 const SETS=[
- {name:"活用 40题",lv:[null,{n:"見分け・基本活用",c:"var(--l1)"},{n:"使役形・可能形",c:"var(--l2)"}],raw:Q1},
- {name:"受身形 80题",lv:[null,{n:"作り方",c:"var(--l1)"},{n:"四种受身・助词",c:"var(--l2)"},{n:"受身・尊敬・可能",c:"var(--l3)"},{n:"使役受身・综合",c:"var(--l4)"}],raw:Q2},
- {name:"自動詞・他動詞 60题",lv:[null,{n:"対応ペア",c:"var(--l1)"},{n:"助词・ている／てある",c:"var(--l2)"},{n:"視点・情感・综合",c:"var(--l3)"}],raw:Q3}];
+ {name:"活用 60题",lv:[null,{n:"見分け・基本活用",c:"var(--l1)"},{n:"使役形・可能形",c:"var(--l2)"},{n:"活用総合",c:"var(--l3)"}],raw:Q1},
+ {name:"受身形 100题",lv:[null,{n:"作り方",c:"var(--l1)"},{n:"四种受身・助词",c:"var(--l2)"},{n:"受身・尊敬・可能",c:"var(--l3)"},{n:"使役受身・综合",c:"var(--l4)"},{n:"受身 実戦",c:"var(--l5)"}],raw:Q2},
+ {name:"自動詞・他動詞 80题",lv:[null,{n:"対応ペア",c:"var(--l1)"},{n:"助词・ている／てある",c:"var(--l2)"},{n:"視点・情感・综合",c:"var(--l3)"},{n:"自然現象・情感",c:"var(--l4)"}],raw:Q3}];
 const KEY="jp-doushi-v1";
 function rng(s){return()=>{s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff}}
 SETS.forEach((S,si)=>{S.items=S.raw.map((q,i)=>{const r=rng((i+1)*7919+17+si*131);const idx=[0,1,2,3];
