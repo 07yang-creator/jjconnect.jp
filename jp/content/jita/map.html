@@ -1,0 +1,807 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>[hidden]{display:none!important}body{margin:0}</style>
+<title>自他動詞マップ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: one reading column with sticky tabs; 自 = teal (R side), 他 = indigo (S side), -e- toggle = amber */
+:root{
+  --bg:#F1F4F3; --surface:#FFFFFF; --sunk:#E7ECEA; --ink:#18201E; --muted:#5A6663; --line:#D5DDDA;
+  --ji:#147565; --ji-soft:#D9EEE9;
+  --ta:#3A45A3; --ta-soft:#E1E4F6;
+  --e:#9A6200; --e-soft:#F5E9CF;
+  --good:#1D7A38; --good-soft:#DDF1E2; --bad:#AE2A1F; --bad-soft:#F8E0DD;
+  --f-disp:"Shippori Mincho","Hiragino Mincho ProN","Songti SC",serif;
+  --f-zh:"Noto Sans SC","PingFang SC","Hiragino Sans GB",system-ui,sans-serif;
+  --f-ja:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101517; --surface:#182022; --sunk:#131A1C; --ink:#E3EAE8; --muted:#97A5A2; --line:#2A3537;
+  --ji:#4CC0AA; --ji-soft:#16352F; --ta:#9AA4FF; --ta-soft:#232A52; --e:#E3A73C; --e-soft:#3A2C10;
+  --good:#6ACF88; --good-soft:#163522; --bad:#FF8C80; --bad-soft:#40201C; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101517; --surface:#182022; --sunk:#131A1C; --ink:#E3EAE8; --muted:#97A5A2; --line:#2A3537;
+  --ji:#4CC0AA; --ji-soft:#16352F; --ta:#9AA4FF; --ta-soft:#232A52; --e:#E3A73C; --e-soft:#3A2C10;
+  --good:#6ACF88; --good-soft:#163522; --bad:#FF8C80; --bad-soft:#40201C; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-zh);font-size:15.5px;line-height:1.75;padding-inline:16px;padding-block:0 64px}
+.ja,[lang="ja"]{font-family:var(--f-ja)}
+.wrap{max-width:980px;margin:0 auto}
+header.top{padding-block:28px 14px}
+header.top h1{font-family:var(--f-disp);font-weight:800;font-size:clamp(28px,5vw,40px);line-height:1.2;margin:0;letter-spacing:.02em;text-wrap:balance}
+header.top p{margin:6px 0 0;color:var(--muted);max-width:62ch}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:12px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;gap:4px;border-bottom:1px solid var(--line);margin-inline:-16px;padding-inline:16px;overflow-x:auto}
+nav.tabs button{font:inherit;font-size:15px;background:none;border:0;color:var(--muted);padding:12px 14px 10px;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink);font-weight:700}
+nav.tabs button:focus-visible{outline:2px solid var(--ta);outline-offset:-2px}
+section.panel{padding-block:24px}
+.prose{max-width:70ch}
+.prose h2{font-family:var(--f-disp);font-size:24px;font-weight:800;margin:40px 0 8px;line-height:1.35;text-wrap:balance}
+.prose h2:first-child{margin-top:8px}
+.prose h3{font-size:17px;margin:26px 0 6px}
+.prose p{margin:8px 0}
+.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--muted);font-weight:700}
+.tbl{overflow-x:auto;margin:12px 0;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{padding:8px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:12.5px;color:var(--muted);font-weight:700;letter-spacing:.04em;background:var(--sunk)}
+tr:last-child td{border-bottom:0}
+.mono{font-family:var(--f-mono);font-size:.92em}
+.ji{color:var(--ji)} .ta{color:var(--ta)} .ee{color:var(--e)}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:99px;letter-spacing:.04em}
+.tag.ji{background:var(--ji-soft)} .tag.ta{background:var(--ta-soft)} .tag.ee{background:var(--e-soft)}
+.formula{font-family:var(--f-mono);background:var(--sunk);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:10px 0;overflow-x:auto;white-space:pre;font-size:14px;line-height:1.7}
+.callout{border-left:3px solid var(--e);background:var(--e-soft);padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+.gblock{border-top:1px solid var(--line);padding-top:6px;margin-top:28px}
+.ghead{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px}
+.ghead h3{margin:10px 0 0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.chip{font-family:var(--f-ja);font-size:14px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:3px 9px;cursor:pointer;color:var(--ink)}
+.chip:hover{border-color:var(--ta)}
+.chip:focus-visible{outline:2px solid var(--ta);outline-offset:1px}
+.chip .s{color:var(--muted);margin:0 3px}
+.split b{font-weight:600}
+.split .r{color:var(--ink)}
+.rootcell{font-family:var(--f-mono);white-space:nowrap}
+.rootcell .rt{font-weight:600}
+/* map */
+.mapgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:20px;align-items:start}
+@media (max-width:760px){.mapgrid{grid-template-columns:1fr}.detail{order:-1}}
+.search{width:100%;font:inherit;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.maplist h4{font-size:13px;margin:16px 0 4px;color:var(--muted);letter-spacing:.04em}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip[aria-pressed="true"] .s{color:var(--bg)}
+.detail{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 58px)}
+@media (max-width:760px){.detail{position:static}}
+.pairhead{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.side{border-radius:8px;padding:10px 12px}
+.side.ji{background:var(--ji-soft);color:var(--ink)} .side.ta{background:var(--ta-soft);color:var(--ink)}
+.side .lab{font-size:12px;font-weight:700;letter-spacing:.06em}
+.side.ji .lab{color:var(--ji)} .side.ta .lab{color:var(--ta)}
+.side .w{font-family:var(--f-ja);font-size:26px;font-weight:700;line-height:1.3}
+.side .kana{font-family:var(--f-ja);color:var(--muted);font-size:14px}
+.side .rm{font-family:var(--f-mono);font-size:15px;margin-top:4px}
+.rm .root{color:var(--ink);font-weight:600}
+.rm .suf{padding:0 2px;border-radius:3px}
+.side.ji .suf{background:var(--surface);color:var(--ji)}
+.side.ta .suf{background:var(--surface);color:var(--ta)}
+.axis{margin-top:16px}
+.axis .ends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);border-bottom:1px dashed var(--line);padding-bottom:4px;margin-bottom:8px}
+.cells{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+@media (max-width:420px){.cells{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.cell{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--bg)}
+.cell .cl{font-size:12px;font-weight:700}
+.cell .cs{font-size:11.5px;color:var(--muted);line-height:1.4}
+.cell .cw{font-family:var(--f-ja);font-size:17px;font-weight:500;margin-top:2px;word-break:keep-all;overflow-wrap:anywhere}
+.cell .ck{font-family:var(--f-ja);font-size:12px;color:var(--muted)}
+.cell.ta{border-color:var(--ta)} .cell.ji{border-color:var(--ji)}
+.cell.ta .cl{color:var(--ta)} .cell.ji .cl{color:var(--ji)}
+.gnote{margin-top:14px;font-size:14px;color:var(--muted)}
+.btn{font:inherit;font-size:14px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);border-radius:8px;padding:8px 14px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn:focus-visible{outline:2px solid var(--ta);outline-offset:2px}
+/* drill */
+.settings{display:grid;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.srow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}
+.srow .sl{font-size:12.5px;color:var(--muted);font-weight:700;width:4.5em;flex:none}
+.tog{font:inherit;font-size:13.5px;border:1px solid var(--line);background:var(--bg);color:var(--muted);border-radius:99px;padding:3px 11px;cursor:pointer}
+.tog[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tog:focus-visible{outline:2px solid var(--ta);outline-offset:1px}
+.stats{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13.5px;color:var(--muted);margin:16px 0 10px;font-variant-numeric:tabular-nums}
+.stats b{color:var(--ink);font-weight:700}
+.bar{height:6px;background:var(--sunk);border-radius:99px;overflow:hidden;margin-bottom:14px}
+.bar i{display:block;height:100%;background:var(--good);width:0;transition:width .3s}
+.qcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px 20px}
+.qtype{font-size:13px;font-weight:700;letter-spacing:.05em}
+.qword{font-family:var(--f-ja);font-size:clamp(34px,8vw,48px);font-weight:700;line-height:1.5;margin:6px 0 2px}
+.qword rt{font-size:.36em;font-weight:500;color:var(--muted)}
+.qask{font-size:16px}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}
+@media (max-width:420px){.opts{grid-template-columns:1fr}}
+.opt{font:inherit;text-align:left;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:10px 14px;cursor:pointer;display:flex;gap:10px;align-items:baseline}
+.opt:hover:not(:disabled){border-color:var(--ink)}
+.opt:focus-visible{outline:2px solid var(--ta);outline-offset:1px}
+.opt .n{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.opt .ow{font-family:var(--f-ja);font-size:20px;font-weight:500}
+.opt .ok{font-family:var(--f-ja);font-size:13px;color:var(--muted)}
+.opt.right{background:var(--good-soft);border-color:var(--good)}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.opt:disabled{cursor:default}
+.typerow{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.typerow input{flex:1 1 220px;min-width:0;font-family:var(--f-ja);font-size:20px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+.typehint{font-size:12.5px;color:var(--muted);margin-top:6px}
+.fb{margin-top:16px;border-radius:10px;padding:12px 14px;font-size:14.5px}
+.fb.good{background:var(--good-soft)} .fb.bad{background:var(--bad-soft)}
+.fb .v{font-weight:700}
+.fb.good .v{color:var(--good)} .fb.bad .v{color:var(--bad)}
+.fb .pair{font-family:var(--f-ja);font-size:17px;margin:4px 0}
+.fb .why{color:var(--ink)}
+.next{margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.kbd{font-size:12px;color:var(--muted)}
+.reset{margin-top:22px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.empty{color:var(--muted);padding:20px 0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">自動詞 · 他動詞 · 词根与零件</div>
+  <h1 lang="ja">自他動詞マップ</h1>
+  <p>把成对的自動詞和他動詞看成“同一个词根＋不同零件”。先读原理，再查图谱，最后在练习里反复练变形。</p>
+  <div class="legend">
+    <span><i class="dot" style="background:var(--ji)"></i>自動詞（事情发生，没有人）</span>
+    <span><i class="dot" style="background:var(--ta)"></i>他動詞（有人去做）</span>
+    <span><i class="dot" style="background:var(--e)"></i>-e- 翻转零件</span>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="页面">
+  <button role="tab" id="t-principle" aria-controls="principle" aria-selected="true">原理</button>
+  <button role="tab" id="t-roots" aria-controls="roots" aria-selected="false">词根一览</button>
+  <button role="tab" id="t-exceptions" aria-controls="exceptions" aria-selected="false">例外</button>
+  <button role="tab" id="t-map" aria-controls="map" aria-selected="false">图谱</button>
+  <button role="tab" id="t-drill" aria-controls="drill" aria-selected="false">练习</button>
+</nav>
+
+<!-- ============ 原理 ============ -->
+<section class="panel" id="principle" role="tabpanel" aria-labelledby="t-principle">
+<div class="prose">
+  <h2>一、先问一个问题：人在不在场</h2>
+  <p>同一件事可以从两边说。日语会为两边各准备一个词，所以说话时必须选一边：</p>
+  <div class="tbl"><table>
+    <tr><th>说法</th><th>例</th><th>意思</th><th>人</th></tr>
+    <tr><td><span class="tag ta">他動詞</span></td><td lang="ja">私が窓<b>を</b>割った</td><td>我打碎了窗户</td><td>在场，是主语</td></tr>
+    <tr><td>受身</td><td lang="ja">窓が（誰かに）割られた</td><td>窗户被人打碎了</td><td>在背后</td></tr>
+    <tr><td><span class="tag ji">自動詞</span></td><td lang="ja">窓<b>が</b>割れた</td><td>窗户碎了</td><td>不存在</td></tr>
+  </table></div>
+  <p>他動詞的“他”指的是<b>动作作用到另一个东西上</b>，也就是中文的<b>及物动词</b>，它是主动的。自動詞就是<b>不及物动词</b>。受身形是从他動詞变出来的，背后仍然有人；自動詞背后没有人。</p>
+
+  <h2>二、成对的词不是两个独立的词</h2>
+  <p>上がる 和 上げる 看起来是两个词，其实它们共用一个<b>词根</b>。词根只带意思（“上”），不带方向。方向由后面接的<b>零件</b>决定。</p>
+  <p>用假名看不出切分点，因为假名把辅音和元音绑在一起：<span lang="ja">あが|る</span>、<span lang="ja">あげ|る</span>。换成罗马字就清楚了：</p>
+  <div class="formula">ag- (上) + <span class="ji">aru</span>  →  agaru  上がる   变成在上面（自）
+ag- (上) + <span class="ta">eru</span>  →  ageru  上げる   把它弄上去（他）</div>
+  <p>本页的罗马字用<b>训令式</b>（<span class="mono">ti, tu, si</span>，而不是 <span class="mono">chi, tsu, shi</span>），因为训令式不会把一个辅音拆成两种写法，词根更容易看出来。比如 落ちる / 落とす 写成 <span class="mono">ot-iru / ot-osu</span>，词根都是 <span class="mono">ot-</span>。</p>
+
+  <h2>三、只有三个零件</h2>
+  <div class="tbl"><table>
+    <tr><th>零件</th><th>来源</th><th>意思</th><th>结果</th></tr>
+    <tr><td class="mono ji">-ar-</td><td lang="ja">ある（存在、变成）</td><td>变成那样</td><td><span class="tag ji">自動詞</span></td></tr>
+    <tr><td class="mono ta">-s- / -as- / -os-</td><td lang="ja">す（做）</td><td>让它变成那样</td><td><span class="tag ta">他動詞</span></td></tr>
+    <tr><td class="mono ee">-e-</td><td>翻转</td><td>方向反过来</td><td>和原词相反</td></tr>
+  </table></div>
+  <p>-ar- 和 -s- 的方向是固定的。只有 -e- 要看它接在什么词上。下面五组就是这三个零件的组合方式。</p>
+
+  <div id="groupBlocks"></div>
+
+  <h2>四、-e- 为什么有两个方向</h2>
+  <p>-e- 的作用是“把原词的方向反过来”。所以要先知道原词是什么方向，而原词的方向由它的<b>本义</b>决定：</p>
+  <div class="tbl"><table>
+    <tr><th>原词的本义</th><th>原词</th><th>加 -e- 后</th><th>例</th></tr>
+    <tr><td>本来会<b>自己发生</b>的事：开、附着、继续、站、成长、排列</td><td><span class="tag ji">自</span></td><td><span class="tag ta">他</span>（让它发生）</td><td lang="ja">開く → 開ける、立つ → 立てる</td></tr>
+    <tr><td>本来要<b>人动手</b>的事：打碎、切、折、烤、卖、拔</td><td><span class="tag ta">他</span></td><td><span class="tag ji">自</span>（结果出现了）</td><td lang="ja">割る → 割れる、焼く → 焼ける</td></tr>
+  </table></div>
+  <div class="callout">判断方法：问自己一句<b>“这个动作本来要人动手吗？”</b>要，原词就是他動詞，加 e 的是自動詞；不要，原词就是自動詞，加 e 的是他動詞。</div>
+  <p>第 5B 组的自動詞和原词的<b>可能形</b>完全同形（割れる＝碎了／能打碎）。原因也在这里：可能形本来就是用 -e- 构成的，意思是“会自然变成那样”。</p>
+
+  <h2>五、三步判断法</h2>
+  <div class="tbl"><table>
+    <tr><th>步骤</th><th>检查</th><th>结论</th></tr>
+    <tr><td>1</td><td>两个词里，有一个结尾带 <b>す</b> 吗？</td><td>带 す 的是 <span class="tag ta">他動詞</span>（第 2・3・4 组）</td></tr>
+    <tr><td>2</td><td>有一个读音以 <b class="mono">-aru</b> 结尾吗？（がる・まる・わる・かる・たる・なる）</td><td>那个是 <span class="tag ji">自動詞</span>（第 1 组）</td></tr>
+    <tr><td>3</td><td>都不是，只差一个 <b>e</b>？</td><td>问“本来要人动手吗”（第 5 组）</td></tr>
+  </table></div>
+  <p>大约九成的成对动词，用这三步就能判断出来。剩下的放在“例外”页里。</p>
+
+  <h2>六、同一批零件也造出受身和使役</h2>
+  <p>受身和使役不是另外一套规则，它们是用同样的零件拼出来的：</p>
+  <div class="formula">受身・可能・自発   〜(r)are-ru  =  <span class="ji">-ar-</span> + <span class="ee">-e-</span>   “变成（被做了的）状态”
+使役             〜(s)ase-ru  =  <span class="ta">-as-</span> + <span class="ee">-e-</span>   “让（别人）去做”</div>
+  <p>所以动词这一层和助动词这一层是同一个规律：<b>R 那边是“自然发生”，S 那边是“人伸手”</b>。</p>
+  <div class="formula">词这一层：     上が-<span class="ji">r</span>-u    ↔   出-<span class="ta">s</span>-u
+助动词这一层：  〜<span class="ji">r</span>are-ru    ↔   〜<span class="ta">s</span>ase-ru</div>
+  <h3>放到一条轴上</h3>
+  <div class="tbl"><table>
+    <tr><th>使役</th><th>他動詞</th><th>〜てある</th><th>受身</th><th>自動詞</th><th>〜ている</th></tr>
+    <tr lang="ja"><td>割らせる</td><td class="ta">割る</td><td>割ってある</td><td>割られる</td><td class="ji">割れる</td><td>割れている</td></tr>
+    <tr><td>让别人打碎</td><td>打碎</td><td>有人特意打碎了</td><td>被人打碎</td><td>碎了</td><td>碎着的状态</td></tr>
+  </table></div>
+  <p>从左到右，人一步步淡出。〜てある 接他動詞，表示“有人有意做好了”；〜ている 接自動詞，表示“变化之后的状态”。</p>
+
+  <h2>七、一句话</h2>
+  <div class="callout">词根带意思，零件定方向：<b class="ji">-ar-</b> 是“变成”，<b class="ta">-s-</b> 是“做”，<b class="ee">-e-</b> 是“翻转”。受身用 ar+e，使役用 as+e，规律是同一个。</div>
+</div>
+</section>
+
+<!-- ============ 词根一览 ============ -->
+<section class="panel" id="roots" role="tabpanel" aria-labelledby="t-roots" hidden>
+<div class="prose">
+  <h2>词根是什么</h2>
+  <p>词根是一对词里<b>两个词共有的那一段</b>。它本身不是一个能用的词，只带基本意思，比如 <span class="mono">ag-</span> 是“上”，<span class="mono">kim-</span> 是“定”，<span class="mono">ugok-</span> 是“动”。词根后面接上零件，才成为能用的动词。</p>
+  <p>词根有两种形状：</p>
+  <div class="tbl"><table>
+    <tr><th>形状</th><th>例</th><th>特点</th></tr>
+    <tr><td>以<b>辅音</b>结尾</td><td class="mono">ag- · kim- · ak- · war- · ugok-</td><td>零件直接以元音开头接上去：ag+aru、ak+eru。第 1・3・5 组大多是这种。</td></tr>
+    <tr><td>以<b>元音</b>结尾</td><td class="mono">modo- · nao- · hi- · hu-</td><td>零件只剩一个辅音：modo+ru / modo+su、hi+eru / hi+yasu。第 2 组和第 3 组的 〜える/〜やす 多是这种。</td></tr>
+  </table></div>
+  <p>下表从全部词对里自动算出共同部分（训令式罗马字），按组排列。点任意一行可以在“图谱”里查看它的全部变形。</p>
+  <div class="callout">少数词在历史上发生过音变，算出来的词根会很短或者没有：<span lang="ja">変わる / 変える</span>（kaw-aru / ka-eru，w 脱落了）、<span lang="ja">出る / 出す</span>（d-eru / d-asu）、<span lang="ja">入る / 入れる</span>（hairu / ireru，读音完全不同）。这些是“化石”，记住就好，不影响规律。</div>
+</div>
+<div class="tbl" style="max-width:980px"><table id="rootTable">
+  <thead><tr><th>组</th><th>词根</th><th>自動詞</th><th>他動詞</th><th>意思（自／他）</th></tr></thead>
+  <tbody></tbody>
+</table></div>
+</section>
+
+<!-- ============ 例外 ============ -->
+<section class="panel" id="exceptions" role="tabpanel" aria-labelledby="t-exceptions" hidden>
+<div class="prose">
+  <h2>例外：规律管不到的地方</h2>
+  <p>这套构词方式在古日语里是活的，后来停止产生新词，只留下已经造好的词。一千多年里有的词变了音、变了意思，所以会有下面这些例外。数量不多，按类型记即可。</p>
+
+  <h3>1. 结尾是 る，但不是自動詞</h3>
+  <p>可靠的信号是 <b class="mono">-aru</b>，不是 る 本身。下面这些词结尾是 る，但都是他動詞：</p>
+  <div class="chips" lang="ja"><span class="chip">作る</span><span class="chip">取る</span><span class="chip">送る</span><span class="chip">切る</span><span class="chip">握る</span><span class="chip">売る</span><span class="chip">塗る</span></div>
+
+  <h3>2. 结尾是 -aる，却是他動詞（“接收方”动词）</h3>
+  <p>这些 -ar- 词表示“接收”，所以带を，但仍然在“自己这边发生”的那一侧：</p>
+  <div class="tbl"><table>
+    <tr><th>〜aる（接收方）</th><th>〜eる（给出方）</th><th>例</th></tr>
+    <tr lang="ja"><td>預かる</td><td>預ける</td><td>荷物を預かる（帮人保管）／荷物を預ける（寄存）</td></tr>
+    <tr lang="ja"><td>教わる</td><td>教える</td><td>先生に日本語を教わる／学生に教える</td></tr>
+    <tr lang="ja"><td>授かる</td><td>授ける</td><td>子どもを授かる／賞を授ける</td></tr>
+  </table></div>
+
+  <h3>3. 一个他動詞对两个自動詞，或两组意思不同</h3>
+  <div class="tbl"><table>
+    <tr><th>自動詞</th><th>他動詞</th><th>区别</th></tr>
+    <tr lang="ja"><td>起きる・起こる</td><td>起こす</td><td>起きる＝人醒来、起床；起こる＝事情发生</td></tr>
+    <tr lang="ja"><td>冷える／冷める</td><td>冷やす／冷ます</td><td>冷える＝变冷（冰镇）；冷める＝热的东西变凉</td></tr>
+    <tr lang="ja"><td>直る／治る</td><td>直す／治す</td><td>直＝修理东西；治＝治病</td></tr>
+  </table></div>
+
+  <h3>4. 同一个词自他两用</h3>
+  <p>这些词不变形，靠助词区分：</p>
+  <div class="tbl"><table>
+    <tr><th>词</th><th>自（が）</th><th>他（を）</th></tr>
+    <tr lang="ja"><td>開く（ひらく）</td><td>ドアが開く</td><td>店を開く</td></tr>
+    <tr lang="ja"><td>閉じる</td><td>目が閉じる</td><td>目を閉じる</td></tr>
+    <tr lang="ja"><td>増す</td><td>人気が増す</td><td>速度を増す</td></tr>
+    <tr lang="ja"><td>吹く</td><td>風が吹く</td><td>笛を吹く</td></tr>
+    <tr lang="ja"><td>終わる</td><td>会議が終わる</td><td>これで会議を終わります（正式场合）</td></tr>
+  </table></div>
+
+  <h3>5. 他動詞长得像使役（-as-e-）</h3>
+  <p>这些他動詞用的是和 させる 同样的零件，所以看起来像使役形，但它们是独立的词，意思也不同：</p>
+  <div class="tbl"><table>
+    <tr><th>自動詞</th><th>他動詞</th><th>真正的使役</th><th>区别</th></tr>
+    <tr lang="ja"><td>乗る</td><td>乗せる</td><td>乗らせる</td><td>乗せる＝载人；乗らせる＝让（某人）去乘</td></tr>
+    <tr lang="ja"><td>載る</td><td>載せる</td><td>—</td><td>记事が載る／記事を載せる</td></tr>
+    <tr lang="ja"><td>寄る</td><td>寄せる</td><td>寄らせる</td><td>车を寄せる＝把车靠边</td></tr>
+    <tr lang="ja"><td>合う</td><td>合わせる</td><td>—</td><td>時間を合わせる＝对时间</td></tr>
+    <tr lang="ja"><td>似る</td><td>似せる</td><td>—</td><td>本物に似せる＝仿造</td></tr>
+  </table></div>
+
+  <h3>6. 读音变了</h3>
+  <div class="chips" lang="ja"><span class="chip">入る はいる ／ 入れる いれる</span><span class="chip">出る でる ／ 出す だす</span><span class="chip">消える きえる ／ 消す けす</span></div>
+
+  <h3>7. 意思偏离</h3>
+  <p><span lang="ja">過ぎる／過ごす</span>：过去／度过（时间）。<span lang="ja">寝る／寝かす</span>：睡／哄睡、放置（寝かせる 也常用）。这些词形符合规律，只是意思已经分开发展。</p>
+
+  <h3>8. 没有搭档</h3>
+  <div class="tbl"><table>
+    <tr><th>只有自動詞</th><th>只有他動詞</th></tr>
+    <tr lang="ja"><td>行く・来る・歩く・ある・いる・降る（雨）・咲く</td><td>食べる・読む・書く・買う・作る・見る</td></tr>
+    <tr><td>要表达“让它发生”，加 <b>させる</b>：<span lang="ja">花を咲かせる</span></td><td>要表达“结果”，用 <b>受身</b> 或 <b>〜てある</b>：<span lang="ja">本が読まれる・料理が作ってある</span></td></tr>
+  </table></div>
+
+  <h3>9. 見える・聞こえる 不是受身</h3>
+  <p><span lang="ja">富士山が見える</span>（看得见）、<span lang="ja">音が聞こえる</span>（听得见）是自発动词：东西自己进入视野、听觉。它们不是 <span lang="ja">見られる・聞かれる</span>（被看、被问）。</p>
+</div>
+</section>
+
+<!-- ============ 图谱 ============ -->
+<section class="panel" id="map" role="tabpanel" aria-labelledby="t-map" hidden>
+  <div class="mapgrid">
+    <div class="maplist">
+      <label for="mapSearch" class="eyebrow">查找（汉字或假名）</label>
+      <input id="mapSearch" class="search" type="search" placeholder="例：あげる、焼" autocomplete="off" lang="ja">
+      <div id="mapList"></div>
+    </div>
+    <div class="detail" id="detail" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- ============ 练习 ============ -->
+<section class="panel" id="drill" role="tabpanel" aria-labelledby="t-drill" hidden>
+  <div class="settings">
+    <div class="srow"><span class="sl">组</span><div id="setGroups" class="srow"></div></div>
+    <div class="srow"><span class="sl">题型</span><div id="setTypes" class="srow"></div></div>
+    <div class="srow"><span class="sl">作答</span><div id="setMode" class="srow"></div></div>
+  </div>
+  <div class="stats" id="stats"></div>
+  <div class="bar" aria-hidden="true"><i id="barFill"></i></div>
+  <div id="quiz"></div>
+  <div class="reset" id="resetRow"></div>
+</section>
+</div>
+
+<script>
+/* ---------------- data ---------------- */
+const RAW = `1|上がる|あがる|上げる|あげる|上升／举起
+1|下がる|さがる|下げる|さげる|下降／降低
+1|始まる|はじまる|始める|はじめる|开始／开始(做)
+1|決まる|きまる|決める|きめる|定下来／决定
+1|変わる|かわる|変える|かえる|变／改变
+1|集まる|あつまる|集める|あつめる|聚集／收集
+1|止まる|とまる|止める|とめる|停下／停住
+1|閉まる|しまる|閉める|しめる|关上了／关上
+1|曲がる|まがる|曲げる|まげる|弯／弄弯
+1|掛かる|かかる|掛ける|かける|挂着／挂上
+1|助かる|たすかる|助ける|たすける|得救／帮助
+1|伝わる|つたわる|伝える|つたえる|传到／传达
+1|加わる|くわわる|加える|くわえる|加入／添加
+1|見つかる|みつかる|見つける|みつける|被找到／找到
+1|儲かる|もうかる|儲ける|もうける|赚到／赚
+1|受かる|うかる|受ける|うける|考上／参加(考试)
+1|当たる|あたる|当てる|あてる|命中／打中
+1|重なる|かさなる|重ねる|かさねる|重叠／叠起
+1|混ざる|まざる|混ぜる|まぜる|混在一起／搅拌
+1|埋まる|うまる|埋める|うめる|填满／填
+1|温まる|あたたまる|温める|あたためる|变暖／加热
+1|固まる|かたまる|固める|かためる|凝固／使凝固
+1|広がる|ひろがる|広げる|ひろげる|扩大／展开
+1|繋がる|つながる|繋げる|つなげる|连上／连接
+2|戻る|もどる|戻す|もどす|回来／放回
+2|直る|なおる|直す|なおす|修好了／修理
+2|治る|なおる|治す|なおす|痊愈／治疗
+2|回る|まわる|回す|まわす|转／转动
+2|残る|のこる|残す|のこす|剩下／留下
+2|返る|かえる|返す|かえす|返回／归还
+2|帰る|かえる|帰す|かえす|回家／让…回去
+2|通る|とおる|通す|とおす|通过／让…通过
+2|移る|うつる|移す|うつす|转移／移动
+2|渡る|わたる|渡す|わたす|渡过／交给
+2|起こる|おこる|起こす|おこす|发生／引起
+2|写る|うつる|写す|うつす|被拍上／拍、抄
+2|映る|うつる|映す|うつす|映出／放映
+2|下る|くだる|下す|くだす|下行／下达
+3|動く|うごく|動かす|うごかす|动／移动
+3|乾く|かわく|乾かす|かわかす|干／弄干
+3|沸く|わく|沸かす|わかす|沸腾／烧开
+3|驚く|おどろく|驚かす|おどろかす|吃惊／使吃惊
+3|飛ぶ|とぶ|飛ばす|とばす|飞／放飞
+3|減る|へる|減らす|へらす|减少／削减
+3|散る|ちる|散らす|ちらす|散落／弄散
+3|鳴る|なる|鳴らす|ならす|响／弄响
+3|照る|てる|照らす|てらす|照耀／照亮
+3|済む|すむ|済ます|すます|结束／办完
+3|冷える|ひえる|冷やす|ひやす|变冷／冰镇
+3|増える|ふえる|増やす|ふやす|增加／增加(某物)
+3|燃える|もえる|燃やす|もやす|燃烧／烧
+3|生える|はえる|生やす|はやす|长出／留(胡子)
+3|伸びる|のびる|伸ばす|のばす|伸长／延长
+3|生きる|いきる|生かす|いかす|活／发挥
+3|濡れる|ぬれる|濡らす|ぬらす|湿／弄湿
+3|焦げる|こげる|焦がす|こがす|烧焦／烤焦
+3|流れる|ながれる|流す|ながす|流／冲走
+3|溶ける|とける|溶かす|とかす|融化／溶解
+3|逃げる|にげる|逃がす|にがす|逃跑／放跑
+3|負ける|まける|負かす|まかす|输／打败
+3|冷める|さめる|冷ます|さます|变凉／放凉
+3|覚める|さめる|覚ます|さます|醒／唤醒
+3|慣れる|なれる|慣らす|ならす|习惯／使习惯
+3|遅れる|おくれる|遅らす|おくらす|迟到／推迟
+3|寝る|ねる|寝かす|ねかす|睡／哄睡
+3|出る|でる|出す|だす|出去／拿出
+3|消える|きえる|消す|けす|消失／关掉
+3|隠れる|かくれる|隠す|かくす|藏起来／隐藏
+3|汚れる|よごれる|汚す|よごす|变脏／弄脏
+3|倒れる|たおれる|倒す|たおす|倒下／推倒
+3|壊れる|こわれる|壊す|こわす|坏了／弄坏
+3|離れる|はなれる|離す|はなす|离开／分开
+3|外れる|はずれる|外す|はずす|脱落／取下
+3|崩れる|くずれる|崩す|くずす|崩塌／弄乱
+4|落ちる|おちる|落とす|おとす|掉落／弄掉
+4|起きる|おきる|起こす|おこす|起床／叫醒
+4|降りる|おりる|降ろす|おろす|下(车)／放下
+4|下りる|おりる|下ろす|おろす|下来／取下
+4|滅びる|ほろびる|滅ぼす|ほろぼす|灭亡／消灭
+4|過ぎる|すぎる|過ごす|すごす|过去／度过
+5A|開く|あく|開ける|あける|开了／打开
+5A|空く|あく|空ける|あける|空出来／腾出
+5A|付く|つく|付ける|つける|附着／装上
+5A|続く|つづく|続ける|つづける|持续／继续
+5A|届く|とどく|届ける|とどける|送到／送达
+5A|向く|むく|向ける|むける|朝向／使朝向
+5A|近づく|ちかづく|近づける|ちかづける|靠近／使靠近
+5A|片付く|かたづく|片付ける|かたづける|收拾好／收拾
+5A|立つ|たつ|立てる|たてる|站立／立起
+5A|建つ|たつ|建てる|たてる|建成／建造
+5A|育つ|そだつ|育てる|そだてる|成长／培养
+5A|進む|すすむ|進める|すすめる|前进／推进
+5A|沈む|しずむ|沈める|しずめる|沉没／弄沉
+5A|縮む|ちぢむ|縮める|ちぢめる|缩小／缩短
+5A|緩む|ゆるむ|緩める|ゆるめる|松弛／放松
+5A|痛む|いたむ|痛める|いためる|疼、受损／弄伤
+5A|並ぶ|ならぶ|並べる|ならべる|排列／摆放
+5A|浮かぶ|うかぶ|浮かべる|うかべる|浮起／浮现
+5A|揃う|そろう|揃える|そろえる|齐全／备齐
+5A|入る|はいる|入れる|いれる|进入／放入
+5B|割れる|われる|割る|わる|碎了／打碎
+5B|切れる|きれる|切る|きる|断了／切
+5B|折れる|おれる|折る|おる|折断了／折
+5B|破れる|やぶれる|破る|やぶる|破了／撕破
+5B|取れる|とれる|取る|とる|脱落／取
+5B|売れる|うれる|売る|うる|畅销／卖
+5B|焼ける|やける|焼く|やく|烤好、烧了／烤
+5B|炊ける|たける|炊く|たく|(饭)煮好／煮饭
+5B|抜ける|ぬける|抜く|ぬく|脱落／拔
+5B|解ける|とける|解く|とく|解开了／解开
+5B|砕ける|くだける|砕く|くだく|碎了／弄碎
+5B|裂ける|さける|裂く|さく|裂开／撕开
+5B|欠ける|かける|欠く|かく|缺损／缺少
+5B|剥ける|むける|剥く|むく|(皮)脱落／剥
+5B|剥げる|はげる|剥ぐ|はぐ|剥落／剥下
+5B|擦れる|すれる|擦る|する|磨损／摩擦
+5B|千切れる|ちぎれる|千切る|ちぎる|扯断了／扯断
+5B|捲れる|めくれる|捲る|めくる|翻起来／翻
+5B|破ける|やぶける|破く|やぶく|破了／撕破
+X|乗る|のる|乗せる|のせる|乘坐／载
+X|載る|のる|載せる|のせる|刊登／登载
+X|寄る|よる|寄せる|よせる|靠近／挪近
+X|合う|あう|合わせる|あわせる|合适／对齐
+X|似る|にる|似せる|にせる|相似／仿造`;
+
+const G = {
+ '1': {name:'第1组', formula:'-ar- ↔ -e-', jiEnd:'〜aる', taEnd:'〜eる', ex:0,
+   desc:'词根后接 -ar-（来自「ある」：存在、变成）的是自動詞，接 -e- 的是他動詞。读音以 -aru 结尾（がる・まる・わる・かる・たる・なる・ざる）的，基本就是这一组的自動詞。这是最大、最整齐的一组。',
+   rule:'-aru 是自，-eru 是他'},
+ '2': {name:'第2组', formula:'-r- ↔ -s-', jiEnd:'〜る', taEnd:'〜す', ex:0,
+   desc:'同一个词根，r 对 s。-r- 表示自然发生，-s-（来自「す」：做）表示有人去做。两个词只差最后一个音：る ↔ す。',
+   rule:'る 是自，す 是他'},
+ '3': {name:'第3组', formula:'＋ -as- / -yas- / -s-', jiEnd:'〜う・〜える・〜れる', taEnd:'〜かす・〜らす・〜やす・〜す', ex:0,
+   desc:'在自動詞的词根后面加上 -as-（或 -yas-、-s-），意思是“让它这样”。所以结尾是 〜かす・〜らす・〜やす・〜がす 的都是他動詞。自動詞那一边可能是 〜う、〜える 或 〜れる。',
+   rule:'带 す 的是他'},
+ '4': {name:'第4组', formula:'-i- ↔ -os-', jiEnd:'〜iる', taEnd:'〜おす', ex:0,
+   desc:'自動詞是 〜iる（上一段动词），他動詞是 〜おす。-os- 仍然是 s 零件，所以还是带 す 的那个是他動詞。',
+   rule:'〜iる 是自，〜おす 是他'},
+ '5A': {name:'第5A组', formula:'原词(自) ＋ -e- → 他', jiEnd:'〜う（原词）', taEnd:'〜える', ex:0,
+   desc:'原词本来表示会自己发生的事（开、附着、继续、站、成长），所以原词是自動詞。加 -e- 翻转，得到“让它发生”的他動詞。',
+   rule:'本来自己会发生 → 原词是自，加 e 是他'},
+ '5B': {name:'第5B组', formula:'原词(他) ＋ -e- → 自', jiEnd:'〜える', taEnd:'〜う（原词）', ex:0,
+   desc:'原词本来表示人动手做的事（打碎、切、烤、卖），所以原词是他動詞。加 -e- 翻转，得到“结果出现了”的自動詞。这一组的自動詞和原词的可能形完全同形。',
+   rule:'本来要人动手 → 原词是他，加 e 是自（＝可能形同形）'},
+ 'X': {name:'例外组', formula:'＋ -as-e-（像使役）', jiEnd:'〜う', taEnd:'〜せる', ex:1,
+   desc:'他動詞那一边接的是 -as-e-，和使役 させる 用的是同一个零件，所以看起来像使役形，但它是独立的他動詞。',
+   rule:'〜せる 是他（不是使役）'}
+};
+const GORDER = ['1','2','3','4','5A','5B','X'];
+const GODAN_RU = new Set(['入る','減る','切る','散る','照る','返る','帰る','千切る']);
+
+const PAIRS = RAW.trim().split('\n').map((l,i)=>{const [g,jk,jr,tk,tr,m]=l.split('|');return {id:i,g,ji:{k:jk,r:jr},ta:{k:tk,r:tr},m};});
+
+/* ---------------- kana / romaji ---------------- */
+const ROWS = {'う':'わいうえお','く':'かきくけこ','ぐ':'がぎぐげご','す':'さしすせそ','つ':'たちつてと','ぬ':'なにぬねの','ぶ':'ばびぶべぼ','む':'まみむめも','る':'らりるれろ'};
+const I_ROW = 'いきしちにひみりぎじぢびぴ', E_ROW = 'えけせてねへめれげぜでべぺ';
+function isIchidan(w){ if(GODAN_RU.has(w.k)) return false; const r=w.r; return r.endsWith('る') && r.length>=2 && (I_ROW.includes(r[r.length-2])||E_ROW.includes(r[r.length-2])); }
+function grade(s,last,idx){ return s.slice(0,-1)+ROWS[last][idx]; }
+function conj(w,kind){
+  const ichi=isIchidan(w);
+  const f=s=>{
+    const last=s[s.length-1], base=s.slice(0,-1);
+    if(ichi){ return {caus:base+'させる',pass:base+'られる',pot:base+'られる',te:base+'て'}[kind]; }
+    if(kind==='caus') return grade(s,last,0)+'せる';
+    if(kind==='pass') return grade(s,last,0)+'れる';
+    if(kind==='pot')  return grade(s,last,3)+'る';
+    if(kind==='te'){ if('うつる'.includes(last)) return base+'って'; if('むぶぬ'.includes(last)) return base+'んで'; if(last==='く') return base+'いて'; if(last==='ぐ') return base+'いで'; if(last==='す') return base+'して'; }
+  };
+  return {k:f(w.k), r:f(w.r)};
+}
+const teAru = w=>{const t=conj(w,'te');return {k:t.k+'ある',r:t.r+'ある'};};
+const teIru = w=>{const t=conj(w,'te');return {k:t.k+'いる',r:t.r+'いる'};};
+
+/* kunrei syllabary */
+const SYL = {}; // kana -> kunrei
+(function(){
+  const rows = {'':'あいうえお',k:'かきくけこ',s:'さしすせそ',t:'たちつてと',n:'なにぬねの',h:'はひふへほ',m:'まみむめも',r:'らりるれろ',g:'がぎぐげご',z:'ざじずぜぞ',d:'だぢづでど',b:'ばびぶべぼ',p:'ぱぴぷぺぽ'};
+  const v='aiueo';
+  for(const c in rows){ [...rows[c]].forEach((k,i)=>SYL[k]=c+v[i]); }
+  Object.assign(SYL,{'や':'ya','ゆ':'yu','よ':'yo','わ':'wa','を':'wo','ん':'n'});
+  const ys={'ゃ':'a','ゅ':'u','ょ':'o'};
+  for(const c of 'kgnhmrbpsztd'){ const ik=rows[c][1]; for(const y in ys) SYL[ik+y]=c+'y'+ys[y]; }
+})();
+function toRomaji(kana){
+  let out='';
+  for(let i=0;i<kana.length;i++){
+    const two=kana.slice(i,i+2);
+    if(SYL[two]&&two.length===2&&'ゃゅょ'.includes(two[1])){ out+=SYL[two]; i++; continue; }
+    const ch=kana[i];
+    if(ch==='っ'){ const nx=kana.slice(i+1,i+3); const r=(SYL[nx]&&'ゃゅょ'.includes(nx[1]))?SYL[nx]:(SYL[kana[i+1]]||''); out+=r[0]||''; continue; }
+    out+=SYL[ch]||ch;
+  }
+  return out;
+}
+/* romaji input -> hiragana (accepts Hepburn and Kunrei) */
+const R2K = {};
+for(const k in SYL){ if(k!=='ん') R2K[SYL[k]]=k; }
+Object.assign(R2K,{shi:'し',chi:'ち',tsu:'つ',fu:'ふ',ji:'じ',sha:'しゃ',shu:'しゅ',sho:'しょ',cha:'ちゃ',chu:'ちゅ',cho:'ちょ',ja:'じゃ',ju:'じゅ',jo:'じょ',jya:'じゃ',jyu:'じゅ',jyo:'じょ',zi:'じ',di:'ぢ',du:'づ',o:'お'});
+function romajiToKana(s){
+  s=s.toLowerCase(); let out='',i=0;
+  while(i<s.length){
+    const c=s[i];
+    if(c==="'"){i++;continue;}
+    if(c==='n'){ const nx=s[i+1]; if(nx==='n'){out+='ん';i+=2;continue;} if(!nx||!'aiueoy'.includes(nx)){out+='ん';i++;continue;} }
+    if(c===s[i+1] && /[bcdfghjkmprstwz]/.test(c)){ out+='っ'; i++; continue; }
+    let hit=false;
+    for(const L of [3,2,1]){ const p=s.slice(i,i+L); if(R2K[p]){ out+=R2K[p]; i+=L; hit=true; break; } }
+    if(!hit){ out+=c; i++; }
+  }
+  return out;
+}
+const kataToHira = s=>s.replace(/[ァ-ヶ]/g,ch=>String.fromCharCode(ch.charCodeAt(0)-0x60));
+
+function splitRoot(p){
+  const a=toRomaji(p.ji.r), b=toRomaji(p.ta.r);
+  let n=0; while(n<a.length&&n<b.length&&a[n]===b[n]) n++;
+  return {root:a.slice(0,n), jiSuf:a.slice(n), taSuf:b.slice(n)};
+}
+const esc = s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------------- storage ---------------- */
+const KEY='jita-v1';
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){ return {}; } }
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(STORE)); }catch(e){} }
+const STORE = Object.assign({boxes:{}, set:{groups:['1','2','3','4','5A','5B'], types:['toTa','toJi'], mode:'choice'}}, load());
+
+/* ---------------- tabs ---------------- */
+const TABS=['principle','roots','exceptions','map','drill'];
+function showTab(id){
+  if(!TABS.includes(id)) id='principle';
+  TABS.forEach(t=>{ document.getElementById(t).hidden = t!==id; document.getElementById('t-'+t).setAttribute('aria-selected', t===id?'true':'false'); });
+  if(id==='drill' && !CUR) nextQ();
+}
+TABS.forEach(t=>document.getElementById('t-'+t).addEventListener('click',()=>{ showTab(t); try{ history.replaceState(null,'','#'+t); }catch(e){} }));
+
+/* ---------------- principle: group blocks ---------------- */
+function chipHTML(p){ return `<button class="chip" data-pid="${p.id}" lang="ja">${esc(p.ji.k)}<span class="s">／</span>${esc(p.ta.k)}</button>`; }
+(function(){
+  const host=document.getElementById('groupBlocks');
+  host.innerHTML = GORDER.filter(g=>g!=='X').map(g=>{
+    const meta=G[g], list=PAIRS.filter(p=>p.g===g), p0=list[0], sp=splitRoot(p0);
+    const jiSide = g==='5B' ? 'eru' : '';
+    return `<div class="gblock">
+      <div class="ghead"><h3>${meta.name}</h3><span class="mono">${esc(meta.formula)}</span></div>
+      <p>${meta.desc}</p>
+      <div class="formula">${esc(sp.root)}- + <span class="ji">${esc(sp.jiSuf)}</span>  →  ${esc(toRomaji(p0.ji.r))}  ${esc(p0.ji.k)}   <span class="ji">自</span>
+${esc(sp.root)}- + <span class="ta">${esc(sp.taSuf)}</span>  →  ${esc(toRomaji(p0.ta.r))}  ${esc(p0.ta.k)}   <span class="ta">他</span></div>
+      <p><span class="tag ji">自 ${esc(meta.jiEnd)}</span> <span class="tag ta">他 ${esc(meta.taEnd)}</span> 共 ${list.length} 对：</p>
+      <div class="chips">${list.map(chipHTML).join('')}</div>
+    </div>`;
+  }).join('');
+})();
+document.addEventListener('click',e=>{
+  const c=e.target.closest('[data-pid]'); if(!c) return;
+  const inMap = c.closest('#map');
+  selectPair(+c.dataset.pid);
+  if(!inMap){ showTab('map'); try{ history.replaceState(null,'','#map'); }catch(err){} window.scrollTo({top:0}); }
+});
+
+/* ---------------- roots table ---------------- */
+(function(){
+  const tb=document.querySelector('#rootTable tbody');
+  tb.innerHTML = PAIRS.map(p=>{
+    const sp=splitRoot(p);
+    const root = sp.root ? `<span class="rt">${esc(sp.root)}-</span>` : '<span class="ee">（音变）</span>';
+    return `<tr data-pid="${p.id}" style="cursor:pointer">
+      <td>${G[p.g].name.replace('第','').replace('组','')}</td>
+      <td class="rootcell">${root}</td>
+      <td><span lang="ja">${esc(p.ji.k)}</span> <span class="mono ji">${esc(sp.root)}<b>${esc(sp.jiSuf)}</b></span></td>
+      <td><span lang="ja">${esc(p.ta.k)}</span> <span class="mono ta">${esc(sp.root)}<b>${esc(sp.taSuf)}</b></span></td>
+      <td>${esc(p.m)}</td></tr>`;
+  }).join('');
+})();
+
+/* ---------------- map ---------------- */
+let SEL = 0;
+function renderMapList(q=''){
+  q=kataToHira(q.trim());
+  const host=document.getElementById('mapList');
+  const html = GORDER.map(g=>{
+    const list=PAIRS.filter(p=>p.g===g && (!q || [p.ji.k,p.ji.r,p.ta.k,p.ta.r].some(s=>s.includes(q))));
+    if(!list.length) return '';
+    return `<h4>${G[g].name} <span class="mono">${esc(G[g].formula)}</span></h4><div class="chips">${list.map(p=>chipHTML(p).replace('class="chip"',`class="chip" aria-pressed="${p.id===SEL}"`)).join('')}</div>`;
+  }).join('');
+  host.innerHTML = html || '<p class="empty">没有找到。试试输入假名或汉字的一部分。</p>';
+}
+document.getElementById('mapSearch').addEventListener('input',e=>renderMapList(e.target.value));
+function cell(lab,sub,w,cls=''){ return `<div class="cell ${cls}"><div class="cl">${lab}</div><div class="cs">${sub}</div><div class="cw" lang="ja">${esc(w.k)}</div><div class="ck" lang="ja">${esc(w.r)}</div></div>`; }
+function selectPair(id){
+  SEL=id; const p=PAIRS[id], sp=splitRoot(p), meta=G[p.g];
+  const rm=(suf)=>`<span class="root">${esc(sp.root)}</span><span class="suf">${esc(suf)}</span>`;
+  let note = meta.rule;
+  if(p.g==='5B'){ note += `。可能形：${p.ta.k} → ${conj(p.ta,'pot').k}（能…），和自動詞同形。`; }
+  document.getElementById('detail').innerHTML = `
+    <div class="eyebrow">${meta.name} · <span class="mono">${esc(meta.formula)}</span> · ${esc(p.m)}</div>
+    <div class="pairhead" style="margin-top:8px">
+      <div class="side ji"><div class="lab">自動詞</div><div class="w" lang="ja">${esc(p.ji.k)}</div><div class="kana" lang="ja">${esc(p.ji.r)}</div><div class="rm">${rm(sp.jiSuf)}</div></div>
+      <div class="side ta"><div class="lab">他動詞</div><div class="w" lang="ja">${esc(p.ta.k)}</div><div class="kana" lang="ja">${esc(p.ta.r)}</div><div class="rm">${rm(sp.taSuf)}</div></div>
+    </div>
+    <div class="axis">
+      <div class="ends"><span>◀ 人在场</span><span>人不在场 ▶</span></div>
+      <div class="cells">
+        ${cell('使役','让别人去做',conj(p.ta,'caus'))}
+        ${cell('他動詞','有人去做',p.ta,'ta')}
+        ${cell('〜てある','有人特意做好',teAru(p.ta))}
+        ${cell('受身','被人做了',conj(p.ta,'pass'))}
+        ${cell('自動詞','自然发生',p.ji,'ji')}
+        ${cell('〜ている','变化后的状态',teIru(p.ji))}
+      </div>
+    </div>
+    <p class="gnote">${esc(note)}</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="drillGroup" data-g="${p.g}">只练${meta.name}</button></div>`;
+  renderMapList(document.getElementById('mapSearch').value);
+}
+document.getElementById('detail').addEventListener('click',e=>{
+  const b=e.target.closest('#drillGroup'); if(!b) return;
+  STORE.set.groups=[b.dataset.g]; save(); renderSettings(); CUR=null; showTab('drill'); try{ history.replaceState(null,'','#drill'); }catch(err){}
+});
+
+/* ---------------- drill ---------------- */
+const TYPES = {
+  toTa:{label:'自 → 他', ask:'成对的 <b class="ta">他動詞</b> 是？', cls:'ta', from:p=>p.ji, ans:p=>p.ta,
+        pool:p=>[conj(p.ji,'caus'), conj(p.ta,'pass'), p.ji, teIru(p.ji)]},
+  toJi:{label:'他 → 自', ask:'成对的 <b class="ji">自動詞</b> 是？', cls:'ji', from:p=>p.ta, ans:p=>p.ji,
+        pool:p=>[conj(p.ta,'pass'), p.ta, conj(p.ji,'caus'), conj(p.ta,'caus')]},
+  ukemi:{label:'他 → 受身', ask:'它的 <b>受身形</b> 是？', cls:'', from:p=>p.ta, ans:p=>conj(p.ta,'pass'),
+        pool:p=>[p.ji, conj(p.ta,'caus'), conj(p.ji,'pass'), conj(p.ta,'pot')]},
+  shieki:{label:'自 → 使役', ask:'它的 <b>使役形</b> 是？', cls:'', from:p=>p.ji, ans:p=>conj(p.ji,'caus'),
+        pool:p=>[p.ta, conj(p.ta,'caus'), conj(p.ta,'pass'), conj(p.ji,'pass')]}
+};
+const MODES = {choice:'选择', type:'输入假名'};
+const W = [10,7,4,2,1,.5];
+let CUR=null, QN=0, RECENT=[], REQ=[], SES={n:0,ok:0,streak:0};
+
+function renderSettings(){
+  const s=STORE.set;
+  document.getElementById('setGroups').innerHTML = GORDER.map(g=>`<button class="tog" data-kind="groups" data-v="${g}" aria-pressed="${s.groups.includes(g)}">${G[g].name.replace('第','').replace('组','组')}</button>`).join('');
+  document.getElementById('setTypes').innerHTML = Object.keys(TYPES).map(t=>`<button class="tog" data-kind="types" data-v="${t}" aria-pressed="${s.types.includes(t)}">${TYPES[t].label}</button>`).join('');
+  document.getElementById('setMode').innerHTML = Object.keys(MODES).map(m=>`<button class="tog" data-kind="mode" data-v="${m}" aria-pressed="${s.mode===m}">${MODES[m]}</button>`).join('');
+}
+document.querySelector('#drill .settings').addEventListener('click',e=>{
+  const b=e.target.closest('.tog'); if(!b) return;
+  const {kind,v}=b.dataset, s=STORE.set;
+  if(kind==='mode') s.mode=v;
+  else { const arr=s[kind]; const i=arr.indexOf(v); if(i>=0){ if(arr.length>1) arr.splice(i,1); } else arr.push(v); }
+  save(); renderSettings(); CUR=null; REQ=[]; nextQ();
+});
+
+function items(){ const s=STORE.set, out=[]; PAIRS.forEach(p=>{ if(s.groups.includes(p.g)) s.types.forEach(t=>out.push(p.id+':'+t)); }); return out; }
+function pick(){
+  const all=items(); if(!all.length) return null;
+  const due=REQ.findIndex(r=>r.due<=QN && all.includes(r.key));
+  if(due>=0){ return REQ.splice(due,1)[0].key; }
+  const cand=all.filter(k=>!RECENT.includes(k)); const pool=cand.length?cand:all;
+  let tot=0; const ws=pool.map(k=>{ const b=STORE.boxes[k]; const w=b===undefined?5:W[Math.min(b,5)]; tot+=w; return w; });
+  let r=Math.random()*tot; for(let i=0;i<pool.length;i++){ r-=ws[i]; if(r<=0) return pool[i]; }
+  return pool[pool.length-1];
+}
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function renderStats(){
+  const all=items(); const m=all.filter(k=>(STORE.boxes[k]||0)>=3).length;
+  const acc = SES.n? Math.round(SES.ok/SES.n*100)+'%' : '—';
+  document.getElementById('stats').innerHTML = `<span>本次 <b>${SES.ok}</b> / ${SES.n}（${acc}）</span><span>连对 <b>${SES.streak}</b></span><span>已掌握 <b>${m}</b> / ${all.length}</span>`;
+  document.getElementById('barFill').style.width = all.length? (m/all.length*100)+'%' : '0';
+}
+function nextQ(){
+  const key=pick(); const host=document.getElementById('quiz');
+  renderStats();
+  if(!key){ host.innerHTML='<p class="empty">请至少选择一个组和一个题型。</p>'; CUR=null; return; }
+  QN++; RECENT.push(key); if(RECENT.length>4) RECENT.shift();
+  const [pid,t]=key.split(':'); const p=PAIRS[+pid], T=TYPES[t];
+  const q=T.from(p), a=T.ans(p);
+  CUR={key,p,t,a,done:false};
+  let opts=null;
+  if(STORE.set.mode==='choice'){
+    const seen=new Set([a.r]); const ds=[];
+    for(const w of T.pool(p)){ if(!seen.has(w.r)){ seen.add(w.r); ds.push(w); } if(ds.length===3) break; }
+    opts=shuffle([a,...ds]); CUR.opts=opts;
+  }
+  host.innerHTML = `<div class="qcard">
+    <div class="qtype ${T.cls}">${T.label} · ${G[p.g].name}</div>
+    <div class="qword" lang="ja"><ruby>${esc(q.k)}<rt>${esc(q.r)}</rt></ruby></div>
+    <div class="qask">${T.ask}</div>
+    ${opts ? `<div class="opts">${opts.map((o,i)=>`<button class="opt" data-i="${i}"><span class="n">${i+1}</span><span><span class="ow" lang="ja">${esc(o.k)}</span> <span class="ok" lang="ja">${esc(o.r)}</span></span></button>`).join('')}</div>`
+      : `<form class="typerow" id="typeForm" autocomplete="off"><input id="typeIn" lang="ja" placeholder="假名或罗马字，例：ageru" aria-label="答案"><button class="btn" type="submit">确定</button></form><div class="typehint">可以输入平假名、片假名、汉字或罗马字（agaru / あがる）。</div>`}
+    <div id="fb"></div>
+  </div>`;
+  if(opts){ host.querySelectorAll('.opt').forEach(b=>b.addEventListener('click',()=>answer(+b.dataset.i))); }
+  else { const f=document.getElementById('typeForm'); f.addEventListener('submit',ev=>{ev.preventDefault(); answerTyped(document.getElementById('typeIn').value);}); document.getElementById('typeIn').focus({preventScroll:true}); }
+}
+function grade_(ok){
+  const k=CUR.key; const b=STORE.boxes[k];
+  if(ok){ STORE.boxes[k]=Math.min(5,(b===undefined?1:b+1)); SES.ok++; SES.streak++; }
+  else { STORE.boxes[k]=0; SES.streak=0; REQ.push({key:k,due:QN+3}); }
+  SES.n++; save(); CUR.done=true; renderStats();
+}
+function feedback(ok, given){
+  const p=CUR.p, sp=splitRoot(p), meta=G[p.g], a=CUR.a;
+  let why = `${meta.name}（<span class="mono">${esc(meta.formula)}</span>）：${esc(meta.rule)}。`;
+  if(CUR.t==='ukemi') why += ` 受身是在他動詞后加（ら）れる；不要和自動詞 ${esc(p.ji.k)} 混淆。`;
+  if(CUR.t==='shieki') why += ` 使役是在自動詞后加（さ）せる；成对的他動詞是 ${esc(p.ta.k)}。`;
+  if(CUR.t==='toJi' && given && given.r===conj(p.ta,'pass').r) why += ' 你选的是受身形（背后有人），自動詞背后没有人。';
+  if(CUR.t==='toTa' && given && given.r===conj(p.ji,'caus').r) why += ' 你选的是使役形（让别人做），成对的他動詞是独立的词。';
+  document.getElementById('fb').innerHTML = `<div class="fb ${ok?'good':'bad'}">
+    <div class="v">${ok?'正确':'答案是 '+esc(a.k)+'（'+esc(a.r)+'）'}</div>
+    <div class="pair" lang="ja"><span class="ji">${esc(p.ji.k)}</span> <span class="mono ji">${esc(sp.root)}·${esc(sp.jiSuf)}</span>　↔　<span class="ta">${esc(p.ta.k)}</span> <span class="mono ta">${esc(sp.root)}·${esc(sp.taSuf)}</span></div>
+    <div class="why">${why}</div>
+  </div>
+  <div class="next"><button class="btn" id="nextBtn">下一题</button><span class="kbd">回车键继续${STORE.set.mode==='choice'?'，数字键 1–4 选择':''}</span></div>`;
+  const nb=document.getElementById('nextBtn'); nb.addEventListener('click',nextQ); nb.focus({preventScroll:true});
+}
+function answer(i){
+  if(!CUR||CUR.done) return;
+  const o=CUR.opts[i], ok=o.r===CUR.a.r;
+  document.querySelectorAll('.opt').forEach((b,j)=>{ b.disabled=true; const w=CUR.opts[j]; if(w.r===CUR.a.r) b.classList.add('right'); else if(j===i) b.classList.add('wrong'); });
+  grade_(ok); feedback(ok,o);
+}
+function answerTyped(v){
+  if(!CUR||CUR.done) return;
+  v=v.trim(); if(!v) return;
+  let norm=kataToHira(v); if(/^[a-z' ]+$/i.test(norm)) norm=romajiToKana(norm.replace(/\s/g,''));
+  const zd = s=>s.replace(/づ/g,'ず').replace(/ぢ/g,'じ');
+  const ok = zd(norm)===zd(CUR.a.r) || v===CUR.a.k;
+  document.getElementById('typeIn').disabled=true;
+  grade_(ok); feedback(ok,null);
+}
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('drill').hidden||!CUR) return;
+  if(CUR.done && (e.key==='Enter')){ if(document.activeElement && document.activeElement.id==='nextBtn') return; e.preventDefault(); nextQ(); return; }
+  if(!CUR.done && STORE.set.mode==='choice' && /^[1-4]$/.test(e.key) && CUR.opts[+e.key-1]){ answer(+e.key-1); }
+});
+/* reset with in-page confirm */
+function renderReset(confirming){
+  const r=document.getElementById('resetRow');
+  r.innerHTML = confirming
+    ? `<span>清除全部练习记录？</span><button class="btn" id="rsYes">清除</button><button class="btn ghost" id="rsNo">取消</button>`
+    : `<span>进度只保存在这个浏览器里。</span><button class="btn ghost" id="rsAsk">清除练习记录</button>`;
+  if(confirming){ document.getElementById('rsYes').onclick=()=>{ STORE.boxes={}; SES={n:0,ok:0,streak:0}; REQ=[]; save(); renderReset(false); renderStats(); }; document.getElementById('rsNo').onclick=()=>renderReset(false); }
+  else document.getElementById('rsAsk').onclick=()=>renderReset(true);
+}
+
+/* ---------------- boot ---------------- */
+renderSettings(); renderReset(false); renderMapList(); selectPair(0);
+showTab((location.hash||'').slice(1)||'principle');
+</script>
+
+</html>

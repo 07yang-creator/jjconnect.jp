@@ -31,4 +31,12 @@ GOI_DATA="src/goi-quiz/data/meishi.js src/goi-quiz/data/doushi.js src/goi-quiz/d
 cat src/goi-quiz/shell.html $GOI_DATA src/goi-quiz/app.js src/goi-quiz/footer.html > ../content/goi/quiz.html
 cat src/goi-list/shell.html $GOI_DATA src/goi-list/render.js src/goi-list/footer.html > ../content/goi/list.html
 
-echo "built:"; ls -l dist/*.html ../content/doushi/*.html ../content/goi/*.html | awk '{print "  "$9" "$5" bytes"}'
+# 自他動詞 topic: the map (owner's file, copied verbatim) + a test bank generated from the map's pair list
+mkdir -p ../content/jita
+node tools/gen_jita.cjs > /dev/null
+cp src/jita/map.html ../content/jita/map.html
+cat src/jita-quiz/shell.html src/jita-quiz/data/tota.js src/jita-quiz/data/toji.js src/jita-quiz/data/ukemi.js \
+    src/jita-quiz/data/shieki.js src/jita-quiz/data/teiru.js src/jita-quiz/data/hantei.js \
+    src/jita-quiz/app.js src/jita-quiz/footer.html > ../content/jita/quiz.html
+
+echo "built:"; ls -l dist/*.html ../content/doushi/*.html ../content/goi/*.html ../content/jita/*.html | awk '{print "  "$9" "$5" bytes"}'

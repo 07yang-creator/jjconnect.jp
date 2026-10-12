@@ -11,6 +11,8 @@
 | `dist/benseki.html` | 接续表达 易混辨析（16 组） | `/v/t260924-h8rz/benseki.html` |
 | `dist/fukushu.html` | 文型・語彙 復習ノート（文型 23 组 + 語彙 18 组） | `/v/300/fukushu.html` |
 | `../content/doushi/material.html` | 日语动词 讲义：活用表 93 词（表里 50＋常用 43，按意思分 7 组，可检索）・受身形 8 组・自他 46 组＋5 组 | `/v/doushi/material.html`（**静态专题**） |
+| `../content/jita/map.html` | 自他動詞マップ：用户在 claude.ai 会话「Japanese verb stem changes」做的交互页（原理・词根一览・例外・图谱・练习），原样复制 | `/v/jita/map.html`（**静态专题**） |
+| `../content/jita/quiz.html` | 自他動詞 744 题：从 map 的 124 对词自动生成（自→他／他→自／受身／使役／ている・てある／自他判定），按 7 组；错题本 | `/v/jita/quiz.html`（**静态专题**） |
 | `../content/goi/list.html` | N2 語彙 单词表：320 词按 4 题库・16 组，单词／读音／意思／例句，可检索 | `/v/goi/list.html`（**静态专题**） |
 | `../content/goi/quiz.html` | N2 語彙 320 题：名詞・動詞・形容詞・副詞／接続詞／その他 各 80，四选一；错题本（复习・导出 .md・复制）| `/v/goi/quiz.html`（**静态专题**） |
 | `../content/doushi/quiz.html` | 日语动词 280 题：活用 80・受身形 120・自他 80，14 个分组各 20 题；活用表 93 词＋自他 46 组的每个动词至少考一次（check_doushi.cjs 审计） | `/v/doushi/quiz.html`（**静态专题**） |
@@ -42,6 +44,9 @@ src/benseki/  shell.html + sec.js (const SEC) + render.js + footer.html
 src/fukushu/  同上
 
 src/doushi/        shell.html + data.js (VERBS 活用表 93 行・末两列是 グループ／出典 / PAIRS 自他 46 行 / SEC 讲解 15 组) + render.js + footer.html
+src/jita/map.html  用户的交互图原文件（勿改；要改先在 claude.ai 那边改再替换）
+src/jita-quiz/     shell.html + app.js（goi 引擎的泛化版：每组题数不固定，7 组色带）+ data/*.js（**生成物**：build.sh 先跑 tools/gen_jita.cjs，
+                   从 map.html 的 const RAW 解析 124 对词，用 map 自己的活用规则造 6 套题）+ footer.html；key `jp-jita-v1`
 src/goi-quiz/      shell.html + data/{meishi,doushi,keiyoushi,fukushi}.js (QA–QD 各 80，行＝[组, 题干, 选项, 解析, 語, 読み, 意味]) + app.js + footer.html
                    app.js 在 doushi-quiz 引擎上加了错题本：st.mist[set][题号]={n,a,t}，错题复习模式（答对即移除），导出 Markdown／复制；key `jp-goi-n2-v1`
 src/goi-list/      单词表页：同一份数据 + render.js（按题库・组列表，可检索，?q= 深链接）
