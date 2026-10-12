@@ -10,7 +10,7 @@
 | `dist/quiz.html` | 400 题交互测验（4 套 × 100 题），练习模式 + 考试模式 + 自动评分 | `/v/300/jp-setsuzoku-quiz2.html` |
 | `dist/benseki.html` | 接续表达 易混辨析（16 组） | `/v/t260924-h8rz/benseki.html` |
 | `dist/fukushu.html` | 文型・語彙 復習ノート（文型 23 组 + 語彙 18 组） | `/v/300/fukushu.html` |
-| `../content/doushi/material.html` | 日语动词 讲义：活用表 50 词（可检索）・受身形 10 组・自他 45 对＋6 组・表の訂正 | `/v/doushi/material.html`（**静态专题**） |
+| `../content/doushi/material.html` | 日语动词 讲义：活用表 50 词（可检索）・受身形 8 组・自他 46 组＋5 组 | `/v/doushi/material.html`（**静态专题**） |
 | `../content/doushi/quiz.html` | 日语动词 180 题：活用 40・受身形 80・自他 60，9 个分组各 20 题 | `/v/doushi/quiz.html`（**静态专题**） |
 
 另有 `/mnt/user-data/outputs/日语接续表达一览.pdf`（7 页 A4，接续表达分类表，WeasyPrint 生成，源码未保留，见 BACKLOG 第 6 项）。

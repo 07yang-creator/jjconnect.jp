@@ -51,7 +51,11 @@ data.VERBS.forEach(r => r.slice(0, 10).forEach(c => flag(`VERBS:${r[0]}`, c)));
 data.PAIRS.forEach(r => [r[0], r[2]].forEach(c => flag(`PAIRS:${r[0]}`, c)));
 const ids = new Set(data.SEC.map(s => s.id));
 console.log(`  doushi material: ${data.VERBS.length} verbs, ${data.PAIRS.length} pairs, ${data.SEC.length} sections, dup ids ${data.SEC.length - ids.size}`);
-if (data.VERBS.length !== 50 || data.PAIRS.length !== 45 || ids.size !== data.SEC.length) bad = 1;
+if (data.VERBS.length !== 50 || data.PAIRS.length !== 46 || ids.size !== data.SEC.length) bad = 1;
+// the material must not talk about its sources' mistakes: corrections are applied silently
+const meta = [data.SEC.map(s => [s.t, s.lead, s.tip, ...s.tb.flat(), ...s.ex.flat()]).flat(), data.VERBS.flat(), data.PAIRS.flat()].flat()
+  .filter(x => typeof x === 'string' && /誤り|误标|有误|误写|订正|訂正|表里|表の|表では/.test(x));
+if (meta.length) { console.log('  mentions of source errors in material:', meta.length); meta.forEach(m => console.log('    ' + m.slice(0, 60))); bad = 1; }
 if (hits.length) { console.log('MIXED SCRIPT in Japanese fields:'); console.log(hits.join('\n')); bad = 1; }
 else console.log('  doushi mixed-script scan: clean');
 process.exit(bad);

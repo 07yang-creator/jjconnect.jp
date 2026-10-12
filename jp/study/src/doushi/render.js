@@ -21,7 +21,7 @@ function verbsSection(){return `
 <section id="katsuyo-hyo">
   <span class="cat">活用表</span>
   <h2><span class="ja" lang="ja">動詞活用表（50 語）</span></h2>
-  <p class="lead">終止形・連体形＝辞書形，省略。一段的可能形写标准形（表里是ら抜き）；表里误标一段的六个词已改为五段，备注栏有说明。可按类别筛选或输入任何活用形检索。</p>
+  <p class="lead">終止形・連体形＝辞書形，省略。一段的可能形写标准形，口语的ら抜き形在备注栏。可按类别筛选或输入任何活用形检索。</p>
   <div class="filters"><div class="chips" id="vf">${["全部","五段","一段","特殊"].map(k=>`<button data-k="${k}" aria-pressed="${k==="全部"}">${k}</button>`).join("")}</div>
   <input id="vq" type="search" placeholder="検索：辞書形・読み・活用形（例：られる）" aria-label="活用表检索"><span class="cnt" id="vcnt"></span></div>
   <div class="tw"><table id="vt"><thead><tr><th>辞書形</th><th>類</th><th>未然形</th><th>連用形</th><th>仮定形</th><th>命令形</th><th>使役形</th><th>受身形</th><th>可能形</th><th>備考</th></tr></thead><tbody></tbody></table></div>
@@ -39,14 +39,14 @@ function renderVerbs(){
 }
 
 /* ---------- 自他表 ---------- */
-const TY={"対":["t1","词汇对子"],"使":["t2","使役代用"],"受":["t3","受身代用"],"注":["t4","表の分类有误"]};
+const TY={"対":["t1","词汇对子"],"使":["t2","使役代用"],"受":["t3","受身代用"],"類":["t4","近义・用法有别"]};
 function pairsSection(){return `
 <section id="jita-hyo">
   <span class="cat">自他表</span>
-  <h2><span class="ja" lang="ja">自動詞・他動詞 対応表（45 組）</span></h2>
-  <p class="lead">按表的三个分类和频度列出。「型」说明右栏是什么：真正的他动词、还是没有他动词时的使役形、没有自动词时的受身形；标「注」的是表里分类有误的组，备注里写了原因。</p>
+  <h2><span class="ja" lang="ja">自動詞・他動詞 対応表（46 組）</span></h2>
+  <p class="lead">按自然現象・情感・動作三类和频度列出。「型」说明右栏是什么：真正的他动词、没有他动词时的使役形、没有自动词时的受身形，或意思相近但用法有别的一组。</p>
   <div class="filters"><div class="chips" id="pf">${["全部","自然現象","情感","動作"].map(k=>`<button data-k="${k}" aria-pressed="${k==="全部"}">${k}</button>`).join("")}</div>
-  <div class="chips" id="pt">${["全部","対","使","受","注"].map(k=>`<button data-k="${k}" aria-pressed="${k==="全部"}">${k==="全部"?"全部の型":k}</button>`).join("")}</div><span class="cnt" id="pcnt"></span></div>
+  <div class="chips" id="pt">${["全部","対","使","受","類"].map(k=>`<button data-k="${k}" aria-pressed="${k==="全部"}">${k==="全部"?"全部の型":k}</button>`).join("")}</div><span class="cnt" id="pcnt"></span></div>
   <div class="legend">${Object.entries(TY).map(([k,[c,n]])=>`<span class="ty ${c}">${k}</span>${n}　`).join("")}</div>
   <div class="tw"><table id="pt-table"><thead><tr><th>自動詞</th><th>他動詞（右栏）</th><th>分類</th><th>頻度</th><th>型</th><th>備考</th></tr></thead><tbody></tbody></table></div>
 </section>`}
@@ -63,7 +63,7 @@ function renderPairs(){
 }
 
 /* ---------- 组装 ---------- */
-const navParts=[[1,[link("katsuyo-hyo","表","活用表（50語）")]],[2,[]],[3,[link("jita-hyo","表","自他対応表（45組）")]]];
+const navParts=[[1,[link("katsuyo-hyo","表","活用表（50語）")]],[2,[]],[3,[link("jita-hyo","表","自他対応表（46組）")]]];
 SEC.forEach(s=>navParts.find(p=>p[0]===s.p)[1].push(secLink(s)));
 document.getElementById("nav").innerHTML=navParts.map(([p,ls])=>`<p class="nt">${PARTS[p]}</p>`+ls.join("")).join("");
 let html="",lastP=0;
