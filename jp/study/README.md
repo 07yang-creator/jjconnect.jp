@@ -11,6 +11,8 @@
 | `dist/benseki.html` | 接续表达 易混辨析（16 组） | `/v/t260924-h8rz/benseki.html` |
 | `dist/fukushu.html` | 文型・語彙 復習ノート（文型 23 组 + 語彙 18 组） | `/v/300/fukushu.html` |
 | `../content/doushi/material.html` | 日语动词 讲义：活用表 93 词（表里 50＋常用 43，按意思分 7 组，可检索）・受身形 8 组・自他 46 组＋5 组 | `/v/doushi/material.html`（**静态专题**） |
+| `../content/doushi/drill1.html` | 動詞活用ドリル① 基本活用：ます・ない・て・た・意志・命令・仮定，305 词（活用表 93＋自他 124 对），tools/gen_katsuyo.cjs 生成 | `/v/doushi/drill1.html`（**静态专题**） |
+| `../content/doushi/drill2.html` | 動詞活用ドリル② 派生形：可能・受身・使役・使役受身，同上 | `/v/doushi/drill2.html`（**静态专题**） |
 | `../content/jita/map.html` | 自他動詞マップ：用户在 claude.ai 会话「Japanese verb stem changes」做的交互页（原理・词根一览・例外・图谱・练习），原样复制 | `/v/jita/map.html`（**静态专题**） |
 | `../content/jita/quiz.html` | 自他動詞 744 题：从 map 的 124 对词自动生成（自→他／他→自／受身／使役／ている・てある／自他判定），按 7 组；错题本 | `/v/jita/quiz.html`（**静态专题**） |
 | `../content/goi/list.html` | N2 語彙 单词表：320 词按 4 题库・16 组，单词／读音／意思／例句，可检索 | `/v/goi/list.html`（**静态专题**） |
@@ -44,6 +46,10 @@ src/benseki/  shell.html + sec.js (const SEC) + render.js + footer.html
 src/fukushu/  同上
 
 src/doushi/        shell.html + data.js (VERBS 活用表 93 行・末两列是 グループ／出典 / PAIRS 自他 46 行 / SEC 讲解 15 组) + render.js + footer.html
+src/_engine/       **共用测验引擎**：quiz.js（练习／错题循环／考试／错题复习＋错题本导出）＋ shell.html（模板，{{TITLE}}／{{H1}}）。
+                   每页只有 config.js（CFG={key,title,wordInfo,sets}）＋ meta.json（标题）＋ data；tools/assemble.cjs 拼装。goi／jita／doushi-drill 都用它。
+src/doushi-drill/  config1.js／meta1.json（基本活用 7 形）、config2.js／meta2.json（派生形 4 形）；data/*.js 由 tools/gen_katsuyo.cjs 生成（勿手改）：
+                   从 doushi/data.js 的 VERBS＋jita map 的 124 对取 305 个动词，按类（五段／一段／五段例外／特殊）造每种形，干扰项＝真实的错误变形
 src/jita/map.html  用户的交互图原文件（勿改；要改先在 claude.ai 那边改再替换）
 src/jita-quiz/     shell.html + app.js（goi 引擎的泛化版：每组题数不固定，7 组色带）+ data/*.js（**生成物**：build.sh 先跑 tools/gen_jita.cjs，
                    从 map.html 的 const RAW 解析 124 对词，用 map 自己的活用规则造 6 套题）+ footer.html；key `jp-jita-v1`

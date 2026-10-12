@@ -25,18 +25,17 @@ cat src/doushi-quiz/shell.html \
     src/doushi-quiz/app.js \
     src/doushi-quiz/footer.html > ../content/doushi/quiz.html
 
-# N2 語彙 topic: static, same pattern (quiz + word list built from the same data)
-mkdir -p ../content/goi
+# N2 語彙 / 自他動詞 / 動詞活用ドリル: shared engine (src/_engine) + per-page config + data, assembled by tools/assemble.cjs
+mkdir -p ../content/goi ../content/jita ../content/doushi
 GOI_DATA="src/goi-quiz/data/meishi.js src/goi-quiz/data/doushi.js src/goi-quiz/data/keiyoushi.js src/goi-quiz/data/fukushi.js"
-cat src/goi-quiz/shell.html $GOI_DATA src/goi-quiz/app.js src/goi-quiz/footer.html > ../content/goi/quiz.html
+node tools/assemble.cjs src/goi-quiz/meta.json ../content/goi/quiz.html $GOI_DATA src/goi-quiz/config.js
 cat src/goi-list/shell.html $GOI_DATA src/goi-list/render.js src/goi-list/footer.html > ../content/goi/list.html
-
-# 自他動詞 topic: the map (owner's file, copied verbatim) + a test bank generated from the map's pair list
-mkdir -p ../content/jita
 node tools/gen_jita.cjs > /dev/null
 cp src/jita/map.html ../content/jita/map.html
-cat src/jita-quiz/shell.html src/jita-quiz/data/tota.js src/jita-quiz/data/toji.js src/jita-quiz/data/ukemi.js \
-    src/jita-quiz/data/shieki.js src/jita-quiz/data/teiru.js src/jita-quiz/data/hantei.js \
-    src/jita-quiz/app.js src/jita-quiz/footer.html > ../content/jita/quiz.html
+node tools/assemble.cjs src/jita-quiz/meta.json ../content/jita/quiz.html src/jita-quiz/data/tota.js src/jita-quiz/data/toji.js src/jita-quiz/data/ukemi.js src/jita-quiz/data/shieki.js src/jita-quiz/data/teiru.js src/jita-quiz/data/hantei.js src/jita-quiz/config.js
+node tools/gen_katsuyo.cjs > /dev/null
+D=src/doushi-drill/data
+node tools/assemble.cjs src/doushi-drill/meta1.json ../content/doushi/drill1.html $D/masu.js $D/nai.js $D/te.js $D/ta.js $D/ishi.js $D/meirei.js $D/katei.js src/doushi-drill/config1.js
+node tools/assemble.cjs src/doushi-drill/meta2.json ../content/doushi/drill2.html $D/kanou.js $D/ukemi.js $D/shieki.js $D/shiekiukemi.js src/doushi-drill/config2.js
 
 echo "built:"; ls -l dist/*.html ../content/doushi/*.html ../content/goi/*.html ../content/jita/*.html | awk '{print "  "$9" "$5" bytes"}'
