@@ -53,6 +53,16 @@ PY2
   if node --check ".tmp/$f.js"; then echo "  syntax ok: doushi/$f"; else echo "  SYNTAX FAIL: doushi/$f"; fail=1; fi
 done
 node tools/check_katsuyo.cjs || fail=1
+for f in material quiz; do
+  python3 - "$f" << 'PY3'
+import sys,pathlib
+n=sys.argv[1]
+h=pathlib.Path(f"../content/onbin/{n}.html").read_text(encoding="utf-8")
+pathlib.Path(f".tmp/onbin-{n}.js").write_text(h.split("<script>")[1].split("</script>")[0],encoding="utf-8")
+PY3
+  if node --check ".tmp/onbin-$f.js"; then echo "  syntax ok: onbin/$f"; else echo "  SYNTAX FAIL: onbin/$f"; fail=1; fi
+done
+node tools/check_onbin.cjs || fail=1
 node - << 'EOF2' || fail=1
 const fs=require('fs');
 const src=['set1-basic','set2-advanced','set3-bunkei-goi','set4-ichiran'].map(n=>fs.readFileSync(`src/quiz/data/${n}.js`,'utf8'));

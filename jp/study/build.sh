@@ -38,4 +38,11 @@ D=src/doushi-drill/data
 node tools/assemble.cjs src/doushi-drill/meta1.json ../content/doushi/drill1.html $D/masu.js $D/nai.js $D/te.js $D/ta.js $D/ishi.js $D/meirei.js $D/katei.js src/doushi-drill/config1.js
 node tools/assemble.cjs src/doushi-drill/meta2.json ../content/doushi/drill2.html $D/kanou.js $D/ukemi.js $D/shieki.js $D/shiekiukemi.js src/doushi-drill/config2.js
 
-echo "built:"; ls -l dist/*.html ../content/doushi/*.html ../content/goi/*.html ../content/jita/*.html | awk '{print "  "$9" "$5" bytes"}'
+# 音便: static topic; material from src/onbin, sets 1–3 generated from its VERBS table, sets 4–6 hand-written
+mkdir -p ../content/onbin
+cat src/onbin/shell.html src/onbin/data.js src/onbin/render.js src/onbin/footer.html > ../content/onbin/material.html
+node tools/gen_onbin.cjs > /dev/null
+O=src/onbin-quiz/data
+node tools/assemble.cjs src/onbin-quiz/meta.json ../content/onbin/quiz.html $O/shurui.js $O/te.js $O/ta.js $O/n.js $O/ndesu.js $O/sougou.js src/onbin-quiz/config.js
+
+echo "built:"; ls -l dist/*.html ../content/doushi/*.html ../content/goi/*.html ../content/jita/*.html ../content/onbin/*.html | awk '{print "  "$9" "$5" bytes"}'

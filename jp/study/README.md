@@ -13,6 +13,8 @@
 | `../content/doushi/material.html` | 日语动词 讲义：活用表 93 词（表里 50＋常用 43，按意思分 7 组，可检索）・受身形 8 组・自他 46 组＋5 组 | `/v/doushi/material.html`（**静态专题**） |
 | `../content/doushi/drill1.html` | 動詞活用ドリル① 基本活用：ます・ない・て・た・意志・命令・仮定，305 词（活用表 93＋自他 124 对），tools/gen_katsuyo.cjs 生成 | `/v/doushi/drill1.html`（**静态专题**） |
 | `../content/doushi/drill2.html` | 動詞活用ドリル② 派生形：可能・受身・使役・使役受身，同上 | `/v/doushi/drill2.html`（**静态专题**） |
+| `../content/onbin/material.html` | 音便 讲义：四种音便・て形全规则・た／たら／たり／ちゃう・「ん」の四つの正体・〜んです，附 98 词音便一览表 | `/v/onbin/material.html`（**静态专题**） |
+| `../content/onbin/quiz.html` | 音便 348 题：音便の種類／て形／た形・たら・たり・ちゃう（tools/gen_onbin.cjs 从一览表生成，覆盖全部词）＋「ん」の正体／〜んです／実戦 手写各 20 | `/v/onbin/quiz.html`（**静态专题**） |
 | `../content/jita/map.html` | 自他動詞マップ：用户在 claude.ai 会话「Japanese verb stem changes」做的交互页（原理・词根一览・例外・图谱・练习），原样复制 | `/v/jita/map.html`（**静态专题**） |
 | `../content/jita/quiz.html` | 自他動詞 744 题：从 map 的 124 对词自动生成（自→他／他→自／受身／使役／ている・てある／自他判定），按 7 组；错题本 | `/v/jita/quiz.html`（**静态专题**） |
 | `../content/goi/list.html` | N2 語彙 单词表：320 词按 4 题库・16 组，单词／读音／意思／例句，可检索 | `/v/goi/list.html`（**静态专题**） |
@@ -55,6 +57,9 @@ src/doushi-drill/  config1.js／meta1.json（基本活用 7 形）、config2.js�
 src/jita/map.html  用户的交互图原文件（勿改；要改先在 claude.ai 那边改再替换）
 src/jita-quiz/     shell.html + app.js（goi 引擎的泛化版：每组题数不固定，7 组色带）+ data/*.js（**生成物**：build.sh 先跑 tools/gen_jita.cjs，
                    从 map.html 的 const RAW 解析 124 对词，用 map 自己的活用规则造 6 套题）+ footer.html；key `jp-jita-v1`
+src/onbin/         shell.html + data.js (VERBS 音便一覧 98 行：[語, 読み, 語尾, 音便, て形, た形, 意味, English, 備考] / SEC 讲解 13 组) + render.js + footer.html
+src/onbin-quiz/    config.js／meta.json（6 题库）+ data/：shurui・te・ta 由 tools/gen_onbin.cjs 从 VERBS 生成（勿手改），n・ndesu・sougou 手写各 20 题；key `jp-onbin-v1`
+                   tools/check_onbin.cjs：结构、覆盖（一览表每个词都考到）、手写题的词必须出现在讲义里、陷阱抽查（行って・問うて・借りて・着て）
 src/goi-quiz/      shell.html + data/{meishi,doushi,keiyoushi,fukushi}.js (QA–QD 各 80，行＝[组, 题干, 选项, 解析, 語, 読み, 意味]) + app.js + footer.html
                    app.js 在 doushi-quiz 引擎上加了错题本：st.mist[set][题号]={n,a,t}，错题复习模式（答对即移除），导出 Markdown／复制；key `jp-goi-n2-v1`
 src/goi-list/      单词表页：同一份数据 + render.js（按题库・组列表，可检索，?q= 深链接）
