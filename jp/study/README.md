@@ -49,7 +49,7 @@ src/fukushu/  同上
 
 src/doushi/        shell.html + data.js (VERBS 活用表 93 行・末四列是 グループ／出典／意味／English / PAIRS 自他 46 行 / SEC 讲解 17 组，含 活用の作り方・五段の段の対応 两张规则总表) + render.js + footer.html
                    表格・例句里 ｛…｝＝着色的「与辞書形不同的部分」：按列头或行头的形选色（仮定 kt 緑・可能 kn 青・受身 uk 朱・使役 sk 紫），没有形的用节的 hk 或默认茶色；wide:true 的表横向滚动。
-                   活用表（VERBS）自动着色：每格与辞書形的公共前缀之后的部分，列按段排：辞書形｜あ段 ない・受身・使役｜い段 ます｜え段 命令・可能｜お段 意志；ない形・ます形・意志形在 render.js 的 derive() 里由未然形／連用形推出，未然・連用・仮定 不单列
+                   活用表（VERBS）自动着色：每格与辞書形的公共前缀之后的部分，列严格按段排（五段八形）：あ段 ない・受身・使役｜い段 連用・ます｜う段 辞書形｜え段 命令・可能｜お段 意志，段之间竖线、五段／一段块之间横线；ない形・ます形・意志形在 render.js 的 derive() 里由未然形／連用形推出，未然・連用・仮定 不单列
 src/_engine/       **共用测验引擎**：quiz.js（练习／错题循环／考试／错题复习＋错题本导出）＋ shell.html（模板，{{TITLE}}／{{H1}}）。
                    每页只有 config.js（CFG={key,title,wordInfo,gloss?,sets}）＋ meta.json（标题）＋ data；tools/assemble.cjs 拼装。goi／jita／doushi-drill 都用它。
                    gloss(it,setIndex,answered) 返回题干下的词义行（drill／jita 用；填空题不要给，会泄露答案）。
