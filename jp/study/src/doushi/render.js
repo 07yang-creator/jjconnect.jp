@@ -6,7 +6,7 @@ const secLink=s=>link(s.id,s.cat,s.t.split("──")[0].split("（")[0].trim());
 /* ---------- 讲解 ---------- */
 /* 表格・例句里的 ｛…｝ ＝ 与辞書形不同的部分，按列头或行头的形着色（仮定 kt・可能 kn・受身 uk・使役 sk・使役受身 su），
    没有形的用 s.hk（节的默认色）或 hk（茶色） */
-const FKEY=s=>/^使役受身/.test(s)?"su":/^受身/.test(s)?"uk":/^使役/.test(s)?"sk":/^可能/.test(s)?"kn":/^仮定/.test(s)?"kt":null;
+const FKEY=x=>{const s=String(x).replace(/^[あいうえお]段[^：]*：/,"");return /^使役受身/.test(s)?"su":/^受身/.test(s)?"uk":/^使役/.test(s)?"sk":/^可能/.test(s)?"kn":/^仮定/.test(s)?"kt":null};
 const mk=(s,key)=>esc(s).replace(/｛(.+?)｝/g,`<span class="f ${key}">$1</span>`);
 function section(s){const hd=s.tb[0],dk=s.hk||"hk";return `
 <section id="${s.id}">
@@ -22,17 +22,24 @@ function section(s){const hd=s.tb[0],dk=s.hk||"hk";return `
 /* ---------- 活用表 ---------- */
 const KCLS={"五段":"g5","一段":"g1","特殊":"gs"},KORD={"五段":0,"一段":1,"特殊":2}; // 每组内 五段→一段→特殊 排列，五段行浅色底
 const VGROUPS=[...new Set(VERBS.map(r=>r[11]))];
-/* 列顺序按段走：未然（あ段）・連用（い段）・命令（え段），然后 可能（え段＋る）・受身（あ段＋れる）・使役（あ段＋せる）。
-   仮定形不占列：它只是え段＋ば（五段＝命令形那栏＋ば，一段＝去る＋れば）。每格与辞書形不同的部分着色 */
-const VCOLS=[[3,"hk"],[4,"hk"],[6,"hk"],[9,"kn"],[8,"uk"],[7,"sk"]];
-const VHEAD=`<thead><tr><th>類</th><th>辞書形</th><th>未然形</th><th>連用形</th><th>命令形</th><th>可能形</th><th>受身形</th><th>使役形</th><th>備考</th></tr></thead>`;
-const VLEGEND=`<div class="legend">着色＝与辞書形不同的部分：<span class="f kn">可能形</span>・<span class="f uk">受身形</span>・<span class="f sk">使役形</span>・<span class="f hk">其他</span>。可能・受身相邻便于比较：書<span class="f kn">ける</span>／書<span class="f uk">かれる</span>，一段同形：食べ<span class="f kn">られる</span>／食べ<span class="f uk">られる</span>。仮定形不单列：え段＋ば（書けば・食べれば・すれば・来れば）。<br><i class="sw"></i>浅色底＝五段（换段的）；无底色＝一段（去る的）・特殊。每组内五段在前，一段在后。</div>`;
+/* 活用表按段排：辞書形（う段）｜あ段：ない・受身・使役｜い段：ます｜え段：命令・可能｜お段：意志。
+   未然形・連用形不单列（它们不是能独立使用的词），ない形・ます形・意志形由数据里的未然形／連用形推出；每格与辞書形不同的部分着色 */
+const OROW={か:"こ",が:"ご",さ:"そ",た:"と",な:"の",ば:"ぼ",ま:"も",ら:"ろ",わ:"お"};
+const suf=(s,x)=>!s||s==="—"?"—":s.includes("（")?s.replace(/^(.*?)（(.*?)）$/,`$1${x}（$2${x}）`):s+x;
+function derive(r){const k=r[0],nai=k==="ある"?"ない":suf(r[3],"ない"),masu=suf(r[4],"ます");let ishi;
+  if(k==="ある")ishi="—";else if(k==="来る")ishi="来よう（こよう）";else if(r[2]!=="五段")ishi=r[4]+"よう";
+  else{const m=r[3],l=m[m.length-1];ishi=OROW[l]?m.slice(0,-1)+OROW[l]+"う":"—"}
+  return{nai,masu,ishi}}
+const VCOLS=[[(r,d)=>d.nai,"hk"],[r=>r[8],"uk"],[r=>r[7],"sk"],[(r,d)=>d.masu,"hk"],[r=>r[6],"hk"],[r=>r[9],"kn"],[(r,d)=>d.ishi,"hk"]];
+const VHEAD=`<thead><tr><th rowspan="2">類</th><th rowspan="2">辞書形<small class="dan">う段</small></th><th colspan="3">あ段</th><th>い段</th><th colspan="2">え段</th><th>お段</th><th rowspan="2">備考</th></tr>
+<tr><th>ない</th><th>受身</th><th>使役</th><th>ます</th><th>命令</th><th>可能</th><th>意志</th></tr></thead>`;
+const VLEGEND=`<div class="legend">列按段排：あ段＝ない・受身・使役，い段＝ます，え段＝命令・可能，お段＝意志（一段动词没有段，一律去 る 接后缀）。着色＝与辞書形不同的部分：<span class="f kn">可能形</span>・<span class="f uk">受身形</span>・<span class="f sk">使役形</span>・<span class="f hk">其他</span>；可能・受身：書<span class="f kn">ける</span>／書<span class="f uk">かれる</span>，一段同形 食べ<span class="f kn">られる</span>／食べ<span class="f uk">られる</span>。て形见<a href="/v/onbin/material.html" target="_top">音便</a>，仮定＝え段＋ば。<br><i class="sw"></i>浅色底＝五段（换段的）；无底色＝一段（去る的）・特殊。每组内五段在前，一段在后。</div>`;
 function fcell(base,s,cls){if(!s||s==="—")return hl(s||"");let i=0;while(i<s.length&&i<base.length&&s[i]===base[i])i++;return hl(s.slice(0,i))+(i<s.length?`<span class="f ${cls}">${hl(s.slice(i))}</span>`:"")}
 function verbsSection(){return `
 <section id="katsuyo-hyo">
   <span class="cat">活用表</span>
-  <h2><span class="ja" lang="ja">動詞活用表（${VERBS.length} 語・${VGROUPS.length} 組）</span></h2>
-  <p class="lead">按意思分成 ${VGROUPS.length} 组。終止形・連体形＝辞書形，省略；仮定形也不单列，它只是え段＋ば。前三列是五段的三个段：未然（あ段）・連用（い段）・命令（え段）；后三列由它们派生：可能＝え段＋る、受身＝あ段＋れる、使役＝あ段＋せる。一段的可能形写标准形，口语的ら抜き形在备注栏。各形的做法见上面的「活用の仕組み」和「五段の段の対応」。可按类别筛选或输入任何活用形检索。</p>
+  <h2><span class="ja" lang="ja">五段七形 ── 動詞活用表（${VERBS.length} 語・${VGROUPS.length} 組）</span></h2>
+  <p class="lead">按意思分成 ${VGROUPS.length} 组，列按 あ・い・う・え・お 的段排。表里每一格都是能直接用的词：未然形・連用形・仮定形这些「半个词」不单列（ない形＝未然形＋ない，ます形＝連用形＋ます，仮定＝え段＋ば）。一段的可能形写标准形，口语的ら抜き形在备注栏。各形的做法见上面的「活用の仕組み」和「五段の段の対応」。可按类别筛选或输入任何活用形检索。</p>
   <div class="filters"><div class="chips" id="vf">${["全部","五段","一段","特殊"].map(k=>`<button data-k="${k}" aria-pressed="${k==="全部"}">${k}</button>`).join("")}</div>
   <input id="vq" type="search" placeholder="検索：辞書形・読み・活用形（例：られる）" aria-label="活用表检索"><span class="cnt" id="vcnt"></span></div>
   ${VLEGEND}
@@ -41,13 +48,13 @@ function verbsSection(){return `
 </section>`}
 let vk="全部",vq="";
 function hl(s){if(!vq)return esc(s);const i=s.indexOf(vq);return i<0?esc(s):esc(s.slice(0,i))+"<mark>"+esc(s.slice(i,i+vq.length))+"</mark>"+esc(s.slice(i+vq.length))}
-const vrow=r=>{const base=r[0].split("（")[0];return `<tr class="${KCLS[r[2]]}">
+const vrow=r=>{const base=r[0].split("（")[0],d=derive(r);return `<tr class="${KCLS[r[2]]}">
     <td><span class="k ${KCLS[r[2]]}">${r[2]}</span></td>
     <td class="ja hw" lang="ja">${hl(r[0])}<span class="yomi">${hl(r[1])}</span>${r[13]?`<span class="yomi imi">${hl(r[13])}${r[14]?" · "+hl(r[14]):""}</span>`:""}</td>
-    ${VCOLS.map(([i,c])=>`<td class="ja" lang="ja">${fcell(base,r[i],c)}</td>`).join("")}
+    ${VCOLS.map(([g,c])=>`<td class="ja" lang="ja">${fcell(base,g(r,d),c)}</td>`).join("")}
     <td class="note">${hl(r[10])}</td></tr>`};
 function renderVerbs(){
-  const rows=VERBS.filter(r=>(vk==="全部"||r[2]===vk)&&(!vq||[...r.slice(0,11),r[13]||"",(r[14]||"").toLowerCase()].some(c=>c.includes(vq.toLowerCase()))));
+  const rows=VERBS.filter(r=>(vk==="全部"||r[2]===vk)&&(!vq||[...r.slice(0,11),r[13]||"",(r[14]||"").toLowerCase(),...Object.values(derive(r))].some(c=>c.includes(vq.toLowerCase()))));
   document.getElementById("vt").innerHTML=VGROUPS.map((g,i)=>{let rs=rows.filter(r=>r[11]===g);if(!rs.length)return "";
     rs=rs.map((r,k)=>[r,k]).sort((a,b)=>(KORD[a[0][2]]-KORD[b[0][2]])||(a[1]-b[1])).map(x=>x[0]);
     return `<h3 class="vg" id="vg-${i}"><span class="ja" lang="ja">${esc(g)}</span><small>${rs.length} 語</small></h3><div class="tw"><table>${VHEAD}<tbody>${rs.map(vrow).join("")}</tbody></table></div>`}).join("")
@@ -82,7 +89,7 @@ function renderPairs(){
 /* ---------- 组装 ---------- */
 const navParts=[[1,[]],[2,[]],[3,[link("jita-hyo","表","自他対応表（46組）")]]];
 SEC.forEach(s=>navParts.find(p=>p[0]===s.p)[1].push(secLink(s)));
-navParts[0][1].push(link("katsuyo-hyo","表",`活用表（${VERBS.length}語）`)); // 表放在第一部讲解之后
+navParts[0][1].push(link("katsuyo-hyo","表",`五段七形 活用表（${VERBS.length}語）`)); // 表放在第一部讲解之后
 document.getElementById("nav").innerHTML=navParts.map(([p,ls])=>`<p class="nt">${PARTS[p]}</p>`+ls.join("")).join("");
 let html="",lastP=0;
 SEC.forEach(s=>{
