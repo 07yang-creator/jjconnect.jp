@@ -83,6 +83,9 @@ h3.vg:first-child{margin-top:4px}
 /* 着色＝与辞書形不同的部分：仮定 緑・可能 青・受身 朱・使役 紫・其他 茶 */
 .f{font-weight:700}.f.hk{color:var(--cha)}.f.kt{color:var(--midori)}.f.kn{color:var(--ai)}.f.uk{color:var(--shu)}.f.sk,.f.su{color:var(--murasaki)}
 .legend .f{margin:0 1px}
+/* 活用表：五段行浅色底，一段・特殊无底色 */
+.tw tr.g5>td{background:var(--ai-soft)}.tw tr.g5>td{background:color-mix(in srgb,var(--ai-soft) 55%,var(--card))}
+.legend .sw{display:inline-block;width:12px;height:12px;border-radius:2px;vertical-align:-1px;margin-right:4px;border:1px solid var(--rule);background:var(--ai-soft);background:color-mix(in srgb,var(--ai-soft) 55%,var(--card))}
 .legend .ty{margin-right:2px}
 td.note{white-space:normal;min-width:16em;color:var(--sub);font-size:12px}
 mark{background:var(--ai-soft);color:inherit;padding:0 2px;border-radius:2px}
@@ -500,13 +503,13 @@ function section(s){const hd=s.tb[0],dk=s.hk||"hk";return `
 </section>`}
 
 /* ---------- 活用表 ---------- */
-const KCLS={"五段":"g5","一段":"g1","特殊":"gs"};
+const KCLS={"五段":"g5","一段":"g1","特殊":"gs"},KORD={"五段":0,"一段":1,"特殊":2}; // 每组内 五段→一段→特殊 排列，五段行浅色底
 const VGROUPS=[...new Set(VERBS.map(r=>r[11]))];
 /* 列顺序按段走：未然（あ段）・連用（い段）・命令（え段），然后 可能（え段＋る）・受身（あ段＋れる）・使役（あ段＋せる）。
    仮定形不占列：它只是え段＋ば（五段＝命令形那栏＋ば，一段＝去る＋れば）。每格与辞書形不同的部分着色 */
 const VCOLS=[[3,"hk"],[4,"hk"],[6,"hk"],[9,"kn"],[8,"uk"],[7,"sk"]];
 const VHEAD=`<thead><tr><th>類</th><th>辞書形</th><th>未然形</th><th>連用形</th><th>命令形</th><th>可能形</th><th>受身形</th><th>使役形</th><th>備考</th></tr></thead>`;
-const VLEGEND=`<div class="legend">着色＝与辞書形不同的部分：<span class="f kn">可能形</span>・<span class="f uk">受身形</span>・<span class="f sk">使役形</span>・<span class="f hk">其他</span>。可能・受身相邻便于比较：書<span class="f kn">ける</span>／書<span class="f uk">かれる</span>，一段同形：食べ<span class="f kn">られる</span>／食べ<span class="f uk">られる</span>。仮定形不单列：え段＋ば（書けば・食べれば・すれば・来れば）。</div>`;
+const VLEGEND=`<div class="legend">着色＝与辞書形不同的部分：<span class="f kn">可能形</span>・<span class="f uk">受身形</span>・<span class="f sk">使役形</span>・<span class="f hk">其他</span>。可能・受身相邻便于比较：書<span class="f kn">ける</span>／書<span class="f uk">かれる</span>，一段同形：食べ<span class="f kn">られる</span>／食べ<span class="f uk">られる</span>。仮定形不单列：え段＋ば（書けば・食べれば・すれば・来れば）。<br><i class="sw"></i>浅色底＝五段（换段的）；无底色＝一段（去る的）・特殊。每组内五段在前，一段在后。</div>`;
 function fcell(base,s,cls){if(!s||s==="—")return hl(s||"");let i=0;while(i<s.length&&i<base.length&&s[i]===base[i])i++;return hl(s.slice(0,i))+(i<s.length?`<span class="f ${cls}">${hl(s.slice(i))}</span>`:"")}
 function verbsSection(){return `
 <section id="katsuyo-hyo">
@@ -521,14 +524,15 @@ function verbsSection(){return `
 </section>`}
 let vk="全部",vq="";
 function hl(s){if(!vq)return esc(s);const i=s.indexOf(vq);return i<0?esc(s):esc(s.slice(0,i))+"<mark>"+esc(s.slice(i,i+vq.length))+"</mark>"+esc(s.slice(i+vq.length))}
-const vrow=r=>{const base=r[0].split("（")[0];return `<tr>
+const vrow=r=>{const base=r[0].split("（")[0];return `<tr class="${KCLS[r[2]]}">
     <td><span class="k ${KCLS[r[2]]}">${r[2]}</span></td>
     <td class="ja hw" lang="ja">${hl(r[0])}<span class="yomi">${hl(r[1])}</span>${r[13]?`<span class="yomi imi">${hl(r[13])}${r[14]?" · "+hl(r[14]):""}</span>`:""}</td>
     ${VCOLS.map(([i,c])=>`<td class="ja" lang="ja">${fcell(base,r[i],c)}</td>`).join("")}
     <td class="note">${hl(r[10])}</td></tr>`};
 function renderVerbs(){
   const rows=VERBS.filter(r=>(vk==="全部"||r[2]===vk)&&(!vq||[...r.slice(0,11),r[13]||"",(r[14]||"").toLowerCase()].some(c=>c.includes(vq.toLowerCase()))));
-  document.getElementById("vt").innerHTML=VGROUPS.map((g,i)=>{const rs=rows.filter(r=>r[11]===g);if(!rs.length)return "";
+  document.getElementById("vt").innerHTML=VGROUPS.map((g,i)=>{let rs=rows.filter(r=>r[11]===g);if(!rs.length)return "";
+    rs=rs.map((r,k)=>[r,k]).sort((a,b)=>(KORD[a[0][2]]-KORD[b[0][2]])||(a[1]-b[1])).map(x=>x[0]);
     return `<h3 class="vg" id="vg-${i}"><span class="ja" lang="ja">${esc(g)}</span><small>${rs.length} 語</small></h3><div class="tw"><table>${VHEAD}<tbody>${rs.map(vrow).join("")}</tbody></table></div>`}).join("")
     ||`<p style="color:var(--sub)">没有匹配的词</p>`;
   document.getElementById("vcnt").textContent=`${rows.length} / ${VERBS.length}`;
