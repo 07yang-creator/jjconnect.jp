@@ -30,10 +30,12 @@ function derive(r){const k=r[0],nai=k==="ある"?"ない":suf(r[3],"ない"),mas
   if(k==="ある")ishi="—";else if(k==="来る")ishi="来よう（こよう）";else if(r[2]!=="五段")ishi=r[4]+"よう";
   else{const m=r[3],l=m[m.length-1];ishi=OROW[l]?m.slice(0,-1)+OROW[l]+"う":"—"}
   return{nai,masu,ishi}}
-const VCOLS=[[(r,d)=>d.nai,"hk"],[r=>r[8],"uk"],[r=>r[7],"sk"],[(r,d)=>d.masu,"hk"],[r=>r[6],"hk"],[r=>r[9],"kn"],[(r,d)=>d.ishi,"hk"]];
-const VHEAD=`<thead><tr><th rowspan="2">類</th><th rowspan="2">辞書形<small class="dan">う段</small></th><th colspan="3">あ段</th><th>い段</th><th colspan="2">え段</th><th>お段</th><th rowspan="2">備考</th></tr>
+// 严格按 あ・い・う・え・お 排：辞書形（う段）放在 い段 和 え段 之间
+const VC1=[[(r,d)=>d.nai,"hk"],[r=>r[8],"uk"],[r=>r[7],"sk"],[(r,d)=>d.masu,"hk"]],VC2=[[r=>r[6],"hk"],[r=>r[9],"kn"],[(r,d)=>d.ishi,"hk"]];
+const vcell=(base,r,d)=>([g,c])=>`<td class="ja" lang="ja">${fcell(base,g(r,d),c)}</td>`;
+const VHEAD=`<thead><tr><th rowspan="2">類</th><th colspan="3">あ段</th><th>い段</th><th rowspan="2">辞書形<small class="dan">う段</small></th><th colspan="2">え段</th><th>お段</th><th rowspan="2">備考</th></tr>
 <tr><th>ない</th><th>受身</th><th>使役</th><th>ます</th><th>命令</th><th>可能</th><th>意志</th></tr></thead>`;
-const VLEGEND=`<div class="legend">列按段排：あ段＝ない・受身・使役，い段＝ます，え段＝命令・可能，お段＝意志（一段动词没有段，一律去 る 接后缀）。着色＝与辞書形不同的部分：<span class="f kn">可能形</span>・<span class="f uk">受身形</span>・<span class="f sk">使役形</span>・<span class="f hk">其他</span>；可能・受身：書<span class="f kn">ける</span>／書<span class="f uk">かれる</span>，一段同形 食べ<span class="f kn">られる</span>／食べ<span class="f uk">られる</span>。て形见<a href="/v/onbin/material.html" target="_top">音便</a>，仮定＝え段＋ば。<br><i class="sw"></i>浅色底＝五段（换段的）；无底色＝一段（去る的）・特殊。每组内五段在前，一段在后。</div>`;
+const VLEGEND=`<div class="legend">列严格按 あ・い・う・え・お 排：あ段＝ない・受身・使役，い段＝ます，う段＝辞書形，え段＝命令・可能，お段＝意志（一段动词没有段，一律去 る 接后缀）。着色＝与辞書形不同的部分：<span class="f kn">可能形</span>・<span class="f uk">受身形</span>・<span class="f sk">使役形</span>・<span class="f hk">其他</span>；可能・受身：書<span class="f kn">ける</span>／書<span class="f uk">かれる</span>，一段同形 食べ<span class="f kn">られる</span>／食べ<span class="f uk">られる</span>。て形见<a href="/v/onbin/material.html" target="_top">音便</a>，仮定＝え段＋ば。<br><i class="sw"></i>浅色底＝五段（换段的）；无底色＝一段（去る的）・特殊。每组内五段在前，一段在后。</div>`;
 function fcell(base,s,cls){if(!s||s==="—")return hl(s||"");let i=0;while(i<s.length&&i<base.length&&s[i]===base[i])i++;return hl(s.slice(0,i))+(i<s.length?`<span class="f ${cls}">${hl(s.slice(i))}</span>`:"")}
 function verbsSection(){return `
 <section id="katsuyo-hyo">
@@ -50,8 +52,9 @@ let vk="全部",vq="";
 function hl(s){if(!vq)return esc(s);const i=s.indexOf(vq);return i<0?esc(s):esc(s.slice(0,i))+"<mark>"+esc(s.slice(i,i+vq.length))+"</mark>"+esc(s.slice(i+vq.length))}
 const vrow=r=>{const base=r[0].split("（")[0],d=derive(r);return `<tr class="${KCLS[r[2]]}">
     <td><span class="k ${KCLS[r[2]]}">${r[2]}</span></td>
+    ${VC1.map(vcell(base,r,d)).join("")}
     <td class="ja hw" lang="ja">${hl(r[0])}<span class="yomi">${hl(r[1])}</span>${r[13]?`<span class="yomi imi">${hl(r[13])}${r[14]?" · "+hl(r[14]):""}</span>`:""}</td>
-    ${VCOLS.map(([g,c])=>`<td class="ja" lang="ja">${fcell(base,g(r,d),c)}</td>`).join("")}
+    ${VC2.map(vcell(base,r,d)).join("")}
     <td class="note">${hl(r[10])}</td></tr>`};
 function renderVerbs(){
   const rows=VERBS.filter(r=>(vk==="全部"||r[2]===vk)&&(!vq||[...r.slice(0,11),r[13]||"",(r[14]||"").toLowerCase(),...Object.values(derive(r))].some(c=>c.includes(vq.toLowerCase()))));
