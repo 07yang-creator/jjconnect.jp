@@ -65,6 +65,7 @@ td:first-child{font-weight:700;white-space:nowrap;font-family:"Zen Kaku Gothic N
 .tw table{white-space:nowrap;margin-bottom:6px;width:auto;min-width:100%}
 .tw td,.tw th{font-size:12px;padding:4px 5px;line-height:1.4}
 .tw td small.rd{font-size:10px;color:var(--sub)}
+.rm{font-style:normal;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;color:var(--ai);margin-left:6px;letter-spacing:.01em}.rm b,.rmb{color:var(--shu);font-weight:700}
 .tw td.ja{font-family:"Zen Kaku Gothic New",sans-serif}
 .tw td:first-child{font-weight:400;font-family:inherit}
 .tw td.hw{font-weight:700}
@@ -682,6 +683,12 @@ function section(s){const hd=s.tb[0],dk=s.hk||"hk";return `
 </section>`}
 
 /* ---------- 活用表 ---------- */
+/* 読み → ローマ字，辞書形旁边标出词干末尾：五段 ka<b>k</b>-u（辅音结尾），一段 tab<b>e</b>-ru（元音结尾） */
+const RK={あ:"a",い:"i",う:"u",え:"e",お:"o",か:"ka",き:"ki",く:"ku",け:"ke",こ:"ko",さ:"sa",し:"shi",す:"su",せ:"se",そ:"so",た:"ta",ち:"chi",つ:"tsu",て:"te",と:"to",な:"na",に:"ni",ぬ:"nu",ね:"ne",の:"no",は:"ha",ひ:"hi",ふ:"fu",へ:"he",ほ:"ho",ま:"ma",み:"mi",む:"mu",め:"me",も:"mo",や:"ya",ゆ:"yu",よ:"yo",ら:"ra",り:"ri",る:"ru",れ:"re",ろ:"ro",わ:"wa",を:"o",ん:"n",が:"ga",ぎ:"gi",ぐ:"gu",げ:"ge",ご:"go",ざ:"za",じ:"ji",ず:"zu",ぜ:"ze",ぞ:"zo",だ:"da",ぢ:"ji",づ:"zu",で:"de",ど:"do",ば:"ba",び:"bi",ぶ:"bu",べ:"be",ぼ:"bo",ぱ:"pa",ぴ:"pi",ぷ:"pu",ぺ:"pe",ぽ:"po",きゃ:"kya",きゅ:"kyu",きょ:"kyo",しゃ:"sha",しゅ:"shu",しょ:"sho",ちゃ:"cha",ちゅ:"chu",ちょ:"cho",にゃ:"nya",にゅ:"nyu",にょ:"nyo",ひゃ:"hya",ひゅ:"hyu",ひょ:"hyo",みゃ:"mya",みゅ:"myu",みょ:"myo",りゃ:"rya",りゅ:"ryu",りょ:"ryo",ぎゃ:"gya",ぎゅ:"gyu",ぎょ:"gyo",じゃ:"ja",じゅ:"ju",じょ:"jo",びゃ:"bya",びゅ:"byu",びょ:"byo",ぴゃ:"pya",ぴゅ:"pyu",ぴょ:"pyo"};
+function romaji(h){let o="";for(let i=0;i<h.length;i++){const c=h[i],d=h[i+1];if(c==="っ"){const nx=RK[h.slice(i+1,i+3)]||RK[d]||"";o+=nx[0]||"";continue}if(d&&RK[c+d]){o+=RK[c+d];i++;continue}o+=RK[c]||c}return o}
+const STEM_C={う:"w",く:"k",ぐ:"g",す:"s",つ:"t",ぬ:"n",ぶ:"b",む:"m",る:"r"};
+function romStem(yomi,cls){const y=yomi.replace(/（.*/,"");if(cls==="五段"){const c=STEM_C[y.slice(-1)];return c?romaji(y.slice(0,-1))+"<b>"+c+"</b>-u":""}if(cls==="一段"){const b=romaji(y.slice(0,-1));return b?b.slice(0,-1)+"<b>"+b.slice(-1)+"</b>-ru":""}return ""}
+
 const KCLS={"五段":"g5","一段":"g1","特殊":"gs"},KORD={"五段":0,"一段":1,"特殊":2}; // 每组内 五段→一段→特殊 排列，五段行浅色底
 const VGROUPS=[...new Set(VERBS.map(r=>r[11]))];
 /* 活用表按段排：辞書形（う段）｜あ段：ない・受身・使役｜い段：ます｜え段：命令・可能｜お段：意志。
@@ -698,7 +705,7 @@ const VC1=[[(r,d)=>d.nai,"hk",1],[r=>r[8],"uk"],[r=>r[7],"sk"],[r=>r[4],"hk",1],
 const vcell=(base,r,d)=>([g,c,gs])=>`<td class="ja${gs?" gs":""}" lang="ja">${fcell(base,g(r,d),c)}</td>`;
 const VHEAD=`<thead><tr><th rowspan="2">類</th><th colspan="3" class="gs">あ段</th><th colspan="2" class="gs">い段</th><th rowspan="2" class="gs">辞書形<small class="dan">う段</small></th><th colspan="2" class="gs">え段</th><th class="gs">お段</th><th rowspan="2" class="gs">備考</th></tr>
 <tr><th class="gs">ない</th><th>受身</th><th>使役</th><th class="gs">連用</th><th>ます</th><th class="gs">命令</th><th>可能</th><th class="gs">意志</th></tr></thead>`;
-const VLEGEND=`<div class="legend">列严格按 あ・い・う・え・お 排，竖线隔开每个段：あ段＝ない・受身・使役，い段＝連用形・ます（て形＝連用形＋音便），う段＝辞書形，え段＝命令・可能，お段＝意志（一段动词没有段，一律去 る 接后缀）。着色＝与辞書形不同的部分：<span class="f kn">可能形</span>・<span class="f uk">受身形</span>・<span class="f sk">使役形</span>・<span class="f hk">其他</span>；可能・受身：書<span class="f kn">ける</span>／書<span class="f uk">かれる</span>，一段同形 食べ<span class="f kn">られる</span>／食べ<span class="f uk">られる</span>。て形见<a href="/v/onbin/material.html" target="_top">音便</a>，仮定＝え段＋ば。<br><i class="sw"></i>浅色底＝五段（换段的）；无底色＝一段（去る的）・特殊。每组内五段在前，一段在后。</div>`;
+const VLEGEND=`<div class="legend">列严格按 あ・い・う・え・お 排，竖线隔开每个段：あ段＝ない・受身・使役，い段＝連用形・ます（て形＝連用形＋音便），う段＝辞書形，え段＝命令・可能，お段＝意志（一段动词没有段，一律去 る 接后缀）。着色＝与辞書形不同的部分：<span class="f kn">可能形</span>・<span class="f uk">受身形</span>・<span class="f sk">使役形</span>・<span class="f hk">其他</span>；可能・受身：書<span class="f kn">ける</span>／書<span class="f uk">かれる</span>，一段同形 食べ<span class="f kn">られる</span>／食べ<span class="f uk">られる</span>。て形见<a href="/v/onbin/material.html" target="_top">音便</a>，仮定＝え段＋ば。<br>读音右边的罗马字标出词干末尾：五段 ka<b class="rmb">k</b>-u 以辅音结尾，一段 tab<b class="rmb">e</b>-ru 以元音结尾，后缀接在连字符后面。<br><i class="sw"></i>浅色底＝五段（换段的）；无底色＝一段（去る的）・特殊。每组内五段在前，一段在后。</div>`;
 function fcell(base,s,cls){if(!s||s==="—")return hl(s||"");let i=0;while(i<s.length&&i<base.length&&s[i]===base[i])i++;return (hl(s.slice(0,i))+(i<s.length?`<span class="f ${cls}">${hl(s.slice(i))}</span>`:"")).replace(/（([^）]+)）/g,'<small class="rd">（$1）</small>')} // 括号里的读音缩小，省宽度
 function verbsSection(){return `
 <section id="katsuyo-hyo">
@@ -716,7 +723,7 @@ function hl(s){if(!vq)return esc(s);const i=s.indexOf(vq);return i<0?esc(s):esc(
 const vrow=(r,cb)=>{const base=r[0].split("（")[0],d=derive(r);return `<tr class="${KCLS[r[2]]}${cb?" cb":""}">
     <td><span class="k ${KCLS[r[2]]}">${r[2]}</span></td>
     ${VC1.map(vcell(base,r,d)).join("")}
-    <td class="ja hw gs" lang="ja">${hl(r[0])}<span class="yomi">${hl(r[1])}</span>${r[13]?`<span class="yomi imi">${hl(r[13])}${r[14]?" · "+hl(r[14]):""}</span>`:""}</td>
+    <td class="ja hw gs" lang="ja">${hl(r[0])}<span class="yomi">${hl(r[1])}${(rm=>rm?`<i class="rm">${rm}</i>`:"")(romStem(r[1],r[2]))}</span>${r[13]?`<span class="yomi imi">${hl(r[13])}${r[14]?" · "+hl(r[14]):""}</span>`:""}</td>
     ${VC2.map(vcell(base,r,d)).join("")}
     <td class="note gs">${hl(r[10])}</td></tr>`};
 function renderVerbs(){
