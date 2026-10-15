@@ -15,6 +15,7 @@
 | `../content/doushi/drill2.html` | 動詞活用ドリル② 派生形：可能・受身・使役・使役受身，同上 | `/v/doushi/drill2.html`（**静态专题**） |
 | `../content/doushi/quiz2.html` | 動詞 実務 100 题：連用形の用法・祈使の階段・否定と特殊動詞・時制・条件 各 20（手写，共用引擎，错题循环） | `/v/doushi/quiz2.html`（**静态专题**） |
 | `../content/doushi/godan.html` | 五段動詞一覧（頻度順）：BCCWJ 語彙表 ver1.0 的全部动词经 UniDic 标活用型后只留五段，6,047 词，按行筛选・「像一段的五段」・检索 | `/v/doushi/godan.html`（**静态专题**） |
+| `../content/doushi/drill3.html` | 頻度順ドリル：BCCWJ 最常用 100 个五段动词，按频率复现（1–20 位全 11 形、21–50 位 7 形、51–100 位 4 形），625 题，tools/gen_godan_drill.cjs 生成 | `/v/doushi/drill3.html`（**静态专题**） |
 | `../content/onbin/material.html` | 音便 讲义：四种音便・て形全规则・た／たら／たり／ちゃう・「ん」の四つの正体・〜んです，附 98 词音便一览表 | `/v/onbin/material.html`（**静态专题**） |
 | `../content/onbin/quiz.html` | 音便 348 题：音便の種類／て形／た形・たら・たり・ちゃう（tools/gen_onbin.cjs 从一览表生成，覆盖全部词）＋「ん」の正体／〜んです／実戦 手写各 20 | `/v/onbin/quiz.html`（**静态专题**） |
 | `../content/jita/map.html` | 自他動詞マップ：用户在 claude.ai 会话「Japanese verb stem changes」做的交互页（原理・词根一览・例外・图谱・练习），原样复制 | `/v/jita/map.html`（**静态专题**） |
@@ -58,6 +59,7 @@ src/_engine/       **共用测验引擎**：quiz.js（练习／错题循环／�
 tools/glosses.cjs  动词英文释义表（活用表 93 词＋自他 248 词）；gen_katsuyo／gen_jita 都从这里取英文，缺词即报错，加新动词先补这里。
 src/doushi-godan/  五段動詞一覧：shell.html + data.js（GODAN 6,047 行 ＋ GODAN_META，由 tools/gen_godan.py 从 BCCWJ 語彙表＋UniDic 生成，输入数据不入库，见脚本头部说明）+ render.js + footer.html；tools/check_godan.cjs 查结构与陷阱词
 src/doushi-quiz2/  動詞 実務 100 题：config.js／meta.json + data/{renyou,kishi,hitei,jisei,jouken}.js（手写各 20，基本 10＋応用 10）；tools/check_doushi2.cjs 查结构、每题的词必须出现在动词讲义里；key `jp-doushi2-v1`
+                   config3.js／meta3.json（頻度順ドリル）；data/freq{1,2,3}.js 由 tools/gen_godan_drill.cjs 从 doushi-godan/data.js 前 100 词生成（复用 gen_katsuyo.cjs 导出的 form／wrongs／explain）；tools/check_godan_drill.cjs
 src/doushi-drill/  config1.js／meta1.json（基本活用 7 形）、config2.js／meta2.json（派生形 4 形）；data/*.js 由 tools/gen_katsuyo.cjs 生成（勿手改）：
                    从 doushi/data.js 的 VERBS＋jita map 的 124 对取 305 个动词，按类（五段／一段／五段例外／特殊）造每种形，干扰项＝真实的错误变形
 src/jita/map.html  用户的交互图原文件（勿改；要改先在 claude.ai 那边改再替换）

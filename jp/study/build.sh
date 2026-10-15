@@ -39,6 +39,8 @@ node tools/assemble.cjs src/doushi-drill/meta1.json ../content/doushi/drill1.htm
 cat src/doushi-godan/shell.html src/doushi-godan/data.js src/doushi-godan/render.js src/doushi-godan/footer.html > ../content/doushi/godan.html
 Q2=src/doushi-quiz2/data
 node tools/assemble.cjs src/doushi-quiz2/meta.json ../content/doushi/quiz2.html $Q2/renyou.js $Q2/kishi.js $Q2/hitei.js $Q2/jisei.js $Q2/jouken.js src/doushi-quiz2/config.js
+node tools/gen_godan_drill.cjs > /dev/null
+node tools/assemble.cjs src/doushi-drill/meta3.json ../content/doushi/drill3.html $D/freq1.js $D/freq2.js $D/freq3.js src/doushi-drill/config3.js
 node tools/assemble.cjs src/doushi-drill/meta2.json ../content/doushi/drill2.html $D/kanou.js $D/ukemi.js $D/shieki.js $D/shiekiukemi.js src/doushi-drill/config2.js
 
 # 音便: static topic; material from src/onbin, sets 1–3 generated from its VERBS table, sets 4–6 hand-written

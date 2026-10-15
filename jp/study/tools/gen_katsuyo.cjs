@@ -107,20 +107,24 @@ function explain(v, f, c) {
     shiekiukemi: { g5: v.r.endsWith('す') ? `す结尾的五段：使役「${g5x(x => x.a)}せる」＋られる → ${c}，不能缩成「${g5x(x => x.a)}される」。` : `五段：使役「${g5x(x => x.a)}せる」＋られる＝${g5x(x => x.a)}せられる，口语缩成 ${c}（す结尾不能缩）。`, g1: `一段：去る＋させられる → ${c}。`, suru: `する→させられる。`, kuru: `来る→来させられる（こさせられる）。` } };
   return (E[f][cls] || E[f].g5);
 }
-/* ---- build ---- */
-const out = {}; ALLF.forEach(f => out[f] = []);
-for (const v of verbs) for (const [f, fname] of FORMS) {
-  const ans = form(v, f); if (!ans) continue;
-  const seenR = new Set([ans.r]); const ds = [];
-  for (const w of wrongs(v, f)) { if (!seenR.has(w.r) && w.k !== ans.k) { seenR.add(w.r); ds.push(w); } if (ds.length === 3) break; }
-  for (const g of ALLF) { if (ds.length === 3) break; if (g === f) continue; const w = form(v, g); if (w && !seenR.has(w.r)) { seenR.add(w.r); ds.push(w); } }
-  if (ds.length < 3) throw new Error(`distractors: ${v.k} ${f}`);
-  const stem = `「${v.k === v.r ? v.k : v.k + '（' + v.r + '）'}」の${fname}はどれか。`;
-  out[f].push([level(v), stem, [ans, ...ds].map(show), explain(v, f, show(ans)), v.k, v.r, v.m]);
-}
-fs.mkdirSync('src/doushi-drill/data', { recursive: true });
-for (const [f, fname] of FORMS) fs.writeFileSync(`src/doushi-drill/data/${f}.js`, `// 動詞活用ドリル ${fname}：由 tools/gen_katsuyo.cjs 从 活用表＋自他对 生成，勿手改。\n// [组, 题干, [正确, 干扰×3], 解析, 辞書形, 読み, 意味]\nconst F_${f} = [\n` + out[f].map(r => JSON.stringify(r)).join(',\n') + '\n];\n');
-const lv = {}; verbs.forEach(v => lv[level(v)] = (lv[level(v)] || 0) + 1);
-console.log(`gen_katsuyo: ${verbs.length} verbs (levels ${JSON.stringify(lv)}) → ${ALLF.map(f => f + ':' + out[f].length).join(' ')}`);
+/* ---- build (only when run directly; tools/gen_godan_drill.cjs requires the helpers above) ---- */
+if (require.main === module) {
+  /* ---- build ---- */
+  const out = {}; ALLF.forEach(f => out[f] = []);
+  for (const v of verbs) for (const [f, fname] of FORMS) {
+    const ans = form(v, f); if (!ans) continue;
+    const seenR = new Set([ans.r]); const ds = [];
+    for (const w of wrongs(v, f)) { if (!seenR.has(w.r) && w.k !== ans.k) { seenR.add(w.r); ds.push(w); } if (ds.length === 3) break; }
+    for (const g of ALLF) { if (ds.length === 3) break; if (g === f) continue; const w = form(v, g); if (w && !seenR.has(w.r)) { seenR.add(w.r); ds.push(w); } }
+    if (ds.length < 3) throw new Error(`distractors: ${v.k} ${f}`);
+    const stem = `「${v.k === v.r ? v.k : v.k + '（' + v.r + '）'}」の${fname}はどれか。`;
+    out[f].push([level(v), stem, [ans, ...ds].map(show), explain(v, f, show(ans)), v.k, v.r, v.m]);
+  }
+  fs.mkdirSync('src/doushi-drill/data', { recursive: true });
+  for (const [f, fname] of FORMS) fs.writeFileSync(`src/doushi-drill/data/${f}.js`, `// 動詞活用ドリル ${fname}：由 tools/gen_katsuyo.cjs 从 活用表＋自他对 生成，勿手改。\n// [组, 题干, [正确, 干扰×3], 解析, 辞書形, 読み, 意味]\nconst F_${f} = [\n` + out[f].map(r => JSON.stringify(r)).join(',\n') + '\n];\n');
+  const lv = {}; verbs.forEach(v => lv[level(v)] = (lv[level(v)] || 0) + 1);
+  console.log(`gen_katsuyo: ${verbs.length} verbs (levels ${JSON.stringify(lv)}) → ${ALLF.map(f => f + ':' + out[f].length).join(' ')}`);
 
-const missing = verbs.filter(v => !EN[v.k]).map(v => v.k); if (missing.length) { console.error('no English gloss for: ' + missing.join('、')); process.exit(1); }
+  const missing = verbs.filter(v => !EN[v.k]).map(v => v.k); if (missing.length) { console.error('no English gloss for: ' + missing.join('、')); process.exit(1); }
+}
+module.exports = { form, wrongs, explain, show, FORMS, ALLF, level, g5, onbin };

@@ -43,7 +43,7 @@ pathlib.Path(".tmp/jita-map.js").write_text(h.split("<script>")[-1].split("</scr
 PY
 for f in quiz map; do if node --check ".tmp/jita-$f.js"; then echo "  syntax ok: jita/$f"; else echo "  SYNTAX FAIL: jita/$f"; fail=1; fi; done
 node tools/check_jita.cjs || fail=1
-for f in drill1 drill2 quiz2 godan; do
+for f in drill1 drill2 drill3 quiz2 godan; do
   python3 - "$f" << 'PY2'
 import sys,pathlib
 n=sys.argv[1]
@@ -55,6 +55,7 @@ done
 node tools/check_katsuyo.cjs || fail=1
 node tools/check_doushi2.cjs || fail=1
 node tools/check_godan.cjs || fail=1
+node tools/check_godan_drill.cjs || fail=1
 for f in material quiz; do
   python3 - "$f" << 'PY3'
 import sys,pathlib
