@@ -42,7 +42,7 @@ function verbsSection(){return `
 <section id="katsuyo-hyo">
   <span class="cat">活用表</span>
   <h2><span class="ja" lang="ja">五段八形 ── 動詞活用表（${VERBS.length} 語・${VGROUPS.length} 組）</span></h2>
-  <p class="lead">按意思分成 ${VGROUPS.length} 组，列按 あ・い・う・え・お 的段排。未然形・仮定形这些「半个词」不单列（ない形＝未然形＋ない，仮定＝え段＋ば）；連用形留着，因为它能独立用（中止法・名词化・お〜する）。一段的可能形写标准形，口语的ら抜き形在备注栏。各形的做法见上面的「活用の仕組み」和「五段の段の対応」。可按类别筛选或输入任何活用形检索。</p>
+  <p class="lead">按意思分成 ${VGROUPS.length} 组，列按 あ・い・う・え・お 的段排。未然形・仮定形这些「半个词」不单列（ない形＝未然形＋ない，仮定＝え段＋ば）；連用形留着，因为它能独立用（中止法・名词化・お〜する）。一段的可能形写标准形，口语的ら抜き形在备注栏。各形的做法见下面的「活用の作り方」和「五段の段の対応」。可按类别筛选或输入任何活用形检索。</p>
   <div class="filters"><div class="chips" id="vf">${["全部","五段","一段","特殊"].map(k=>`<button data-k="${k}" aria-pressed="${k==="全部"}">${k}</button>`).join("")}</div>
   <input id="vq" type="search" placeholder="検索：辞書形・読み・活用形（例：られる）" aria-label="活用表检索"><span class="cnt" id="vcnt"></span></div>
   ${VLEGEND}
@@ -92,13 +92,12 @@ function renderPairs(){
 
 /* ---------- 组装 ---------- */
 const navParts=[[1,[]],[2,[]],[3,[link("jita-hyo","表","自他対応表（46組）")]]];
-SEC.forEach(s=>navParts.find(p=>p[0]===s.p)[1].push(secLink(s)));
-navParts[0][1].push(link("katsuyo-hyo","表",`五段八形 活用表（${VERBS.length}語）`)); // 表放在第一部讲解之后
+SEC.forEach(s=>{navParts.find(p=>p[0]===s.p)[1].push(secLink(s));if(s.id==="mikiwake")navParts[0][1].push(link("katsuyo-hyo","表",`五段八形 活用表（${VERBS.length}語）`))}); // 活用表紧跟 見分け方，在变形规则之前
 document.getElementById("nav").innerHTML=navParts.map(([p,ls])=>`<p class="nt">${PARTS[p]}</p>`+ls.join("")).join("");
 let html="",lastP=0;
 SEC.forEach(s=>{
-  if(s.p!==lastP){if(lastP===1)html+=verbsSection();html+=`<div class="partbar">${PARTS[s.p]}</div>`;if(s.p===3)html+=pairsSection();lastP=s.p}
-  html+=section(s);
+  if(s.p!==lastP){html+=`<div class="partbar">${PARTS[s.p]}</div>`;if(s.p===3)html+=pairsSection();lastP=s.p}
+  html+=section(s);if(s.id==="mikiwake")html+=verbsSection();
 });
 document.getElementById("main").innerHTML=html;
 document.getElementById("fcount").textContent=`活用表 ${VERBS.length} 词（${VGROUPS.length} 组）・自他 ${PAIRS.length} 组・讲解 ${SEC.length} 组`;
