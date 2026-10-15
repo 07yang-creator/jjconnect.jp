@@ -32,7 +32,7 @@ function verbsSection(){return `
 <section id="katsuyo-hyo">
   <span class="cat">活用表</span>
   <h2><span class="ja" lang="ja">動詞活用表（${VERBS.length} 語・${VGROUPS.length} 組）</span></h2>
-  <p class="lead">按意思分成 ${VGROUPS.length} 组。終止形・連体形＝辞書形，省略；仮定形也不单列，它只是え段＋ば。前三列是五段的三个段：未然（あ段）・連用（い段）・命令（え段）；后三列由它们派生：可能＝え段＋る、受身＝あ段＋れる、使役＝あ段＋せる。一段的可能形写标准形，口语的ら抜き形在备注栏。各形的做法见下面的「活用の作り方」和「五段の段の対応」。可按类别筛选或输入任何活用形检索。</p>
+  <p class="lead">按意思分成 ${VGROUPS.length} 组。終止形・連体形＝辞書形，省略；仮定形也不单列，它只是え段＋ば。前三列是五段的三个段：未然（あ段）・連用（い段）・命令（え段）；后三列由它们派生：可能＝え段＋る、受身＝あ段＋れる、使役＝あ段＋せる。一段的可能形写标准形，口语的ら抜き形在备注栏。各形的做法见上面的「活用の仕組み」和「五段の段の対応」。可按类别筛选或输入任何活用形检索。</p>
   <div class="filters"><div class="chips" id="vf">${["全部","五段","一段","特殊"].map(k=>`<button data-k="${k}" aria-pressed="${k==="全部"}">${k}</button>`).join("")}</div>
   <input id="vq" type="search" placeholder="検索：辞書形・読み・活用形（例：られる）" aria-label="活用表检索"><span class="cnt" id="vcnt"></span></div>
   ${VLEGEND}
@@ -80,12 +80,13 @@ function renderPairs(){
 }
 
 /* ---------- 组装 ---------- */
-const navParts=[[1,[link("katsuyo-hyo","表",`活用表（${VERBS.length}語）`)]],[2,[]],[3,[link("jita-hyo","表","自他対応表（46組）")]]];
+const navParts=[[1,[]],[2,[]],[3,[link("jita-hyo","表","自他対応表（46組）")]]];
 SEC.forEach(s=>navParts.find(p=>p[0]===s.p)[1].push(secLink(s)));
+navParts[0][1].push(link("katsuyo-hyo","表",`活用表（${VERBS.length}語）`)); // 表放在第一部讲解之后
 document.getElementById("nav").innerHTML=navParts.map(([p,ls])=>`<p class="nt">${PARTS[p]}</p>`+ls.join("")).join("");
 let html="",lastP=0;
 SEC.forEach(s=>{
-  if(s.p!==lastP){html+=`<div class="partbar">${PARTS[s.p]}</div>`;if(s.p===1)html+=verbsSection();if(s.p===3)html+=pairsSection();lastP=s.p}
+  if(s.p!==lastP){if(lastP===1)html+=verbsSection();html+=`<div class="partbar">${PARTS[s.p]}</div>`;if(s.p===3)html+=pairsSection();lastP=s.p}
   html+=section(s);
 });
 document.getElementById("main").innerHTML=html;
