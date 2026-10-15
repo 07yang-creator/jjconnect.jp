@@ -4,38 +4,48 @@ const link=(id,cat,t)=>`<a href="#${id}"><span class="c">${esc(cat)}</span>${esc
 const secLink=s=>link(s.id,s.cat,s.t.split("──")[0].split("（")[0].trim());
 
 /* ---------- 讲解 ---------- */
-function section(s){return `
+/* 表格・例句里的 ｛…｝ ＝ 与辞書形不同的部分，按列头或行头的形着色（仮定 kt・可能 kn・受身 uk・使役 sk・使役受身 su），
+   没有形的用 s.hk（节的默认色）或 hk（茶色） */
+const FKEY=s=>/^使役受身/.test(s)?"su":/^受身/.test(s)?"uk":/^使役/.test(s)?"sk":/^可能/.test(s)?"kn":/^仮定/.test(s)?"kt":null;
+const mk=(s,key)=>esc(s).replace(/｛(.+?)｝/g,`<span class="f ${key}">$1</span>`);
+function section(s){const hd=s.tb[0],dk=s.hk||"hk";return `
 <section id="${s.id}">
   <span class="cat">${esc(s.cat)}</span>
   <h2><span class="ja" lang="ja">${esc(s.t)}</span></h2>
   <p class="lead">${esc(s.lead)}</p>
-  <table><thead><tr>${s.tb[0].map(h=>`<th>${esc(h)}</th>`).join("")}</tr></thead>
-  <tbody>${s.tb.slice(1).map(r=>`<tr>${r.map((c,j)=>`<td${j===0?' class="ja" lang="ja"':""}>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table>
-  <div class="ex">${s.ex.map(([ok,ja,zh])=>`<div class="e ${ok?"o":"x"}"><div class="m">${ok?"○":"×"}</div><div><div class="s ja" lang="ja">${esc(ja)}</div><div class="n">${esc(zh)}</div></div></div>`).join("")}</div>
+  ${s.wide?'<div class="tw">':""}<table><thead><tr>${hd.map(h=>`<th>${esc(h)}</th>`).join("")}</tr></thead>
+  <tbody>${s.tb.slice(1).map(r=>`<tr>${r.map((c,j)=>`<td${j===0?' class="ja" lang="ja"':""}>${mk(c,FKEY(hd[j])||FKEY(r[0])||dk)}</td>`).join("")}</tr>`).join("")}</tbody></table>${s.wide?"</div>":""}
+  <div class="ex">${s.ex.map(([ok,ja,zh])=>`<div class="e ${ok?"o":"x"}"><div class="m">${ok?"○":"×"}</div><div><div class="s ja" lang="ja">${mk(ja,dk)}</div><div class="n">${esc(zh)}</div></div></div>`).join("")}</div>
   <div class="tip"><b>记法　</b>${esc(s.tip)}</div>
 </section>`}
 
 /* ---------- 活用表 ---------- */
 const KCLS={"五段":"g5","一段":"g1","特殊":"gs"};
 const VGROUPS=[...new Set(VERBS.map(r=>r[11]))];
-const VHEAD=`<thead><tr><th>類</th><th>辞書形</th><th>未然形</th><th>連用形</th><th>仮定形</th><th>可能形</th><th>命令形</th><th>使役形</th><th>受身形</th><th>備考</th></tr></thead>`;
+/* 列顺序：仮定・可能・受身 三列相邻（書けば／書ける／書かれる），使役紧跟受身；每格与辞書形不同的部分着色 */
+const VCOLS=[[3,"hk"],[4,"hk"],[5,"kt"],[9,"kn"],[8,"uk"],[7,"sk"],[6,"hk"]];
+const VHEAD=`<thead><tr><th>類</th><th>辞書形</th><th>未然形</th><th>連用形</th><th>仮定形（〜ば）</th><th>可能形</th><th>受身形</th><th>使役形</th><th>命令形</th><th>備考</th></tr></thead>`;
+const VLEGEND=`<div class="legend">着色＝与辞書形不同的部分：<span class="f kt">仮定形</span>・<span class="f kn">可能形</span>・<span class="f uk">受身形</span>・<span class="f sk">使役形</span>・<span class="f hk">其他</span>。三列相邻便于比较：書<span class="f kt">けば</span>／書<span class="f kn">ける</span>／書<span class="f uk">かれる</span>；一段的可能＝受身：食べ<span class="f kn">られる</span>／食べ<span class="f uk">られる</span>。</div>`;
+const addBa=s=>!s||s==="—"?s:s.includes("（")?s.replace(/^(.*?)（(.*?)）$/,"$1ば（$2ば）"):s+"ば";
+function fcell(base,s,cls){if(!s||s==="—")return hl(s||"");let i=0;while(i<s.length&&i<base.length&&s[i]===base[i])i++;return hl(s.slice(0,i))+(i<s.length?`<span class="f ${cls}">${hl(s.slice(i))}</span>`:"")}
 function verbsSection(){return `
 <section id="katsuyo-hyo">
   <span class="cat">活用表</span>
   <h2><span class="ja" lang="ja">動詞活用表（${VERBS.length} 語・${VGROUPS.length} 組）</span></h2>
-  <p class="lead">按意思分成 ${VGROUPS.length} 组。終止形・連体形＝辞書形，省略；可能形放在仮定形旁边，五段的两者只差一个「る」。一段的可能形写标准形，口语的ら抜き形在备注栏。可按类别筛选或输入任何活用形检索。</p>
+  <p class="lead">按意思分成 ${VGROUPS.length} 组。終止形・連体形＝辞書形，省略。仮定形・可能形・受身形三列相邻，五段的三者只差一两个假名；一段的可能形写标准形，口语的ら抜き形在备注栏。各形的做法见下面的「活用の作り方」和「五段の段の対応」。可按类别筛选或输入任何活用形检索。</p>
   <div class="filters"><div class="chips" id="vf">${["全部","五段","一段","特殊"].map(k=>`<button data-k="${k}" aria-pressed="${k==="全部"}">${k}</button>`).join("")}</div>
   <input id="vq" type="search" placeholder="検索：辞書形・読み・活用形（例：られる）" aria-label="活用表检索"><span class="cnt" id="vcnt"></span></div>
+  ${VLEGEND}
   <div class="vgnav" id="vgnav">${VGROUPS.map((g,i)=>`<a href="#vg-${i}">${esc(g)}</a>`).join("")}</div>
   <div id="vt"></div>
 </section>`}
 let vk="全部",vq="";
 function hl(s){if(!vq)return esc(s);const i=s.indexOf(vq);return i<0?esc(s):esc(s.slice(0,i))+"<mark>"+esc(s.slice(i,i+vq.length))+"</mark>"+esc(s.slice(i+vq.length))}
-const vrow=r=>`<tr>
+const vrow=r=>{const base=r[0].split("（")[0];return `<tr>
     <td><span class="k ${KCLS[r[2]]}">${r[2]}</span></td>
     <td class="ja hw" lang="ja">${hl(r[0])}<span class="yomi">${hl(r[1])}</span>${r[13]?`<span class="yomi imi">${hl(r[13])}${r[14]?" · "+hl(r[14]):""}</span>`:""}</td>
-    ${[3,4,5,9,6,7,8].map(i=>`<td class="ja" lang="ja">${hl(r[i])}</td>`).join("")}
-    <td class="note">${hl(r[10])}</td></tr>`;
+    ${VCOLS.map(([i,c])=>`<td class="ja" lang="ja">${fcell(base,i===5?addBa(r[i]):r[i],c)}</td>`).join("")}
+    <td class="note">${hl(r[10])}</td></tr>`};
 function renderVerbs(){
   const rows=VERBS.filter(r=>(vk==="全部"||r[2]===vk)&&(!vq||[...r.slice(0,11),r[13]||"",(r[14]||"").toLowerCase()].some(c=>c.includes(vq.toLowerCase()))));
   document.getElementById("vt").innerHTML=VGROUPS.map((g,i)=>{const rs=rows.filter(r=>r[11]===g);if(!rs.length)return "";
