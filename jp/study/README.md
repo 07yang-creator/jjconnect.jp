@@ -13,6 +13,7 @@
 | `../content/doushi/material.html` | 日语动词 讲义：活用表 93 词（表里 50＋常用 43，按意思分 7 组，可检索）・受身形 8 组・自他 46 组＋5 组 | `/v/doushi/material.html`（**静态专题**） |
 | `../content/doushi/drill1.html` | 動詞活用ドリル① 基本活用：ます・ない・て・た・意志・命令・仮定，305 词（活用表 93＋自他 124 对），tools/gen_katsuyo.cjs 生成 | `/v/doushi/drill1.html`（**静态专题**） |
 | `../content/doushi/drill2.html` | 動詞活用ドリル② 派生形：可能・受身・使役・使役受身，同上 | `/v/doushi/drill2.html`（**静态专题**） |
+| `../content/doushi/quiz2.html` | 動詞 実務 100 题：連用形の用法・祈使の階段・否定と特殊動詞・時制・条件 各 20（手写，共用引擎，错题循环） | `/v/doushi/quiz2.html`（**静态专题**） |
 | `../content/onbin/material.html` | 音便 讲义：四种音便・て形全规则・た／たら／たり／ちゃう・「ん」の四つの正体・〜んです，附 98 词音便一览表 | `/v/onbin/material.html`（**静态专题**） |
 | `../content/onbin/quiz.html` | 音便 348 题：音便の種類／て形／た形・たら・たり・ちゃう（tools/gen_onbin.cjs 从一览表生成，覆盖全部词）＋「ん」の正体／〜んです／実戦 手写各 20 | `/v/onbin/quiz.html`（**静态专题**） |
 | `../content/jita/map.html` | 自他動詞マップ：用户在 claude.ai 会话「Japanese verb stem changes」做的交互页（原理・词根一览・例外・图谱・练习），原样复制 | `/v/jita/map.html`（**静态专题**） |
@@ -47,13 +48,14 @@ src/quiz/
 src/benseki/  shell.html + sec.js (const SEC) + render.js + footer.html
 src/fukushu/  同上
 
-src/doushi/        shell.html + data.js (VERBS 活用表 93 行・末四列是 グループ／出典／意味／English / PAIRS 自他 46 行 / SEC 讲解 24 组；第一部按用户口述的六章排，章名放在 cat 里：① 構造 ② 段の意味 ③ 五段と一段 ④ 変形規則 ⑤ 連用 ⑥ 特殊) + render.js + footer.html
+src/doushi/        shell.html + data.js (VERBS 活用表 93 行・末四列是 グループ／出典／意味／English / PAIRS 自他 46 行 / SEC 讲解 27 组；第一部按用户口述的六章排，章名放在 cat 里：① 構造 ② 段の意味 ③ 五段と一段 ④ 変形規則 ⑤ 連用 ⑥ 特殊) + render.js + footer.html
                    表格・例句里 ｛…｝＝着色的「与辞書形不同的部分」：按列头或行头的形选色（仮定 kt 緑・可能 kn 青・受身 uk 朱・使役 sk 紫），没有形的用节的 hk 或默认茶色；wide:true 的表横向滚动。
                    活用表（VERBS）自动着色：每格与辞書形的公共前缀之后的部分，列严格按段排（五段八形）：あ段 ない・受身・使役｜い段 連用・ます｜う段 辞書形｜え段 命令・可能｜お段 意志，段之间竖线、五段／一段块之间横线；ない形・ます形・意志形在 render.js 的 derive() 里由未然形／連用形推出，未然・連用・仮定 不单列
 src/_engine/       **共用测验引擎**：quiz.js（练习／错题循环／考试／错题复习＋错题本导出）＋ shell.html（模板，{{TITLE}}／{{H1}}）。
                    每页只有 config.js（CFG={key,title,wordInfo,gloss?,sets}）＋ meta.json（标题）＋ data；tools/assemble.cjs 拼装。goi／jita／doushi-drill 都用它。
                    gloss(it,setIndex,answered) 返回题干下的词义行（drill／jita 用；填空题不要给，会泄露答案）。
 tools/glosses.cjs  动词英文释义表（活用表 93 词＋自他 248 词）；gen_katsuyo／gen_jita 都从这里取英文，缺词即报错，加新动词先补这里。
+src/doushi-quiz2/  動詞 実務 100 题：config.js／meta.json + data/{renyou,kishi,hitei,jisei,jouken}.js（手写各 20，基本 10＋応用 10）；tools/check_doushi2.cjs 查结构、每题的词必须出现在动词讲义里；key `jp-doushi2-v1`
 src/doushi-drill/  config1.js／meta1.json（基本活用 7 形）、config2.js／meta2.json（派生形 4 形）；data/*.js 由 tools/gen_katsuyo.cjs 生成（勿手改）：
                    从 doushi/data.js 的 VERBS＋jita map 的 124 对取 305 个动词，按类（五段／一段／五段例外／特殊）造每种形，干扰项＝真实的错误变形
 src/jita/map.html  用户的交互图原文件（勿改；要改先在 claude.ai 那边改再替换）
