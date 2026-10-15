@@ -36,6 +36,7 @@ node tools/assemble.cjs src/jita-quiz/meta.json ../content/jita/quiz.html src/ji
 node tools/gen_katsuyo.cjs > /dev/null
 D=src/doushi-drill/data
 node tools/assemble.cjs src/doushi-drill/meta1.json ../content/doushi/drill1.html $D/masu.js $D/nai.js $D/te.js $D/ta.js $D/ishi.js $D/meirei.js $D/katei.js src/doushi-drill/config1.js
+cat src/doushi-godan/shell.html src/doushi-godan/data.js src/doushi-godan/render.js src/doushi-godan/footer.html > ../content/doushi/godan.html
 Q2=src/doushi-quiz2/data
 node tools/assemble.cjs src/doushi-quiz2/meta.json ../content/doushi/quiz2.html $Q2/renyou.js $Q2/kishi.js $Q2/hitei.js $Q2/jisei.js $Q2/jouken.js src/doushi-quiz2/config.js
 node tools/assemble.cjs src/doushi-drill/meta2.json ../content/doushi/drill2.html $D/kanou.js $D/ukemi.js $D/shieki.js $D/shiekiukemi.js src/doushi-drill/config2.js

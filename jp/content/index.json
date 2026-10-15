@@ -131,6 +131,14 @@
           "note": "第一部六章（构造→段→五段与一段→规则→连用→特殊）· 五段八形活用表 93 词 · 自他 46 组 · 24 组讲解 · 可检索"
         },
         {
+          "id": "godan",
+          "type": "material",
+          "kind": "html",
+          "title": "五段動詞一覧（頻度順）",
+          "file": "godan.html",
+          "note": "BCCWJ 語彙表＋UniDic · 全部五段动词按频度排 · 按行筛选 · 可检索"
+        },
+        {
           "id": "quiz",
           "type": "test",
           "kind": "html",
