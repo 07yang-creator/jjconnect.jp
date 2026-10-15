@@ -101,6 +101,7 @@ SEC.forEach(s=>{
   html+=section(s);
 });
 document.getElementById("main").innerHTML=html;
+document.getElementById("fcount").textContent=`活用表 ${VERBS.length} 词（${VGROUPS.length} 组）・自他 ${PAIRS.length} 组・讲解 ${SEC.length} 组`;
 renderVerbs();renderPairs();
 document.getElementById("vf").onclick=e=>{const b=e.target.closest("button");if(!b)return;vk=b.dataset.k;[...e.currentTarget.children].forEach(x=>x.setAttribute("aria-pressed",x===b));renderVerbs()};
 document.getElementById("vq").oninput=e=>{vq=e.target.value.trim();renderVerbs()};
