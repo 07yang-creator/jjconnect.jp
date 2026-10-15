@@ -289,12 +289,12 @@ const SEC=[
   ["未然形（ない）","｛あ段｝＋ない（う→わ）：書｛か｝ない・買｛わ｝ない","去る＋ない：食べ｛ない｝","しない・来ない（こない）"],
   ["連用形（ます）","｛い段｝＋ます：書｛き｝ます","去る＋ます：食べ｛ます｝","します・来ます（きます）"],
   ["て形・た形","連用形＋て，但发生音便：く→｛いて｝、ぐ→｛いで｝、う・つ・る→｛って｝、む・ぶ・ぬ→｛んで｝、す→｛して｝；行く→行｛って｝","去る＋て：食べ｛て｝","して・来て（きて）"],
-  ["仮定形（ば）","｛え段｝＋ば：書｛けば｝","去る＋れば：食べ｛れば｝","すれば・来れば（くれば）"],
+  ["命令形","｛え段｝：書｛け｝","去る＋ろ：食べ｛ろ｝（书面 よ）","しろ（书面 せよ）・来い（こい）"],
+  ["〜ば（仮定）","｛え段｝＋ば：書｛けば｝（＝命令形＋ば）","去る＋れば：食べ｛れば｝","すれば・来れば（くれば）"],
   ["可能形","｛え段｝＋る：書｛ける｝","去る＋られる：食べ｛られる｝（口语ら抜き 食べれる）","できる・来られる（こられる）"],
   ["受身形","｛あ段｝＋れる：書｛かれる｝・買｛われる｝","去る＋られる：食べ｛られる｝（与可能同形）","される・来られる（こられる）"],
   ["使役形","｛あ段｝＋せる：書｛かせる｝","去る＋させる：食べ｛させる｝","させる・来させる（こさせる）"],
   ["使役受身","｛あ段｝＋される：書｛かされる｝（す 结尾用 せられる：話｛させられる｝）","去る＋させられる：食べ｛させられる｝","させられる・来させられる（こさせられる）"],
-  ["命令形","｛え段｝：書｛け｝","去る＋ろ：食べ｛ろ｝（书面 よ）","しろ（书面 せよ）・来い（こい）"],
   ["意志形","｛お段｝＋う：書｛こう｝","去る＋よう：食べ｛よう｝","しよう・来よう（こよう）"]],
  ex:[[1,"書く → 書かない・書きます・書いて・書けば・書け・書こう・書ける・書かれる・書かせる","五段一条线：あ段管 ない・受身・使役，い段管 ます，え段管 ば・命令・可能，お段管意志；て形有音便。"],
   [1,"食べる → 食べない・食べます・食べて・食べれば・食べろ・食べよう・食べられる・食べさせる","一段：全部去 る 再接后缀。"],
@@ -502,17 +502,17 @@ function section(s){const hd=s.tb[0],dk=s.hk||"hk";return `
 /* ---------- 活用表 ---------- */
 const KCLS={"五段":"g5","一段":"g1","特殊":"gs"};
 const VGROUPS=[...new Set(VERBS.map(r=>r[11]))];
-/* 列顺序：仮定・可能・受身 三列相邻（書けば／書ける／書かれる），使役紧跟受身；每格与辞書形不同的部分着色 */
-const VCOLS=[[3,"hk"],[4,"hk"],[5,"kt"],[9,"kn"],[8,"uk"],[7,"sk"],[6,"hk"]];
-const VHEAD=`<thead><tr><th>類</th><th>辞書形</th><th>未然形</th><th>連用形</th><th>仮定形（〜ば）</th><th>可能形</th><th>受身形</th><th>使役形</th><th>命令形</th><th>備考</th></tr></thead>`;
-const VLEGEND=`<div class="legend">着色＝与辞書形不同的部分：<span class="f kt">仮定形</span>・<span class="f kn">可能形</span>・<span class="f uk">受身形</span>・<span class="f sk">使役形</span>・<span class="f hk">其他</span>。三列相邻便于比较：書<span class="f kt">けば</span>／書<span class="f kn">ける</span>／書<span class="f uk">かれる</span>；一段的可能＝受身：食べ<span class="f kn">られる</span>／食べ<span class="f uk">られる</span>。</div>`;
-const addBa=s=>!s||s==="—"?s:s.includes("（")?s.replace(/^(.*?)（(.*?)）$/,"$1ば（$2ば）"):s+"ば";
+/* 列顺序按段走：未然（あ段）・連用（い段）・命令（え段），然后 可能（え段＋る）・受身（あ段＋れる）・使役（あ段＋せる）。
+   仮定形不占列：它只是え段＋ば（五段＝命令形那栏＋ば，一段＝去る＋れば）。每格与辞書形不同的部分着色 */
+const VCOLS=[[3,"hk"],[4,"hk"],[6,"hk"],[9,"kn"],[8,"uk"],[7,"sk"]];
+const VHEAD=`<thead><tr><th>類</th><th>辞書形</th><th>未然形</th><th>連用形</th><th>命令形</th><th>可能形</th><th>受身形</th><th>使役形</th><th>備考</th></tr></thead>`;
+const VLEGEND=`<div class="legend">着色＝与辞書形不同的部分：<span class="f kn">可能形</span>・<span class="f uk">受身形</span>・<span class="f sk">使役形</span>・<span class="f hk">其他</span>。可能・受身相邻便于比较：書<span class="f kn">ける</span>／書<span class="f uk">かれる</span>，一段同形：食べ<span class="f kn">られる</span>／食べ<span class="f uk">られる</span>。仮定形不单列：え段＋ば（書けば・食べれば・すれば・来れば）。</div>`;
 function fcell(base,s,cls){if(!s||s==="—")return hl(s||"");let i=0;while(i<s.length&&i<base.length&&s[i]===base[i])i++;return hl(s.slice(0,i))+(i<s.length?`<span class="f ${cls}">${hl(s.slice(i))}</span>`:"")}
 function verbsSection(){return `
 <section id="katsuyo-hyo">
   <span class="cat">活用表</span>
   <h2><span class="ja" lang="ja">動詞活用表（${VERBS.length} 語・${VGROUPS.length} 組）</span></h2>
-  <p class="lead">按意思分成 ${VGROUPS.length} 组。終止形・連体形＝辞書形，省略。仮定形・可能形・受身形三列相邻，五段的三者只差一两个假名；一段的可能形写标准形，口语的ら抜き形在备注栏。各形的做法见下面的「活用の作り方」和「五段の段の対応」。可按类别筛选或输入任何活用形检索。</p>
+  <p class="lead">按意思分成 ${VGROUPS.length} 组。終止形・連体形＝辞書形，省略；仮定形也不单列，它只是え段＋ば。前三列是五段的三个段：未然（あ段）・連用（い段）・命令（え段）；后三列由它们派生：可能＝え段＋る、受身＝あ段＋れる、使役＝あ段＋せる。一段的可能形写标准形，口语的ら抜き形在备注栏。各形的做法见下面的「活用の作り方」和「五段の段の対応」。可按类别筛选或输入任何活用形检索。</p>
   <div class="filters"><div class="chips" id="vf">${["全部","五段","一段","特殊"].map(k=>`<button data-k="${k}" aria-pressed="${k==="全部"}">${k}</button>`).join("")}</div>
   <input id="vq" type="search" placeholder="検索：辞書形・読み・活用形（例：られる）" aria-label="活用表检索"><span class="cnt" id="vcnt"></span></div>
   ${VLEGEND}
@@ -524,7 +524,7 @@ function hl(s){if(!vq)return esc(s);const i=s.indexOf(vq);return i<0?esc(s):esc(
 const vrow=r=>{const base=r[0].split("（")[0];return `<tr>
     <td><span class="k ${KCLS[r[2]]}">${r[2]}</span></td>
     <td class="ja hw" lang="ja">${hl(r[0])}<span class="yomi">${hl(r[1])}</span>${r[13]?`<span class="yomi imi">${hl(r[13])}${r[14]?" · "+hl(r[14]):""}</span>`:""}</td>
-    ${VCOLS.map(([i,c])=>`<td class="ja" lang="ja">${fcell(base,i===5?addBa(r[i]):r[i],c)}</td>`).join("")}
+    ${VCOLS.map(([i,c])=>`<td class="ja" lang="ja">${fcell(base,r[i],c)}</td>`).join("")}
     <td class="note">${hl(r[10])}</td></tr>`};
 function renderVerbs(){
   const rows=VERBS.filter(r=>(vk==="全部"||r[2]===vk)&&(!vq||[...r.slice(0,11),r[13]||"",(r[14]||"").toLowerCase()].some(c=>c.includes(vq.toLowerCase()))));
