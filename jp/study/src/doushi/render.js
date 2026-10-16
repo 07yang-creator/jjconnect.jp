@@ -42,8 +42,8 @@ function derive(r){const k=r[0],nai=k==="ある"?"ない":suf(r[3],"ない"),mas
 const VC1=[[(r,d)=>d.nai,"hk",1],[r=>r[8],"uk"],[r=>r[7],"sk"],[r=>r[4],"hk",1]],VC2=[[r=>r[6],"hk",1],[r=>r[9],r=>r[9]===r[8]?"uk":"kn"],[(r,d)=>d.ishi,"hk",1]]; // 可能形与受身形同形（一段・来る）时用同一种颜色，一眼看出是同一个形
 const vcell=(base,r,d)=>([g,c,gs])=>`<td class="ja${gs?" gs":""}" lang="ja">${fcell(base,g(r,d),typeof c==="function"?c(r):c)}</td>`;
 const VHEAD=`<thead><tr><th rowspan="3">類</th><th colspan="3" class="gs">あ段</th><th class="gs">い段</th><th class="gs">う段</th><th colspan="2" class="gs">え段</th><th class="gs">お段</th><th rowspan="3" class="gs">備考</th></tr>
-<tr><th class="gs">ない</th><th>受身</th><th>使役</th><th class="gs">連用</th><th class="gs">辞書形</th><th class="gs">命令</th><th>可能</th><th class="gs">意志</th></tr>
-<tr class="sub"><th colspan="3" class="gs">底座＝未然形：ない形去掉 ない</th><th class="gs">＋ます＝ます形，＋て＝て形</th><th class="gs"></th><th colspan="2" class="gs">え段＋ば＝仮定形（書けば）</th><th class="gs"></th></tr></thead>`;
+<tr><th rowspan="2" class="gs">ない</th><th rowspan="2">受身</th><th rowspan="2">使役</th><th class="gs">連用</th><th rowspan="2" class="gs">辞書形</th><th rowspan="2" class="gs">命令</th><th rowspan="2">可能</th><th rowspan="2" class="gs">意志</th></tr>
+<tr class="sub"><th class="gs">＋ます／＋て／＋た<br>＝ます形・て形・た形</th></tr></thead>`;
 const VLEGEND=`<ol class="legend lg">
 <li><b>列按段排</b>：あ段＝ない・受身・使役，い段＝連用形，う段＝辞書形，え段＝命令・可能，お段＝意志。一段动词没有段，一律去 る 接后缀。</li>
 <li><b>不单列的三个</b>：未然形（＝ない形去掉 ない）、仮定形（＝え段＋ば：書けば・食べれば）、ます形（＝連用形＋ます）。它们都是「底座＋后缀」，看对应的那一列就有。て形＝連用形＋て，五段过音便，见 ⑤。</li>
