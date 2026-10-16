@@ -35,18 +35,20 @@ const suf=(s,x)=>!s||s==="—"?"—":s.includes("（")?s.replace(/^(.*?)（(.*?)
 function derive(r){const k=r[0],nai=k==="ある"?"ない":suf(r[3],"ない"),masu=suf(r[4],"ます");let ishi;
   if(k==="ある")ishi="—";else if(k==="来る")ishi="来よう（こよう）";else if(r[2]!=="五段")ishi=r[4]+"よう";
   else{const m=r[3],l=m[m.length-1];ishi=OROW[l]?m.slice(0,-1)+OROW[l]+"う":"—"}
-  return{nai,masu,ishi}}
+  return{nai,masu,ishi,te:teForm(r)}}
+// て形＝連用形＋て，五段按連用形末尾的假名走音便（行く 例外）；一段・特殊直接＋て
+function teForm(r){const ren=r[4];if(!ren||ren==="—")return "—";const conv=s=>{if(r[2]!=="五段")return s+"て";const last=s.slice(-1),b=s.slice(0,-1);if(r[0]==="行く")return b+"って";return last==="き"?b+"いて":last==="ぎ"?b+"いで":last==="し"?s+"て":"ちいり".includes(last)?b+"って":"にびみ".includes(last)?b+"んで":s+"て"};const m=ren.match(/^(.*?)（(.*?)）$/);return m?`${conv(m[1])}（${conv(m[2])}）`:conv(ren)}
 // 严格按 あ・い・う・え・お 排：辞書形（う段）放在 い段 和 え段 之间
 // 第三个元素 true＝该列是一个段的第一列，画分隔线
 // ます形不单列：連用形＋ます 是標準的連用用法
-const VC1=[[(r,d)=>d.nai,"hk",1],[r=>r[8],"uk"],[r=>r[7],"sk"],[r=>r[4],"hk",1]],VC2=[[r=>r[6],"hk",1],[r=>r[9],r=>r[9]===r[8]?"uk":"kn"],[(r,d)=>d.ishi,"hk",1]]; // 可能形与受身形同形（一段・来る）时用同一种颜色，一眼看出是同一个形
+const VC1=[[(r,d)=>d.nai,"hk",1],[r=>r[8],"uk"],[r=>r[7],"sk"],[r=>r[4],"hk",1],[(r,d)=>d.te,"hk"]],VC2=[[r=>r[6],"hk",1],[r=>r[9],r=>r[9]===r[8]?"uk":"kn"],[(r,d)=>d.ishi,"hk",1]]; // 可能形与受身形同形（一段・来る）时用同一种颜色，一眼看出是同一个形
 const vcell=(base,r,d)=>([g,c,gs])=>`<td class="ja${gs?" gs":""}" lang="ja">${fcell(base,g(r,d),typeof c==="function"?c(r):c)}</td>`;
-const VHEAD=`<thead><tr><th rowspan="3">類</th><th colspan="3" class="gs">あ段</th><th class="gs">い段</th><th class="gs">う段</th><th colspan="2" class="gs">え段</th><th class="gs">お段</th><th rowspan="3" class="gs">備考</th></tr>
-<tr><th rowspan="2" class="gs">ない</th><th rowspan="2">受身</th><th rowspan="2">使役</th><th class="gs">連用</th><th rowspan="2" class="gs">辞書形</th><th rowspan="2" class="gs">命令</th><th rowspan="2">可能</th><th rowspan="2" class="gs">意志</th></tr>
-<tr class="sub"><th class="gs">＋ます／＋て／＋た<br>＝ます形・て形・た形</th></tr></thead>`;
+const VHEAD=`<thead><tr><th rowspan="3">類</th><th colspan="3" class="gs">あ段</th><th colspan="2" class="gs">い段</th><th class="gs">う段</th><th colspan="2" class="gs">え段</th><th class="gs">お段</th><th rowspan="3" class="gs">備考</th></tr>
+<tr><th rowspan="2" class="gs">ない</th><th rowspan="2">受身</th><th rowspan="2">使役</th><th class="gs">連用</th><th>て形</th><th rowspan="2" class="gs">辞書形</th><th rowspan="2" class="gs">命令</th><th rowspan="2">可能</th><th rowspan="2" class="gs">意志</th></tr>
+<tr class="sub"><th class="gs">＋ます＝ます形</th><th>連用形＋て（五段音便）<br>て→た＝た形</th></tr></thead>`;
 const VLEGEND=`<ol class="legend lg">
-<li><b>列按段排</b>：あ段＝ない・受身・使役，い段＝連用形，う段＝辞書形，え段＝命令・可能，お段＝意志。一段动词没有段，一律去 る 接后缀。</li>
-<li><b>不单列的三个</b>：未然形（＝ない形去掉 ない）、仮定形（＝え段＋ば：書けば・食べれば）、ます形（＝連用形＋ます）。它们都是「底座＋后缀」，看对应的那一列就有。て形＝連用形＋て，五段过音便，见 ⑤。</li>
+<li><b>列按段排</b>：あ段＝ない・受身・使役，い段＝連用形・て形，う段＝辞書形，え段＝命令・可能，お段＝意志。一段动词没有段，一律去 る 接后缀。</li>
+<li><b>不单列的三个</b>：未然形（＝ない形去掉 ない）、仮定形（＝え段＋ば：書けば・食べれば）、ます形（＝連用形＋ます）。它们都是「底座＋后缀」，看对应的那一列就有。て形单列，是因为五段要过音便（行き→行って），た形＝て→た。</li>
 <li><b>連用形还能接</b>：たい・ながら・やすい／にくい・そうだ・すぎる・に行く・なさい・方；中止法 〜し、；敬語 お＋連用形＋する／ください；本身当名词（支払い・申し込み）。详见「連用形の用法」。</li>
 <li><b>着色</b>＝与辞書形不同的部分：<span class="f kn">可能形</span>・<span class="f uk">受身形</span>・<span class="f sk">使役形</span>・<span class="f hk">其他</span>。可能形与受身形同形时同色：食べ<span class="f uk">られる</span>／食べ<span class="f uk">られる</span>（意思靠助词和语境分）。</li>
 <li><b>罗马字</b>（读音右边）标出词干末尾：五段 ka<b class="rmb">k</b>-u 辅音结尾，一段 tab<b class="rmb">e</b>-ru 元音结尾，后缀接在连字符后面。</li>
@@ -89,11 +91,11 @@ function renderVerbs(){
   unifyCols();
 }
 /* 七张组表共用一套列宽：按各列内容的最大需要定前 10 列，備考吃掉剩余 */
-function unifyCols(){const ts=[...document.querySelectorAll("#vt table")];if(!ts.length)return;const N=10,w=Array(N).fill(0);
-  ts.forEach(t=>{t.style.tableLayout="auto";t.style.width="max-content";t.querySelectorAll("colgroup").forEach(c=>c.remove())});
+function unifyCols(){const ts=[...document.querySelectorAll("#vt table")];if(!ts.length)return;const N=11,w=Array(N).fill(0);
+  ts.forEach(t=>{t.style.tableLayout="auto";t.style.width="max-content";t.querySelectorAll("colgroup").forEach(c=>c.remove());t.querySelector("thead").style.display="none"}); // 量宽时不算表头，表头第三行的注可以换行
   ts.forEach(t=>{const tr=t.querySelector("tbody tr");if(tr)[...tr.children].forEach((td,i)=>{w[i]=Math.max(w[i],td.getBoundingClientRect().width)})});
-  w[5]=Math.min(w[5],140); // 辞書形列（第 6 列）封顶：释义行允许换行，不让它挤掉備考
-  ts.forEach(t=>{const cg=document.createElement("colgroup");for(let i=0;i<N;i++){const c=document.createElement("col");if(i<N-1)c.style.width=Math.ceil(w[i])+"px";cg.appendChild(c)}t.insertBefore(cg,t.firstChild);t.style.tableLayout="fixed";t.style.width="100%"})}
+  w[6]=Math.min(w[6],120); // 辞書形列（第 7 列）封顶：释义行允许换行，不让它挤掉備考
+  ts.forEach(t=>{t.querySelector("thead").style.display="";const cg=document.createElement("colgroup");for(let i=0;i<N;i++){const c=document.createElement("col");if(i<N-1)c.style.width=Math.ceil(w[i])+"px";cg.appendChild(c)}t.insertBefore(cg,t.firstChild);t.style.tableLayout="fixed";t.style.width="100%"})}
 
 /* ---------- 自他表 ---------- */
 const TY={"対":["t1","词汇对子"],"使":["t2","使役代用"],"受":["t3","受身代用"],"類":["t4","近义・用法有别"]};
