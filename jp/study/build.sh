@@ -17,7 +17,8 @@ cat src/fukushu/shell.html src/fukushu/sec.js src/fukushu/render.js src/fukushu/
 
 # 動詞 topic is a STATIC topic of the site: built straight into jp/content/doushi/ (git-tracked, deployed by push)
 mkdir -p ../content/doushi
-cat src/doushi/shell.html src/doushi/data.js src/doushi/render.js src/doushi/footer.html > ../content/doushi/material.html
+node tools/gen_jita_index.cjs > /dev/null
+cat src/doushi/shell.html src/doushi/data.js src/doushi/jita_index.js src/doushi/render.js src/doushi/footer.html > ../content/doushi/material.html
 cat src/doushi-quiz/shell.html \
     src/doushi-quiz/data/katsuyo.js \
     src/doushi-quiz/data/ukemi.js \

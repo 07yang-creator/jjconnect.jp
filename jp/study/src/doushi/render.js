@@ -42,7 +42,7 @@ const VC1=[[(r,d)=>d.nai,"hk",1],[r=>r[8],"uk"],[r=>r[7],"sk"],[r=>r[4],"hk",1],
 const vcell=(base,r,d)=>([g,c,gs])=>`<td class="ja${gs?" gs":""}" lang="ja">${fcell(base,g(r,d),typeof c==="function"?c(r):c)}</td>`;
 const VHEAD=`<thead><tr><th rowspan="2">類</th><th colspan="3" class="gs">あ段</th><th colspan="2" class="gs">い段</th><th rowspan="2" class="gs">辞書形<small class="dan">う段</small></th><th colspan="2" class="gs">え段</th><th class="gs">お段</th><th rowspan="2" class="gs">備考</th></tr>
 <tr><th class="gs">ない</th><th>受身</th><th>使役</th><th class="gs">連用</th><th>ます</th><th class="gs">命令</th><th>可能</th><th class="gs">意志</th></tr></thead>`;
-const VLEGEND=`<div class="legend">列严格按 あ・い・う・え・お 排，竖线隔开每个段：あ段＝ない・受身・使役，い段＝連用形・ます（て形＝連用形＋音便），う段＝辞書形，え段＝命令・可能，お段＝意志（一段动词没有段，一律去 る 接后缀）。着色＝与辞書形不同的部分：<span class="f kn">可能形</span>・<span class="f uk">受身形</span>・<span class="f sk">使役形</span>・<span class="f hk">其他</span>；可能・受身：書<span class="f kn">ける</span>／書<span class="f uk">かれる</span>，一段的可能形与受身形同形，两格都用受身的颜色：食べ<span class="f uk">られる</span>／食べ<span class="f uk">られる</span>（同形同色，意思靠助词和语境分）。て形见<a href="/v/onbin/material.html" target="_top">音便</a>，仮定＝え段＋ば。<br>读音右边的罗马字标出词干末尾：五段 ka<b class="rmb">k</b>-u 以辅音结尾，一段 tab<b class="rmb">e</b>-ru 以元音结尾，后缀接在连字符后面。<br><i class="sw"></i>浅色底＝五段（换段的）；无底色＝一段（去る的）・特殊。每组内五段在前，一段在后。</div>`;
+const VLEGEND=`<div class="legend">列严格按 あ・い・う・え・お 排，竖线隔开每个段：あ段＝ない・受身・使役，い段＝連用形・ます（て形＝連用形＋音便），う段＝辞書形，え段＝命令・可能，お段＝意志（一段动词没有段，一律去 る 接后缀）。着色＝与辞書形不同的部分：<span class="f kn">可能形</span>・<span class="f uk">受身形</span>・<span class="f sk">使役形</span>・<span class="f hk">其他</span>；可能・受身：書<span class="f kn">ける</span>／書<span class="f uk">かれる</span>，一段的可能形与受身形同形，两格都用受身的颜色：食べ<span class="f uk">られる</span>／食べ<span class="f uk">られる</span>（同形同色，意思靠助词和语境分）。て形见<a href="/v/onbin/material.html" target="_top">音便</a>，仮定＝え段＋ば。<br>读音右边的罗马字标出词干末尾：五段 ka<b class="rmb">k</b>-u 以辅音结尾，一段 tab<b class="rmb">e</b>-ru 以元音结尾，后缀接在连字符后面。<br><i class="sw"></i>浅色底＝五段（换段的）；无底色＝一段（去る的）・特殊。每组内五段在前，一段在后。類 旁的 <span class="jt ji">自</span><span class="jt ta">他</span>＝有自他对子的动词，備考里 ⇄ 后面是对方（出自<a href="/v/jita/map.html" target="_top">自他動詞マップ</a>124 对和下面的自他表）。</div>`;
 function fcell(base,s,cls){if(!s||s==="—")return hl(s||"");let i=0;while(i<s.length&&i<base.length&&s[i]===base[i])i++;return (hl(s.slice(0,i))+(i<s.length?`<span class="f ${cls}">${hl(s.slice(i))}</span>`:"")).replace(/（([^）]+)）/g,'<small class="rd">$1</small>')} // 括号里的读音另起一小行，特殊动词不撑宽整列
 function verbsSection(){return `
 <section id="katsuyo-hyo">
@@ -58,11 +58,11 @@ function verbsSection(){return `
 let vk="全部",vq="";
 function hl(s){if(!vq)return esc(s);const i=s.indexOf(vq);return i<0?esc(s):esc(s.slice(0,i))+"<mark>"+esc(s.slice(i,i+vq.length))+"</mark>"+esc(s.slice(i+vq.length))}
 const vrow=(r,cb)=>{const base=r[0].split("（")[0],d=derive(r);return `<tr class="${KCLS[r[2]]}${cb?" cb":""}">
-    <td><span class="k ${KCLS[r[2]]}">${r[2]}</span></td>
+    <td><span class="k ${KCLS[r[2]]}">${r[2]}</span>${JITA[base]?`<span class="jt ${JITA[base][0]==="自"?"ji":"ta"}" title="${JITA[base][0]==="自"?"自動詞，他動詞は":"他動詞，自動詞は"} ${esc(JITA[base][1])}">${JITA[base][0]}</span>`:""}</td>
     ${VC1.map(vcell(base,r,d)).join("")}
     <td class="ja hw gs" lang="ja">${hl(r[0].split("（")[0])}${r[0].includes("（")?`<span class="yomi">${hl(r[0].slice(r[0].indexOf("（")+1,-1))}</span>`:""}<span class="yomi">${hl(r[1])}${(rm=>rm?`<i class="rm">${rm}</i>`:"")(romStem(r[1],r[2]))}</span>${r[13]?`<span class="yomi imi">${hl(r[13])}${r[14]?" · "+hl(r[14]):""}</span>`:""}</td>
     ${VC2.map(vcell(base,r,d)).join("")}
-    <td class="note gs">${hl(r[10])}</td></tr>`};
+    <td class="note gs">${JITA[base]?`<span class="jtp">⇄ ${esc(JITA[base][1])}</span>`:""}${hl(r[10])}</td></tr>`};
 function renderVerbs(){
   const rows=VERBS.filter(r=>(vk==="全部"||r[2]===vk)&&(!vq||[...r.slice(0,11),r[13]||"",(r[14]||"").toLowerCase(),...Object.values(derive(r))].some(c=>c.includes(vq.toLowerCase()))));
   document.getElementById("vt").innerHTML=VGROUPS.map((g,i)=>{let rs=rows.filter(r=>r[11]===g);if(!rs.length)return "";
