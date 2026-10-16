@@ -96,7 +96,8 @@ function unifyCols(){const ts=[...document.querySelectorAll("#vt table")];if(!ts
   ts.forEach(t=>{t.style.tableLayout="auto";t.style.width="max-content";t.querySelectorAll("colgroup").forEach(c=>c.remove());t.querySelector("thead").style.display="none"}); // 量宽时不算表头，表头第三行的注可以换行
   ts.forEach(t=>{const tr=t.querySelector("tbody tr");if(tr)[...tr.children].forEach((td,i)=>{w[i]=Math.max(w[i],td.getBoundingClientRect().width)})});
   w[7]=Math.min(w[7],110); // 辞書形列（第 8 列）封顶：释义行允许换行，不让它挤掉備考
-  ts.forEach(t=>{t.querySelector("thead").style.display="";const cg=document.createElement("colgroup");for(let i=0;i<N;i++){const c=document.createElement("col");if(i<N-1)c.style.width=Math.ceil(w[i])+"px";cg.appendChild(c)}t.insertBefore(cg,t.firstChild);t.style.tableLayout="fixed";t.style.width="100%"})}
+  ts.forEach(t=>{t.querySelector("thead").style.display="";const cg=document.createElement("colgroup");for(let i=0;i<N;i++){const c=document.createElement("col");if(i<N-1)c.style.width=Math.ceil(w[i])+"px";cg.appendChild(c)}t.insertBefore(cg,t.firstChild);t.style.tableLayout="fixed";
+    const need=w.slice(0,N-1).reduce((x,y)=>x+y,0)+120,box=t.parentElement.clientWidth;t.style.width=need>box?Math.ceil(need)+"px":"100%"})} // 備考至少 120px；窗口更窄时宁可横滚，也不让備考逐字换行
 
 /* ---------- 自他表 ---------- */
 const TY={"対":["t1","词汇对子"],"使":["t2","使役代用"],"受":["t3","受身代用"],"類":["t4","近义・用法有别"]};
