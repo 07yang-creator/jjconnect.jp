@@ -46,7 +46,7 @@ const VC1=[[(r,d)=>d.nai,"hk",1],[r=>r[8],"uk"],[r=>r[7],"sk"],[(r,d)=>d.masu,"h
 const vcell=(base,r,d)=>([g,c,gs])=>`<td class="ja${gs?" gs":""}" lang="ja">${fcell(base,g(r,d),typeof c==="function"?c(r):c)}</td>`;
 const VHEAD=`<thead><tr><th rowspan="3">類</th><th colspan="3" class="gs">あ段</th><th colspan="3" class="gs">い段</th><th class="gs">う段</th><th colspan="2" class="gs">え段</th><th class="gs">お段</th><th rowspan="3" class="gs">備考</th></tr>
 <tr><th rowspan="2" class="gs">ない</th><th rowspan="2">受身</th><th rowspan="2">使役</th><th colspan="3" class="gs grp">連用形</th><th rowspan="2" class="gs">辞書形</th><th rowspan="2" class="gs">命令</th><th rowspan="2">可能</th><th rowspan="2" class="gs">意志</th></tr>
-<tr><th class="gs">ます形</th><th>て形</th><th>た形</th></tr></thead>`;
+<tr><th class="gs">ます形</th><th>て形<small class="dan">（で）</small></th><th>た形<small class="dan">（だ）</small></th></tr></thead>`;
 const VLEGEND=`<ol class="legend lg">
 <li><b>列按段排</b>：あ段＝ない・受身・使役，い段＝連用形（ます形・て形・た形），う段＝辞書形，え段＝命令・可能，お段＝意志。一段动词没有段，一律去 る 接后缀。</li>
 <li><b>不单列的「半个词」</b>：未然形（＝ない形去掉 ない）、仮定形（＝え段＋ば：書けば・食べれば）、連用形本身（＝ます形去掉 ます）。它们都是底座，看对应的那一列就有；連用形的三个成品 ます形・て形・た形 列在い段下，て形五段要过音便（行き→行って），た形＝て→た。使役受身＝使役＋られる（書かせられる，五段口语缩成 書かされる），也不单列；た形再接 ら・り 就是 たら・たり。</li>
