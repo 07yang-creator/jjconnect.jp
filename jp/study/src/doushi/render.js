@@ -35,20 +35,21 @@ const suf=(s,x)=>!s||s==="—"?"—":s.includes("（")?s.replace(/^(.*?)（(.*?)
 function derive(r){const k=r[0],nai=k==="ある"?"ない":suf(r[3],"ない"),masu=suf(r[4],"ます");let ishi;
   if(k==="ある")ishi="—";else if(k==="来る")ishi="来よう（こよう）";else if(r[2]!=="五段")ishi=r[4]+"よう";
   else{const m=r[3],l=m[m.length-1];ishi=OROW[l]?m.slice(0,-1)+OROW[l]+"う":"—"}
-  return{nai,masu,ishi,te:teForm(r)}}
+  const te=teForm(r),tf=x=>x.endsWith("て")?x.slice(0,-1)+"た":x.endsWith("で")?x.slice(0,-1)+"だ":x,ta=te==="—"?te:te.replace(/^(.*?)（(.*?)）$/,(m,a,b)=>tf(a)+"（"+tf(b)+"）").replace(/^([^（]*)$/,(m,a)=>tf(a));
+  return{nai,masu,ishi,te,ta}}
 // て形＝連用形＋て，五段按連用形末尾的假名走音便（行く 例外）；一段・特殊直接＋て
 function teForm(r){const ren=r[4];if(!ren||ren==="—")return "—";const conv=s=>{if(r[2]!=="五段")return s+"て";const last=s.slice(-1),b=s.slice(0,-1);if(r[0]==="行く")return b+"って";return last==="き"?b+"いて":last==="ぎ"?b+"いで":last==="し"?s+"て":"ちいり".includes(last)?b+"って":"にびみ".includes(last)?b+"んで":s+"て"};const m=ren.match(/^(.*?)（(.*?)）$/);return m?`${conv(m[1])}（${conv(m[2])}）`:conv(ren)}
 // 严格按 あ・い・う・え・お 排：辞書形（う段）放在 い段 和 え段 之间
 // 第三个元素 true＝该列是一个段的第一列，画分隔线
 // ます形不单列：連用形＋ます 是標準的連用用法
-const VC1=[[(r,d)=>d.nai,"hk",1],[r=>r[8],"uk"],[r=>r[7],"sk"],[r=>r[4],"hk",1],[(r,d)=>d.te,"hk"]],VC2=[[r=>r[6],"hk",1],[r=>r[9],r=>r[9]===r[8]?"uk":"kn"],[(r,d)=>d.ishi,"hk",1]]; // 可能形与受身形同形（一段・来る）时用同一种颜色，一眼看出是同一个形
+const VC1=[[(r,d)=>d.nai,"hk",1],[r=>r[8],"uk"],[r=>r[7],"sk"],[(r,d)=>d.masu,"hk",1],[(r,d)=>d.te,"hk"],[(r,d)=>d.ta,"hk"]],VC2=[[r=>r[6],"hk",1],[r=>r[9],r=>r[9]===r[8]?"uk":"kn"],[(r,d)=>d.ishi,"hk",1]]; // 可能形与受身形同形（一段・来る）时用同一种颜色，一眼看出是同一个形
 const vcell=(base,r,d)=>([g,c,gs])=>`<td class="ja${gs?" gs":""}" lang="ja">${fcell(base,g(r,d),typeof c==="function"?c(r):c)}</td>`;
-const VHEAD=`<thead><tr><th rowspan="3">類</th><th colspan="3" class="gs">あ段</th><th colspan="2" class="gs">い段</th><th class="gs">う段</th><th colspan="2" class="gs">え段</th><th class="gs">お段</th><th rowspan="3" class="gs">備考</th></tr>
-<tr><th rowspan="2" class="gs">ない</th><th rowspan="2">受身</th><th rowspan="2">使役</th><th class="gs">連用</th><th>て形</th><th rowspan="2" class="gs">辞書形</th><th rowspan="2" class="gs">命令</th><th rowspan="2">可能</th><th rowspan="2" class="gs">意志</th></tr>
-<tr class="sub"><th class="gs">＋ます＝ます形</th><th>連用形＋て（五段音便）<br>て→た＝た形</th></tr></thead>`;
+const VHEAD=`<thead><tr><th rowspan="3">類</th><th colspan="3" class="gs">あ段</th><th colspan="3" class="gs">い段</th><th class="gs">う段</th><th colspan="2" class="gs">え段</th><th class="gs">お段</th><th rowspan="3" class="gs">備考</th></tr>
+<tr><th rowspan="2" class="gs">ない</th><th rowspan="2">受身</th><th rowspan="2">使役</th><th colspan="3" class="gs grp">連用形</th><th rowspan="2" class="gs">辞書形</th><th rowspan="2" class="gs">命令</th><th rowspan="2">可能</th><th rowspan="2" class="gs">意志</th></tr>
+<tr><th class="gs">ます形</th><th>て形</th><th>た形</th></tr></thead>`;
 const VLEGEND=`<ol class="legend lg">
-<li><b>列按段排</b>：あ段＝ない・受身・使役，い段＝連用形・て形，う段＝辞書形，え段＝命令・可能，お段＝意志。一段动词没有段，一律去 る 接后缀。</li>
-<li><b>不单列的三个</b>：未然形（＝ない形去掉 ない）、仮定形（＝え段＋ば：書けば・食べれば）、ます形（＝連用形＋ます）。它们都是「底座＋后缀」，看对应的那一列就有。て形单列，是因为五段要过音便（行き→行って），た形＝て→た。</li>
+<li><b>列按段排</b>：あ段＝ない・受身・使役，い段＝連用形（ます形・て形・た形），う段＝辞書形，え段＝命令・可能，お段＝意志。一段动词没有段，一律去 る 接后缀。</li>
+<li><b>不单列的「半个词」</b>：未然形（＝ない形去掉 ない）、仮定形（＝え段＋ば：書けば・食べれば）、連用形本身（＝ます形去掉 ます）。它们都是底座，看对应的那一列就有；連用形的三个成品 ます形・て形・た形 列在い段下，て形五段要过音便（行き→行って），た形＝て→た。</li>
 <li><b>連用形还能接</b>：たい・ながら・やすい／にくい・そうだ・すぎる・に行く・なさい・方；中止法 〜し、；敬語 お＋連用形＋する／ください；本身当名词（支払い・申し込み）。详见「連用形の用法」。</li>
 <li><b>着色</b>＝与辞書形不同的部分：<span class="f kn">可能形</span>・<span class="f uk">受身形</span>・<span class="f sk">使役形</span>・<span class="f hk">其他</span>。可能形与受身形同形时同色：食べ<span class="f uk">られる</span>／食べ<span class="f uk">られる</span>（意思靠助词和语境分）。</li>
 <li><b>罗马字</b>（读音右边）标出词干末尾：五段 ka<b class="rmb">k</b>-u 辅音结尾，一段 tab<b class="rmb">e</b>-ru 元音结尾，后缀接在连字符后面。</li>
@@ -58,7 +59,7 @@ function fcell(base,s,cls){if(!s||s==="—")return hl(s||"");let i=0;while(i<s.l
 function verbsSection(){return `
 <section id="katsuyo-hyo">
   <span class="cat">活用表</span>
-  <h2><span class="ja" lang="ja">五段八形 ── 動詞活用表（${VERBS.length} 語・${VGROUPS.length} 組）</span></h2>
+  <h2><span class="ja" lang="ja">五段十形 ── 動詞活用表（${VERBS.length} 語・${VGROUPS.length} 組）</span></h2>
   <ol class="lead memo">
     <li><b>先定类</b>：五段还是一段（非る→五段；a・u・o＋る→五段；i・e 在送り仮名里→一段；漢字一拍＋る 背九个一段）。</li>
     <li><b>五段</b>＝词尾换段再接后缀：あ段＋ない・れる・せる，い段＋ます・て，え段＝命令／＋ば／＋る（可能），お段＋う（意志）。</li>
@@ -91,10 +92,10 @@ function renderVerbs(){
   unifyCols();
 }
 /* 七张组表共用一套列宽：按各列内容的最大需要定前 10 列，備考吃掉剩余 */
-function unifyCols(){const ts=[...document.querySelectorAll("#vt table")];if(!ts.length)return;const N=11,w=Array(N).fill(0);
+function unifyCols(){const ts=[...document.querySelectorAll("#vt table")];if(!ts.length)return;const N=12,w=Array(N).fill(0);
   ts.forEach(t=>{t.style.tableLayout="auto";t.style.width="max-content";t.querySelectorAll("colgroup").forEach(c=>c.remove());t.querySelector("thead").style.display="none"}); // 量宽时不算表头，表头第三行的注可以换行
   ts.forEach(t=>{const tr=t.querySelector("tbody tr");if(tr)[...tr.children].forEach((td,i)=>{w[i]=Math.max(w[i],td.getBoundingClientRect().width)})});
-  w[6]=Math.min(w[6],120); // 辞書形列（第 7 列）封顶：释义行允许换行，不让它挤掉備考
+  w[7]=Math.min(w[7],110); // 辞書形列（第 8 列）封顶：释义行允许换行，不让它挤掉備考
   ts.forEach(t=>{t.querySelector("thead").style.display="";const cg=document.createElement("colgroup");for(let i=0;i<N;i++){const c=document.createElement("col");if(i<N-1)c.style.width=Math.ceil(w[i])+"px";cg.appendChild(c)}t.insertBefore(cg,t.firstChild);t.style.tableLayout="fixed";t.style.width="100%"})}
 
 /* ---------- 自他表 ---------- */
@@ -123,7 +124,7 @@ function renderPairs(){
 
 /* ---------- 组装 ---------- */
 const navParts=[[1,[]],[2,[]],[3,[link("jita-hyo","表","自他対応表（46組）")]]];
-SEC.forEach(s=>{navParts.find(p=>p[0]===s.p)[1].push(secLink(s));if(s.id==="keimei")navParts[0][1].push(link("katsuyo-hyo","表",`五段八形 活用表（${VERBS.length}語）`))}); // 活用表紧跟「形の名前の整理」，在变形规则之前
+SEC.forEach(s=>{navParts.find(p=>p[0]===s.p)[1].push(secLink(s));if(s.id==="keimei")navParts[0][1].push(link("katsuyo-hyo","表",`五段十形 活用表（${VERBS.length}語）`))}); // 活用表紧跟「形の名前の整理」，在变形规则之前
 document.getElementById("nav").innerHTML=navParts.map(([p,ls])=>`<p class="nt">${PARTS[p]}</p>`+ls.join("")).join("");
 let html="",lastP=0;
 SEC.forEach(s=>{
