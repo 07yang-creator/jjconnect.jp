@@ -38,11 +38,11 @@ function derive(r){const k=r[0],nai=k==="ある"?"ない":suf(r[3],"ない"),mas
   return{nai,masu,ishi}}
 // 严格按 あ・い・う・え・お 排：辞書形（う段）放在 い段 和 え段 之间
 // 第三个元素 true＝该列是一个段的第一列，画分隔线
-const VC1=[[(r,d)=>d.nai,"hk",1],[r=>r[8],"uk"],[r=>r[7],"sk"],[r=>r[4],"hk",1],[(r,d)=>d.masu,"hk"]],VC2=[[r=>r[6],"hk",1],[r=>r[9],"kn"],[(r,d)=>d.ishi,"hk",1]];
-const vcell=(base,r,d)=>([g,c,gs])=>`<td class="ja${gs?" gs":""}" lang="ja">${fcell(base,g(r,d),c)}</td>`;
+const VC1=[[(r,d)=>d.nai,"hk",1],[r=>r[8],"uk"],[r=>r[7],"sk"],[r=>r[4],"hk",1],[(r,d)=>d.masu,"hk"]],VC2=[[r=>r[6],"hk",1],[r=>r[9],r=>r[9]===r[8]?"uk":"kn"],[(r,d)=>d.ishi,"hk",1]]; // 可能形与受身形同形（一段・来る）时用同一种颜色，一眼看出是同一个形
+const vcell=(base,r,d)=>([g,c,gs])=>`<td class="ja${gs?" gs":""}" lang="ja">${fcell(base,g(r,d),typeof c==="function"?c(r):c)}</td>`;
 const VHEAD=`<thead><tr><th rowspan="2">類</th><th colspan="3" class="gs">あ段</th><th colspan="2" class="gs">い段</th><th rowspan="2" class="gs">辞書形<small class="dan">う段</small></th><th colspan="2" class="gs">え段</th><th class="gs">お段</th><th rowspan="2" class="gs">備考</th></tr>
 <tr><th class="gs">ない</th><th>受身</th><th>使役</th><th class="gs">連用</th><th>ます</th><th class="gs">命令</th><th>可能</th><th class="gs">意志</th></tr></thead>`;
-const VLEGEND=`<div class="legend">列严格按 あ・い・う・え・お 排，竖线隔开每个段：あ段＝ない・受身・使役，い段＝連用形・ます（て形＝連用形＋音便），う段＝辞書形，え段＝命令・可能，お段＝意志（一段动词没有段，一律去 る 接后缀）。着色＝与辞書形不同的部分：<span class="f kn">可能形</span>・<span class="f uk">受身形</span>・<span class="f sk">使役形</span>・<span class="f hk">其他</span>；可能・受身：書<span class="f kn">ける</span>／書<span class="f uk">かれる</span>，一段同形 食べ<span class="f kn">られる</span>／食べ<span class="f uk">られる</span>。て形见<a href="/v/onbin/material.html" target="_top">音便</a>，仮定＝え段＋ば。<br>读音右边的罗马字标出词干末尾：五段 ka<b class="rmb">k</b>-u 以辅音结尾，一段 tab<b class="rmb">e</b>-ru 以元音结尾，后缀接在连字符后面。<br><i class="sw"></i>浅色底＝五段（换段的）；无底色＝一段（去る的）・特殊。每组内五段在前，一段在后。</div>`;
+const VLEGEND=`<div class="legend">列严格按 あ・い・う・え・お 排，竖线隔开每个段：あ段＝ない・受身・使役，い段＝連用形・ます（て形＝連用形＋音便），う段＝辞書形，え段＝命令・可能，お段＝意志（一段动词没有段，一律去 る 接后缀）。着色＝与辞書形不同的部分：<span class="f kn">可能形</span>・<span class="f uk">受身形</span>・<span class="f sk">使役形</span>・<span class="f hk">其他</span>；可能・受身：書<span class="f kn">ける</span>／書<span class="f uk">かれる</span>，一段的可能形与受身形同形，两格都用受身的颜色：食べ<span class="f uk">られる</span>／食べ<span class="f uk">られる</span>（同形同色，意思靠助词和语境分）。て形见<a href="/v/onbin/material.html" target="_top">音便</a>，仮定＝え段＋ば。<br>读音右边的罗马字标出词干末尾：五段 ka<b class="rmb">k</b>-u 以辅音结尾，一段 tab<b class="rmb">e</b>-ru 以元音结尾，后缀接在连字符后面。<br><i class="sw"></i>浅色底＝五段（换段的）；无底色＝一段（去る的）・特殊。每组内五段在前，一段在后。</div>`;
 function fcell(base,s,cls){if(!s||s==="—")return hl(s||"");let i=0;while(i<s.length&&i<base.length&&s[i]===base[i])i++;return (hl(s.slice(0,i))+(i<s.length?`<span class="f ${cls}">${hl(s.slice(i))}</span>`:"")).replace(/（([^）]+)）/g,'<small class="rd">（$1）</small>')} // 括号里的读音缩小，省宽度
 function verbsSection(){return `
 <section id="katsuyo-hyo">
