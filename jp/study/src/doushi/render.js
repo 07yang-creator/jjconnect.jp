@@ -76,7 +76,7 @@ function renderVerbs(){
 function unifyCols(){const ts=[...document.querySelectorAll("#vt table")];if(!ts.length)return;const N=11,w=Array(N).fill(0);
   ts.forEach(t=>{t.style.tableLayout="auto";t.style.width="max-content";t.querySelectorAll("colgroup").forEach(c=>c.remove())});
   ts.forEach(t=>{const tr=t.querySelector("tbody tr");if(tr)[...tr.children].forEach((td,i)=>{w[i]=Math.max(w[i],td.getBoundingClientRect().width)})});
-  w[5]=Math.min(w[5],140); // 辞書形列封顶：释义行允许换行，不让它挤掉備考
+  w[6]=Math.min(w[6],135); // 辞書形列（第 7 列）封顶：释义行允许换行，不让它挤掉備考
   ts.forEach(t=>{const cg=document.createElement("colgroup");for(let i=0;i<N;i++){const c=document.createElement("col");if(i<N-1)c.style.width=Math.ceil(w[i])+"px";cg.appendChild(c)}t.insertBefore(cg,t.firstChild);t.style.tableLayout="fixed";t.style.width="100%"})}
 
 /* ---------- 自他表 ---------- */
