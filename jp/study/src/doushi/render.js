@@ -57,7 +57,14 @@ function verbsSection(){return `
 <section id="katsuyo-hyo">
   <span class="cat">活用表</span>
   <h2><span class="ja" lang="ja">五段八形 ── 動詞活用表（${VERBS.length} 語・${VGROUPS.length} 組）</span></h2>
-  <p class="lead">按意思分成 ${VGROUPS.length} 组，列按 あ・い・う・え・お 的段排；读法见表上方的六条。可按类别筛选或输入任何活用形检索。</p>
+  <ol class="lead memo">
+    <li><b>先定类</b>：五段还是一段（非る→五段；a・u・o＋る→五段；i・e 在送り仮名里→一段；漢字一拍＋る 背九个一段）。</li>
+    <li><b>五段</b>＝词尾换段再接后缀：あ段＋ない・れる・せる，い段＋ます・て，え段＝命令／＋ば／＋る（可能），お段＋う（意志）。</li>
+    <li><b>一段</b>＝去 る 直接接：ない・ます・て・れば・ろ・よう・られる（可能＝受身）・させる。</li>
+    <li><b>て形</b>五段过音便：く→いて、ぐ→いで、う・つ・る→って、む・ぶ・ぬ→んで、す→して；行く→行って。</li>
+    <li><b>特殊</b>只有 する・来る；例外四个：ある→ない、くれる→くれ、行く→行って、問う→問うて。</li>
+  </ol>
+  <p class="lead">按意思分成 ${VGROUPS.length} 组，列按 あ・い・う・え・お 的段排；表的读法见筛选框下面的六条。</p>
   <div class="filters"><div class="chips" id="vf">${["全部","五段","一段","特殊"].map(k=>`<button data-k="${k}" aria-pressed="${k==="全部"}">${k}</button>`).join("")}</div>
   <input id="vq" type="search" placeholder="検索：辞書形・読み・活用形（例：られる）" aria-label="活用表检索"><span class="cnt" id="vcnt"></span></div>
   ${VLEGEND}
