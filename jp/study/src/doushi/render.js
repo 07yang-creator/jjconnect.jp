@@ -43,11 +43,11 @@ const vcell=(base,r,d)=>([g,c,gs])=>`<td class="ja${gs?" gs":""}" lang="ja">${fc
 const VHEAD=`<thead><tr><th rowspan="2">類</th><th colspan="3" class="gs">あ段</th><th colspan="2" class="gs">い段</th><th rowspan="2" class="gs">辞書形<small class="dan">う段</small></th><th colspan="2" class="gs">え段</th><th class="gs">お段</th><th rowspan="2" class="gs">備考</th></tr>
 <tr><th class="gs">ない</th><th>受身</th><th>使役</th><th class="gs">連用</th><th>ます</th><th class="gs">命令</th><th>可能</th><th class="gs">意志</th></tr></thead>`;
 const VLEGEND=`<div class="legend">列严格按 あ・い・う・え・お 排，竖线隔开每个段：あ段＝ない・受身・使役，い段＝連用形・ます（て形＝連用形＋音便），う段＝辞書形，え段＝命令・可能，お段＝意志（一段动词没有段，一律去 る 接后缀）。着色＝与辞書形不同的部分：<span class="f kn">可能形</span>・<span class="f uk">受身形</span>・<span class="f sk">使役形</span>・<span class="f hk">其他</span>；可能・受身：書<span class="f kn">ける</span>／書<span class="f uk">かれる</span>，一段的可能形与受身形同形，两格都用受身的颜色：食べ<span class="f uk">られる</span>／食べ<span class="f uk">られる</span>（同形同色，意思靠助词和语境分）。て形见<a href="/v/onbin/material.html" target="_top">音便</a>，仮定＝え段＋ば。<br>读音右边的罗马字标出词干末尾：五段 ka<b class="rmb">k</b>-u 以辅音结尾，一段 tab<b class="rmb">e</b>-ru 以元音结尾，后缀接在连字符后面。<br><i class="sw"></i>浅色底＝五段（换段的）；无底色＝一段（去る的）・特殊。每组内五段在前，一段在后。</div>`;
-function fcell(base,s,cls){if(!s||s==="—")return hl(s||"");let i=0;while(i<s.length&&i<base.length&&s[i]===base[i])i++;return (hl(s.slice(0,i))+(i<s.length?`<span class="f ${cls}">${hl(s.slice(i))}</span>`:"")).replace(/（([^）]+)）/g,'<small class="rd">（$1）</small>')} // 括号里的读音缩小，省宽度
+function fcell(base,s,cls){if(!s||s==="—")return hl(s||"");let i=0;while(i<s.length&&i<base.length&&s[i]===base[i])i++;return (hl(s.slice(0,i))+(i<s.length?`<span class="f ${cls}">${hl(s.slice(i))}</span>`:"")).replace(/（([^）]+)）/g,'<small class="rd">$1</small>')} // 括号里的读音另起一小行，特殊动词不撑宽整列
 function verbsSection(){return `
 <section id="katsuyo-hyo">
   <span class="cat">活用表</span>
-  <h2><span class="ja" lang="ja">五段八形 ── 動詞活用表（${VERBS.length} 語・${VGROUPS.length} 組）</span></h2>
+  <h2><span class="ja" lang="ja">五段九形 ── 動詞活用表（${VERBS.length} 語・${VGROUPS.length} 組）</span></h2>
   <p class="lead">按意思分成 ${VGROUPS.length} 组，列按 あ・い・う・え・お 的段排。未然形・仮定形这些「半个词」不单列（ない形＝未然形＋ない，仮定＝え段＋ば）；連用形留着，因为它能独立用（中止法・名词化・お〜する）。一段的可能形写标准形，口语的ら抜き形在备注栏。各形的做法见下面的「活用の作り方」和「五段の段の対応」。可按类别筛选或输入任何活用形检索。</p>
   <div class="filters"><div class="chips" id="vf">${["全部","五段","一段","特殊"].map(k=>`<button data-k="${k}" aria-pressed="${k==="全部"}">${k}</button>`).join("")}</div>
   <input id="vq" type="search" placeholder="検索：辞書形・読み・活用形（例：られる）" aria-label="活用表检索"><span class="cnt" id="vcnt"></span></div>
@@ -60,7 +60,7 @@ function hl(s){if(!vq)return esc(s);const i=s.indexOf(vq);return i<0?esc(s):esc(
 const vrow=(r,cb)=>{const base=r[0].split("（")[0],d=derive(r);return `<tr class="${KCLS[r[2]]}${cb?" cb":""}">
     <td><span class="k ${KCLS[r[2]]}">${r[2]}</span></td>
     ${VC1.map(vcell(base,r,d)).join("")}
-    <td class="ja hw gs" lang="ja">${hl(r[0])}<span class="yomi">${hl(r[1])}${(rm=>rm?`<i class="rm">${rm}</i>`:"")(romStem(r[1],r[2]))}</span>${r[13]?`<span class="yomi imi">${hl(r[13])}${r[14]?" · "+hl(r[14]):""}</span>`:""}</td>
+    <td class="ja hw gs" lang="ja">${hl(r[0].split("（")[0])}${r[0].includes("（")?`<span class="yomi">${hl(r[0].slice(r[0].indexOf("（")+1,-1))}</span>`:""}<span class="yomi">${hl(r[1])}${(rm=>rm?`<i class="rm">${rm}</i>`:"")(romStem(r[1],r[2]))}</span>${r[13]?`<span class="yomi imi">${hl(r[13])}${r[14]?" · "+hl(r[14]):""}</span>`:""}</td>
     ${VC2.map(vcell(base,r,d)).join("")}
     <td class="note gs">${hl(r[10])}</td></tr>`};
 function renderVerbs(){
@@ -70,7 +70,14 @@ function renderVerbs(){
     return `<h3 class="vg" id="vg-${i}"><span class="ja" lang="ja">${esc(g)}</span><small>${rs.length} 語</small></h3><div class="tw"><table>${VHEAD}<tbody>${rs.map((r,i)=>vrow(r,i>0&&rs[i-1][2]!==r[2])).join("")}</tbody></table></div>`}).join("")
     ||`<p style="color:var(--sub)">没有匹配的词</p>`;
   document.getElementById("vcnt").textContent=`${rows.length} / ${VERBS.length}`;
+  unifyCols();
 }
+/* 七张组表共用一套列宽：按各列内容的最大需要定前 10 列，備考吃掉剩余 */
+function unifyCols(){const ts=[...document.querySelectorAll("#vt table")];if(!ts.length)return;const N=11,w=Array(N).fill(0);
+  ts.forEach(t=>{t.style.tableLayout="auto";t.style.width="max-content";t.querySelectorAll("colgroup").forEach(c=>c.remove())});
+  ts.forEach(t=>{const tr=t.querySelector("tbody tr");if(tr)[...tr.children].forEach((td,i)=>{w[i]=Math.max(w[i],td.getBoundingClientRect().width)})});
+  w[5]=Math.min(w[5],140); // 辞書形列封顶：释义行允许换行，不让它挤掉備考
+  ts.forEach(t=>{const cg=document.createElement("colgroup");for(let i=0;i<N;i++){const c=document.createElement("col");if(i<N-1)c.style.width=Math.ceil(w[i])+"px";cg.appendChild(c)}t.insertBefore(cg,t.firstChild);t.style.tableLayout="fixed";t.style.width="100%"})}
 
 /* ---------- 自他表 ---------- */
 const TY={"対":["t1","词汇对子"],"使":["t2","使役代用"],"受":["t3","受身代用"],"類":["t4","近义・用法有别"]};
@@ -98,7 +105,7 @@ function renderPairs(){
 
 /* ---------- 组装 ---------- */
 const navParts=[[1,[]],[2,[]],[3,[link("jita-hyo","表","自他対応表（46組）")]]];
-SEC.forEach(s=>{navParts.find(p=>p[0]===s.p)[1].push(secLink(s));if(s.id==="keimei")navParts[0][1].push(link("katsuyo-hyo","表",`五段八形 活用表（${VERBS.length}語）`))}); // 活用表紧跟「形の名前の整理」，在变形规则之前
+SEC.forEach(s=>{navParts.find(p=>p[0]===s.p)[1].push(secLink(s));if(s.id==="keimei")navParts[0][1].push(link("katsuyo-hyo","表",`五段九形 活用表（${VERBS.length}語）`))}); // 活用表紧跟「形の名前の整理」，在变形规则之前
 document.getElementById("nav").innerHTML=navParts.map(([p,ls])=>`<p class="nt">${PARTS[p]}</p>`+ls.join("")).join("");
 let html="",lastP=0;
 SEC.forEach(s=>{
