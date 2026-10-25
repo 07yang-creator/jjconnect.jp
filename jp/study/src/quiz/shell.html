@@ -128,7 +128,7 @@ button:focus-visible{outline:2px solid var(--ai);outline-offset:2px}
   <div class="score" id="scorebox"><b id="sc">0</b> / <span id="done">0</span> 答对<br>已完成 <span id="pct">0</span>%</div>
 </header>
 <div class="tabs" id="sets" role="group" aria-label="题库" style="margin-bottom:12px"></div>
-<div class="modes" role="group" aria-label="模式"><button id="mP">练习模式</button><button id="mE">考试模式</button></div>
+<div class="modes" role="group" aria-label="模式"><button id="mP">练习模式</button><button id="mX">打乱模式</button><button id="mE">考试模式</button></div>
 
 <section id="practice">
 <div class="tabs" id="tabs" role="group" aria-label="难度筛选"></div>
@@ -147,6 +147,19 @@ button:focus-visible{outline:2px solid var(--ai);outline-offset:2px}
 </main>
 <section class="result" id="result"></section>
 <div class="foot"><span>题号颜色：灰＝未答　绿＝答对　红＝答错；下方色条表示难度。</span><button id="reset">清空练习记录・重新打乱选项</button></div>
+</section>
+
+<section id="mix" hidden>
+  <div class="exambar"><span>第 <b id="xPos">1</b> / <b id="xTot">0</b>　已答 <b id="xDone">0</b> 题　·　不分难度、不计入练习记录</span><button class="submit ghost" id="xShuffle">重新打乱</button></div>
+  <div class="grid" id="xGrid" aria-label="打乱题目导航"></div>
+  <main class="card">
+    <div class="meta"><span></span><span id="xNo"></span></div>
+    <p class="stem ja" id="xStem" lang="ja"></p>
+    <div class="opts" id="xOpts"></div>
+    <div class="stamp" id="xStamp" aria-hidden="true"></div>
+    <div class="exp" id="xExp" hidden><div class="ans" id="xAns"></div><div id="xWhy"></div></div>
+    <div class="nav"><button id="xPrev">上一题</button><span class="hint">键盘 1–4 选择，← → 翻页</span><button id="xNext" class="primary">下一题</button></div>
+  </main>
 </section>
 
 <section id="exam" hidden>

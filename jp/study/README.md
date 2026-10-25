@@ -53,7 +53,10 @@ src/fukushu/  同上
 src/doushi/        shell.html + data.js (VERBS 活用表 93 行・末四列是 グループ／出典／意味／English / PAIRS 自他 46 行 / SEC 讲解 27 组；第一部按用户口述的六章排，章名放在 cat 里：① 構造 ② 段の意味 ③ 五段と一段 ④ 変形規則 ⑤ 連用 ⑥ 特殊) + render.js + footer.html
                    表格・例句里 ｛…｝＝着色的「与辞書形不同的部分」：按列头或行头的形选色（仮定 kt 緑・可能 kn 青・受身 uk 朱・使役 sk 紫），没有形的用节的 hk 或默认茶色；wide:true 的表横向滚动。
                    活用表（VERBS）自动着色：每格与辞書形的公共前缀之后的部分，列严格按段排（五段十形）：あ段 ない・受身・使役｜い段 連用形→ます形・て形・た形｜う段 辞書形｜え段 命令・可能｜お段 意志，段之间竖线、五段／一段块之间横线；ない形・ます形・意志形在 render.js 的 derive() 里由未然形／連用形推出，未然・連用・仮定 不单列
-src/_engine/       **共用测验引擎**：quiz.js（练习／错题循环／考试／错题复习＋错题本导出）＋ shell.html（模板，{{TITLE}}／{{H1}}）。
+src/_engine/       **共用测验引擎**：quiz.js（练习／打乱／错题循环／考试／错题复习＋错题本导出）＋ shell.html（模板，{{TITLE}}／{{H1}}）。
+                   **打乱模式**（`st.mix[题库]={o,cur,ans}`）：把本题库全部题目随机排一遍，不显示难度标签、不按难度筛选、格子不标对错，
+                   作答只给即时反馈，**不写 `st.a`（练习记录）也不写 `st.mist`（错题本）**；顺序和进度存在 localStorage 里，离开再回来接着做，
+                   「重新打乱」重开一轮。题库题数变了会自动重排。接续 400 题和動詞 280 题、content/setsuzoku/quiz.html 各自有一份同样的实现。
                    每页只有 config.js（CFG={key,title,wordInfo,gloss?,sets}）＋ meta.json（标题）＋ data；tools/assemble.cjs 拼装。goi／jita／doushi-drill 都用它。
                    gloss(it,setIndex,answered) 返回题干下的词义行（drill／jita 用；填空题不要给，会泄露答案）。
 tools/glosses.cjs  动词英文释义表（活用表 93 词＋自他 248 词）；gen_katsuyo／gen_jita 都从这里取英文，缺词即报错，加新动词先补这里。

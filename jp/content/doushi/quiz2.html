@@ -141,7 +141,7 @@ button:focus-visible{outline:2px solid var(--ai);outline-offset:2px}
   <div class="score" id="scorebox"><b id="sc">0</b> / <span id="done">0</span> 答对<br>已完成 <span id="pct">0</span>%</div>
 </header>
 <div class="tabs" id="sets" role="group" aria-label="题库" style="margin-bottom:12px"></div>
-<div class="modes" role="group" aria-label="模式"><button id="mP">练习模式</button><button id="mL">错题循环</button><button id="mE">考试模式</button><button id="mR">错题复习</button></div>
+<div class="modes" role="group" aria-label="模式"><button id="mP">练习模式</button><button id="mX">打乱模式</button><button id="mL">错题循环</button><button id="mE">考试模式</button><button id="mR">错题复习</button></div>
 
 <section id="practice">
 <div class="tabs" id="tabs" role="group" aria-label="分组筛选"></div>
@@ -160,6 +160,19 @@ button:focus-visible{outline:2px solid var(--ai);outline-offset:2px}
 </main>
 <section class="result" id="result"></section>
 <div class="foot"><span>题号颜色：灰＝未答　绿＝答对　红＝答错；下方色条表示分组。</span><button id="reset">清空练习记录・重新打乱选项</button></div>
+</section>
+
+<section id="mix" hidden>
+  <div class="exambar"><span>第 <b id="xPos">1</b> / <b id="xTot">0</b>　已答 <b id="xDone">0</b> 题　·　不分难度、不计入练习记录与错题本</span><button class="submit ghost" id="xShuffle">重新打乱</button></div>
+  <div class="grid" id="xGrid" aria-label="打乱题目导航"></div>
+  <main class="card">
+    <div class="meta"><span></span><span id="xNo"></span></div>
+    <p class="stem ja" id="xStem" lang="ja"></p>
+    <div class="opts" id="xOpts"></div>
+    <div class="stamp" id="xStamp" aria-hidden="true"></div>
+    <div class="exp" id="xExp" hidden><div class="ans" id="xAns"></div><div id="xWhy"></div></div>
+    <div class="nav"><button id="xPrev">上一题</button><span class="hint">键盘 1–4 选择，← → 翻页</span><button id="xNext" class="primary">下一题</button></div>
+  </main>
 </section>
 
 <section id="loop" hidden>
@@ -498,11 +511,11 @@ function rng(s){return()=>{s=(Math.imul(s,1103515245)+12345)&0x7fffffff;return s
 function buildItems(si){const S=SETS[si],salt=st.salt[si]||0;S.items=S.raw.map((q,i)=>{const r=rng((i+1)*7919+17+si*131+salt*7001);const idx=[0,1,2,3];
   for(let j=3;j>0;j--){const k=Math.floor(r()*(j+1));[idx[j],idx[k]]=[idx[k],idx[j]]}
   return{lv:q[0],stem:q[1],opts:idx.map(x=>q[2][x]),ans:idx.indexOf(0),exp:q[3],correct:q[2][0],w1:q[4]||"",w2:q[5]||"",w3:q[6]||""}})}
-let st={set:0,a:[],cur:[],f:0,mode:"practice",range:0,count:20,exam:null,salt:[],mist:[],loop:[]};
+let st={set:0,a:[],cur:[],f:0,mode:"practice",range:0,count:20,exam:null,salt:[],mist:[],loop:[],mix:[]};
 try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&Array.isArray(s.a))st=Object.assign(st,s)}catch(e){}
-for(const k of ["a","cur","salt","mist","loop"])if(!Array.isArray(st[k]))st[k]=[];
+for(const k of ["a","cur","salt","mist","loop","mix"])if(!Array.isArray(st[k]))st[k]=[];
 while(st.a.length<SETS.length)st.a.push({});while(st.cur.length<SETS.length)st.cur.push(0);
-while(st.salt.length<SETS.length)st.salt.push(0);while(st.mist.length<SETS.length)st.mist.push({});while(st.loop.length<SETS.length)st.loop.push(null);
+while(st.salt.length<SETS.length)st.salt.push(0);while(st.mist.length<SETS.length)st.mist.push({});while(st.loop.length<SETS.length)st.loop.push(null);while(st.mix.length<SETS.length)st.mix.push(null);
 if(st.mode==="review")st.mode="practice";
 SETS.forEach((_,si)=>buildItems(si));
 const SET=()=>SETS[st.set], IT=()=>SET().items, LVS=()=>SET().lv, ANS=()=>st.a[st.set], N=()=>IT().length, MIST=()=>st.mist[st.set];
@@ -539,7 +552,7 @@ function setTabs(){const el=$("sets");el.innerHTML="";SETS.forEach((S,i)=>{const
   b.textContent=S.name;b.setAttribute("aria-pressed",st.set===i);
   b.onclick=()=>{if(st.set===i)return;st.set=i;st.f=0;st.range=0;if(st.exam&&!st.exam.end){if(!confirm("正在进行的测验将被放弃，确定切换题库？"))return}st.exam=null;rv={cur:0,ans:null};save();render()};el.appendChild(b)})}
 function setMode(m){st.mode=m;rv={cur:0,ans:null};save();render()}
-$("mP").onclick=()=>setMode("practice");$("mE").onclick=()=>setMode("exam");$("mR").onclick=()=>setMode("review");$("mL").onclick=()=>setMode("loop");
+$("mP").onclick=()=>setMode("practice");$("mX").onclick=()=>setMode("mix");$("mE").onclick=()=>setMode("exam");$("mR").onclick=()=>setMode("review");$("mL").onclick=()=>setMode("loop");
 
 /* ---------- shared card helpers ---------- */
 function optButtons(el,it,a,onPick){el.innerHTML="";it.opts.forEach((t,k)=>{const b=document.createElement("button");b.className="opt ja"+(t.length>12?" long":"");b.lang="ja";
@@ -581,7 +594,7 @@ function score(){const keys=Object.keys(ANS());const ok=keys.filter(i=>ANS()[i]=
 function go(d){const v=visible(),p=v.indexOf(CUR());const n=v[p+d];if(n!=null){setCur(n);save();render()}}
 $("prev").onclick=()=>go(-1);$("next").onclick=()=>go(1);
 $("reset").onclick=()=>{if(confirm(`确定清空「${SET().name}」的练习记录？选项顺序也会重新打乱（错题记录保留）。`)){st.a[st.set]={};setCur(0);st.f=0;
-  st.salt[st.set]=1+Math.floor(Math.random()*9998);if(st.exam&&st.exam.set===st.set)st.exam=null;st.loop[st.set]=null;buildItems(st.set);save();render()}};
+  st.salt[st.set]=1+Math.floor(Math.random()*9998);if(st.exam&&st.exam.set===st.set)st.exam=null;st.loop[st.set]=null;st.mix[st.set]=null;buildItems(st.set);save();render()}};
 
 /* ---------- review (mistakes) ---------- */
 let rv={cur:0,ans:null,ok:false};
@@ -606,6 +619,27 @@ function rvChoose(k){if(rv.ans!=null)return;const pool=rvPool(),i=pool[rv.cur],i
   $("rNext").textContent=rv.ok?"已移除，下一题":"下一题";$("rCount").textContent=`本题库错题 ${rvPool().length} 题　·　全部 ${mistTotal()} 题`;pop("rStamp")}
 $("rNext").onclick=()=>{if(!(rv.ans!=null&&rv.ok))rv.cur++;rv.ans=null;rv.ok=false;renderReview()};
 $("rPrev").onclick=()=>{if(rv.cur>0){rv.cur--;rv.ans=null;rv.ok=false;renderReview()}};
+
+/* ---------- mix (打乱模式：全题库随机排列，不分难度、不写练习记录和错题本，进度可恢复) ---------- */
+const MIX=()=>st.mix[st.set];
+function mixStart(){st.mix[st.set]={o:shuffle(IT().map((_,i)=>i)),cur:0,ans:{}};save()}
+// a stale session (题库题数变了) is rebuilt rather than shown wrong
+function mixEnsure(){const M=MIX();if(!M||!Array.isArray(M.o)||M.o.length!==N()||M.o.some(i=>i>=N()))mixStart()}
+function mixChoose(k){const M=MIX();if(!M||M.ans[M.cur]!=null)return;M.ans[M.cur]=k;save();renderMix();pop("xStamp")}
+function mixGo(d){const M=MIX(),n=M.cur+d;if(n>=0&&n<M.o.length){M.cur=n;save();renderMix()}}
+function renderMix(){mixEnsure();const M=MIX(),i=M.o[M.cur],it=IT()[i],a=M.ans[M.cur];
+  $("xPos").textContent=M.cur+1;$("xTot").textContent=M.o.length;$("xDone").textContent=Object.keys(M.ans).length;
+  const g=$("xGrid");g.innerHTML="";
+  // no lv class and no ok/ng class: 不分难度、不标记对错，只显示答过没有
+  M.o.forEach((qi,k)=>{const b=document.createElement("button");b.className=(M.ans[k]!=null?"sel":"")+(k===M.cur?" cur":"");
+    b.setAttribute("aria-label",`第${k+1}题`+(M.ans[k]!=null?"，已答":"，未答"));
+    b.onclick=()=>{M.cur=k;save();renderMix()};g.appendChild(b)});
+  $("xNo").textContent=`第 ${M.cur+1} 题 / ${M.o.length}`;
+  $("xStem").innerHTML=fill(it,a!=null?esc(it.correct):"　");
+  optButtons($("xOpts"),it,a,mixChoose);stampExp("x",it,a);
+  $("xPrev").disabled=M.cur<=0;$("xNext").disabled=M.cur>=M.o.length-1}
+$("xPrev").onclick=()=>mixGo(-1);$("xNext").onclick=()=>mixGo(1);
+$("xShuffle").onclick=()=>{if(confirm(`重新打乱「${SET().name}」？本轮作答会清空（打乱模式本来就不记入练习记录）。`)){mixStart();renderMix()}};
 
 /* ---------- loop (错题循环：答到全对为止) ---------- */
 const LOOP=()=>st.loop[st.set];
@@ -694,15 +728,17 @@ function renderReport(){const e=st.exam,EI=SETS[e.set].items,EL=SETS[e.set].lv,n
 /* ---------- keys & render ---------- */
 document.addEventListener("keydown",e=>{
   if(st.mode==="practice"){if(e.key>="1"&&e.key<="4")choose(+e.key-1);else if(e.key==="ArrowRight")go(1);else if(e.key==="ArrowLeft")go(-1)}
+  else if(st.mode==="mix"){if(e.key>="1"&&e.key<="4")mixChoose(+e.key-1);else if(e.key==="ArrowRight")mixGo(1);else if(e.key==="ArrowLeft")mixGo(-1)}
   else if(st.mode==="review"){if(e.key>="1"&&e.key<="4")rvChoose(+e.key-1);else if(e.key==="ArrowRight")$("rNext").click();else if(e.key==="ArrowLeft")$("rPrev").click()}
   else if(st.mode==="loop"){const L=LOOP();if(!L||L.end)return;if(e.key>="1"&&e.key<="4")loopChoose(+e.key-1);else if((e.key==="Enter"||e.key==="ArrowRight")&&L.ans!=null){e.preventDefault();loopNext()}}
   else if(st.exam&&!st.exam.end){if(e.key>="1"&&e.key<="4")pick(+e.key-1);else if(e.key==="ArrowRight")$("eNext").click();else if(e.key==="ArrowLeft")$("ePrev").click()}});
 function modeBadge(){$("mR").textContent=`错题复习（${mistTotal()}）`}
 function render(){const M=st.mode;setTabs();modeBadge();
-  for(const [id,m] of [["mP","practice"],["mE","exam"],["mL","loop"],["mR","review"]])$(id).setAttribute("aria-pressed",M===m);
-  $("practice").hidden=M!=="practice";$("exam").hidden=M!=="exam";$("review").hidden=M!=="review";$("loop").hidden=M!=="loop";$("scorebox").hidden=M!=="practice";
+  for(const [id,m] of [["mP","practice"],["mX","mix"],["mE","exam"],["mL","loop"],["mR","review"]])$(id).setAttribute("aria-pressed",M===m);
+  $("practice").hidden=M!=="practice";$("mix").hidden=M!=="mix";$("exam").hidden=M!=="exam";$("review").hidden=M!=="review";$("loop").hidden=M!=="loop";$("scorebox").hidden=M!=="practice";
   clearInterval(timer);
   if(M==="practice"){tabs();grid();card();score();return}
+  if(M==="mix"){renderMix();return}
   if(M==="review"){renderReview();return}
   if(M==="loop"){renderLoop();return}
   const e=st.exam;

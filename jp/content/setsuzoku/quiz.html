@@ -126,7 +126,7 @@ button:focus-visible{outline:2px solid var(--ai);outline-offset:2px}
   <h1>日语接续表达 100题<small>从入门到高级，五个难度递进。练习模式即时判题，考试模式交卷后自动评分。</small></h1>
   <div class="score" id="scorebox"><b id="sc">0</b> / <span id="done">0</span> 答对<br>已完成 <span id="pct">0</span>%</div>
 </header>
-<div class="modes" role="group" aria-label="模式"><button id="mP">练习模式</button><button id="mE">考试模式</button></div>
+<div class="modes" role="group" aria-label="模式"><button id="mP">练习模式</button><button id="mX">打乱模式</button><button id="mE">考试模式</button></div>
 
 <section id="practice">
 <div class="tabs" id="tabs" role="group" aria-label="难度筛选"></div>
@@ -145,6 +145,19 @@ button:focus-visible{outline:2px solid var(--ai);outline-offset:2px}
 </main>
 <section class="result" id="result"></section>
 <div class="foot"><span>题号颜色：灰＝未答　绿＝答对　红＝答错；下方色条表示难度。</span><button id="reset">清空练习记录・重新打乱选项</button></div>
+</section>
+
+<section id="mix" hidden>
+  <div class="exambar"><span>第 <b id="xPos">1</b> / <b id="xTot">0</b>　已答 <b id="xDone">0</b> 题　·　不分难度、不计入练习记录</span><button class="submit ghost" id="xShuffle">重新打乱</button></div>
+  <div class="grid" id="xGrid" aria-label="打乱题目导航"></div>
+  <main class="card">
+    <div class="meta"><span></span><span id="xNo"></span></div>
+    <p class="stem ja" id="xStem" lang="ja"></p>
+    <div class="opts" id="xOpts"></div>
+    <div class="stamp" id="xStamp" aria-hidden="true"></div>
+    <div class="exp" id="xExp" hidden><div class="ans" id="xAns"></div><div id="xWhy"></div></div>
+    <div class="nav"><button id="xPrev">上一题</button><span class="hint">键盘 1–4 选择，← → 翻页</span><button id="xNext" class="primary">下一题</button></div>
+  </main>
 </section>
 
 <section id="exam" hidden>
@@ -302,7 +315,7 @@ const lvTag=it=>`<i style="background:${LV[it.lv].c}"></i>${LV[it.lv].n}`;
 
 /* ---------- mode ---------- */
 function setMode(m){st.mode=m;save();render()}
-$("mP").onclick=()=>setMode("practice");$("mE").onclick=()=>setMode("exam");
+$("mP").onclick=()=>setMode("practice");$("mX").onclick=()=>setMode("mix");$("mE").onclick=()=>setMode("exam");
 
 /* ---------- practice ---------- */
 function visible(){return ITEMS.map((_,i)=>i).filter(i=>!st.f||ITEMS[i].lv===st.f)}
@@ -339,7 +352,36 @@ function score(){const keys=Object.keys(st.a);const ok=keys.filter(i=>st.a[i]===
   r.innerHTML=h+"</div>"}
 function go(d){const v=visible(),p=v.indexOf(st.cur);const n=v[p+d];if(n!=null){st.cur=n;save();render()}}
 $("prev").onclick=()=>go(-1);$("next").onclick=()=>go(1);
-$("reset").onclick=()=>{if(confirm("确定清空全部练习记录？选项顺序也会重新打乱。")){st.a={};st.cur=0;st.f=0;st.salt=1+Math.floor(Math.random()*9998);st.exam=null;buildItems();save();render()}};
+$("reset").onclick=()=>{if(confirm("确定清空全部练习记录？选项顺序也会重新打乱。")){st.a={};st.cur=0;st.f=0;st.salt=1+Math.floor(Math.random()*9998);st.exam=null;st.mix=null;buildItems();save();render()}};
+
+
+/* ---------- mix (打乱模式：随机排列，不分难度、不写练习记录，进度可恢复) ---------- */
+const xsh=a=>{for(let j=a.length-1;j>0;j--){const k=Math.floor(Math.random()*(j+1));[a[j],a[k]]=[a[k],a[j]]}return a};
+function mixStart(){st.mix={o:xsh(ITEMS.map((_,i)=>i)),cur:0,ans:{}};save()}
+function mixEnsure(){const M=st.mix;if(!M||!Array.isArray(M.o)||M.o.length!==ITEMS.length||M.o.some(i=>i>=ITEMS.length))mixStart()}
+function mixChoose(k){const M=st.mix;if(!M||M.ans[M.cur]!=null)return;M.ans[M.cur]=k;save();renderMix();
+  const s=$("xStamp");s.classList.remove("show");void s.offsetWidth;s.classList.add("show")}
+function mixGo(d){const M=st.mix,n=M.cur+d;if(n>=0&&n<M.o.length){M.cur=n;save();renderMix()}}
+function renderMix(){mixEnsure();const M=st.mix,i=M.o[M.cur],it=ITEMS[i],a=M.ans[M.cur];
+  $("xPos").textContent=M.cur+1;$("xTot").textContent=M.o.length;$("xDone").textContent=Object.keys(M.ans).length;
+  const g=$("xGrid");g.innerHTML="";
+  M.o.forEach((qi,k)=>{const b=document.createElement("button");b.className=(M.ans[k]!=null?"sel":"")+(k===M.cur?" cur":"");
+    b.setAttribute("aria-label",`第${k+1}题`+(M.ans[k]!=null?"，已答":"，未答"));
+    b.onclick=()=>{M.cur=k;save();renderMix()};g.appendChild(b)});
+  $("xNo").textContent=`第 ${M.cur+1} 题 / ${M.o.length}`;
+  $("xStem").innerHTML=fill(it,a!=null?esc(it.correct):"　");
+  const o=$("xOpts");o.innerHTML="";
+  it.opts.forEach((t,k)=>{const b=document.createElement("button");b.className="opt ja"+(t.length>12?" long":"");b.lang="ja";
+    b.innerHTML=`<span class="k">${k+1}</span><span>${esc(t)}</span>`;
+    if(a!=null){b.disabled=true;if(k===it.ans)b.classList.add("right");else if(k===a)b.classList.add("wrong")}
+    b.onclick=()=>mixChoose(k);o.appendChild(b)});
+  const s=$("xStamp");s.className="stamp";
+  if(a!=null){s.textContent=a===it.ans?"正解":"誤";s.classList.add(a===it.ans?"ok":"ng","show");
+    $("xExp").hidden=false;$("xAns").innerHTML=`正确答案：<span class="ja" lang="ja">${esc(it.correct)}</span>`;$("xWhy").textContent=it.exp}
+  else $("xExp").hidden=true;
+  $("xPrev").disabled=M.cur<=0;$("xNext").disabled=M.cur>=M.o.length-1}
+$("xPrev").onclick=()=>mixGo(-1);$("xNext").onclick=()=>mixGo(1);
+$("xShuffle").onclick=()=>{if(confirm("重新打乱？本轮作答会清空（打乱模式本来就不记入练习记录）。")){mixStart();renderMix()}};
 
 /* ---------- exam ---------- */
 const RANGES=[["全部难度",0],["入门",1],["初级",2],["中级",3],["中高级",4],["高级",5]];
@@ -398,12 +440,14 @@ function renderReport(){const e=st.exam,n=e.ids.length;
 /* ---------- keys & render ---------- */
 document.addEventListener("keydown",e=>{
   if(st.mode==="practice"){if(e.key>="1"&&e.key<="4")choose(+e.key-1);else if(e.key==="ArrowRight")go(1);else if(e.key==="ArrowLeft")go(-1)}
+  else if(st.mode==="mix"){if(e.key>="1"&&e.key<="4")mixChoose(+e.key-1);else if(e.key==="ArrowRight")mixGo(1);else if(e.key==="ArrowLeft")mixGo(-1)}
   else if(st.exam&&!st.exam.end){if(e.key>="1"&&e.key<="4")pick(+e.key-1);else if(e.key==="ArrowRight")$("eNext").click();else if(e.key==="ArrowLeft")$("ePrev").click()}});
-function render(){const P=st.mode==="practice";
-  $("mP").setAttribute("aria-pressed",P);$("mE").setAttribute("aria-pressed",!P);
-  $("practice").hidden=!P;$("exam").hidden=P;$("scorebox").hidden=!P;
+function render(){const M=st.mode,P=M==="practice";
+  $("mP").setAttribute("aria-pressed",P);$("mX").setAttribute("aria-pressed",M==="mix");$("mE").setAttribute("aria-pressed",M==="exam");
+  $("practice").hidden=!P;$("mix").hidden=M!=="mix";$("exam").hidden=M!=="exam";$("scorebox").hidden=!P;
   clearInterval(timer);
   if(P){tabs();grid();card();score();return}
+  if(M==="mix"){renderMix();return}
   const e=st.exam;
   $("setup").hidden=!!e;$("running").hidden=!(e&&!e.end);$("report").hidden=!(e&&e.end);
   if(!e)renderSetup();else if(!e.end){renderRun();timer=setInterval(tick,1000)}else renderReport()}
