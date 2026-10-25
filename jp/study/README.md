@@ -13,7 +13,7 @@
 | `../content/doushi/material.html` | 日语动词 讲义：活用表 93 词（表里 50＋常用 43，按意思分 7 组，可检索）・受身形 8 组・自他 46 组＋5 组 | `/v/doushi/material.html`（**静态专题**） |
 | `../content/doushi/drill1.html` | 動詞活用ドリル① 基本活用：ます・ない・て・た・意志・命令・仮定，305 词（活用表 93＋自他 124 对），tools/gen_katsuyo.cjs 生成 | `/v/doushi/drill1.html`（**静态专题**） |
 | `../content/doushi/drill2.html` | 動詞活用ドリル② 派生形：可能・受身・使役・使役受身，同上 | `/v/doushi/drill2.html`（**静态专题**） |
-| `../content/doushi/quiz2.html` | 動詞 実務 100 题：連用形の用法・祈使の階段・否定と特殊動詞・時制・条件 各 20（手写，共用引擎，错题循环） | `/v/doushi/quiz2.html`（**静态专题**） |
+| `../content/doushi/quiz2.html` | 動詞 実務 200 题：文法軸 5 套（連用形の用法・祈使の階段・否定と特殊動詞・時制・条件 各 20）＋ 頻出動詞 5 套（五段動詞一覧 BCCWJ 前 100 位里此前没考过的 50 词，每词 基本 1・応用 1）。手写，共用引擎，错题循环 | `/v/doushi/quiz2.html`（**静态专题**） |
 | `../content/doushi/godan.html` | 五段動詞一覧（頻度順）：BCCWJ 語彙表 ver1.0 的全部动词经 UniDic 标活用型后只留五段，6,047 词，按行筛选・「像一段的五段」・检索 | `/v/doushi/godan.html`（**静态专题**） |
 | `../content/doushi/drill3.html` | 頻度順ドリル：BCCWJ 最常用 100 个五段动词，按频率复现（1–20 位全 11 形、21–50 位 7 形、51–100 位 4 形），625 题，tools/gen_godan_drill.cjs 生成 | `/v/doushi/drill3.html`（**静态专题**） |
 | `../content/onbin/material.html` | 音便 讲义：四种音便・て形全规则・た／たら／たり／ちゃう・「ん」の四つの正体・〜んです，附 98 词音便一览表 | `/v/onbin/material.html`（**静态专题**） |
@@ -58,7 +58,11 @@ src/_engine/       **共用测验引擎**：quiz.js（练习／错题循环／�
                    gloss(it,setIndex,answered) 返回题干下的词义行（drill／jita 用；填空题不要给，会泄露答案）。
 tools/glosses.cjs  动词英文释义表（活用表 93 词＋自他 248 词）；gen_katsuyo／gen_jita 都从这里取英文，缺词即报错，加新动词先补这里。
 src/doushi-godan/  五段動詞一覧：shell.html + data.js（GODAN 6,047 行 ＋ GODAN_META，由 tools/gen_godan.py 从 BCCWJ 語彙表＋UniDic 生成，输入数据不入库，见脚本头部说明）+ render.js + footer.html；tools/check_godan.cjs 查结构与陷阱词
-src/doushi-quiz2/  動詞 実務 100 题：config.js／meta.json + data/{renyou,kishi,hitei,jisei,jouken}.js（手写各 20，基本 10＋応用 10）；tools/check_doushi2.cjs 查结构、每题的词必须出现在动词讲义里；key `jp-doushi2-v1`
+src/doushi-quiz2/  動詞 実務 200 题：config.js／meta.json + data/{renyou,kishi,hitei,jisei,jouken}.js（文法軸，手写各 20，基本 10＋応用 10）
+                   + data/hin{1..5}.js（頻出動詞，手写各 20）：从 doushi-godan/data.js（BCCWJ 頻度順）前 100 位里挑 50 个 renyou〜jouken 没考过的词，
+                   按 1–20／21–40／41–60／61–80／81–100 位分五套，每套 10 词 × （基本 1 ＋ 応用 1）。基本考形（自他・接続・音便・活用），応用考场合（语体・敬语方向・近义选择）。
+                   tools/check_doushi2.cjs 查结构；文法軸 5 套的词必须出现在动词讲义里，頻出 5 套的词必须在一覧前 100 位内、每词正好 2 题、50 词互不重复；key `jp-doushi2-v1`
+                   **加套时把新文件追加在末尾**，别插在中间——错题本按「题库序号 + 题号」存，插队会让用户已有的错题全部指错题目。
                    config3.js／meta3.json（頻度順ドリル）；data/freq{1,2,3}.js 由 tools/gen_godan_drill.cjs 从 doushi-godan/data.js 前 100 词生成（复用 gen_katsuyo.cjs 导出的 form／wrongs／explain）；tools/check_godan_drill.cjs
 src/doushi-drill/  config1.js／meta1.json（基本活用 7 形）、config2.js／meta2.json（派生形 4 形）；data/*.js 由 tools/gen_katsuyo.cjs 生成（勿手改）：
                    从 doushi/data.js 的 VERBS＋jita map 的 124 对取 305 个动词，按类（五段／一段／五段例外／特殊）造每种形，干扰项＝真实的错误变形
