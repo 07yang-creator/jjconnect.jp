@@ -101,7 +101,7 @@ function renderReview(){const pool=rvPool();
   if(!pool.length)return;
   if(rv.cur>=pool.length)rv.cur=0;
   const i=pool[rv.cur],it=IT()[i],e=MIST()[i];
-  const g=$("rGrid");g.innerHTML="";g.style.gridTemplateColumns=`repeat(${Math.min(pool.length,20)},1fr)`;
+  const g=$("rGrid");g.innerHTML="";
   pool.forEach((qi,k)=>{const b=document.createElement("button");b.className=`lv${IT()[qi].lv}`+(k===rv.cur?" cur":"");b.setAttribute("aria-label",`错题${k+1}`);
     b.onclick=()=>{rv={cur:k,ans:null,ok:false};renderReview()};g.appendChild(b)});
   $("rLv").innerHTML=lvTag(it);$("rNo").textContent=`错题 ${rv.cur+1} / ${pool.length}　（原题第 ${i+1} 题・错 ${e.n} 次）`;
@@ -163,7 +163,7 @@ let timer=null;
 function tick(){const e=st.exam;if(e&&!e.end)$("eTime").textContent=fmt(Date.now()-e.start)}
 function renderRun(){const e=st.exam,EI=SETS[e.set].items,EL=SETS[e.set].lv,n=e.ids.length,i=e.ids[e.cur],it=EI[i],a=e.ans[e.cur];
   $("eDone").textContent=Object.keys(e.ans).length;$("eTot").textContent=n;tick();
-  const g=$("eGrid");g.innerHTML="";g.style.gridTemplateColumns=`repeat(${Math.min(n,20)},1fr)`;
+  const g=$("eGrid");g.innerHTML="";
   e.ids.forEach((qi,k)=>{const b=document.createElement("button");b.className=`lv${EI[qi].lv}`+(e.ans[k]!=null?" sel":"")+(k===e.cur?" cur":"");
     b.setAttribute("aria-label",`第${k+1}题`+(e.ans[k]!=null?"，已答":"，未答"));b.onclick=()=>{e.cur=k;save();renderRun()};g.appendChild(b)});
   $("eLv").innerHTML=lvTag(it,EL);$("eNo").textContent=`第 ${e.cur+1} 题 / ${n}`;

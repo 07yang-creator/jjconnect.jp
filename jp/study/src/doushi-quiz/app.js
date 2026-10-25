@@ -85,7 +85,7 @@ let timer=null;
 function tick(){const e=st.exam;if(e&&!e.end)$("eTime").textContent=fmt(Date.now()-e.start)}
 function renderRun(){const e=st.exam,EI=SETS[e.set].items,EL=SETS[e.set].lv,n=e.ids.length,i=e.ids[e.cur],it=EI[i],a=e.ans[e.cur];
   $("eDone").textContent=Object.keys(e.ans).length;$("eTot").textContent=n;tick();
-  const g=$("eGrid");g.innerHTML="";g.style.gridTemplateColumns=`repeat(${Math.min(n,20)},1fr)`;
+  const g=$("eGrid");g.innerHTML="";
   e.ids.forEach((qi,k)=>{const b=document.createElement("button");b.className=`lv${EI[qi].lv}`+(e.ans[k]!=null?" sel":"")+(k===e.cur?" cur":"");
     b.setAttribute("aria-label",`第${k+1}题`+(e.ans[k]!=null?"，已答":"，未答"));b.onclick=()=>{e.cur=k;save();renderRun()};g.appendChild(b)});
   $("eLv").innerHTML=`<i style="background:${EL[it.lv].c}"></i>${EL[it.lv].n}`;$("eNo").textContent=`第 ${e.cur+1} 题 / ${n}`;
